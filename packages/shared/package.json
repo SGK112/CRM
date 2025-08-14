@@ -1,0 +1,15 @@
+{
+  "name": "@remodely-crm/shared",
+  "version": "1.0.0",
+  "description": "Shared types and utilities for Remodely CRM",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
