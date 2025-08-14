@@ -1,0 +1,46 @@
+{
+  "name": "remodely-crm",
+  "version": "1.0.0",
+  "description": "Enterprise CRM system for general contractors and construction companies",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm:backend:dev\" \"npm:frontend:dev\"",
+    "build": "npm run build --workspaces",
+    "start": "npm run start --workspaces",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces",
+    "clean": "npm run clean --workspaces",
+    "backend:dev": "npm run dev --workspace=apps/backend",
+    "frontend:dev": "npm run dev --workspace=apps/frontend",
+    "backend:build": "npm run build --workspace=apps/backend",
+    "frontend:build": "npm run build --workspace=apps/frontend"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "concurrently": "^8.0.0",
+    "eslint": "^8.0.0",
+  "prettier": "^3.0.0",
+  "@typescript-eslint/parser": "^7.0.0",
+  "@typescript-eslint/eslint-plugin": "^7.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "keywords": [
+    "crm",
+    "construction",
+    "contractor",
+    "enterprise",
+    "nestjs",
+    "nextjs",
+    "mongodb"
+  ],
+  "author": "SGK112",
+  "license": "MIT"
+}
