@@ -12,8 +12,10 @@ export class TwilioService {
     const authToken = this.configService.get('TWILIO_AUTH_TOKEN');
     this.fromNumber = this.configService.get('TWILIO_PHONE_NUMBER');
     
-    if (accountSid && authToken) {
+    if (accountSid && authToken && /^AC[0-9a-fA-F]{32}$/.test(accountSid)) {
       this.client = twilio(accountSid, authToken);
+    } else if (accountSid || authToken) {
+      console.warn('Twilio credentials present but invalid format; running in simulation mode.');
     }
   }
 
