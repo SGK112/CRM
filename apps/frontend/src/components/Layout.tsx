@@ -103,6 +103,7 @@ export default function Layout({ children }: LayoutProps) {
     { name: 'File Storage', href: '/dashboard/storage', icon: CloudArrowUpIcon },
     { name: 'Online Store', href: '/dashboard/ecommerce', icon: BuildingStorefrontIcon, badge: 7 },
     { name: 'Business Cards', href: '/dashboard/rolladex', icon: UserGroupIcon },
+  { name: 'Voice Agent', href: '/dashboard/voice-agent', icon: SparklesIcon },
     { name: 'Messages', href: '/dashboard/chat', icon: ChatBubbleLeftRightIcon, badge: 5 },
     { name: 'Marketing', href: '/dashboard/marketing', icon: MegaphoneIcon },
     { name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon },

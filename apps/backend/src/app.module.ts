@@ -12,6 +12,7 @@ import { IntegrationsModule } from './integrations/integrations.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { DocumentsModule } from './documents/documents.module';
 import { MarketingModule } from './marketing/marketing.module';
+import { VoiceAgentModule } from './voice-agent/voice-agent.module';
 
 @Module({
   imports: [
@@ -35,7 +36,8 @@ import { MarketingModule } from './marketing/marketing.module';
     IntegrationsModule,
     NotificationsModule,
     DocumentsModule,
-    MarketingModule,
+  MarketingModule,
+  VoiceAgentModule,
   ],
 })
 export class AppModule {}

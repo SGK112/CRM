@@ -56,6 +56,9 @@ export default function ClientsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [sourceFilter, setSourceFilter] = useState('all');
+  const [uploading, setUploading] = useState(false);
+  const [importResult, setImportResult] = useState<any>(null);
+  const [importError, setImportError] = useState<string|null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -140,6 +143,30 @@ export default function ClientsPage() {
     }
   };
 
+  const handleCsvUpload = async (file: File) => {
+    setUploading(true); setImportError(null); setImportResult(null);
+    try {
+      const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+      if (!token) { router.push('/auth/login'); return; }
+      const formData = new FormData();
+      formData.append('file', file);
+      const resp = await fetch('http://localhost:3001/clients/import', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        setImportResult(data);
+        await fetchClients();
+      } else {
+        setImportError('Import failed');
+      }
+    } catch (e:any) {
+      setImportError(e.message);
+    } finally { setUploading(false); }
+  };
+
   const formatSource = (source: string) => {
     return source.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
@@ -162,7 +189,7 @@ export default function ClientsPage() {
             <p className="text-gray-600">Manage your client relationships and contact information</p>
           </div>
           <Link
-            href="/clients/new"
+            href="/dashboard/clients/new"
             className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mt-4 md:mt-0"
           >
             <PlusIcon className="h-5 w-5 mr-2" />
@@ -190,7 +217,7 @@ export default function ClientsPage() {
         })}
       </div>
 
-      {/* Filters */}
+      {/* Filters & Import */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Search */}
@@ -234,6 +261,26 @@ export default function ClientsPage() {
             <option value="other">Other</option>
           </select>
         </div>
+        <div className="mt-6 border-t pt-6">
+          <h3 className="text-sm font-semibold text-gray-900 mb-2">Bulk Import CSV</h3>
+          <div className="flex flex-col md:flex-row md:items-center gap-4">
+            <label className="flex-1 flex flex-col items-center justify-center px-4 py-6 border-2 border-dashed rounded-lg text-center cursor-pointer hover:border-blue-400 transition-colors">
+              <span className="text-xs text-gray-500">Click to select or drag & drop CSV file</span>
+              <input
+                type="file"
+                accept=".csv,text/csv"
+                className="hidden"
+                onChange={e => { const f = e.target.files?.[0]; if (f) handleCsvUpload(f); }}
+              />
+            </label>
+            {uploading && <div className="text-xs text-blue-600">Uploading & parsing...</div>}
+            {importResult && (
+              <div className="text-xs text-green-600">Imported: {importResult.created} created, {importResult.updated} updated, {importResult.skipped} skipped</div>
+            )}
+            {importError && <div className="text-xs text-red-600">{importError}</div>}
+            <div className="text-[10px] text-gray-500 flex-1">Columns auto-detected: firstName,lastName,name,email,phone,company,notes,tags. Existing clients matched by email.</div>
+          </div>
+        </div>
       </div>
 
       {/* Clients Table */}
@@ -243,7 +290,7 @@ export default function ClientsPage() {
           <h3 className="text-lg font-medium text-gray-900 mb-2">No clients found</h3>
           <p className="text-gray-600 mb-4">Get started by adding your first client.</p>
           <Link
-            href="/clients/new"
+            href="/dashboard/clients/new"
             className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <PlusIcon className="h-5 w-5 mr-2" />

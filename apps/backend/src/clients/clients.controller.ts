@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ClientsService } from './clients.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -43,5 +44,13 @@ export class ClientsController {
   @ApiResponse({ status: 200, description: 'Client deleted successfully' })
   remove(@Param('id') id: string, @Request() req) {
     return this.clientsService.remove(id, req.user.workspaceId);
+  }
+
+  @Post('import')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({ summary: 'Bulk import clients via CSV' })
+  @ApiResponse({ status: 201, description: 'Clients imported successfully' })
+  async importCsv(@UploadedFile() file: any, @Request() req) {
+    return this.clientsService.importCsv(file, req.user.workspaceId);
   }
 }

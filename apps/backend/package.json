@@ -38,6 +38,7 @@
     "compression": "^1.7.0",
     "cors": "^2.8.0",
     "express-rate-limit": "^6.0.0",
+    "fast-csv": "^5.0.5",
     "googleapis": "^126.0.0",
     "helmet": "^7.0.0",
     "mongoose": "^7.0.0",
