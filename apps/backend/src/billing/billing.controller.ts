@@ -8,28 +8,30 @@ import Stripe from 'stripe';
 
 @Controller('billing')
 export class BillingController {
-  private stripe: Stripe;
+  private stripe: Stripe | null = null;
   private trialDays: number;
 
   constructor(private config: ConfigService, @InjectModel(User.name) private userModel: Model<UserDocument>) {
     const secret = this.config.get<string>('STRIPE_SECRET_KEY');
-    if (!secret) {
-      // Stripe not configured; create a placeholder that will throw on usage
-      // We avoid embedding any secret-like pattern to satisfy push protection
-      throw new Error('STRIPE_SECRET_KEY not set');
+    if (secret) {
+      this.stripe = new Stripe(secret, { apiVersion: '2023-08-16' });
+    } else {
+      // Log once (console.log acceptable; could integrate Nest Logger if desired)
+      // Avoid throwing so auth & other modules still work without billing configured.
+      // eslint-disable-next-line no-console
+      console.warn('[Billing] STRIPE_SECRET_KEY not set – billing endpoints will return configuration errors until provided.');
     }
-    this.stripe = new Stripe(secret, { apiVersion: '2023-08-16' });
     this.trialDays = parseInt(this.config.get<string>('STRIPE_TRIAL_DAYS') || '14', 10);
   }
 
   @Post('create-checkout-session')
   async createCheckoutSession(@Body() body: { priceId: string; customerEmail?: string; workspaceName?: string }) {
-    if (!this.config.get('STRIPE_SECRET_KEY')) {
+  if (!this.stripe) {
       throw new BadRequestException('Stripe not configured');
     }
     if (!body.priceId) throw new BadRequestException('Missing priceId');
 
-    const session = await this.stripe.checkout.sessions.create({
+  const session = await this.stripe.checkout.sessions.create({
       mode: 'subscription',
       line_items: [ { price: body.priceId, quantity: 1 } ],
       allow_promotion_codes: true,
@@ -51,7 +53,7 @@ export class BillingController {
 
   @Get('session')
   async getCheckoutSession(@Query('id') id: string) {
-    if (!this.config.get('STRIPE_SECRET_KEY')) {
+  if (!this.stripe) {
       throw new BadRequestException('Stripe not configured');
     }
     if (!id) throw new BadRequestException('Missing id');
