@@ -65,7 +65,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   </div>
                 </div>
                 <div className="mt-10 pt-6 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4">
-                  <p className="text-xs text-slate-500">© {new Date().getFullYear()} Remodely CRM. All rights reserved.</p>
+                  <p className="text-xs text-slate-500">© {new Date().getFullYear()} Remodely CRM. All rights reserved. <span className="ml-2 text-slate-600" data-build="ddf068b">build ddf068b</span></p>
                   <div className="flex items-center gap-5 text-xs text-slate-500">
                     <a className="hover:text-amber-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 rounded-sm transition-colors" href="/security">Security</a>
                     <a className="hover:text-amber-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 rounded-sm transition-colors" href="/legal">Legal</a>
