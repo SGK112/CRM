@@ -50,6 +50,22 @@ export class User {
 
   @Prop()
   lastLoginAt?: Date;
+
+  // Subscription / Billing
+  @Prop()
+  stripeCustomerId?: string;
+
+  @Prop()
+  stripeSubscriptionId?: string;
+
+  @Prop()
+  subscriptionPlan?: string; // e.g., starter, growth
+
+  @Prop()
+  subscriptionStatus?: string; // active, trialing, past_due, canceled, incomplete
+
+  @Prop()
+  trialEndsAt?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

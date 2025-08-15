@@ -16,6 +16,7 @@ import { VoiceAgentModule } from './voice-agent/voice-agent.module';
 import { DesignsModule } from './designs/designs.module';
 import { AiModule } from './ai/ai.module';
 import { HealthModule } from './health/health.module';
+import { BillingModule } from './billing/billing.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { HealthModule } from './health/health.module';
   DesignsModule,
   AiModule,
   HealthModule,
+  BillingModule,
   ],
 })
 export class AppModule {}

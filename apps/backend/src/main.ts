@@ -3,19 +3,50 @@ import { ValidationPipe, Logger } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
+import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Security
+  // Security headers
   app.use(helmet());
+
+  // Raw body for Stripe webhook signature verification
+  app.use('/billing/webhook', express.raw({ type: 'application/json' }));
+
+  // ---- CORS CONFIGURATION ----
+  // Accept comma-separated list in CORS_ORIGINS (preferred) or fallback to FRONTEND_URL.
+  // Example: CORS_ORIGINS="https://crm-h137.onrender.com,https://staging-crm.onrender.com,http://localhost:3000"
+  const explicitOrigins = (process.env.CORS_ORIGINS || '')
+    .split(',')
+    .map(o => o.trim())
+    .filter(Boolean);
+  const fallbackOrigin = process.env.FRONTEND_URL?.trim();
+  const allowedOrigins = Array.from(new Set([
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:3002',
+    ...(explicitOrigins.length ? explicitOrigins : []),
+    ...(fallbackOrigin ? [fallbackOrigin] : []),
+  ])).filter(Boolean);
+
+  const corsLogger = new Logger('CORS');
+  corsLogger.log(`Allowed Origins: ${allowedOrigins.join(', ') || '(none)'}`);
+
   app.enableCors({
-    origin: [
-      'http://localhost:3000',
-      'http://localhost:3002',
-      process.env.FRONTEND_URL
-    ].filter(Boolean),
+    origin: (origin, callback) => {
+      // Allow non-browser / same-origin (no origin header) requests
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+  corsLogger.warn(`Blocked CORS origin: ${origin}`);
+      return callback(new Error('CORS blocked')); // Will omit CORS headers
+    },
     credentials: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type,Authorization,Accept',
+    maxAge: 86400,
   });
 
   // Validation
