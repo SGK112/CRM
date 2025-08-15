@@ -1,4 +1,8 @@
-import { Body, Controller, Post, Get, Query, BadRequestException } from '@nestjs/common';
+import { Body, Controller, Post, Get, Query, BadRequestException, UseGuards, Req } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { InjectModel } from '@nestjs/mongoose';
+import { User, UserDocument } from '../users/schemas/user.schema';
+import { Model } from 'mongoose';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
 
@@ -7,7 +11,7 @@ export class BillingController {
   private stripe: Stripe;
   private trialDays: number;
 
-  constructor(private config: ConfigService) {
+  constructor(private config: ConfigService, @InjectModel(User.name) private userModel: Model<UserDocument>) {
     const secret = this.config.get<string>('STRIPE_SECRET_KEY');
     if (!secret) {
       // Stripe not configured; create a placeholder that will throw on usage
@@ -62,6 +66,21 @@ export class BillingController {
       currency: session.currency,
       payment_status: session.payment_status,
       trial_end: (session as any).trial_end || null,
+    };
+  }
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  async getMySubscription(@Req() req) {
+    const email = req.user?.email;
+    if (!email) throw new BadRequestException('Missing user context');
+    const user = await this.userModel.findOne({ email }).select('stripeCustomerId stripeSubscriptionId subscriptionPlan subscriptionStatus trialEndsAt');
+    return {
+      customerId: user?.stripeCustomerId || null,
+      subscriptionId: user?.stripeSubscriptionId || null,
+      plan: user?.subscriptionPlan || null,
+      status: user?.subscriptionStatus || null,
+      trialEndsAt: user?.trialEndsAt || null,
     };
   }
 }
