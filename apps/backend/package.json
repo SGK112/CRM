@@ -4,10 +4,10 @@
   "description": "NestJS backend for Remodely CRM",
   "main": "dist/main.js",
   "scripts": {
-    "build": "nest build",
+    "build": "npx nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start",
-    "dev": "nest start --watch",
+    "start": "npx nest start",
+    "dev": "npx nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
   "start:render": "node dist/main",
