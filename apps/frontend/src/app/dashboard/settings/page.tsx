@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Layout from '../../../components/Layout';
+import { useTheme } from '../../../components/ThemeProvider';
 import {
   UserIcon,
   CogIcon,
@@ -208,7 +209,7 @@ export default function SettingsPage() {
               type="text"
               value={formData.firstName}
               onChange={(e) => handleInputChange('firstName', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-token rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--surface-2)] dark:text-[var(--text)]"
             />
           </div>
           <div>
@@ -217,7 +218,7 @@ export default function SettingsPage() {
               type="text"
               value={formData.lastName}
               onChange={(e) => handleInputChange('lastName', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-token rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--surface-2)] dark:text-[var(--text)]"
             />
           </div>
           <div>
@@ -226,7 +227,7 @@ export default function SettingsPage() {
               type="email"
               value={formData.email}
               onChange={(e) => handleInputChange('email', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-token rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--surface-2)] dark:text-[var(--text)]"
             />
           </div>
           <div>
@@ -235,7 +236,7 @@ export default function SettingsPage() {
               type="tel"
               value={formData.phone}
               onChange={(e) => handleInputChange('phone', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-token rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--surface-2)] dark:text-[var(--text)]"
             />
           </div>
           <div className="md:col-span-2">
@@ -244,7 +245,7 @@ export default function SettingsPage() {
               type="text"
               value={formData.company}
               onChange={(e) => handleInputChange('company', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-token rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--surface-2)] dark:text-[var(--text)]"
             />
           </div>
         </div>
@@ -258,7 +259,7 @@ export default function SettingsPage() {
             <select
               value={formData.timezone}
               onChange={(e) => handleInputChange('timezone', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-token rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--surface-2)] dark:text-[var(--text)]"
             >
               <option value="America/Los_Angeles">Pacific Time (PT)</option>
               <option value="America/Denver">Mountain Time (MT)</option>
@@ -271,7 +272,7 @@ export default function SettingsPage() {
             <select
               value={formData.language}
               onChange={(e) => handleInputChange('language', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-token rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--surface-2)] dark:text-[var(--text)]"
             >
               <option value="en">English</option>
               <option value="es">Spanish</option>
@@ -279,6 +280,11 @@ export default function SettingsPage() {
             </select>
           </div>
         </div>
+      </div>
+
+      <div>
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Appearance</h3>
+        <ThemeSettingsSection />
       </div>
     </div>
   );
@@ -554,10 +560,10 @@ export default function SettingsPage() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                    className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors border ${
                       activeTab === tab.id
-                        ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                        : 'text-gray-600 hover:bg-gray-100'
+                        ? 'bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-600/20 dark:text-blue-300 dark:border-blue-500'
+                        : 'text-gray-600 hover:bg-gray-100 dark:text-[var(--text-dim)] dark:hover:bg-[var(--surface-2)] dark:border-token'
                     }`}
                   >
                     <IconComponent className="h-5 w-5 mr-3" />
@@ -570,11 +576,11 @@ export default function SettingsPage() {
 
           {/* Content */}
           <div className="flex-1">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="surface-1 rounded-lg shadow-sm border border-token p-6">
               {renderTabContent()}
               
               <div className="mt-8 pt-6 border-t border-gray-200 flex justify-end space-x-3">
-                <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                <button className="px-4 py-2 border border-gray-300 dark:border-token text-gray-700 dark:text-[var(--text)] rounded-lg hover:bg-gray-50 dark:hover:bg-[var(--surface-2)] transition-colors">
                   Cancel
                 </button>
                 <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
@@ -586,5 +592,40 @@ export default function SettingsPage() {
         </div>
       </div>
     </Layout>
+  );
+}
+
+// Theme settings subsection
+function ThemeSettingsSection() {
+  const { theme, setTheme, toggleTheme, system } = useTheme();
+  return (
+    <div className="border border-gray-200 dark:border-token rounded-lg p-4 bg-white dark:bg-[var(--surface-2)]">
+      <p className="text-sm text-gray-600 mb-4">Choose between light and dark mode. Your preference is saved to this device.</p>
+      <div className="flex gap-4">
+        {(['light','dark'] as const).map(t => (
+          <button
+            key={t}
+            onClick={() => setTheme(t)}
+            className={`flex-1 rounded-lg p-4 border text-left transition-colors ${
+              theme === t
+                ? 'border-blue-600 ring-2 ring-blue-200 bg-blue-50 dark:bg-blue-600/20 dark:ring-blue-500/40'
+                : 'border-gray-200 dark:border-token hover:border-gray-300 dark:hover:border-blue-500'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="font-medium capitalize">{t}</span>
+              {theme === t && <span className="text-xs text-blue-600 font-medium">Active</span>}
+            </div>
+            <div className="h-6 rounded bg-gradient-to-r from-gray-100 to-gray-200 dark:from-[var(--surface-2)] dark:to-[var(--surface-3)] flex items-center justify-center text-[10px] text-gray-500 dark:text-[var(--text-dim)]">
+              {t === 'dark' ? 'Dark palette preview' : 'Light palette preview'}
+            </div>
+          </button>
+        ))}
+      </div>
+      <div className="mt-4 flex items-center justify-between">
+        <p className="text-xs text-gray-500 dark:text-[var(--text-dim)]">System preference: {system}</p>
+        <button onClick={toggleTheme} className="text-xs px-3 py-1.5 rounded-md border border-gray-300 dark:border-token hover:bg-gray-50 dark:hover:bg-[var(--surface-2)] font-medium">Toggle</button>
+      </div>
+    </div>
   );
 }

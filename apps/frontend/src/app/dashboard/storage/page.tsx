@@ -426,7 +426,7 @@ export default function StoragePage() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Upload to
               </label>
-              <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-[var(--surface-2)] dark:border-token">
                 <option>Current Folder</option>
                 <option>Project Files</option>
                 <option>Client Documents</option>
@@ -490,7 +490,7 @@ export default function StoragePage() {
 
         {/* Storage Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="surface-1 rounded-lg shadow-sm border border-token p-6">
             <div className="flex items-center">
               <div className="p-2 bg-blue-100 rounded-lg">
                 <ArchiveBoxIcon className="h-6 w-6 text-blue-600" />
@@ -512,7 +512,7 @@ export default function StoragePage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="surface-1 rounded-lg shadow-sm border border-token p-6">
             <div className="flex items-center">
               <div className="p-2 bg-green-100 rounded-lg">
                 <DocumentIcon className="h-6 w-6 text-green-600" />
@@ -524,7 +524,7 @@ export default function StoragePage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="surface-1 rounded-lg shadow-sm border border-token p-6">
             <div className="flex items-center">
               <div className="p-2 bg-yellow-100 rounded-lg">
                 <FolderIcon className="h-6 w-6 text-yellow-600" />
@@ -536,7 +536,7 @@ export default function StoragePage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="surface-1 rounded-lg shadow-sm border border-token p-6">
             <div className="flex items-center">
               <div className="p-2 bg-purple-100 rounded-lg">
                 <ShareIcon className="h-6 w-6 text-purple-600" />
@@ -550,7 +550,7 @@ export default function StoragePage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+  <div className="surface-1 rounded-lg shadow-sm border border-token p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {quickActions.map((action, index) => (
@@ -606,9 +606,9 @@ export default function StoragePage() {
         </div>
 
         {/* Files Display */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+  <div className="surface-1 rounded-lg shadow-sm border border-token">
           {selectedFiles.length > 0 && (
-            <div className="border-b border-gray-200 p-4 bg-blue-50">
+            <div className="border-b border-token p-4 bg-blue-50 dark:bg-[var(--surface-2)]/40">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-blue-700">
                   {selectedFiles.length} file{selectedFiles.length > 1 ? 's' : ''} selected
@@ -636,8 +636,8 @@ export default function StoragePage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-[color-mix(in_oklab,var(--border),transparent_40%)]">
+                <thead className="bg-gray-50 dark:bg-[var(--surface-2)]">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Name
@@ -656,7 +656,7 @@ export default function StoragePage() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="surface-1 divide-y divide-gray-200 dark:divide-[color-mix(in_oklab,var(--border),transparent_40%)]">
                   {filteredFiles.map(renderListItem)}
                 </tbody>
               </table>
@@ -666,7 +666,7 @@ export default function StoragePage() {
           {filteredFiles.length === 0 && (
             <div className="text-center py-12">
               <FolderIcon className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">No files found</h3>
+              <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-[var(--text)]">No files found</h3>
               <p className="mt-1 text-sm text-gray-500">
                 {searchQuery ? 'Try adjusting your search terms.' : 'Get started by uploading files.'}
               </p>

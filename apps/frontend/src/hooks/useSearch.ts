@@ -1,10 +1,13 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { listTemplates, listDesigns } from '../lib/designsApi'
+
+interface APIDesignSummary { _id: string; title?: string; name?: string; status?: string; }
 
 interface SearchResult {
   id: string
-  type: 'project' | 'client' | 'document' | 'message' | 'user'
+  type: 'project' | 'client' | 'document' | 'message' | 'user' | 'design' | 'template'
   title: string
   description: string
   url: string
@@ -115,6 +118,7 @@ export function useSearch() {
   const [results, setResults] = useState<SearchResult[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [recentSearches, setRecentSearches] = useState<string[]>([])
+  const [error, setError] = useState<string | null>(null)
 
   // Load recent searches from localStorage
   useEffect(() => {
@@ -143,20 +147,75 @@ export function useSearch() {
     }
 
     setIsLoading(true)
+    setError(null)
     
     // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 300))
-    
-    // Filter mock data based on query
-    const filtered = mockData.filter(item => 
+    await new Promise(resolve => setTimeout(resolve, 150))
+
+    // Start with local mock data
+    let aggregated: SearchResult[] = mockData.filter(item => 
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (item.metadata && Object.values(item.metadata).some(value => 
         String(value).toLowerCase().includes(searchQuery.toLowerCase())
       ))
     )
+
+    // Attempt to fetch design templates & designs (graceful fail if no API)
+    try {
+      // Templates
+      const templatesResp = await listTemplates({ search: searchQuery })
+      if (Array.isArray(templatesResp)) {
+        const templateResults: SearchResult[] = templatesResp.map((t: any) => ({
+          id: t._id,
+          type: 'template',
+          title: t.name || t.title || 'Untitled Template',
+          description: t.description || 'Design Template',
+          url: `/dashboard/designer?template=${t._id}`,
+          metadata: { category: t.category, features: t.features?.length, uses: t.usesCount }
+        }))
+        aggregated = aggregated.concat(templateResults)
+      }
+      // Designs
+      const designsResp = await listDesigns({ search: searchQuery })
+      if (Array.isArray(designsResp)) {
+        const designResults: SearchResult[] = designsResp.map((d: any) => ({
+            id: d._id,
+            type: 'design',
+            title: d.title || 'Untitled Design',
+            description: d.status ? `Design (${d.status})` : 'Design',
+            url: `/dashboard/designer/editor?design=${d._id}`,
+            metadata: { status: d.status, templateId: d.templateId }
+        }))
+        aggregated = aggregated.concat(designResults)
+      }
+    } catch (e: any) {
+      if (typeof e?.message === 'string' && e.message.toLowerCase().includes('unauthorized')) {
+        setError('unauthorized')
+      }
+    }
+
+    // Deduplicate by id+type
+    const seen = new Set<string>()
+    const filtered = aggregated.filter(r => { const key = `${r.type}:${r.id}`; if (seen.has(key)) return false; seen.add(key); return true; })
     
-    setResults(filtered)
+    // If still no results, provide a soft hint by inserting a pseudo-result (not clickable)
+    if (filtered.length === 0) {
+      if (error === 'unauthorized') {
+        setResults([{
+          id: 'auth-needed',
+          type: 'message',
+          title: 'Sign in required to search live data',
+          description: 'Log in again so we can search your templates and designs.',
+          url: '/auth/login',
+          metadata: { reason: 'unauthorized' }
+        }])
+      } else {
+        setResults([])
+      }
+    } else {
+      setResults(filtered)
+    }
     setIsLoading(false)
     
     // Save to recent searches if we have results
@@ -182,6 +241,7 @@ export function useSearch() {
     results,
     isLoading,
     recentSearches,
+    error,
     search,
     clearSearch,
     clearRecentSearches

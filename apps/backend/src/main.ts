@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
@@ -37,10 +37,19 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
+  const logger = new Logger('Bootstrap');
   const port = process.env.PORT || 3001;
-  await app.listen(port);
-  console.log(`🚀 Backend server running on http://localhost:${port}`);
-  console.log(`📚 API Documentation: http://localhost:${port}/api/docs`);
+  try {
+    await app.listen(port);
+  } catch (err: any) {
+    if (err?.code === 'EADDRINUSE') {
+      logger.warn(`Port ${port} already in use; assuming server already running. Skipping second bootstrap.`);
+      return; // Do not log normal startup banners twice
+    }
+    throw err;
+  }
+  logger.log(`Backend server running on http://localhost:${port}`);
+  logger.log(`API Docs: http://localhost:${port}/api/docs`);
 }
 
 bootstrap();

@@ -13,6 +13,7 @@ import {
   UserIcon,
   DocumentIcon
 } from '@heroicons/react/24/outline';
+import { API_BASE } from '@/lib/api';
 
 interface Client {
   _id: string;
@@ -68,7 +69,7 @@ export default function NewProjectPage() {
         return;
       }
 
-      const response = await fetch('http://localhost:3001/clients', {
+      const response = await fetch(`${API_BASE}/clients`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -113,7 +114,7 @@ export default function NewProjectPage() {
         }
       }
 
-      const response = await fetch('http://localhost:3001/projects', {
+      const response = await fetch(`${API_BASE}/projects`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -202,14 +202,14 @@ export default function DashboardPage() {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Total Revenue */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="surface-1 rounded-xl shadow-sm border border-token p-6 overflow-hidden">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                <p className="text-3xl font-bold text-gray-900">{formatCurrency(stats.totalRevenue)}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-[var(--text-dim)]">Total Revenue</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-[var(--text)]">{formatCurrency(stats.totalRevenue)}</p>
               </div>
-              <div className="p-3 bg-green-100 rounded-full">
-                <CurrencyDollarIcon className="h-8 w-8 text-green-600" />
+              <div className="p-3 bg-green-100 dark:bg-green-600/20 rounded-full flex-shrink-0">
+                <CurrencyDollarIcon className="h-8 w-8 text-green-600 dark:text-green-400" />
               </div>
             </div>
             <div className="mt-4 flex items-center">
@@ -221,19 +221,19 @@ export default function DashboardPage() {
               <span className={`text-sm font-medium ${stats.revenueChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {Math.abs(stats.revenueChange)}%
               </span>
-              <span className="text-sm text-gray-600 ml-1">vs last month</span>
+              <span className="text-sm text-gray-600 dark:text-[var(--text-dim)] ml-1">vs last month</span>
             </div>
           </div>
 
           {/* Active Projects */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="surface-1 rounded-xl shadow-sm border border-token p-6 overflow-hidden">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Active Projects</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.activeProjects}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-[var(--text-dim)]">Active Projects</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-[var(--text)]">{stats.activeProjects}</p>
               </div>
-              <div className="p-3 bg-blue-100 rounded-full">
-                <ClipboardDocumentListIcon className="h-8 w-8 text-blue-600" />
+              <div className="p-3 bg-blue-100 dark:bg-blue-600/20 rounded-full flex-shrink-0">
+                <ClipboardDocumentListIcon className="h-8 w-8 text-blue-600 dark:text-blue-400" />
               </div>
             </div>
             <div className="mt-4 flex items-center">
@@ -245,19 +245,19 @@ export default function DashboardPage() {
               <span className={`text-sm font-medium ${stats.projectsChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {Math.abs(stats.projectsChange)}%
               </span>
-              <span className="text-sm text-gray-600 ml-1">vs last month</span>
+              <span className="text-sm text-gray-600 dark:text-[var(--text-dim)] ml-1">vs last month</span>
             </div>
           </div>
 
           {/* Total Clients */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="surface-1 rounded-xl shadow-sm border border-token p-6 overflow-hidden">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Clients</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.totalClients}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-[var(--text-dim)]">Total Clients</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-[var(--text)]">{stats.totalClients}</p>
               </div>
-              <div className="p-3 bg-purple-100 rounded-full">
-                <UserGroupIcon className="h-8 w-8 text-purple-600" />
+              <div className="p-3 bg-purple-100 dark:bg-purple-600/20 rounded-full flex-shrink-0">
+                <UserGroupIcon className="h-8 w-8 text-purple-600 dark:text-purple-400" />
               </div>
             </div>
             <div className="mt-4 flex items-center">
@@ -269,19 +269,19 @@ export default function DashboardPage() {
               <span className={`text-sm font-medium ${stats.clientsChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {Math.abs(stats.clientsChange)}%
               </span>
-              <span className="text-sm text-gray-600 ml-1">vs last month</span>
+              <span className="text-sm text-gray-600 dark:text-[var(--text-dim)] ml-1">vs last month</span>
             </div>
           </div>
 
           {/* Pending Tasks */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="surface-1 rounded-xl shadow-sm border border-token p-6 overflow-hidden">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Pending Tasks</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.pendingTasks}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-[var(--text-dim)]">Pending Tasks</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-[var(--text)]">{stats.pendingTasks}</p>
               </div>
-              <div className="p-3 bg-orange-100 rounded-full">
-                <BellIcon className="h-8 w-8 text-orange-600" />
+              <div className="p-3 bg-orange-100 dark:bg-orange-600/20 rounded-full flex-shrink-0">
+                <BellIcon className="h-8 w-8 text-orange-600 dark:text-orange-400" />
               </div>
             </div>
             <div className="mt-4 flex items-center">
@@ -293,7 +293,7 @@ export default function DashboardPage() {
               <span className={`text-sm font-medium ${stats.tasksChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {Math.abs(stats.tasksChange)}%
               </span>
-              <span className="text-sm text-gray-600 ml-1">vs last month</span>
+              <span className="text-sm text-gray-600 dark:text-[var(--text-dim)] ml-1">vs last month</span>
             </div>
           </div>
         </div>
@@ -392,17 +392,17 @@ export default function DashboardPage() {
         </div>
 
         {/* Quick Revenue Chart */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="surface-1 rounded-xl shadow-sm border border-token p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">Revenue Overview</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-[var(--text)]">Revenue Overview</h2>
             <div className="flex space-x-2">
-              <button className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-md">30 Days</button>
-              <button className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded-md">90 Days</button>
-              <button className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded-md">1 Year</button>
+              <button className="px-3 py-1 text-sm bg-blue-100 text-blue-700 dark:bg-blue-600/20 dark:text-blue-300 rounded-md">30 Days</button>
+              <button className="px-3 py-1 text-sm text-gray-600 dark:text-[var(--text-dim)] hover:bg-gray-100 dark:hover:bg-[var(--surface-2)] rounded-md">90 Days</button>
+              <button className="px-3 py-1 text-sm text-gray-600 dark:text-[var(--text-dim)] hover:bg-gray-100 dark:hover:bg-[var(--surface-2)] rounded-md">1 Year</button>
             </div>
           </div>
-          <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
-            <p className="text-gray-500">Revenue chart will be displayed here</p>
+          <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-[var(--surface-2)] rounded-lg">
+            <p className="text-gray-500 dark:text-[var(--text-dim)]">Revenue chart will be displayed here</p>
           </div>
         </div>
 

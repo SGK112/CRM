@@ -16,6 +16,7 @@ import {
   PencilIcon,
   TrashIcon
 } from '@heroicons/react/24/outline';
+import { API_BASE } from '@/lib/api';
 
 interface Project {
   _id: string;
@@ -91,7 +92,7 @@ export default function ProjectsPage() {
         return;
       }
 
-      const response = await fetch('http://localhost:3001/projects', {
+      const response = await fetch(`${API_BASE}/projects`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -138,7 +139,7 @@ export default function ProjectsPage() {
 
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
-      const response = await fetch(`http://localhost:3001/projects/${id}`, {
+      const response = await fetch(`${API_BASE}/projects/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -213,7 +214,7 @@ export default function ProjectsPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--surface-2)] dark:border-token"
             >
               <option value="all">All Statuses</option>
               <option value="planning">Planning</option>
@@ -227,7 +228,7 @@ export default function ProjectsPage() {
             <select
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--surface-2)] dark:border-token"
             >
               <option value="all">All Priorities</option>
               <option value="low">Low</option>

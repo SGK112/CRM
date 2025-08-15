@@ -318,13 +318,13 @@ export default function ChatPage() {
 
   return (
     <Layout>
-      <div className="h-[calc(100vh-200px)] flex bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+  <div className="h-[calc(100vh-200px)] flex surface-1 rounded-lg shadow-sm border border-token overflow-hidden">
         {/* Conversations Sidebar */}
-        <div className="w-1/3 border-r border-gray-200 flex flex-col">
+  <div className="w-1/3 border-r border-gray-200 dark:border-token flex flex-col surface-1">
           {/* Header */}
-          <div className="p-4 border-b border-gray-200">
+          <div className="p-4 border-b border-gray-200 dark:border-token bg-white dark:bg-[var(--surface-2)]">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Messages</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-[var(--text)]">Messages</h2>
               <button className="p-2 text-gray-400 hover:text-blue-600 transition-colors">
                 <PlusIcon className="h-5 w-5" />
               </button>
@@ -338,19 +338,19 @@ export default function ChatPage() {
                 placeholder="Search conversations..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-token rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--surface-1)] dark:text-[var(--text)] placeholder:text-gray-400 dark:placeholder:text-[var(--text-faint)]"
               />
             </div>
           </div>
 
           {/* Conversations List */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto bg-white dark:bg-[var(--surface-1)]">
             {filteredConversations.map((conversation) => (
               <div
                 key={conversation._id}
                 onClick={() => setSelectedConversation(conversation._id)}
-                className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
-                  selectedConversation === conversation._id ? 'bg-blue-50 border-blue-200' : ''
+                className={`p-4 border-b border-gray-100 dark:border-[color-mix(in_oklab,var(--border),transparent_70%)] cursor-pointer hover:bg-gray-50 dark:hover:bg-[var(--surface-2)] transition-colors ${
+                  selectedConversation === conversation._id ? 'bg-blue-50 dark:bg-blue-600/15 border-blue-200 dark:border-blue-500/40' : ''
                 }`}
               >
                 <div className="flex items-start space-x-3">
@@ -362,7 +362,7 @@ export default function ChatPage() {
                   
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium text-gray-900 truncate">
+                      <p className="text-sm font-medium text-gray-900 dark:text-[var(--text)] truncate">
                         {conversation.title}
                       </p>
                       <div className="flex items-center space-x-1">
@@ -377,12 +377,12 @@ export default function ChatPage() {
                       </div>
                     </div>
                     
-                    <p className="text-sm text-gray-600 truncate mt-1">
+                    <p className="text-sm text-gray-600 dark:text-[var(--text-dim)] truncate mt-1">
                       {conversation.lastMessage?.content || 'No messages yet'}
                     </p>
                     
                     <div className="flex items-center justify-between mt-1">
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 dark:text-[var(--text-faint)]">
                         {conversation.lastMessage && formatDate(conversation.lastMessage.timestamp)}
                       </p>
                       <div className="flex items-center space-x-1">
@@ -414,17 +414,17 @@ export default function ChatPage() {
           {selectedConversationData ? (
             <>
               {/* Chat Header */}
-              <div className="p-4 border-b border-gray-200 bg-white">
+              <div className="p-4 border-b border-gray-200 dark:border-token bg-white dark:bg-[var(--surface-2)]">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
                       <UserIcon className="h-5 w-5 text-gray-600" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-medium text-gray-900">
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-[var(--text)]">
                         {selectedConversationData.title}
                       </h3>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-gray-600 dark:text-[var(--text-dim)]">
                         {selectedConversationData.participants.map(p => p.name).join(', ')}
                       </p>
                     </div>
@@ -442,7 +442,7 @@ export default function ChatPage() {
               </div>
 
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-white dark:bg-[var(--surface-1)]">
                 {conversationMessages.map((message) => (
                   <div
                     key={message._id}
@@ -455,9 +455,9 @@ export default function ChatPage() {
                         message.sender._id === 'current-user'
                           ? 'bg-blue-600 text-white'
                           : message.sender.role === 'ai'
-                          ? 'bg-gradient-to-r from-purple-100 to-blue-100 text-gray-900'
-                          : 'bg-gray-100 text-gray-900'
-                      }`}
+                          ? 'bg-gradient-to-r from-purple-100 to-blue-100 text-gray-900 dark:from-purple-600/25 dark:to-blue-600/25 dark:text-[var(--text)]'
+                          : 'bg-gray-100 text-gray-900 dark:bg-[var(--surface-2)] dark:text-[var(--text)]'
+                      } border border-transparent dark:border-[color-mix(in_oklab,var(--border),transparent_50%)]`}
                     >
                       {message.sender._id !== 'current-user' && (
                         <p className="text-xs font-medium mb-1 opacity-75">
@@ -466,7 +466,7 @@ export default function ChatPage() {
                       )}
                       <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                       <div className={`flex items-center justify-between mt-1 ${
-                        message.sender._id === 'current-user' ? 'text-blue-100' : 'text-gray-500'
+                        message.sender._id === 'current-user' ? 'text-blue-100' : 'text-gray-500 dark:text-[var(--text-faint)]'
                       }`}>
                         <p className="text-xs">{formatTime(message.timestamp)}</p>
                         {message.sender._id === 'current-user' && (
@@ -494,7 +494,7 @@ export default function ChatPage() {
               </div>
 
               {/* Message Input */}
-              <div className="p-4 border-t border-gray-200 bg-white">
+              <div className="p-4 border-t border-gray-200 dark:border-token bg-white dark:bg-[var(--surface-2)]">
                 <div className="flex items-center space-x-3">
                   <button className="p-2 text-gray-400 hover:text-blue-600 transition-colors">
                     <PhotoIcon className="h-5 w-5" />
@@ -514,7 +514,7 @@ export default function ChatPage() {
                       onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
                       placeholder="Type your message..."
                       disabled={isLoading}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-token rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 bg-white dark:bg-[var(--surface-1)] dark:text-[var(--text)] placeholder:text-gray-400 dark:placeholder:text-[var(--text-faint)]"
                     />
                   </div>
                   
@@ -529,11 +529,11 @@ export default function ChatPage() {
               </div>
             </>
           ) : (
-            <div className="flex-1 flex items-center justify-center">
+      <div className="flex-1 flex items-center justify-center surface-1">
               <div className="text-center">
-                <ChatBubbleLeftRightIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No conversation selected</h3>
-                <p className="text-gray-600">Choose a conversation to start messaging</p>
+        <ChatBubbleLeftRightIcon className="h-12 w-12 text-gray-400 dark:text-[var(--text-faint)] mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-gray-900 dark:text-[var(--text)] mb-2">No conversation selected</h3>
+        <p className="text-gray-600 dark:text-[var(--text-dim)]">Choose a conversation to start messaging</p>
               </div>
             </div>
           )}

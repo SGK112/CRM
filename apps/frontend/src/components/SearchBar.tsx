@@ -10,7 +10,9 @@ import {
   ClipboardDocumentListIcon,
   ChatBubbleLeftRightIcon,
   XMarkIcon,
-  ClockIcon
+  ClockIcon,
+  CubeTransparentIcon,
+  RectangleGroupIcon
 } from '@heroicons/react/24/outline'
 import { useSearch } from '@/hooks/useSearch'
 
@@ -24,16 +26,20 @@ const typeIcons = {
   client: UserGroupIcon,
   document: DocumentTextIcon,
   message: ChatBubbleLeftRightIcon,
-  user: UserGroupIcon
-}
+  user: UserGroupIcon,
+  design: CubeTransparentIcon,
+  template: RectangleGroupIcon
+} as const
 
 const typeColors = {
   project: 'text-blue-600 bg-blue-100',
   client: 'text-green-600 bg-green-100',
   document: 'text-orange-600 bg-orange-100',
   message: 'text-purple-600 bg-purple-100',
-  user: 'text-gray-600 bg-gray-100'
-}
+  user: 'text-gray-600 bg-gray-100',
+  design: 'text-indigo-600 bg-indigo-100',
+  template: 'text-pink-600 bg-pink-100'
+} as const
 
 export default function SearchBar({ className = '', placeholder = 'Search projects, clients, documents...' }: SearchBarProps) {
   const [isOpen, setIsOpen] = useState(false)
@@ -128,7 +134,7 @@ export default function SearchBar({ className = '', placeholder = 'Search projec
       {isOpen && (
         <div
           ref={dropdownRef}
-          className="absolute top-full left-0 right-0 z-50 mt-1 bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 max-h-96 overflow-y-auto"
+          className="absolute top-full left-0 right-0 z-50 mt-1 surface-1 rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 max-h-96 overflow-y-auto border border-token"
         >
           {/* Loading State */}
           {isLoading && (
@@ -173,8 +179,8 @@ export default function SearchBar({ className = '', placeholder = 'Search projec
               </h3>
               <div className="space-y-1">
                 {results.map((result) => {
-                  const Icon = typeIcons[result.type]
-                  const colorClass = typeColors[result.type]
+                  const Icon = typeIcons[result.type as keyof typeof typeIcons] || DocumentTextIcon
+                  const colorClass = typeColors[result.type as keyof typeof typeColors] || 'text-gray-600 bg-gray-100'
                   
                   return (
                     <button
@@ -208,6 +214,15 @@ export default function SearchBar({ className = '', placeholder = 'Search projec
                               <span className="text-xs text-gray-400">
                                 {result.metadata.size}
                               </span>
+                            )}
+                            {result.type === 'design' && result.metadata.status && (
+                              <span className="text-xs text-gray-400">{result.metadata.status}</span>
+                            )}
+                            {result.type === 'template' && result.metadata.category && (
+                              <span className="text-xs text-gray-400">{result.metadata.category}</span>
+                            )}
+                            {result.type === 'template' && typeof result.metadata.uses === 'number' && (
+                              <span className="text-xs text-gray-400">{result.metadata.uses} uses</span>
                             )}
                             {result.type === 'message' && result.metadata.timestamp && (
                               <span className="text-xs text-gray-400">

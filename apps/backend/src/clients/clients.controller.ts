@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, UploadedFile, UseInterceptors, Query } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ClientsService } from './clients.service';
@@ -50,7 +50,7 @@ export class ClientsController {
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Bulk import clients via CSV' })
   @ApiResponse({ status: 201, description: 'Clients imported successfully' })
-  async importCsv(@UploadedFile() file: any, @Request() req) {
-    return this.clientsService.importCsv(file, req.user.workspaceId);
+  async importCsv(@UploadedFile() file: any, @Request() req, @Query('dryRun') dryRun?: string) {
+    return this.clientsService.importCsv(file, req.user.workspaceId, dryRun === 'true');
   }
 }

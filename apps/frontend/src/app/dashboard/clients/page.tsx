@@ -14,8 +14,10 @@ import {
   MapPinIcon,
   EyeIcon,
   PencilIcon,
-  TrashIcon
+  TrashIcon,
+  ArrowUpTrayIcon
 } from '@heroicons/react/24/outline';
+import { API_BASE } from '@/lib/api';
 
 interface Client {
   _id: string;
@@ -41,12 +43,13 @@ interface Client {
   updatedAt: string;
 }
 
+// Unified pill palette (mirrors projects page style with dark variants)
 const statusColors = {
-  lead: 'bg-yellow-100 text-yellow-800',
-  prospect: 'bg-blue-100 text-blue-800',
-  active: 'bg-green-100 text-green-800',
-  inactive: 'bg-gray-100 text-gray-800',
-  churned: 'bg-red-100 text-red-800'
+  lead: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-500/20 dark:text-yellow-300',
+  prospect: 'bg-blue-100 text-blue-800 dark:bg-blue-600/20 dark:text-blue-300',
+  active: 'bg-green-100 text-green-800 dark:bg-green-600/20 dark:text-green-300',
+  inactive: 'bg-gray-100 text-gray-800 dark:bg-[var(--surface-2)] dark:text-[var(--text-dim)]',
+  churned: 'bg-red-100 text-red-800 dark:bg-red-600/20 dark:text-red-300'
 };
 
 export default function ClientsPage() {
@@ -56,9 +59,7 @@ export default function ClientsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [sourceFilter, setSourceFilter] = useState('all');
-  const [uploading, setUploading] = useState(false);
-  const [importResult, setImportResult] = useState<any>(null);
-  const [importError, setImportError] = useState<string|null>(null);
+  // Bulk import logic moved to dedicated page
   const router = useRouter();
 
   useEffect(() => {
@@ -77,7 +78,7 @@ export default function ClientsPage() {
         return;
       }
 
-      const response = await fetch('http://localhost:3001/clients', {
+      const response = await fetch(`${API_BASE}/clients`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -126,7 +127,7 @@ export default function ClientsPage() {
 
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
-      const response = await fetch(`http://localhost:3001/clients/${id}`, {
+      const response = await fetch(`${API_BASE}/clients/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -143,29 +144,7 @@ export default function ClientsPage() {
     }
   };
 
-  const handleCsvUpload = async (file: File) => {
-    setUploading(true); setImportError(null); setImportResult(null);
-    try {
-      const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
-      if (!token) { router.push('/auth/login'); return; }
-      const formData = new FormData();
-      formData.append('file', file);
-      const resp = await fetch('http://localhost:3001/clients/import', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: formData
-      });
-      if (resp.ok) {
-        const data = await resp.json();
-        setImportResult(data);
-        await fetchClients();
-      } else {
-        setImportError('Import failed');
-      }
-    } catch (e:any) {
-      setImportError(e.message);
-    } finally { setUploading(false); }
-  };
+  // (removed upload handler)
 
   const formatSource = (source: string) => {
     return source.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
@@ -183,42 +162,54 @@ export default function ClientsPage() {
     <Layout>
       <div>
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Clients</h1>
             <p className="text-gray-600">Manage your client relationships and contact information</p>
           </div>
-          <Link
-            href="/dashboard/clients/new"
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mt-4 md:mt-0"
-          >
-            <PlusIcon className="h-5 w-5 mr-2" />
-            New Client
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/dashboard/clients/import"
+              className="inline-flex items-center px-4 py-2 border border-indigo-200 text-indigo-700 bg-white rounded-lg hover:bg-indigo-50 transition-colors"
+            >
+              <ArrowUpTrayIcon className="h-5 w-5 mr-2" />
+              Bulk Import
+            </Link>
+            <Link
+              href="/dashboard/clients/new"
+              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <PlusIcon className="h-5 w-5 mr-2" />
+              New Client
+            </Link>
+          </div>
         </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
-        {Object.entries(statusColors).map(([status, colorClass]) => {
-          const count = clients.filter(c => c.status === status).length;
+      {/* Status summary chips (pill style like Projects) */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        {[{ key: 'all', label: 'All' }, ...Object.keys(statusColors).map(k => ({ key: k, label: k }))].map(chip => {
+          const count = chip.key === 'all' ? clients.length : clients.filter(c => c.status === chip.key).length;
+          const colorClass = chip.key === 'all'
+            ? 'bg-gray-100 text-gray-800 dark:bg-[var(--surface-2)] dark:text-[var(--text)]'
+            : (statusColors as any)[chip.key];
           return (
-            <div key={status} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <div className="flex items-center">
-                <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${colorClass}`}>
-                  {status}
-                </div>
-              </div>
-              <div className="mt-2">
-                <div className="text-2xl font-bold text-gray-900">{count}</div>
-                <div className="text-sm text-gray-500">clients</div>
-              </div>
-            </div>
+            <button
+              key={chip.key}
+              onClick={() => setStatusFilter(chip.key)}
+              className={`px-3 py-1 rounded-full text-[11px] font-medium border transition backdrop-blur-sm ${
+                statusFilter === chip.key
+                  ? 'ring-2 ring-offset-1 ring-blue-500 border-blue-500 shadow-sm dark:ring-offset-[var(--surface-1)]'
+                  : 'border-transparent hover:border-gray-300 dark:hover:border-[var(--border)]'
+              } ${colorClass}`}
+            >
+              {chip.label.charAt(0).toUpperCase() + chip.label.slice(1)} ({count})
+            </button>
           );
         })}
       </div>
 
-      {/* Filters & Import */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+  {/* Filters */}
+  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Search */}
           <div className="relative">
@@ -236,7 +227,7 @@ export default function ClientsPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--surface-2)] dark:border-token"
           >
             <option value="all">All Statuses</option>
             <option value="lead">Lead</option>
@@ -250,7 +241,7 @@ export default function ClientsPage() {
           <select
             value={sourceFilter}
             onChange={(e) => setSourceFilter(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--surface-2)] dark:border-token"
           >
             <option value="all">All Sources</option>
             <option value="referral">Referral</option>
@@ -261,29 +252,11 @@ export default function ClientsPage() {
             <option value="other">Other</option>
           </select>
         </div>
-        <div className="mt-6 border-t pt-6">
-          <h3 className="text-sm font-semibold text-gray-900 mb-2">Bulk Import CSV</h3>
-          <div className="flex flex-col md:flex-row md:items-center gap-4">
-            <label className="flex-1 flex flex-col items-center justify-center px-4 py-6 border-2 border-dashed rounded-lg text-center cursor-pointer hover:border-blue-400 transition-colors">
-              <span className="text-xs text-gray-500">Click to select or drag & drop CSV file</span>
-              <input
-                type="file"
-                accept=".csv,text/csv"
-                className="hidden"
-                onChange={e => { const f = e.target.files?.[0]; if (f) handleCsvUpload(f); }}
-              />
-            </label>
-            {uploading && <div className="text-xs text-blue-600">Uploading & parsing...</div>}
-            {importResult && (
-              <div className="text-xs text-green-600">Imported: {importResult.created} created, {importResult.updated} updated, {importResult.skipped} skipped</div>
-            )}
-            {importError && <div className="text-xs text-red-600">{importError}</div>}
-            <div className="text-[10px] text-gray-500 flex-1">Columns auto-detected: firstName,lastName,name,email,phone,company,notes,tags. Existing clients matched by email.</div>
-          </div>
-        </div>
       </div>
 
-      {/* Clients Table */}
+  {/* Bulk import button moved to header */}
+
+  {/* Clients Table */}
       {filteredClients.length === 0 ? (
         <div className="text-center py-12">
           <UserIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -298,10 +271,10 @@ export default function ClientsPage() {
           </Link>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div className="surface-1 rounded-lg shadow-sm border border-token overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-[color-mix(in_oklab,var(--border),transparent_40%)]">
+              <thead className="bg-gray-50 dark:bg-[var(--surface-2)]">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Client
@@ -326,9 +299,9 @@ export default function ClientsPage() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+        <tbody className="surface-1 divide-y divide-gray-200 dark:divide-[color-mix(in_oklab,var(--border),transparent_40%)]">
                 {filteredClients.map((client) => (
-                  <tr key={client._id} className="hover:bg-gray-50">
+          <tr key={client._id} className="hover:bg-gray-50 dark:hover:bg-[var(--surface-2)]">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
@@ -371,7 +344,7 @@ export default function ClientsPage() {
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${statusColors[client.status]}`}>
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-[11px] font-medium backdrop-blur-sm ${statusColors[client.status]}`}>
                         {client.status}
                       </span>
                     </td>

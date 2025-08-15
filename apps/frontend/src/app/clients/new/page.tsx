@@ -14,6 +14,7 @@ import {
   TagIcon,
   DocumentTextIcon
 } from '@heroicons/react/24/outline';
+import { API_BASE } from '@/lib/api';
 
 interface CreateClientData {
   firstName: string;
@@ -77,7 +78,7 @@ export default function NewClientPage() {
         }
       }
 
-      const response = await fetch('http://localhost:3001/clients', {
+      const response = await fetch(`${API_BASE}/clients`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
