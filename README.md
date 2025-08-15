@@ -12,6 +12,27 @@ The application UI has been re-themed with a construction-focused slate + amber 
 
 Environment variable `NEXT_PUBLIC_API_URL` is now centrally consumed via `apps/frontend/src/lib/api.ts`. Update `.env.example` (already included) and set this in deployment environments instead of hard-coding API endpoints in components.
 
+## 🌐 Deployment (Render Quickstart)
+
+Two-service model (recommended):
+1. Backend (NestJS) Web Service → root: `apps/backend`
+2. Frontend (Next.js) Web Service → root: `apps/frontend`
+
+Backend (Render):
+- Build Command: `npm install --workspace-root && npm run build`
+- Start Command: `npm run start:render`
+- Health Check Path: `/health` (returns `{status:"ok"}`)
+
+Frontend (Render):
+- Build Command: `npm install --workspace-root && npm run build`
+- Start Command: `npm run start:render`
+- Env: `NEXT_PUBLIC_API_URL=https://<backend>.onrender.com/api`
+
+Key Prod Env Vars:
+`MONGODB_URI`, `JWT_SECRET`, OAuth keys, provider API keys, `FRONTEND_URL`, `CORS_ORIGINS`, `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_FRONTEND_URL`.
+
+See `DEPLOY_RENDER.md` for the full matrix and hardening notes.
+
 ## 🔐 First Steps
 
 **IMPORTANT**: You need to register first before accessing any pages!
