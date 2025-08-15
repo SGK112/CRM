@@ -3,6 +3,7 @@ import { ValidationPipe, Logger } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import * as express from 'express';
 
 async function bootstrap() {
@@ -57,6 +58,9 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  // Global structured exception filter
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   // API Documentation
   const config = new DocumentBuilder()
