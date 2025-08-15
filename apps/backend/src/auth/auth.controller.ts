@@ -6,7 +6,8 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Authentication')
-@Controller('auth')
+// Support both legacy '/auth' and prefixed '/api/auth' paths so production URL /api/auth/google works
+@Controller(['auth','api/auth'])
 export class AuthController {
   constructor(private authService: AuthService) {}
 
