@@ -94,7 +94,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-      <footer className="py-10 border-t border-slate-800 text-center text-xs text-slate-500">© {new Date().getFullYear()} Remodely CRM. All rights reserved.</footer>
     </div>
   )
 }
