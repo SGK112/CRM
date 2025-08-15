@@ -1,9 +1,10 @@
 'use client'
+export const dynamic = 'force-dynamic';
 
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
+import { EyeIcon, EyeSlashIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline'
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -60,33 +61,40 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-[var(--bg)] transition-colors">
+  <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+      <div className="pointer-events-none select-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-amber-600/10 blur-3xl" />
+      <div className="pointer-events-none select-none absolute top-1/3 -right-40 h-[28rem] w-[28rem] rounded-full bg-amber-500/5 blur-3xl" />
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center">
-          <h1 className="text-3xl font-bold text-blue-600">Remodely CRM</h1>
+        <div className="flex justify-center mb-2">
+          <div className="flex items-center gap-3">
+            <div className="h-12 w-12 rounded-xl bg-amber-600 flex items-center justify-center shadow-inner ring-1 ring-amber-400/40">
+              <WrenchScrewdriverIcon className="h-6 w-6 text-white" />
+            </div>
+            <span className="text-2xl font-semibold tracking-tight text-slate-100">Remodely CRM</span>
+          </div>
         </div>
-  <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-[var(--text)]">
+        <h2 className="mt-4 text-center text-3xl font-semibold tracking-tight text-slate-100">
           Create your workspace
         </h2>
-  <p className="mt-2 text-center text-sm text-gray-600 dark:text-[var(--text-dim)]">
+        <p className="mt-2 text-center text-sm text-slate-400">
           Or{' '}
-          <Link href="/auth/login" className="font-medium text-blue-600 hover:text-blue-500">
+          <Link href="/auth/login" className="font-medium text-amber-400 hover:text-amber-300 transition-colors">
             sign in to existing workspace
           </Link>
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="py-8 px-4 shadow sm:rounded-lg sm:px-10 card bg-[var(--surface-2)] border border-token">
+  <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+    <div className="relative py-8 px-5 sm:px-10 rounded-2xl border border-slate-800 bg-slate-900/70 backdrop-blur-sm shadow-xl shadow-black/40">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
-              <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/40 text-red-600 dark:text-red-400 px-4 py-3 rounded-md">
+      <div className="bg-red-500/10 border border-red-500/40 text-red-300 px-4 py-3 rounded-md text-sm">
                 {error}
               </div>
             )}
 
             <div>
-              <label htmlFor="workspaceName" className="block text-sm font-medium text-gray-700 dark:text-[var(--text-dim)]">
+        <label htmlFor="workspaceName" className="block text-sm font-medium text-slate-200">
                 Company Name
               </label>
               <div className="mt-1">
@@ -97,7 +105,7 @@ export default function RegisterPage() {
                   required
                   value={formData.workspaceName}
                   onChange={handleChange}
-                  className="appearance-none block w-full px-3 py-2 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-[var(--input-bg)] border-gray-300 dark:border-[var(--border)] text-[var(--text)]"
+          className="appearance-none block w-full px-3 py-2 rounded-md bg-slate-900/60 border border-slate-700 placeholder-slate-500 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 sm:text-sm transition"
                   placeholder="Your Construction Company"
                 />
               </div>
@@ -105,7 +113,7 @@ export default function RegisterPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-[var(--text-dim)]">
+        <label htmlFor="firstName" className="block text-sm font-medium text-slate-200">
                   First Name
                 </label>
                 <div className="mt-1">
@@ -116,14 +124,14 @@ export default function RegisterPage() {
                     required
                     value={formData.firstName}
                     onChange={handleChange}
-                    className="appearance-none block w-full px-3 py-2 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-[var(--input-bg)] border-gray-300 dark:border-[var(--border)] text-[var(--text)]"
+          className="appearance-none block w-full px-3 py-2 rounded-md bg-slate-900/60 border border-slate-700 placeholder-slate-500 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 sm:text-sm transition"
                     placeholder="John"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 dark:text-[var(--text-dim)]">
+        <label htmlFor="lastName" className="block text-sm font-medium text-slate-200">
                   Last Name
                 </label>
                 <div className="mt-1">
@@ -134,7 +142,7 @@ export default function RegisterPage() {
                     required
                     value={formData.lastName}
                     onChange={handleChange}
-                    className="appearance-none block w-full px-3 py-2 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-[var(--input-bg)] border-gray-300 dark:border-[var(--border)] text-[var(--text)]"
+          className="appearance-none block w-full px-3 py-2 rounded-md bg-slate-900/60 border border-slate-700 placeholder-slate-500 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 sm:text-sm transition"
                     placeholder="Doe"
                   />
                 </div>
@@ -142,7 +150,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-[var(--text-dim)]">
+        <label htmlFor="email" className="block text-sm font-medium text-slate-200">
                 Email address
               </label>
               <div className="mt-1">
@@ -154,15 +162,15 @@ export default function RegisterPage() {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className="appearance-none block w-full px-3 py-2 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-[var(--input-bg)] border-gray-300 dark:border-[var(--border)] text-[var(--text)]"
+          className="appearance-none block w-full px-3 py-2 rounded-md bg-slate-900/60 border border-slate-700 placeholder-slate-500 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 sm:text-sm transition"
                   placeholder="john@company.com"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-[var(--text-dim)]">
-                Phone Number <span className="text-gray-400">(Optional)</span>
+              <label htmlFor="phone" className="block text-sm font-medium text-slate-200">
+                Phone Number <span className="text-slate-500">(Optional)</span>
               </label>
               <div className="mt-1">
                 <input
@@ -171,14 +179,14 @@ export default function RegisterPage() {
                   type="tel"
                   value={formData.phone}
                   onChange={handleChange}
-                  className="appearance-none block w-full px-3 py-2 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-[var(--input-bg)] border-gray-300 dark:border-[var(--border)] text-[var(--text)]"
+                  className="appearance-none block w-full px-3 py-2 rounded-md bg-slate-900/60 border border-slate-700 placeholder-slate-500 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 sm:text-sm transition"
                   placeholder="+1 (555) 123-4567"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-[var(--text-dim)]">
+              <label htmlFor="password" className="block text-sm font-medium text-slate-200">
                 Password
               </label>
               <div className="mt-1 relative">
@@ -190,7 +198,7 @@ export default function RegisterPage() {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className="appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-[var(--input-bg)] border-gray-300 dark:border-[var(--border)] text-[var(--text)]"
+                  className="appearance-none block w-full px-3 py-2 pr-10 rounded-md bg-slate-900/60 border border-slate-700 placeholder-slate-500 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 sm:text-sm transition"
                   placeholder="Create a strong password"
                 />
                 <button
@@ -199,13 +207,13 @@ export default function RegisterPage() {
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <EyeSlashIcon className="h-5 w-5 text-gray-400 dark:text-[var(--text-dim)]" />
+                    <EyeSlashIcon className="h-5 w-5 text-slate-500" />
                   ) : (
-                    <EyeIcon className="h-5 w-5 text-gray-400 dark:text-[var(--text-dim)]" />
+                    <EyeIcon className="h-5 w-5 text-slate-500" />
                   )}
                 </button>
               </div>
-              <p className="mt-1 text-xs text-gray-500 dark:text-[var(--text-dim)]">
+              <p className="mt-1 text-xs text-slate-500">
                 Must be at least 6 characters long
               </p>
             </div>
@@ -214,19 +222,19 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex justify-center py-2 px-4 rounded-md shadow-sm text-sm font-semibold text-white bg-amber-600 hover:bg-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/70 disabled:opacity-50 disabled:cursor-not-allowed shadow-amber-600/30"
               >
                 {isLoading ? 'Creating workspace...' : 'Create workspace'}
               </button>
             </div>
 
-            <div className="text-xs text-gray-500 dark:text-[var(--text-dim)] text-center">
+            <div className="text-xs text-slate-500 text-center">
               By creating an account, you agree to our{' '}
-              <Link href="/terms" className="text-blue-500 hover:text-blue-400">
+              <Link href="/terms" className="text-amber-400 hover:text-amber-300 transition-colors">
                 Terms of Service
               </Link>{' '}
               and{' '}
-              <Link href="/privacy" className="text-blue-500 hover:text-blue-400">
+              <Link href="/privacy" className="text-amber-400 hover:text-amber-300 transition-colors">
                 Privacy Policy
               </Link>
             </div>
