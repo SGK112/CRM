@@ -6,6 +6,12 @@ Your comprehensive CRM system is built and running:
 - **Frontend**: http://localhost:3002
 - **Backend API**: http://localhost:3001
 
+### New Branding & Demo Experience
+
+The application UI has been re-themed with a construction-focused slate + amber palette for higher contrast in field environments and a more industry-aligned feel. The public landing page and the /demo walkthrough now present a 4‑phase project lifecycle (Plan → Estimate → Execute → Close‑out) with outcomes and role-based value points to support customer-facing demonstrations.
+
+Environment variable `NEXT_PUBLIC_API_URL` is now centrally consumed via `apps/frontend/src/lib/api.ts`. Update `.env.example` (already included) and set this in deployment environments instead of hard-coding API endpoints in components.
+
 ## 🔐 First Steps
 
 **IMPORTANT**: You need to register first before accessing any pages!

@@ -9,14 +9,13 @@ import {
   ClockIcon,
   UserIcon,
   MapPinIcon,
-  PhoneIcon,
   PlusIcon,
   MagnifyingGlassIcon,
-  FunnelIcon,
   PencilIcon,
   TrashIcon,
   CheckCircleIcon,
-  XCircleIcon
+  XCircleIcon,
+  ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
 
 interface Appointment {
@@ -44,20 +43,37 @@ interface Appointment {
   updatedAt: string;
 }
 
-const statusColors = {
-  scheduled: 'bg-blue-100 text-blue-800',
-  confirmed: 'bg-green-100 text-green-800',
-  completed: 'bg-gray-100 text-gray-800',
-  cancelled: 'bg-red-100 text-red-800',
-  rescheduled: 'bg-yellow-100 text-yellow-800'
+// Helper mapping to unified pill tint classes
+const statusTint = (s: Appointment['status']) => {
+  switch (s) {
+    case 'scheduled': return 'blue';
+    case 'confirmed': return 'green';
+    case 'completed': return 'neutral';
+    case 'cancelled': return 'red';
+    case 'rescheduled': return 'yellow';
+    default: return 'neutral';
+  }
 };
 
-const typeColors = {
-  consultation: 'bg-purple-100 text-purple-800',
-  site_visit: 'bg-orange-100 text-orange-800',
-  meeting: 'bg-blue-100 text-blue-800',
-  inspection: 'bg-green-100 text-green-800',
-  other: 'bg-gray-100 text-gray-800'
+const typeTint = (t: Appointment['appointmentType']) => {
+  switch (t) {
+    case 'consultation': return 'purple';
+    case 'site_visit': return 'orange';
+    case 'meeting': return 'blue';
+    case 'inspection': return 'green';
+    case 'other': return 'neutral';
+    default: return 'neutral';
+  }
+};
+
+const priorityTint = (p: Appointment['priority']) => {
+  switch (p) {
+    case 'low': return 'neutral';
+    case 'medium': return 'blue';
+    case 'high': return 'yellow';
+    case 'urgent': return 'red';
+    default: return 'neutral';
+  }
 };
 
 export default function CalendarPage() {
@@ -293,7 +309,7 @@ export default function CalendarPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--surface-2)] dark:border-token"
             >
               <option value="all">All Statuses</option>
               <option value="scheduled">Scheduled</option>
@@ -306,7 +322,7 @@ export default function CalendarPage() {
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--surface-2)] dark:border-token"
             >
               <option value="all">All Types</option>
               <option value="consultation">Consultation</option>
@@ -338,13 +354,12 @@ export default function CalendarPage() {
               <div key={appointment._id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900">{appointment.title}</h3>
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${statusColors[appointment.status]}`}>
-                        {appointment.status}
-                      </span>
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${typeColors[appointment.appointmentType]}`}>
-                        {appointment.appointmentType.replace('_', ' ')}
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                      <h3 className="text-lg font-semibold text-gray-900 mr-1">{appointment.title}</h3>
+                      <span className={`pill pill-tint-${statusTint(appointment.status)} sm capitalize`}>{appointment.status.replace('_',' ')}</span>
+                      <span className={`pill pill-tint-${typeTint(appointment.appointmentType)} sm capitalize`}>{appointment.appointmentType.replace('_', ' ')}</span>
+                      <span className={`pill pill-tint-${priorityTint(appointment.priority)} sm capitalize flex items-center gap-1`}>{appointment.priority}
+                        {appointment.priority === 'urgent' && <ExclamationTriangleIcon className="h-3.5 w-3.5" />}
                       </span>
                     </div>
                     

@@ -1,97 +1,100 @@
 import Link from 'next/link'
-import { ArrowRightIcon } from '@heroicons/react/24/outline'
+import {
+  ArrowRightIcon,
+  ShieldCheckIcon,
+  ChartBarIcon,
+  CpuChipIcon,
+  WrenchScrewdriverIcon,
+  BuildingOffice2Icon,
+  BoltIcon
+} from '@heroicons/react/24/outline'
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-100">
+    <div className="min-h-screen bg-slate-950 text-slate-100">
       {/* Navigation */}
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <h1 className="text-2xl font-bold text-blue-600">Remodely CRM</h1>
-              </div>
+      <nav className="border-b border-slate-800 bg-slate-950/85 backdrop-blur supports-[backdrop-filter]:bg-slate-950/70 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-md bg-amber-600 flex items-center justify-center shadow-inner ring-1 ring-amber-400/40">
+              <WrenchScrewdriverIcon className="h-5 w-5 text-white" />
             </div>
-            <div className="flex items-center space-x-4">
-              <Link
-                href="/auth/login"
-                className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/trial"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-              >
-                Get Started
-              </Link>
-            </div>
+            <span className="text-lg font-semibold tracking-tight text-slate-100">Remodely CRM</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <Link href="/auth/login" className="text-sm font-medium text-slate-400 hover:text-slate-200 transition">Sign In</Link>
+            <Link href="/trial" className="inline-flex items-center rounded-md bg-amber-600 hover:bg-amber-500 text-sm font-semibold px-4 py-2 shadow-sm shadow-amber-600/30 transition-colors">Get Started</Link>
           </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-            Construction CRM
-            <span className="block text-blue-600">Built for Growth</span>
+      {/* Hero */}
+      <header className="relative overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom_right,rgba(30,41,59,0.9),rgba(15,23,42,0.9))]" />
+          <div className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-amber-600/10 blur-3xl" />
+          <div className="absolute top-1/3 -right-28 h-80 w-80 rounded-full bg-amber-500/5 blur-3xl" />
+        </div>
+  <div className="max-w-6xl mx-auto px-6 pt-24 pb-24 md:pt-28 md:pb-32 text-center relative">
+          <h1 className="text-4xl md:text-6xl font-semibold tracking-tight leading-tight mb-6 text-slate-100">
+            Operational Backbone for <span className="text-amber-500">Construction Teams</span>
           </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            Streamline your construction business with our comprehensive CRM platform. 
-            Manage projects, clients, appointments, and team collaboration all in one place.
+          <p className="max-w-3xl mx-auto text-lg md:text-xl text-slate-400 mb-8">
+            Projects, clients, schedules, documents, pipeline & field coordination unified – with AI assist – in one rugged platform.
           </p>
-          <div className="flex justify-center space-x-4">
-            <Link
-              href="/trial"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg font-medium flex items-center"
-            >
-              Start Free Trial
-              <ArrowRightIcon className="ml-2 h-5 w-5" />
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link href="/trial" className="inline-flex items-center gap-2 rounded-md bg-amber-600 hover:bg-amber-500 px-7 py-3 text-base font-semibold shadow shadow-amber-600/30 transition">
+              Start Free Trial <ArrowRightIcon className="h-5 w-5" />
             </Link>
-            <Link
-              href="/demo"
-              className="border border-gray-300 hover:border-gray-400 text-gray-700 px-8 py-3 rounded-lg text-lg font-medium"
-            >
-              Watch Demo
+            <Link href="/demo" className="inline-flex items-center rounded-md px-7 py-3 text-base font-medium border border-slate-600 hover:border-amber-500/60 text-slate-300 hover:text-amber-400 transition-colors">
+              Live Demo
             </Link>
           </div>
+          <p className="mt-4 text-xs uppercase tracking-wide text-slate-500">No credit card • 14‑day full access • Cancel anytime</p>
         </div>
+      </header>
 
-        {/* Features Grid */}
-        <div className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
+      {/* Value Props */}
+  <section className="max-w-5xl mx-auto px-6 py-16 md:py-20">
+        <div className="grid md:grid-cols-3 gap-6">
+          {[
+            { icon: <ChartBarIcon className='h-6 w-6' />, title: 'Project Control', desc: 'Real-time status, costs, margins & schedule drift in one view.' },
+            { icon: <CpuChipIcon className='h-6 w-6' />, title: 'AI Assist', desc: 'Generate summaries, draft messages, surface risk & next actions.' },
+            { icon: <ShieldCheckIcon className='h-6 w-6' />, title: 'Data Security', desc: 'Role-based access, audit trail logging, encrypted storage.' }
+          ].map(f => (
+            <div key={f.title} className="rounded-xl border border-slate-800 bg-slate-900/60 p-6 flex flex-col gap-4 shadow-sm shadow-black/30">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-2 rounded-md bg-amber-600/10 text-amber-500 ring-1 ring-amber-600/30 px-3 py-1 text-[11px] font-medium tracking-wide uppercase">
+                  {f.icon}
+                  Feature
+                </span>
+              </div>
+              <h3 className="text-lg font-semibold tracking-tight text-slate-100">{f.title}</h3>
+              <p className="text-sm text-slate-400 leading-relaxed">{f.desc}</p>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Project Management</h3>
-            <p className="text-gray-600">Track projects from start to finish with timeline management and progress tracking.</p>
-          </div>
+          ))}
+        </div>
+      </section>
 
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
+      {/* CTA */}
+      <section className="relative py-20">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(251,191,36,0.07),transparent_60%)]" />
+        <div className="relative max-w-5xl mx-auto px-6">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-10 md:p-14 flex flex-col items-center text-center gap-6 shadow-xl shadow-black/40">
+            <div className="flex items-center gap-2 text-amber-500">
+              <BoltIcon className="h-6 w-6" />
+              <span className="font-semibold tracking-wide uppercase text-xs">Get Operational Velocity</span>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Client Relations</h3>
-            <p className="text-gray-600">Manage client information, communication history, and build stronger relationships.</p>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
+            <h2 className="text-3xl font-semibold tracking-tight text-slate-100">Ready to modernize operations?</h2>
+            <p className="text-slate-400 max-w-2xl text-sm md:text-base">Spin up a workspace in under a minute. Import clients, define stages, standardize process & keep field + office aligned.</p>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Link href="/trial" className="rounded-md bg-amber-600 hover:bg-amber-500 px-6 py-2.5 text-sm font-semibold shadow shadow-amber-600/30 transition">Create Workspace</Link>
+              <Link href="/auth/register" className="rounded-md border border-slate-600 hover:border-amber-500/60 px-6 py-2.5 text-sm font-medium text-slate-300 hover:text-amber-400 transition">Email Sign Up</Link>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Scheduling</h3>
-            <p className="text-gray-600">Smart appointment scheduling with automated reminders via SMS and email.</p>
           </div>
         </div>
-      </main>
+      </section>
+      <footer className="py-10 border-t border-slate-800 text-center text-xs text-slate-500">© {new Date().getFullYear()} Remodely CRM. All rights reserved.</footer>
     </div>
   )
 }

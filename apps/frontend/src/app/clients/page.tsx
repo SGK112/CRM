@@ -16,6 +16,7 @@ import {
   PencilIcon,
   TrashIcon
 } from '@heroicons/react/24/outline';
+import { API_BASE } from '@/lib/api';
 
 interface Client {
   _id: string;
@@ -74,7 +75,7 @@ export default function ClientsPage() {
         return;
       }
 
-      const response = await fetch('http://localhost:3001/clients', {
+      const response = await fetch(`${API_BASE}/clients`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -123,7 +124,7 @@ export default function ClientsPage() {
 
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
-      const response = await fetch(`http://localhost:3001/clients/${id}`, {
+      const response = await fetch(`${API_BASE}/clients/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -209,7 +210,7 @@ export default function ClientsPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--surface-2)] dark:border-token"
           >
             <option value="all">All Statuses</option>
             <option value="lead">Lead</option>
@@ -223,7 +224,7 @@ export default function ClientsPage() {
           <select
             value={sourceFilter}
             onChange={(e) => setSourceFilter(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--surface-2)] dark:border-token"
           >
             <option value="all">All Sources</option>
             <option value="referral">Referral</option>
@@ -236,7 +237,7 @@ export default function ClientsPage() {
         </div>
       </div>
 
-      {/* Clients Table */}
+  {/* Clients Table */}
       {filteredClients.length === 0 ? (
         <div className="text-center py-12">
           <UserIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -251,10 +252,10 @@ export default function ClientsPage() {
           </Link>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div className="surface-1 rounded-lg shadow-sm border border-token overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-[color-mix(in_oklab,var(--border),transparent_40%)]">
+              <thead className="bg-gray-50 dark:bg-[var(--surface-2)]">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Client
@@ -279,9 +280,9 @@ export default function ClientsPage() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+        <tbody className="surface-1 divide-y divide-gray-200 dark:divide-[color-mix(in_oklab,var(--border),transparent_40%)]">
                 {filteredClients.map((client) => (
-                  <tr key={client._id} className="hover:bg-gray-50">
+          <tr key={client._id} className="hover:bg-gray-50 dark:hover:bg-[var(--surface-2)]">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useSearch } from '@/hooks/useSearch';
 import { useRouter } from 'next/navigation';
 import {
   SparklesIcon,
@@ -12,15 +13,11 @@ import {
   DocumentTextIcon,
   CogIcon,
   PlusIcon,
-  PencilIcon,
   TrashIcon,
   EyeIcon,
   ArrowTopRightOnSquareIcon,
-  CommandLineIcon,
-  CodeBracketIcon,
-  CheckIcon,
-  ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
+import { API_BASE } from '@/lib/api';
 
 interface AIMessage {
   id: string;
@@ -29,7 +26,7 @@ interface AIMessage {
   timestamp: Date;
   actions?: AIAction[];
   suggestions?: string[];
-  meta?: Record<string, any>;
+  meta?: Record<string, unknown>; // tightened from any
 }
 
 interface AIAction {
@@ -48,6 +45,9 @@ interface AIAssistantProps {
 
 export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
   const [messages, setMessages] = useState<AIMessage[]>([]);
+  const MEMORY_KEY = 'copilot_conversation_v1';
+  const PAGE_HISTORY_KEY = 'copilot_page_history_v1';
+  const MAX_MEMORY_MESSAGES = 200;
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showCommands, setShowCommands] = useState(false);
@@ -55,7 +55,12 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
   const [projectDraft, setProjectDraft] = useState({ title: '', description: '', priority: 'medium', status: 'planning' });
   const [contextSummary, setContextSummary] = useState<{projects?: number; clients?: number}>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const router = useRouter();
+  const [scrolled, setScrolled] = useState(false);
+  const baseSuggestions = ['Show me projects','Create a new client','Open calendar','View settings'];
+  const [showTools, setShowTools] = useState(true);
+  const searchHook = useSearch();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -65,42 +70,50 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
     scrollToBottom();
   }, [messages]);
 
+  // Load memory on open
   useEffect(() => {
-    if (isOpen && messages.length === 0) {
-      // Initialize with system + assistant messages
-      setMessages([
-        {
-          id: 'sys-1',
-          type: 'system',
-          content: 'Copilot session started. Context awareness enabled. Type / for commands.',
-          timestamp: new Date(),
-        },
-        {
-          id: 'a-1',
-          type: 'assistant',
-          content: 'Hi! I\'m your Construct Copilot. I can navigate, create & edit entities, summarize data, and help you work faster. Try commands like /projects, /clients, /new-project, /open settings, or just ask naturally. What\'s next?',
-          timestamp: new Date(),
-          suggestions: [
-            'Create a new project',
-            'Show me projects',
-            'List clients',
-            'Open calendar',
-            'Help'
-          ]
+    if (!isOpen) return;
+    try {
+      if (messages.length === 0) {
+        const raw = localStorage.getItem(MEMORY_KEY);
+        if (raw) {
+          const parsed: AIMessage[] = JSON.parse(raw).map((m: any) => ({ ...m, timestamp: new Date(m.timestamp) }));
+          setMessages(parsed);
+        } else {
+          const initial: AIMessage[] = [
+            { id: 'sys-1', type: 'system', content: 'Copilot session started. Context awareness enabled. Type / for commands.', timestamp: new Date() },
+            { id: 'a-1', type: 'assistant', content: 'Hi! I\'m your Construct Copilot. I maintain context of recent chats and pages you visit. Ask naturally or try /recent, /projects, /clients, /new-project, /summary or /help. What\'s next?', timestamp: new Date(), suggestions: [ 'Create a new project','Show me projects','List clients','Open calendar','Help' ]}
+          ];
+          setMessages(initial);
         }
-      ]);
-      fetchContextSummary();
+        fetchContextSummary();
+      }
+    } catch (err) {
+      // ignore parse errors
+      void err;
     }
   }, [isOpen, messages.length]);
+
+  // Persist memory when messages change
+  useEffect(() => {
+    if (messages.length === 0) return;
+    try {
+      const trimmed = messages.slice(-MAX_MEMORY_MESSAGES);
+      localStorage.setItem(MEMORY_KEY, JSON.stringify(trimmed));
+    } catch (err) {
+      // ignore persistence errors
+      void err;
+    }
+  }, [messages]);
 
   const fetchContextSummary = async () => {
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
       if (!token) return;
-      // Fire requests in parallel (best-effort)
+      const authHeaders = { Authorization: `Bearer ${token}` };
       const [projectsRes, clientsRes] = await Promise.all([
-        fetch('http://localhost:3001/projects', { headers: { Authorization: `Bearer ${token}` }}).catch(() => null),
-        fetch('http://localhost:3001/clients', { headers: { Authorization: `Bearer ${token}` }}).catch(() => null),
+        fetch(`${API_BASE}/projects`, { headers: authHeaders }).catch(() => null),
+        fetch(`${API_BASE}/clients`, { headers: authHeaders }).catch(() => null),
       ]);
       const projectsJson = projectsRes && projectsRes.ok ? await projectsRes.json() : [];
       const clientsJson = clientsRes && clientsRes.ok ? await clientsRes.json() : [];
@@ -123,12 +136,38 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
     let actions: AIAction[] = [];
     let responseContent = '';
 
+    // Quick search detection: if user prefixes with ? or the phrase 'search '
+    if (/^(\?|search\s)/i.test(input)) {
+      const q = input.replace(/^\?\s*/, '').replace(/^search\s+/i,'').trim();
+      if (q.length) {
+        searchHook.search(q);
+        const pending: AIMessage = { id: Date.now().toString(), type: 'assistant', content: `Searching for "${q}" ...`, timestamp: new Date() };
+        return pending;
+      }
+    }
+
     // Slash command handling (priority)
     if (input.startsWith('/')) {
       const parts = input.slice(1).split(/\s+/);
       const command = parts[0];
       const arg = parts.slice(1).join(' ');
       switch (command) {
+        case 'recent': {
+          // Pull recent pages from localStorage
+          let pages: { path: string; lastVisited: number; count: number }[] = [];
+          try { pages = JSON.parse(localStorage.getItem(PAGE_HISTORY_KEY) || '[]'); } catch (err) { void err; }
+          if (pages.length === 0) {
+            responseContent = 'No recent page history yet. Navigate around the dashboard and I\'ll remember.';
+          } else {
+            const top = pages.slice(0,6).map(p => `${p.path} (${p.count}×)`).join('\n');
+            responseContent = `Recent pages:\n${top}`;
+            actions = pages.slice(0,4).map(p => ({ type: 'navigate', label: p.path.replace('/dashboard/','') || 'dashboard', description: 'Open page', data: { path: p.path }, icon: ArrowTopRightOnSquareIcon }));
+          }
+          break; }
+        case 'reset': {
+          localStorage.removeItem(MEMORY_KEY);
+          responseContent = 'Conversation memory cleared. I\'ll still remember pages you visit. Type /help to start fresh.';
+          break; }
         case 'help':
           responseContent = 'Available commands:\n\n/projects – list project overview\n/clients – list clients overview\n/new-project – open quick create project form\n/open <page> – navigate to a page (dashboard, projects, clients, calendar, documents, settings, ecommerce, rolladex)\n/summary – show current counts\n/help – show this help';
           actions = [
@@ -185,7 +224,7 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
           actions.push({ type: 'command', label: 'Refresh Summary', description: 'Update counts', data: { cmd: 'summary' }, icon: SparklesIcon });
           break;
         default:
-          responseContent = `Unknown command: /${command}. Type /help for commands.`;
+          responseContent = `Unknown command: /${command}. Try /help, /recent, /reset.`;
       }
       return {
         id: Date.now().toString(),
@@ -359,6 +398,11 @@ What specific task would you like me to help you with?`;
       });
     }
 
+    // Provide light context injection referencing last 3 user messages
+    const recentUser = messages.filter(m => m.type==='user').slice(-3).map(m=>m.content);
+    if (recentUser.length && responseContent && !responseContent.includes('I can')) {
+      responseContent += `\n\n(Context from earlier: ${recentUser.join(' | ')})`;
+    }
     return {
       id: Date.now().toString(),
       type: 'assistant',
@@ -388,12 +432,68 @@ What specific task would you like me to help you with?`;
     setInput('');
     setIsLoading(true);
 
-    // Quick response (simulate minor delay)
-    setTimeout(() => {
-      const aiResponse = parseUserIntent(input);
-      setMessages(prev => [...prev, aiResponse]);
+    // Quick intent parse first for commands/search routing
+    const immediateIntent = parseUserIntent(input);
+    setMessages(prev => [...prev, immediateIntent]);
+
+    // If search pattern, poll results then stop (skip LLM)
+    if (/^(\?|search\s)/i.test(input)) {
+      const checkInterval = setInterval(() => {
+        if (!searchHook.isLoading) {
+          clearInterval(checkInterval);
+          if (searchHook.results.length) {
+            const resultMsg: AIMessage = {
+              id: Date.now().toString(),
+              type: 'assistant',
+              content: `Found ${searchHook.results.length} result(s):\n` + searchHook.results.slice(0,6).map(r=>`• [${r.type}] ${r.title}`).join('\n'),
+              timestamp: new Date(),
+              actions: searchHook.results.slice(0,6).map(r=>({ type: 'navigate', label: r.title, description: r.description, data: { path: r.url }, icon: ArrowTopRightOnSquareIcon }))
+            };
+            setMessages(prev => [...prev, resultMsg]);
+          } else {
+            setMessages(prev => [...prev, { id: Date.now().toString(), type: 'assistant', content: 'No results found. Try refining your search terms.', timestamp: new Date() }]);
+          }
+          setIsLoading(false);
+        }
+      }, 150);
+      return;
+    }
+
+    // If command (starts with /), we already handled; stop loading
+    if (input.trim().startsWith('/')) {
       setIsLoading(false);
-    }, 400);
+      return;
+    }
+
+    // Fire backend AI call for richer response (Gemini/back-end) in parallel after brief delay to show immediacy of intent routing
+    try {
+      const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+      const baseUrl = API_BASE;
+      const payload = {
+        messages: messages.concat(userMessage).map(m => ({
+          role: m.type === 'system' ? 'system' : m.type === 'user' ? 'user' : 'assistant',
+          content: m.content
+        })).slice(-24) // limit context
+      };
+      const resp = await fetch(`${baseUrl}/ai/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify(payload)
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        setMessages(prev => [...prev, { id: Date.now().toString(), type: 'assistant', content: data.reply, timestamp: new Date() }]);
+      } else {
+        setMessages(prev => [...prev, { id: Date.now().toString(), type: 'assistant', content: 'AI service unavailable (HTTP '+resp.status+').', timestamp: new Date() }]);
+      }
+    } catch (e:any) {
+      setMessages(prev => [...prev, { id: Date.now().toString(), type: 'assistant', content: 'AI request failed. Fallback response provided earlier.', timestamp: new Date() }]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleAction = (action: AIAction) => {
@@ -451,16 +551,16 @@ What specific task would you like me to help you with?`;
     }
     try {
       setIsLoading(true);
-      const res = await fetch('http://localhost:3001/projects', {
+      const res = await fetch(`${API_BASE}/projects`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           title: projectDraft.title,
-            description: projectDraft.description,
-            priority: projectDraft.priority,
-            status: projectDraft.status,
-            tags: ['quick-copilot'],
-            assignedUsers: []
+          description: projectDraft.description,
+          priority: projectDraft.priority,
+          status: projectDraft.status,
+          tags: ['quick-copilot'],
+          assignedUsers: []
         })
       });
       if (res.ok) {
@@ -484,42 +584,47 @@ What specific task would you like me to help you with?`;
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-stretch sm:justify-end pointer-events-none">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm pointer-events-auto" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm pointer-events-auto" onClick={onClose} />
       {/* Panel */}
-      <div className="relative w-full sm:w-[480px] h-[80vh] sm:h-full sm:max-h-screen bg-gradient-to-br from-white via-white to-indigo-50 shadow-2xl sm:rounded-none rounded-t-2xl flex flex-col pointer-events-auto border-l border-t sm:border-t-0 border-gray-200">
+      <div className="relative w-full sm:w-[520px] h-[80vh] sm:h-full sm:max-h-screen surface-1 shadow-2xl sm:rounded-none rounded-t-2xl flex flex-col pointer-events-auto border-l border-t sm:border-t-0 border-token overflow-hidden bg-[var(--surface-1)] text-[var(--text)]">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/50">
+  <div className={`flex items-center justify-between px-4 py-3 border-b border-token bg-[var(--surface-1)]/90 backdrop-blur-md supports-[backdrop-filter]:bg-[var(--surface-1)]/70 sticky top-0 z-10 transition-shadow ${scrolled ? 'shadow-sm' : ''}`}>        
           <div className="flex items-center space-x-2">
             <div className="h-8 w-8 rounded-md bg-gradient-to-r from-purple-600 to-blue-600 flex items-center justify-center shadow-inner">
               <SparklesIcon className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-gray-900">Construct Copilot</h2>
-              <p className="text-[11px] text-gray-500">/ for commands • {contextSummary.projects ?? '–'} proj • {contextSummary.clients ?? '–'} clients</p>
+              <h2 className="text-sm font-semibold text-[var(--text)]">Construct Copilot</h2>
+              <div className="flex flex-wrap gap-1 mt-0.5">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-purple-600/25 text-purple-300 border border-purple-500/30">/ for commands</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-600/25 text-blue-300 border border-blue-500/30">{contextSummary.projects ?? '–'} projects</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-600/25 text-green-300 border border-green-500/30">{contextSummary.clients ?? '–'} clients</span>
+              </div>
             </div>
           </div>
           <div className="flex items-center space-x-1">
-            <button onClick={() => setShowCommands(!showCommands)} className="px-2 py-1 text-xs rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50">/{showCommands ? 'hide' : 'cmds'}</button>
+            <button onClick={() => setShowCommands(!showCommands)} className="px-2 py-1 text-[11px] rounded-md border border-[var(--border)] text-[var(--text-dim)] hover:bg-[var(--surface-2)] transition-colors" title="Toggle command palette">/{showCommands ? 'hide' : 'cmds'}</button>
+            <span className="hidden sm:inline-flex px-2 py-1 text-[10px] rounded-md bg-[var(--surface-2)] text-[var(--text-dim)] border border-[var(--border)]">⌘K</span>
             <button
               onClick={onClose}
-              className="p-1 rounded-md hover:bg-gray-100 transition-colors"
+              className="p-1 rounded-md hover:bg-[var(--surface-2)] transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
-              <XMarkIcon className="h-5 w-5 text-gray-500" />
+              <XMarkIcon className="h-5 w-5 text-[var(--text-dim)]" />
             </button>
           </div>
         </div>
 
         {/* Optional command palette */}
         {showCommands && (
-          <div className="border-b border-gray-200 bg-white/60 backdrop-blur px-4 py-2 text-xs text-gray-600 grid grid-cols-2 gap-2">
+          <div className="border-b border-token bg-[var(--surface-1)]/95 backdrop-blur px-4 py-2 text-xs text-[var(--text-dim)] grid grid-cols-2 gap-2">
             {['/projects','/clients','/new-project','/summary','/open dashboard','/help'].map(cmd => (
-              <button key={cmd} onClick={() => { setInput(cmd); setShowCommands(false); }} className="text-left px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 transition text-[11px] font-medium">{cmd}</button>
+              <button key={cmd} onClick={() => { setInput(cmd); setShowCommands(false); }} className="text-left px-2 py-1 rounded bg-[var(--surface-2)] hover:bg-[var(--surface-3)] border border-[var(--border)] transition text-[11px] font-medium">{cmd}</button>
             ))}
           </div>
         )}
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-[var(--surface-1)]" onScroll={(e)=> setScrolled((e.target as HTMLDivElement).scrollTop > 8)}>
           {messages.map((message) => (
             <div
               key={message.id}
@@ -528,40 +633,41 @@ What specific task would you like me to help you with?`;
               <div
                 className={`group max-w-[85%] rounded-xl px-4 py-3 text-sm shadow-sm border transition-all ${
                   message.type === 'user'
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-blue-600/30'
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-blue-600/40'
                     : message.type === 'system'
-                      ? 'bg-gray-50 text-gray-600 border-gray-200 text-xs'
-                      : 'bg-white text-gray-800 border-gray-200 hover:border-gray-300'
+                      ? 'bg-[var(--surface-2)] text-[var(--text-dim)] border-[var(--border)] text-xs'
+                      : 'bg-[var(--surface-2)] text-[var(--text)] border-[var(--border)] hover:border-[var(--text-dim)]/30'
                 }`}
               >
                 <p className={`whitespace-pre-wrap leading-relaxed ${message.type==='system' ? 'font-mono' : ''}`}>{message.content}</p>
                 <div className="flex items-center justify-end space-x-2 mt-2 opacity-60 group-hover:opacity-90 transition-opacity">
-                  <p className={`text-[10px] ${
-                    message.type === 'user' ? 'text-blue-100' : 'text-gray-500'
-                  }`}>{formatTime(message.timestamp)}</p>
+                  <p className={`text-[10px] ${message.type === 'user' ? 'text-blue-100' : 'text-[var(--text-dim)]'}`}>{formatTime(message.timestamp)}</p>
                 </div>
 
                 {/* Actions */}
                 {message.actions && (
                   <div className="mt-3 flex flex-col gap-2">
-                    {message.actions.map((action, index) => (
-                      <button
-                        key={index}
-                        onClick={() => handleAction(action)}
-                        className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left border text-xs font-medium transition group/action ${
-                          message.type === 'user'
-                            ? 'bg-white/10 hover:bg-white/20 border-white/20 text-white'
-                            : 'bg-gray-50 hover:bg-gray-100 border-gray-200 text-gray-700'
-                        } ${action.danger ? 'hover:bg-red-50 text-red-600 border-red-200' : ''}`}
-                      >
-                        <action.icon className={`h-4 w-4 ${message.type==='user' ? 'text-white' : 'text-gray-500 group-hover/action:text-gray-700'}`} />
-                        <div className="flex-1 min-w-0">
-                          <p className="truncate">{action.label}</p>
-                          <p className="text-[10px] opacity-70 truncate">{action.description}</p>
-                        </div>
-                        <ArrowTopRightOnSquareIcon className="h-3 w-3 flex-shrink-0 opacity-40" />
-                      </button>
-                    ))}
+                    {message.actions.map((action, index) => {
+                      const IconComp = (action.icon && typeof action.icon === 'function') ? action.icon : SparklesIcon;
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => handleAction(action)}
+                          className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left border text-xs font-medium transition group/action ${
+                              message.type === 'user'
+                                ? 'bg-white/10 hover:bg-white/15 border-white/20 text-white'
+                                : 'bg-[var(--surface-2)] hover:bg-[var(--surface-3)] border-[var(--border)] text-[var(--text)]'
+                            } ${action.danger ? 'hover:bg-red-600/20 text-red-400 border-red-600/40' : ''}`}
+                        >
+                          <IconComp className={`h-4 w-4 ${message.type==='user' ? 'text-white' : 'text-[var(--text-dim)] group-hover/action:text-[var(--text)]'}`} />
+                          <div className="flex-1 min-w-0">
+                            <p className="truncate">{action.label}</p>
+                            <p className="text-[10px] opacity-70 truncate">{action.description}</p>
+                          </div>
+                          <ArrowTopRightOnSquareIcon className="h-3 w-3 flex-shrink-0 opacity-40" />
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
 
@@ -575,7 +681,7 @@ What specific task would you like me to help you with?`;
                         className={`text-[11px] px-2 py-1 rounded border transition ${
                           message.type === 'user'
                             ? 'bg-white/10 hover:bg-white/20 border-white/20 text-white'
-                            : 'bg-gray-100 hover:bg-gray-200 border-gray-200 text-gray-700'
+                            : 'bg-[var(--surface-2)] hover:bg-[var(--surface-3)] border-[var(--border)] text-[var(--text)]'
                         }`}
                       >
                         {suggestion}
@@ -589,7 +695,7 @@ What specific task would you like me to help you with?`;
 
           {isLoading && (
             <div className="flex justify-start">
-              <div className="bg-white border border-gray-200 rounded-xl px-4 py-3 shadow-sm text-sm text-gray-600 flex items-center gap-3">
+              <div className="bg-white dark:bg-[var(--surface-2)] border border-gray-200 dark:border-token rounded-xl px-4 py-3 shadow-sm text-sm text-gray-600 dark:text-[var(--text-dim)] flex items-center gap-3">
                 <div className="relative h-4 w-4">
                   <div className="absolute inset-0 animate-spin rounded-full border-2 border-purple-500 border-t-transparent" />
                 </div>
@@ -601,10 +707,49 @@ What specific task would you like me to help you with?`;
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input */}
-        <div className="border-t border-gray-200 bg-white/70 backdrop-blur px-4 py-3 space-y-2">
+    {/* Input / Footer */}
+  <div className="border-t border-token bg-[var(--surface-2)] px-4 pt-2 pb-3 space-y-2 sticky bottom-0 z-10 shadow-[0_-2px_10px_-4px_rgba(0,0,0,0.4)]">
+          {/* Toolbar */}
+          <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={()=> setShowCommands(s=>!s)}
+                aria-label="Toggle commands"
+                className="h-7 px-2 inline-flex items-center gap-1 rounded-md border border-[var(--border)] text-[11px] text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-[var(--surface-2)] transition"
+              >/{showCommands ? 'hide' : 'cmds'}</button>
+              <button
+                onClick={()=> { localStorage.removeItem(MEMORY_KEY); setMessages([]); setShowCreateProject(false); }}
+                aria-label="Reset conversation"
+                className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-[var(--border)] text-[var,--text-dim)] hover:text-red-400 hover:border-red-500/50 hover:bg-red-600/10 transition"
+                title="Reset conversation"
+              >
+                <TrashIcon className="h-4 w-4" />
+              </button>
+              <button
+                onClick={()=> fetchContextSummary()}
+                aria-label="Refresh summary"
+                className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-[var(--border)] text-[var(--text-dim)] hover:text-blue-400 hover:border-blue-500/50 hover:bg-blue-600/10 transition"
+                title="Refresh counts"
+              >
+                <SparklesIcon className="h-4 w-4" />
+              </button>
+              <button
+                onClick={()=> setShowTools(t=>!t)}
+                aria-label="Toggle helper row"
+                className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-[var(--border)] text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-[var(--surface-2)] transition"
+                title="Toggle helpers"
+              >
+                {showTools ? <XMarkIcon className="h-4 w-4" /> : <PlusIcon className="h-4 w-4" />}
+              </button>
+            </div>
+            <div className="flex items-center gap-3 text-[10px] text-[var(--text-dim)]">
+              <span>{input.length} chars</span>
+              <span>{Math.ceil(input.trim().split(/\s+/).filter(Boolean).length * 1.3)} tokens est.</span>
+              {isLoading && <span className="flex items-center gap-1"><span className="h-3 w-3 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" /> working</span>}
+            </div>
+          </div>
           {showCreateProject && (
-            <div className="p-3 border border-purple-200 rounded-lg bg-purple-50/70 space-y-2">
+            <div className="p-3 border border-purple-200 dark:border-purple-600/40 rounded-lg bg-purple-50/70 dark:bg-purple-600/15 space-y-2">
               <div className="flex items-center justify-between">
                 <p className="text-xs font-semibold text-purple-700">Quick Project</p>
                 <button onClick={() => setShowCreateProject(false)} className="text-[11px] text-purple-600 hover:underline">close</button>
@@ -613,20 +758,20 @@ What specific task would you like me to help you with?`;
                 placeholder="Title"
                 value={projectDraft.title}
                 onChange={e => setProjectDraft({ ...projectDraft, title: e.target.value })}
-                className="w-full px-2 py-1 rounded border border-purple-200 focus:ring-2 focus:ring-purple-400 text-xs bg-white"
+                className="w-full px-2 py-1 rounded border border-purple-200 dark:border-purple-600/40 focus:ring-2 focus:ring-purple-400 text-xs bg-white dark:bg-[var(--surface-2)] dark:text-[var(--text)]"
               />
               <textarea
                 placeholder="Description"
                 value={projectDraft.description}
                 onChange={e => setProjectDraft({ ...projectDraft, description: e.target.value })}
                 rows={2}
-                className="w-full px-2 py-1 rounded border border-purple-200 focus:ring-2 focus:ring-purple-400 text-xs resize-none bg-white"
+                className="w-full px-2 py-1 rounded border border-purple-200 dark:border-purple-600/40 focus:ring-2 focus:ring-purple-400 text-xs resize-none bg-white dark:bg-[var(--surface-2)] dark:text-[var(--text)]"
               />
               <div className="flex gap-2">
                 <select
                   value={projectDraft.priority}
                   onChange={e => setProjectDraft({ ...projectDraft, priority: e.target.value })}
-                  className="flex-1 px-2 py-1 rounded border border-purple-200 text-xs bg-white"
+                  className="flex-1 px-2 py-1 rounded border border-purple-200 dark:border-purple-600/40 text-xs bg-white dark:bg-[var(--surface-2)] dark:text-[var(--text)]"
                 >
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
@@ -636,7 +781,7 @@ What specific task would you like me to help you with?`;
                 <select
                   value={projectDraft.status}
                   onChange={e => setProjectDraft({ ...projectDraft, status: e.target.value })}
-                  className="flex-1 px-2 py-1 rounded border border-purple-200 text-xs bg-white"
+                  className="flex-1 px-2 py-1 rounded border border-purple-200 dark:border-purple-600/40 text-xs bg-white dark:bg-[var(--surface-2)] dark:text-[var(--text)]"
                 >
                   <option value="planning">Planning</option>
                   <option value="active">Active</option>
@@ -654,40 +799,64 @@ What specific task would you like me to help you with?`;
               </button>
             </div>
           )}
-          <div className="flex items-end gap-2">
-            <div className="flex-1 relative">
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => {
-                  setInput(e.target.value);
-                  if (e.target.value.startsWith('/')) setShowCommands(false);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSend();
-                  } else if (e.key === '/' && input === '') {
-                    setShowCommands(true);
-                  }
-                }}
-                placeholder="Ask or type / for commands..."
-                className="w-full pr-10 pl-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm bg-white shadow-sm"
-                disabled={isLoading}
-              />
-              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                <span className="text-[10px] text-gray-400">Enter</span>
+          {showTools && !showCreateProject && !input && (
+            <div className="flex flex-wrap gap-2 -mt-0.5">
+              {baseSuggestions.map(s => (
+                <button key={s} onClick={()=> setInput(s)} className="text-[11px] px-2 py-1 rounded-md bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-[var(--text)] border border-[var(--border)] transition">{s}</button>
+              ))}
+            </div>
+          )}
+          <div className="mt-1 group">
+            <div className="flex rounded-xl border border-gray-700/70 bg-[#0f0f10] focus-within:border-purple-500/70 transition shadow-sm">
+              <div className="flex-1 relative px-3 py-2">
+                <textarea
+                  ref={textareaRef}
+                  value={input}
+                  onChange={(e) => {
+                    setInput(e.target.value);
+                    if (e.target.value.startsWith('/')) setShowCommands(false);
+                    const el = textareaRef.current; if (el){ el.style.height='auto'; el.style.height = Math.min(el.scrollHeight,160)+'px'; }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey && !e.altKey && !e.metaKey && !e.ctrlKey) {
+                      e.preventDefault();
+                      handleSend();
+                    } else if (e.key === '/' && input === '') {
+                      setShowCommands(true);
+                    }
+                  }}
+                  placeholder="Ask or type / for commands..."
+                  className="w-full bg-transparent outline-none resize-none text-sm leading-relaxed min-h-[42px] max-h-[160px] pr-2 text-gray-200 placeholder:text-gray-500"
+                  disabled={isLoading}
+                />
+                <div className="absolute bottom-1 right-2 flex items-center gap-1 text-[10px] text-gray-600 select-none pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span>/</span><span>Enter</span>
+                </div>
+              </div>
+              <div className="flex items-stretch">
+                <div className="w-px bg-gray-800 my-2" />
+                <button
+                  onClick={handleSend}
+                  disabled={!input.trim() || isLoading}
+                  aria-label="Send message"
+                  className="m-1 ml-0 px-4 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white text-sm font-medium flex items-center gap-1 shadow-sm hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-purple-500"
+                >
+                  <PaperAirplaneIcon className="h-4 w-4" />
+                  <span className="hidden sm:inline">Send</span>
+                </button>
               </div>
             </div>
-            <button
-              onClick={handleSend}
-              disabled={!input.trim() || isLoading}
-              className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium shadow"
-            >
-              <PaperAirplaneIcon className="h-4 w-4" />
-            </button>
+            {showTools && (
+              <div className="flex justify-between mt-1 px-1">
+                <div className="flex gap-2">
+                  <span className="text-[10px] text-gray-500">Ctrl/⌘ + K toggle panel</span>
+                  <span className="text-[10px] text-gray-500">/ for commands</span>
+                </div>
+                <span className="text-[10px] text-gray-600">Enter = send • Shift+Enter = newline</span>
+              </div>
+            )}
           </div>
-          <div className="text-[10px] text-center text-gray-500">Copilot can navigate, create entities, and summarize your workspace.</div>
+  <div className="text-[10px] text-center text-[var(--text-dim)] pt-0.5">Copilot can navigate, create entities, and summarize your workspace.</div>
         </div>
       </div>
     </div>

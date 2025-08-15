@@ -65,6 +65,12 @@ export class Client {
   @Prop([String])
   projects: string[];
 
+    @Prop({ default: 'lead' })
+    status: string;
+
+    @Prop()
+    source?: string;
+
   @Prop({ required: true })
   workspaceId: string;
 

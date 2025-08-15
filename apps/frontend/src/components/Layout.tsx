@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import SearchBar from './SearchBar';
 import CopilotWidget from './CopilotWidget';
+import RouteMemoryTracker from './RouteMemoryTracker';
 import {
   HomeIcon,
   ClipboardDocumentListIcon,
@@ -28,7 +29,11 @@ import {
   ShoppingBagIcon,
   BuildingStorefrontIcon,
   SparklesIcon,
+  PlusCircleIcon,
+  QuestionMarkCircleIcon,
 } from '@heroicons/react/24/outline';
+import Logo from './Logo';
+import { ThemeProvider, useTheme } from './ThemeProvider';
 
 interface User {
   id: string;
@@ -101,6 +106,7 @@ export default function Layout({ children }: LayoutProps) {
     { name: 'Documents', href: '/dashboard/documents', icon: DocumentTextIcon },
     { name: 'Designer', href: '/dashboard/designer', icon: PencilSquareIcon },
     { name: 'File Storage', href: '/dashboard/storage', icon: CloudArrowUpIcon },
+  { name: 'Sales', href: '/dashboard/sales', icon: ShoppingBagIcon },
     { name: 'Online Store', href: '/dashboard/ecommerce', icon: BuildingStorefrontIcon, badge: 7 },
     { name: 'Business Cards', href: '/dashboard/rolladex', icon: UserGroupIcon },
   { name: 'Voice Agent', href: '/dashboard/voice-agent', icon: SparklesIcon },
@@ -148,7 +154,9 @@ export default function Layout({ children }: LayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <ThemeProvider>
+  <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
+  <RouteMemoryTracker />
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
@@ -159,10 +167,7 @@ export default function Layout({ children }: LayoutProps) {
       {/* Mobile sidebar */}
       <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out lg:hidden`}>
         <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
-          <div className="flex items-center space-x-3">
-            <WrenchScrewdriverIcon className="h-8 w-8 text-blue-600" />
-            <span className="text-xl font-bold text-gray-900">ConstructCRM</span>
-          </div>
+          <Logo />
           <button onClick={() => setSidebarOpen(false)} className="p-2 rounded-md text-gray-400 hover:text-gray-600">
             <XMarkIcon className="h-6 w-6" />
           </button>
@@ -202,13 +207,10 @@ export default function Layout({ children }: LayoutProps) {
       </div>
 
       {/* Desktop sidebar */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-        <div className="flex min-h-0 flex-1 flex-col bg-white shadow-lg">
-          <div className="flex h-16 flex-shrink-0 items-center px-4 border-b border-gray-200">
-            <div className="flex items-center space-x-3">
-              <WrenchScrewdriverIcon className="h-8 w-8 text-blue-600" />
-              <span className="text-xl font-bold text-gray-900">ConstructCRM</span>
-            </div>
+    <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
+  <div className="flex min-h-0 flex-1 flex-col surface-1 elevated border-r border-token">
+      <div className="flex h-16 flex-shrink-0 items-center px-4 border-b border-token">
+            <Logo />
           </div>
           <div className="flex flex-1 flex-col overflow-y-auto">
             <nav className="flex-1 px-3 py-6">
@@ -219,22 +221,22 @@ export default function Layout({ children }: LayoutProps) {
                     href={item.href}
                     className={`group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
                       item.current
-                        ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border-l-4 border-blue-600 shadow-sm'
-                        : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                        ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border-l-4 border-blue-600 shadow-sm dark:bg-[var(--surface-2)] dark:text-blue-300 dark:border-blue-500'
+                        : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-[var(--text-dim)] dark:hover:text-[var(--text)] dark:hover:bg-[var(--surface-2)]'
                     }`}
                   >
                     <item.icon
                       className={`mr-3 h-5 w-5 transition-colors ${
-                        item.current ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'
+                        item.current ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300'
                       }`}
                     />
                     <span className={item.current ? 'font-semibold' : ''}>{item.name}</span>
                     {item.badge && (
-                      <span className={`ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                        item.current 
-                          ? 'bg-blue-100 text-blue-800' 
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
+                          <span className={`ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium tracking-wide transition-colors ${
+                            item.current 
+                              ? 'bg-blue-600 text-white dark:bg-blue-500 dark:text-white shadow-sm ring-1 ring-blue-400/60 dark:ring-blue-300/50' 
+                              : 'bg-gray-200 text-gray-700 dark:bg-[var(--surface-2)] dark:text-[var(--text-dim)] dark:ring-1 dark:ring-[var(--border)]/60'
+                          }`}>
                         {item.badge}
                       </span>
                     )}
@@ -244,40 +246,41 @@ export default function Layout({ children }: LayoutProps) {
             </nav>
 
             {/* User profile section */}
-            <div className="flex-shrink-0 border-t border-gray-200 p-4">
+            <div className="flex-shrink-0 border-t border-token p-4">
               <div className="relative">
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="group block w-full rounded-lg p-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="group block w-full rounded-lg p-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:text-gray-300 dark:hover:bg-gray-800 dark:focus:ring-offset-gray-900"
                 >
                   <div className="flex items-center">
                     <div className="flex-shrink-0">
-                      <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-                        <span className="text-sm font-medium text-blue-700">
+                      <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+                        <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
                           {user.firstName?.[0]}{user.lastName?.[0]}
                         </span>
                       </div>
                     </div>
                     <div className="ml-3 flex-1">
-                      <p className="text-sm font-medium text-gray-900">{user.firstName} {user.lastName}</p>
-                      <p className="text-xs text-gray-500">{user.email}</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{user.firstName} {user.lastName}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
                     </div>
-                    <ChevronDownIcon className="h-4 w-4 text-gray-400" />
+                    <ChevronDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                   </div>
                 </button>
 
                 {showUserMenu && (
-                  <div className="absolute bottom-full left-0 right-0 mb-2 rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
+                  <div className="absolute bottom-full left-0 right-0 mb-2 rounded-md surface-2 py-1 shadow-lg ring-1 ring-black/10 border border-token">
+                    <ThemeSelect />
                     <Link
                       href="/dashboard/settings/profile"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700/80"
                       onClick={() => setShowUserMenu(false)}
                     >
                       Your Profile
                     </Link>
                     <Link
                       href="/dashboard/settings"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700/80"
                       onClick={() => setShowUserMenu(false)}
                     >
                       Settings
@@ -287,7 +290,7 @@ export default function Layout({ children }: LayoutProps) {
                         setShowUserMenu(false);
                         handleLogout();
                       }}
-                      className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                      className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700/80"
                     >
                       Sign out
                     </button>
@@ -300,9 +303,9 @@ export default function Layout({ children }: LayoutProps) {
       </div>
 
       {/* Main content */}
-      <div className="lg:pl-64 flex flex-col min-h-screen">
+  <div className="lg:pl-64 flex flex-col min-h-screen" style={{ background: 'var(--bg)' }}>
         {/* Top navigation */}
-        <div className="sticky top-0 z-10 flex h-16 flex-shrink-0 bg-white shadow-sm border-b border-gray-200">
+  <div className="sticky top-0 z-10 flex h-16 flex-shrink-0 surface-1 elevated border-b border-token">
           <button
             type="button"
             className="border-r border-gray-200 px-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 lg:hidden"
@@ -312,16 +315,19 @@ export default function Layout({ children }: LayoutProps) {
             <Bars3Icon className="h-6 w-6" />
           </button>
 
-          <div className="flex flex-1 justify-between px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-1">
-              <SearchBar className="w-full md:max-w-md" />
+          <div className="flex flex-1 items-center justify-between px-4 sm:px-6 lg:px-8">
+            {/* Search (logo only appears in sidebar to avoid duplication) */}
+            <div className="flex items-center flex-1 min-w-0">
+              <div className="flex-1 min-w-0">
+                <SearchBar className="w-full md:max-w-lg" />
+              </div>
             </div>
 
-            <div className="ml-4 flex items-center md:ml-6">
+      <div className="ml-4 flex items-center md:ml-6 shrink-0 space-x-3">
               {/* Notifications */}
               <button
                 type="button"
-                className="relative rounded-full bg-white p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="relative rounded-full surface-2 p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] focus:ring-offset-2 dark:text-[var(--text-dim)] dark:hover:text-[var(--text)] focus:ring-offset-[var(--bg)]"
               >
                 <span className="sr-only">View notifications</span>
                 <BellIcon className="h-6 w-6" />
@@ -329,52 +335,21 @@ export default function Layout({ children }: LayoutProps) {
                   3
                 </span>
               </button>
-
-              {/* Profile dropdown */}
-              <div className="relative ml-3">
-                <button
-                  onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex max-w-xs items-center rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 lg:p-2 lg:rounded-md lg:hover:bg-gray-50"
-                >
-                  <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-                    <span className="text-sm font-medium text-blue-700">
-                      {user.firstName?.[0]}{user.lastName?.[0]}
-                    </span>
-                  </div>
-                  <span className="hidden ml-3 text-gray-700 text-sm font-medium lg:block">
-                    {user.firstName} {user.lastName}
-                  </span>
-                  <ChevronDownIcon className="hidden ml-1 h-4 w-4 text-gray-400 lg:block" />
-                </button>
-
-                {showUserMenu && (
-                  <div className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                    <Link
-                      href="/dashboard/settings/profile"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => setShowUserMenu(false)}
-                    >
-                      Your Profile
-                    </Link>
-                    <Link
-                      href="/dashboard/settings"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => setShowUserMenu(false)}
-                    >
-                      Settings
-                    </Link>
-                    <button
-                      onClick={() => {
-                        setShowUserMenu(false);
-                        handleLogout();
-                      }}
-                      className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Sign out
-                    </button>
-                  </div>
-                )}
-              </div>
+              {/* Quick Create */}
+              <QuickCreate />
+              {/* Help Button */}
+              <button
+                type="button"
+                className="group hidden sm:inline-flex items-center px-3 py-2 rounded-md border border-token surface-1 text-xs font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] dark:text-[var(--text-dim)] dark:hover:text-[var(--text)] dark:hover:bg-[var(--surface-2)]"
+                onClick={() => {
+                  // Focus Copilot widget if available
+                  const evt = new CustomEvent('copilot:open');
+                  window.dispatchEvent(evt);
+                }}
+              >
+                <QuestionMarkCircleIcon className="h-4 w-4 text-gray-400 group-hover:text-gray-500 mr-1" />
+                Help
+              </button>
             </div>
           </div>
         </div>
@@ -389,6 +364,81 @@ export default function Layout({ children }: LayoutProps) {
   {/* Copilot Widget */}
   <CopilotWidget />
       </div>
+    </div>
+  </ThemeProvider>
+  );
+}
+
+// Lightweight quick create dropdown (inline to avoid extra file for now)
+function QuickCreate() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen(o=>!o)}
+        className="inline-flex items-center px-3 py-2 rounded-md bg-blue-600 text-white text-xs font-medium shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        <span className="mr-1">+</span> Create
+      </button>
+      {open && (
+        <div className="absolute right-0 mt-2 w-44 rounded-md bg-white dark:bg-[var(--surface-1)] border border-gray-200 dark:border-token shadow-lg py-1 z-20 text-sm overflow-hidden">
+          {[
+            { label: 'Project', href: '/dashboard/projects?new=1' },
+            { label: 'Client', href: '/dashboard/clients?new=1' },
+            { label: 'Design', href: '/dashboard/designer?view=new' },
+            { label: 'Message', href: '/dashboard/chat?compose=1' }
+          ].map(item => (
+            <Link
+              key={item.label}
+              href={item.href}
+              className="block px-3 py-1.5 hover:bg-gray-50 dark:hover:bg-[var(--surface-2)] text-gray-700 dark:text-[var(--text)] transition-colors"
+            >
+              {item.label}
+            </Link>
+          ))}
+          <button
+            onClick={()=>setOpen(false)}
+            className="w-full text-left px-3 py-1.5 text-xs text-gray-400 dark:text-[var(--text-dim)] hover:text-gray-500 dark:hover:text-[var(--text)] hover:bg-gray-50 dark:hover:bg-[var(--surface-2)] transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Inline theme select component for user menu
+function ThemeSelect() {
+  const { theme, setTheme, toggleTheme, system } = useTheme();
+  return (
+    <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700 mb-1">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Appearance</span>
+        <button
+          onClick={toggleTheme}
+          className="text-xs px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600"
+        >
+          Toggle
+        </button>
+      </div>
+      <div className="flex gap-2">
+        {(['light','dark'] as const).map(t => (
+          <button
+            key={t}
+            onClick={() => setTheme(t)}
+            className={`flex-1 text-xs py-1.5 rounded-md border transition-colors ${
+              theme === t
+                ? 'bg-blue-600 text-white border-blue-600'
+                : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
+          >
+            {t.charAt(0).toUpperCase()+t.slice(1)}
+          </button>
+        ))}
+      </div>
+      <p className="mt-2 text-[10px] text-gray-400 dark:text-gray-500">System: {system}</p>
     </div>
   );
 }

@@ -16,54 +16,83 @@ import {
   PencilIcon,
   TrashIcon
 } from '@heroicons/react/24/outline';
+import { API_BASE } from '@/lib/api';
+
+// Backend schema differs from original assumed shape. We'll create a normalized internal representation.
+interface RawProject { [key:string]: any; _id: string; title: string; description?: string; status: string; priority: string; clientId: string; assignedTo?: string[]; startDate?: string; endDate?: string; budget?: number; workspaceId: string; address?: any; createdAt?: string; updatedAt?: string; }
 
 interface Project {
   _id: string;
   title: string;
   description: string;
-  status: 'planning' | 'active' | 'on_hold' | 'completed' | 'cancelled';
+  status: 'planning' | 'active' | 'on_hold' | 'completed' | 'cancelled'; // normalized
+  rawStatus: string; // original backend status
   priority: 'low' | 'medium' | 'high' | 'urgent';
   budget?: number;
-  estimatedHours?: number;
-  actualHours?: number;
   startDate?: string;
   endDate?: string;
   clientId?: string;
-  assignedUsers: string[];
+  assignedUsers: string[]; // mapped from assignedTo
   address?: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-    coordinates?: {
-      lat: number;
-      lng: number;
-    };
+    city?: string; state?: string; street?: string; zipCode?: string; country?: string; coordinates?: { lat: number; lng: number };
   };
   tags: string[];
-  files: Array<{
-    filename: string;
-    url: string;
-    uploadedAt: string;
-  }>;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
+function normalizeProject(p: RawProject): Project {
+  const mapStatus = (s: string): Project['status'] => {
+    switch (s) {
+      case 'lead':
+      case 'proposal':
+        return 'planning';
+      case 'approved':
+      case 'in_progress':
+        return 'active';
+      case 'on_hold':
+        return 'on_hold';
+      case 'completed':
+        return 'completed';
+      case 'cancelled':
+        return 'cancelled';
+      default:
+        return 'planning';
+    }
+  };
+  return {
+    _id: p._id,
+    title: p.title,
+    description: p.description || '',
+    status: mapStatus(p.status),
+    rawStatus: p.status,
+    priority: (['low','medium','high','urgent'].includes(p.priority) ? p.priority : 'medium') as Project['priority'],
+    budget: p.budget,
+    startDate: p.startDate,
+    endDate: p.endDate,
+    clientId: p.clientId,
+    assignedUsers: p.assignedTo || [],
+    address: p.address || {},
+    tags: Array.isArray(p.tags) ? p.tags : [],
+    createdAt: p.createdAt,
+    updatedAt: p.updatedAt,
+  };
+}
+
+// Unified badge bubble palette (light + dark adaptive)
 const statusColors = {
-  planning: 'bg-blue-100 text-blue-800',
-  active: 'bg-green-100 text-green-800',
-  on_hold: 'bg-yellow-100 text-yellow-800',
-  completed: 'bg-gray-100 text-gray-800',
-  cancelled: 'bg-red-100 text-red-800'
+  planning: 'bg-blue-100 text-blue-800 dark:bg-blue-600/20 dark:text-blue-300',
+  active: 'bg-green-100 text-green-800 dark:bg-green-600/20 dark:text-green-300',
+  on_hold: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-500/20 dark:text-yellow-300',
+  completed: 'bg-gray-100 text-gray-800 dark:bg-[var(--surface-2)] dark:text-[var(--text-dim)]',
+  cancelled: 'bg-red-100 text-red-800 dark:bg-red-600/20 dark:text-red-300'
 };
 
 const priorityColors = {
-  low: 'bg-gray-100 text-gray-800',
-  medium: 'bg-blue-100 text-blue-800',
-  high: 'bg-orange-100 text-orange-800',
-  urgent: 'bg-red-100 text-red-800'
+  low: 'bg-gray-100 text-gray-800 dark:bg-[var(--surface-2)] dark:text-[var(--text-dim)]',
+  medium: 'bg-blue-100 text-blue-800 dark:bg-blue-600/20 dark:text-blue-300',
+  high: 'bg-orange-100 text-orange-800 dark:bg-orange-600/20 dark:text-orange-300',
+  urgent: 'bg-red-100 text-red-800 dark:bg-red-600/20 dark:text-red-300'
 };
 
 export default function ProjectsPage() {
@@ -99,8 +128,7 @@ export default function ProjectsPage() {
         return;
       }
 
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const response = await fetch(`${baseUrl}/projects`, {
+      const response = await fetch(`${API_BASE}/projects`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -108,8 +136,9 @@ export default function ProjectsPage() {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        setProjects(data);
+        const data: RawProject[] = await response.json();
+        const normalized = data.map(normalizeProject);
+        setProjects(normalized);
       } else {
         const text = await response.text();
         setError(`Failed to fetch projects (${response.status})`);
@@ -125,14 +154,15 @@ export default function ProjectsPage() {
   };
 
   const filterProjects = () => {
-    let filtered = projects;
+  let filtered = projects;
 
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(project =>
         project.title.toLowerCase().includes(term) ||
         project.description.toLowerCase().includes(term) ||
-        project.tags.some(tag => tag.toLowerCase().includes(term))
+        (project.tags || []).some(tag => tag.toLowerCase().includes(term)) ||
+        project.rawStatus.toLowerCase().includes(term)
       );
     }
 
@@ -159,7 +189,7 @@ export default function ProjectsPage() {
 
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
-      const response = await fetch(`http://localhost:3001/projects/${id}`, {
+      const response = await fetch(`${API_BASE}/projects/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -230,20 +260,20 @@ export default function ProjectsPage() {
         {/* Status summary chips */}
         <div className="flex flex-wrap gap-2 mb-6">
           {[
-            { key: 'all', label: 'All', color: 'bg-gray-100 text-gray-800' },
-            { key: 'planning', label: `Planning (${statusCounts.planning || 0})`, color: 'bg-blue-100 text-blue-800' },
-            { key: 'active', label: `Active (${statusCounts.active || 0})`, color: 'bg-green-100 text-green-800' },
-            { key: 'on_hold', label: `On Hold (${statusCounts.on_hold || 0})`, color: 'bg-yellow-100 text-yellow-800' },
-            { key: 'completed', label: `Completed (${statusCounts.completed || 0})`, color: 'bg-gray-200 text-gray-800' },
-            { key: 'cancelled', label: `Cancelled (${statusCounts.cancelled || 0})`, color: 'bg-red-100 text-red-800' }
+            { key: 'all', label: 'All', color: 'bg-gray-100 text-gray-800 dark:bg-[var(--surface-2)] dark:text-[var(--text)]' },
+            { key: 'planning', label: `Planning (${statusCounts.planning || 0})`, color: 'bg-blue-100 text-blue-800 dark:bg-blue-600/20 dark:text-blue-300' },
+            { key: 'active', label: `Active (${statusCounts.active || 0})`, color: 'bg-green-100 text-green-800 dark:bg-green-600/20 dark:text-green-300' },
+            { key: 'on_hold', label: `On Hold (${statusCounts.on_hold || 0})`, color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-500/20 dark:text-yellow-300' },
+            { key: 'completed', label: `Completed (${statusCounts.completed || 0})`, color: 'bg-gray-200 text-gray-800 dark:bg-[var(--surface-2)] dark:text-[var(--text-dim)]' },
+            { key: 'cancelled', label: `Cancelled (${statusCounts.cancelled || 0})`, color: 'bg-red-100 text-red-800 dark:bg-red-600/20 dark:text-red-300' }
           ].map(chip => (
             <button
               key={chip.key}
               onClick={() => setStatusFilter(chip.key)}
               className={`px-3 py-1 rounded-full text-xs font-medium border transition ${
                 statusFilter === chip.key
-                  ? 'ring-2 ring-offset-1 ring-blue-500 border-blue-500 shadow-sm'
-                  : 'border-transparent hover:border-gray-300'
+                  ? 'ring-2 ring-offset-1 ring-blue-500 border-blue-500 shadow-sm dark:ring-offset-[var(--surface-1)]'
+                  : 'border-transparent hover:border-gray-300 dark:hover:border-[var(--border)]'
               } ${chip.color}`}
             >
               {chip.label}
@@ -277,7 +307,7 @@ export default function ProjectsPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--surface-2)] dark:border-token"
             >
               <option value="all">All Statuses</option>
               <option value="planning">Planning</option>
@@ -291,7 +321,7 @@ export default function ProjectsPage() {
             <select
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--surface-2)] dark:border-token"
             >
               <option value="all">All Priorities</option>
               <option value="low">Low</option>
@@ -366,12 +396,8 @@ export default function ProjectsPage() {
 
                   {/* Status and Priority Badges */}
                   <div className="flex items-center space-x-2 mb-3">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${statusColors[project.status]}`}>
-                      {project.status.replace('_', ' ')}
-                    </span>
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${priorityColors[project.priority]}`}>
-                      {project.priority}
-                    </span>
+                    <span className={`pill pill-tint-${project.status === 'active' ? 'green' : project.status === 'planning' ? 'blue' : project.status === 'on_hold' ? 'yellow' : project.status === 'cancelled' ? 'red' : 'neutral'} sm`}>{project.status.replace('_',' ')}</span>
+                    <span className={`pill pill-tint-${project.priority === 'high' ? 'yellow' : project.priority === 'urgent' ? 'red' : project.priority === 'medium' ? 'blue' : 'neutral'} sm`}>{project.priority}</span>
                   </div>
 
                   {/* Project Details */}
@@ -390,14 +416,14 @@ export default function ProjectsPage() {
                       </div>
                     )}
 
-                    {project.assignedUsers.length > 0 && (
+                    {project.assignedUsers && project.assignedUsers.length > 0 && (
                       <div className="flex items-center">
                         <UserIcon className="h-4 w-4 mr-2" />
                         <span>{project.assignedUsers.length} assigned</span>
                       </div>
                     )}
 
-                    {project.address && (
+                    {project.address && (project.address.city || project.address.state) && (
                       <div className="flex items-center">
                         <MapPinIcon className="h-4 w-4 mr-2" />
                         <span className="truncate">
@@ -408,18 +434,15 @@ export default function ProjectsPage() {
                   </div>
 
                   {/* Tags */}
-                  {project.tags.length > 0 && (
+                  {project.tags && project.tags.length > 0 && (
                     <div className="mt-3 flex flex-wrap gap-1">
                       {project.tags.slice(0, 4).map((tag, index) => (
-                        <span
-                          key={index}
-                          className="inline-flex items-center px-2 py-1 rounded-md text-[11px] font-medium bg-gray-100 text-gray-700"
-                        >
+                        <span key={index} className="inline-flex items-center px-2 py-1 rounded-md text-[11px] font-medium bg-gray-100 text-gray-700 dark:bg-[var(--surface-2)] dark:text-[var(--text-dim)]">
                           {tag}
                         </span>
                       ))}
                       {project.tags.length > 4 && (
-                        <span className="inline-flex items-center px-2 py-1 rounded-md text-[11px] font-medium bg-gray-100 text-gray-700">
+                        <span className="inline-flex items-center px-2 py-1 rounded-md text-[11px] font-medium bg-gray-100 text-gray-700 dark:bg-[var(--surface-2)] dark:text-[var(--text-dim)]">
                           +{project.tags.length - 4}
                         </span>
                       )}

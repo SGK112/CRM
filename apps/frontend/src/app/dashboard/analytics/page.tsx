@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Button from '../../../components/ui/button';
 import Layout from '../../../components/Layout';
 import {
   ChartBarIcon,
@@ -10,12 +11,7 @@ import {
   CalendarDaysIcon,
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
-  EyeIcon,
-  ArrowDownTrayIcon,
-  FunnelIcon,
-  ChartPieIcon,
-  PresentationChartLineIcon,
-  Squares2X2Icon
+  ArrowDownTrayIcon
 } from '@heroicons/react/24/outline';
 
 interface MetricCard {
@@ -156,7 +152,7 @@ export default function AnalyticsPage() {
   ];
 
   const renderMetricCard = (metric: MetricCard) => (
-    <div key={metric.title} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+  <div key={metric.title} className="surface-1 rounded-xl shadow-sm border border-token p-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <div className={`p-3 rounded-full ${metric.color}`}>
@@ -185,12 +181,12 @@ export default function AnalyticsPage() {
   );
 
   const renderRevenueChart = () => (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+  <div className="surface-1 rounded-xl shadow-sm border border-token p-6">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold text-gray-900">Revenue Trends</h3>
         <div className="flex space-x-2">
-          <button className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-md">Revenue</button>
-          <button className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded-md">Projects</button>
+          <Button size="sm" intent="primary">Revenue</Button>
+          <Button size="sm" intent="neutral">Projects</Button>
         </div>
       </div>
       
@@ -202,15 +198,15 @@ export default function AnalyticsPage() {
             
             return (
               <div key={data.month} className="flex-1 flex flex-col items-center">
-                <div className="w-full bg-gray-200 rounded-t-lg relative" style={{ height: '240px' }}>
+                <div className="w-full bg-gray-200 dark:bg-[color-mix(in_oklab,var(--border),transparent_70%)] rounded-t-lg relative" style={{ height: '240px' }}>
                   <div 
                     className="w-full bg-blue-500 rounded-t-lg absolute bottom-0 transition-all duration-500"
                     style={{ height: `${height}%` }}
                   />
                 </div>
                 <div className="mt-2 text-center">
-                  <p className="text-xs font-medium text-gray-900">{data.month}</p>
-                  <p className="text-xs text-gray-500">${(data.revenue / 1000).toFixed(0)}k</p>
+                  <p className="text-xs font-medium text-gray-900 dark:text-[var(--text)]">{data.month}</p>
+                  <p className="text-xs text-gray-500 dark:text-[var(--text-dim)]">${(data.revenue / 1000).toFixed(0)}k</p>
                 </div>
               </div>
             );
@@ -221,7 +217,7 @@ export default function AnalyticsPage() {
   );
 
   const renderProjectTypeChart = () => (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+  <div className="surface-1 rounded-xl shadow-sm border border-token p-6">
       <h3 className="text-lg font-semibold text-gray-900 mb-6">Projects by Type</h3>
       <div className="space-y-4">
         {projectsByType.map((project, index) => (
@@ -231,7 +227,7 @@ export default function AnalyticsPage() {
               <span className="text-sm font-medium text-gray-900">{project.type}</span>
             </div>
             <div className="flex items-center space-x-3">
-              <div className="w-24 bg-gray-200 rounded-full h-2">
+              <div className="w-24 bg-gray-200 dark:bg-[color-mix(in_oklab,var(--border),transparent_70%)] rounded-full h-2">
                 <div 
                   className={`h-2 rounded-full ${project.color}`}
                   style={{ width: `${project.percentage}%` }}
@@ -247,7 +243,7 @@ export default function AnalyticsPage() {
   );
 
   const renderClientSourceChart = () => (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+  <div className="surface-1 rounded-xl shadow-sm border border-token p-6">
       <h3 className="text-lg font-semibold text-gray-900 mb-6">Client Acquisition Sources</h3>
       <div className="space-y-4">
         {clientSources.map((source, index) => (
@@ -257,7 +253,7 @@ export default function AnalyticsPage() {
               <span className="text-sm font-medium text-gray-900">{source.source}</span>
             </div>
             <div className="flex items-center space-x-3">
-              <div className="w-24 bg-gray-200 rounded-full h-2">
+              <div className="w-24 bg-gray-200 dark:bg-[color-mix(in_oklab,var(--border),transparent_70%)] rounded-full h-2">
                 <div 
                   className={`h-2 rounded-full ${source.color}`}
                   style={{ width: `${source.percentage}%` }}
@@ -273,13 +269,13 @@ export default function AnalyticsPage() {
   );
 
   const renderTopProjectsTable = () => (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+  <div className="surface-1 rounded-xl shadow-sm border border-token">
       <div className="p-6 border-b border-gray-200">
         <h3 className="text-lg font-semibold text-gray-900">Top Performing Projects</h3>
       </div>
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-[color-mix(in_oklab,var(--border),transparent_40%)]">
+          <thead className="bg-gray-50 dark:bg-[var(--surface-2)]">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Project
@@ -301,9 +297,9 @@ export default function AnalyticsPage() {
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="surface-1 divide-y divide-gray-200 dark:divide-[color-mix(in_oklab,var(--border),transparent_40%)]">
             {topPerformingProjects.map((project, index) => (
-              <tr key={index} className="hover:bg-gray-50">
+              <tr key={index} className="hover:bg-gray-50 dark:hover:bg-[var(--surface-2)]">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">{project.name}</div>
                 </td>
@@ -351,7 +347,7 @@ export default function AnalyticsPage() {
             <select
               value={selectedPeriod}
               onChange={(e) => setSelectedPeriod(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 border border-gray-300 dark:border-token rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-[var(--surface-2)] dark:text-[var(--text)]"
             >
               {periods.map((period) => (
                 <option key={period.id} value={period.id}>
@@ -359,7 +355,7 @@ export default function AnalyticsPage() {
                 </option>
               ))}
             </select>
-            <button className="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+            <button className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-token text-gray-700 dark:text-[var(--text)] rounded-lg hover:bg-gray-50 dark:hover:bg-[var(--surface-2)] transition-colors">
               <ArrowDownTrayIcon className="h-5 w-5 mr-2" />
               Export
             </button>
@@ -372,7 +368,7 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Chart Navigation */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+  <div className="surface-1 rounded-xl shadow-sm border border-token p-6">
           <div className="flex items-center space-x-1 border-b border-gray-200">
             {chartTypes.map((chart) => {
               const IconComponent = chart.icon;
@@ -408,47 +404,47 @@ export default function AnalyticsPage() {
 
         {/* Additional Insights */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="surface-1 rounded-xl shadow-sm border border-token p-6">
             <div className="flex items-center space-x-3 mb-4">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <ArrowTrendingUpIcon className="h-6 w-6 text-green-600" />
+              <div className="p-2 bg-green-100 dark:bg-green-600/20 rounded-lg">
+                <ArrowTrendingUpIcon className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">Growth Rate</h3>
-                <p className="text-2xl font-bold text-green-600">+24%</p>
+                <h3 className="font-semibold text-gray-900 dark:text-[var(--text)]">Growth Rate</h3>
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400">+24%</p>
               </div>
             </div>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-[var(--text-dim)]">
               Year-over-year revenue growth showing strong business expansion
             </p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="surface-1 rounded-xl shadow-sm border border-token p-6">
             <div className="flex items-center space-x-3 mb-4">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <CalendarDaysIcon className="h-6 w-6 text-blue-600" />
+              <div className="p-2 bg-blue-100 dark:bg-blue-600/20 rounded-lg">
+                <CalendarDaysIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">Avg Project Duration</h3>
-                <p className="text-2xl font-bold text-blue-600">45 days</p>
+                <h3 className="font-semibold text-gray-900 dark:text-[var(--text)]">Avg Project Duration</h3>
+                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">45 days</p>
               </div>
             </div>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-[var(--text-dim)]">
               Average time from project start to completion
             </p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="surface-1 rounded-xl shadow-sm border border-token p-6">
             <div className="flex items-center space-x-3 mb-4">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <UserGroupIcon className="h-6 w-6 text-purple-600" />
+              <div className="p-2 bg-purple-100 dark:bg-purple-600/20 rounded-lg">
+                <UserGroupIcon className="h-6 w-6 text-purple-600 dark:text-purple-400" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">Client Retention</h3>
-                <p className="text-2xl font-bold text-purple-600">87%</p>
+                <h3 className="font-semibold text-gray-900 dark:text-[var(--text)]">Client Retention</h3>
+                <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">87%</p>
               </div>
             </div>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-[var(--text-dim)]">
               Percentage of clients who return for additional projects
             </p>
           </div>

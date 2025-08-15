@@ -8,25 +8,24 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "concurrently \"npm:backend:dev\" \"npm:frontend:dev\"",
-    "build": "npm run build --workspaces",
-    "start": "npm run start --workspaces",
-    "test": "npm run test --workspaces",
-    "lint": "npm run lint --workspaces",
-    "clean": "npm run clean --workspaces",
-    "backend:dev": "npm run dev --workspace=apps/backend",
-    "frontend:dev": "npm run dev --workspace=apps/frontend",
-    "backend:build": "npm run build --workspace=apps/backend",
-    "frontend:build": "npm run build --workspace=apps/frontend"
+    "dev": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "start": "turbo run start",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "type-check": "turbo run type-check",
+    "clean": "rimraf node_modules apps/*/node_modules"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
     "typescript": "^5.0.0",
-    "concurrently": "^8.0.0",
+    
     "eslint": "^8.0.0",
-  "prettier": "^3.0.0",
-  "@typescript-eslint/parser": "^7.0.0",
-  "@typescript-eslint/eslint-plugin": "^7.0.0"
+    "prettier": "^3.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "turbo": "^2.0.0",
+    "rimraf": "^5.0.0"
   },
   "engines": {
     "node": ">=18.0.0",
@@ -43,4 +42,5 @@
   ],
   "author": "SGK112",
   "license": "MIT"
+  ,"packageManager": "npm@10.0.0"
 }
