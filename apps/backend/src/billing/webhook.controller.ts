@@ -48,9 +48,19 @@ export class BillingWebhookController {
         try {
           const customerId = session.customer as string | undefined;
           const subscriptionId = session.subscription as string | undefined;
-          const plan = session.metadata?.plan;
+          // Derive plan from subscription items if possible
+          let plan: string | undefined = session.metadata?.plan as string | undefined;
           const trialEnd = session.expires_at ? new Date(session.expires_at * 1000) : undefined;
           const email = session.customer_details?.email;
+          if (!plan && subscriptionId && this.stripe) {
+            try {
+              const sub = await this.stripe.subscriptions.retrieve(subscriptionId);
+              const priceId = sub.items.data[0]?.price?.id;
+              plan = this.billingService.resolvePlanFromPrice(priceId);
+            } catch (e) {
+              this.logger.warn(`Could not retrieve subscription for plan mapping: ${subscriptionId}`);
+            }
+          }
           if (email) {
             await this.billingService.attachSubscriptionToUser(email, {
               stripeCustomerId: customerId,
@@ -72,10 +82,21 @@ export class BillingWebhookController {
           const subscriptionId = invoice.subscription as string | undefined;
           const customerId = invoice.customer as string | undefined;
           const email = invoice.customer_email || undefined;
+          let plan: string | undefined;
+          if (subscriptionId && this.stripe) {
+            try {
+              const sub = await this.stripe.subscriptions.retrieve(subscriptionId);
+              const priceId = sub.items.data[0]?.price?.id;
+              plan = this.billingService.resolvePlanFromPrice(priceId);
+            } catch (e) {
+              this.logger.warn(`Could not retrieve subscription for plan mapping: ${subscriptionId}`);
+            }
+          }
           if (email) {
             await this.billingService.attachSubscriptionToUser(email, {
               stripeCustomerId: customerId,
               stripeSubscriptionId: subscriptionId,
+              subscriptionPlan: plan,
               subscriptionStatus: 'active',
             });
           }
@@ -91,11 +112,11 @@ export class BillingWebhookController {
         this.logger.log(`Subscription event: ${event.type} ${sub.id}`);
         try {
           const email = (sub as any).customer_email; // may not be present
-          if (email) {
+      if (email) {
             await this.billingService.attachSubscriptionToUser(email, {
               stripeCustomerId: sub.customer as string,
               stripeSubscriptionId: sub.id,
-              subscriptionPlan: (sub.items.data[0]?.price?.id) || undefined,
+        subscriptionPlan: this.billingService.resolvePlanFromPrice(sub.items.data[0]?.price?.id),
               subscriptionStatus: sub.status,
               trialEndsAt: sub.trial_end ? new Date(sub.trial_end * 1000) : undefined,
             });
