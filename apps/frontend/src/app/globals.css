@@ -55,6 +55,19 @@ body {
 :root .bg-white, :root.bg-white, body .bg-white { background-color: var(--surface-1) !important; }
 .dark .bg-white { background-color: var(--surface-1) !important; }
 
+/* Additional dark overrides for gray utility backgrounds used on public pages */
+.dark .bg-gray-50,
+.dark .bg-gray-100 { background-color: var(--surface-1) !important; }
+.dark .bg-gray-200,
+.dark .bg-gray-300 { background-color: var(--surface-2) !important; }
+.dark .border-gray-200,
+.dark .border-gray-300 { border-color: var(--border) !important; }
+.dark .border-gray-400 { border-color: var(--border-strong) !important; }
+
+/* Section separators that rely on light grays become subtle elevated surfaces */
+.dark .bg-gray-50\/50,
+.dark .bg-gray-100\/50 { background-color: var(--surface-1) !important; }
+
 /* Utility surface helpers */
 .surface-1 { background: var(--surface-1); }
 .surface-2 { background: var(--surface-2); }
