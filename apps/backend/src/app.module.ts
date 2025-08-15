@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { RootController } from './root.controller';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ThrottlerModule } from '@nestjs/throttler';
@@ -47,5 +48,6 @@ import { BillingModule } from './billing/billing.module';
   HealthModule,
   BillingModule,
   ],
+  controllers: [RootController],
 })
 export class AppModule {}
