@@ -2,11 +2,12 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, 
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ClientsService } from './clients.service';
+import { ActiveSubscriptionGuard } from '../billing/billing.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Clients')
 @Controller('clients')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, ActiveSubscriptionGuard)
 @ApiBearerAuth()
 export class ClientsController {
   constructor(private readonly clientsService: ClientsService) {}
