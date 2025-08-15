@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req, BadRequestException } from '@nestjs/common';
+import { Body, Controller, Post, Get, Query, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
 
@@ -43,5 +43,25 @@ export class BillingController {
     });
 
     return { id: session.id, url: session.url };
+  }
+
+  @Get('session')
+  async getCheckoutSession(@Query('id') id: string) {
+    if (!this.config.get('STRIPE_SECRET_KEY')) {
+      throw new BadRequestException('Stripe not configured');
+    }
+    if (!id) throw new BadRequestException('Missing id');
+    const session = await this.stripe.checkout.sessions.retrieve(id);
+    return {
+      id: session.id,
+      status: session.status,
+      mode: session.mode,
+      customer_email: session.customer_details?.email || session.customer_email,
+      subscription: session.subscription,
+      amount_total: session.amount_total,
+      currency: session.currency,
+      payment_status: session.payment_status,
+      trial_end: (session as any).trial_end || null,
+    };
   }
 }
