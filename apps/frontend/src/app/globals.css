@@ -16,6 +16,78 @@
   --danger:#f87171; --warning:#fbbf24; --success:#4ade80; --focus-ring:var(--accent); --shadow-color:215 25% 8%;
 }
 
+/* Smooth scrolling and professional animations */
+html {
+  scroll-behavior: smooth;
+}
+
+* {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar styling */
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+.scrollbar-thumb-gray-300::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+  border-radius: 0.5rem;
+}
+
+.scrollbar-thumb-gray-600::-webkit-scrollbar-thumb {
+  background-color: #4b5563;
+  border-radius: 0.5rem;
+}
+
+.scrollbar-track-transparent::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+.scrollbar-thumb-gray-400:hover::-webkit-scrollbar-thumb {
+  background-color: #9ca3af;
+}
+
+.scrollbar-thumb-gray-500:hover::-webkit-scrollbar-thumb {
+  background-color: #6b7280;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* Elevation effect for surfaces */
+.elevated {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.dark .elevated {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+}
+
 body { color:var(--text); background:radial-gradient(circle at 20% 20%,rgba(217,119,6,0.08),transparent 55%),radial-gradient(circle at 80% 70%,rgba(245,158,11,0.06),transparent 60%),var(--bg); transition:background-color .35s ease,color .35s ease; -webkit-font-smoothing:antialiased; }
 .dark body { background:radial-gradient(circle at 18% 25%,rgba(217,119,6,0.12),transparent 55%),radial-gradient(circle at 82% 65%,rgba(245,158,11,0.10),transparent 60%),linear-gradient(to bottom right,#070a0f,#0d1117 45%,#141b23); }
 

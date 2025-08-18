@@ -1,7 +1,7 @@
 'use client'
 export const dynamic = 'force-dynamic';
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { EyeIcon, EyeSlashIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline'
@@ -27,37 +27,54 @@ export default function RegisterPage() {
     })
   }
 
+  const [backendUp, setBackendUp] = useState(true)
+
+  useEffect(() => {
+    const ping = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL?.replace(/\/api$/, '')}/health`, { cache: 'no-store' })
+        setBackendUp(res.ok)
+      } catch { setBackendUp(false) }
+    }
+    ping()
+  }, [])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError('')
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
+      const base = process.env.NEXT_PUBLIC_API_URL || ''
+      const url = `${base}/auth/register`
+      const response = await fetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       })
 
-      const data = await response.json()
+  let data: any = null
+  try { data = await response.json() } catch { /* ignore */ }
 
-      if (response.ok) {
+  if (response.ok) {
         // Store token in localStorage
         localStorage.setItem('accessToken', data.accessToken)
         localStorage.setItem('user', JSON.stringify(data.user))
         
         // Redirect to dashboard
         router.push('/dashboard')
+      } else if (response.status === 400) {
+        setError(data?.validation?.[0] || data?.message || 'Validation error')
+      } else if (response.status === 401) {
+        setError(data?.message || 'Unauthorized')
+      } else if (response.status >= 500) {
+        setError('Server error. Please try again shortly.')
       } else {
-        setError(data.message || 'Registration failed')
+        setError(data?.message || 'Registration failed')
       }
     } catch (err) {
       setError('Network error. Please try again.')
-    } finally {
-      setIsLoading(false)
-    }
+    } finally { setIsLoading(false) }
   }
 
   return (
@@ -73,9 +90,8 @@ export default function RegisterPage() {
             <span className="text-2xl font-semibold tracking-tight text-slate-100">Remodely CRM</span>
           </div>
         </div>
-        <h2 className="mt-4 text-center text-3xl font-semibold tracking-tight text-slate-100">
-          Create your workspace
-        </h2>
+  <h2 className="mt-4 text-center text-3xl font-semibold tracking-tight text-slate-100">Create your workspace</h2>
+  {!backendUp && <p className="mt-2 text-center text-xs text-red-400">Backend offline or unreachable. Registration may fail.</p>}
         <p className="mt-2 text-center text-sm text-slate-400">
           Or{' '}
           <Link href="/auth/login" className="font-medium text-amber-400 hover:text-amber-300 transition-colors">
