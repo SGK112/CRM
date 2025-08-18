@@ -55,7 +55,7 @@ export default function CopilotWidget() {
             <button
               onClick={cycleFromClosed}
               aria-label="Open Copilot"
-              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-600/40 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[var(--surface-2)] dark:hover:bg-[var(--surface-2)] focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
             >
               <div className="h-10 w-10 rounded-md bg-purple-600 dark:bg-purple-500 flex items-center justify-center shadow-inner">
                 <SparklesIcon className="h-5 w-5 text-white" />
@@ -74,9 +74,9 @@ export default function CopilotWidget() {
       {stage === 'minimized' && (
         <div
           ref={containerRef}
-          className="fixed bottom-4 right-4 z-40 w-72 rounded-xl border border-token surface-1 backdrop-blur-md shadow-lg hover:shadow-xl transition-shadow"
+          className="fixed bottom-4 right-4 z-40 w-72 rounded-xl border border-token surface-1 backdrop-blur-md shadow-lg hover:shadow-xl transition-shadow bg-[var(--surface-1)]"
         >
-          <div className="flex items-center gap-2 px-3 py-2 border-b border-token bg-gray-50 dark:bg-[var(--surface-2)] rounded-t-xl">
+          <div className="flex items-center gap-2 px-3 py-2 border-b border-token bg-[var(--surface-2)] dark:bg-[var(--surface-2)] rounded-t-xl">
             <div className="h-8 w-8 rounded-md bg-purple-600 dark:bg-purple-500 flex items-center justify-center shadow-inner">
               <SparklesIcon className="h-5 w-5 text-white" />
             </div>
@@ -87,14 +87,14 @@ export default function CopilotWidget() {
             <div className="flex items-center gap-1">
               <button
                 onClick={openAssistant}
-                className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-[var(--surface-2)] text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                className="p-1 rounded-md hover:bg-[var(--surface-3)] dark:hover:bg-[var(--surface-2)] text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
                 title="Expand to full assistant"
               >
                 <ArrowsPointingOutIcon className="h-4 w-4" />
               </button>
               <button
                 onClick={closeAll}
-                className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-[var(--surface-2)] text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                className="p-1 rounded-md hover:bg-[var(--surface-3)] dark:hover:bg-[var(--surface-2)] text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
                 title="Close Copilot"
               >
                 <XMarkIcon className="h-4 w-4" />
@@ -106,7 +106,7 @@ export default function CopilotWidget() {
               <input
                 ref={inputRef}
                 placeholder="Ask or type / ..."
-                className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-[var(--surface-2)] px-3 py-2 pr-14 text-xs text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                className="w-full rounded-md border border-[var(--border)] dark:border-gray-700 bg-[var(--surface-2)] dark:bg-[var(--surface-2)] px-3 py-2 pr-14 text-xs text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent placeholder:text-gray-500 dark:placeholder:text-gray-500"
                 value={draft}
                 onChange={e => setDraft(e.target.value)}
                 onFocus={() => setStage('open')}
@@ -121,7 +121,7 @@ export default function CopilotWidget() {
                 <button
                   key={s}
                   onClick={() => setCommandAndOpen(s)}
-                  className="text-[10px] px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-[var(--surface-2)] dark:hover:bg-[var(--surface-3)] dark:text-gray-200 border border-transparent dark:border-gray-800"
+                  className="text-[10px] px-2 py-1 rounded bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-gray-700 dark:bg-[var(--surface-2)] dark:hover:bg-[var(--surface-3)] dark:text-gray-200 border border-[var(--border)] dark:border-gray-800 transition-colors"
                 >{s}</button>
               ))}
             </div>

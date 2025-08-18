@@ -720,7 +720,7 @@ What specific task would you like me to help you with?`;
               <button
                 onClick={()=> { localStorage.removeItem(MEMORY_KEY); setMessages([]); setShowCreateProject(false); }}
                 aria-label="Reset conversation"
-                className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-[var(--border)] text-[var,--text-dim)] hover:text-red-400 hover:border-red-500/50 hover:bg-red-600/10 transition"
+                className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-[var(--border)] text-[var(--text-dim)] hover:text-red-500 hover:border-red-500/50 hover:bg-red-500/10 transition"
                 title="Reset conversation"
               >
                 <TrashIcon className="h-4 w-4" />
@@ -807,7 +807,7 @@ What specific task would you like me to help you with?`;
             </div>
           )}
           <div className="mt-1 group">
-            <div className="flex rounded-xl border border-gray-700/70 bg-[#0f0f10] focus-within:border-purple-500/70 transition shadow-sm">
+            <div className="flex rounded-xl border border-[var(--border)] bg-[var(--surface-2)] dark:bg-[var(--surface-2)] focus-within:border-purple-500/60 focus-within:ring-1 focus-within:ring-purple-500/30 transition shadow-sm">
               <div className="flex-1 relative px-3 py-2">
                 <textarea
                   ref={textareaRef}
@@ -826,15 +826,15 @@ What specific task would you like me to help you with?`;
                     }
                   }}
                   placeholder="Ask or type / for commands..."
-                  className="w-full bg-transparent outline-none resize-none text-sm leading-relaxed min-h-[42px] max-h-[160px] pr-2 text-gray-200 placeholder:text-gray-500"
+                  className="w-full bg-transparent outline-none resize-none text-sm leading-relaxed min-h-[42px] max-h-[160px] pr-2 text-gray-800 dark:text-gray-200 placeholder:text-gray-500"
                   disabled={isLoading}
                 />
-                <div className="absolute bottom-1 right-2 flex items-center gap-1 text-[10px] text-gray-600 select-none pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="absolute bottom-1 right-2 flex items-center gap-1 text-[10px] text-gray-500 dark:text-gray-600 select-none pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
                   <span>/</span><span>Enter</span>
                 </div>
               </div>
               <div className="flex items-stretch">
-                <div className="w-px bg-gray-800 my-2" />
+                <div className="w-px bg-[var(--border)] my-2" />
                 <button
                   onClick={handleSend}
                   disabled={!input.trim() || isLoading}
@@ -849,10 +849,10 @@ What specific task would you like me to help you with?`;
             {showTools && (
               <div className="flex justify-between mt-1 px-1">
                 <div className="flex gap-2">
-                  <span className="text-[10px] text-gray-500">Ctrl/⌘ + K toggle panel</span>
-                  <span className="text-[10px] text-gray-500">/ for commands</span>
+                  <span className="text-[10px] text-[var(--text-dim)]">Ctrl/⌘ + K toggle panel</span>
+                  <span className="text-[10px] text-[var(--text-dim)]">/ for commands</span>
                 </div>
-                <span className="text-[10px] text-gray-600">Enter = send • Shift+Enter = newline</span>
+                <span className="text-[10px] text-[var(--text-dim)]">Enter = send • Shift+Enter = newline</span>
               </div>
             )}
           </div>

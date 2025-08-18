@@ -1,0 +1,103 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  actions: read
+  checks: write
+  pull-requests: write
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Cache root node_modules
+        uses: actions/cache@v4.2.4
+        with:
+          path: |
+            node_modules
+            apps/backend/node_modules
+            apps/frontend/node_modules
+            packages/shared/node_modules
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-modules-
+
+      - name: Install dependencies (root)
+        run: npm install --ignore-scripts
+
+      - name: Turbo cache restore
+        uses: actions/cache@v4.2.4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - name: Type check
+        run: npm run type-check --if-present
+
+      - name: Lint
+        run: npm run lint --if-present
+
+      - name: Build
+        run: npm run build
+
+      - name: Backend unit tests
+        working-directory: apps/backend
+        run: npm test --if-present -- --passWithNoTests
+
+      - name: Artifact (Backend dist)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-dist-${{ matrix.node-version }}
+          path: apps/backend/dist
+          if-no-files-found: warn
+
+      - name: Frontend export (optional)
+        if: success()
+        working-directory: apps/frontend
+        run: |
+          if [ -f next.config.js ] || [ -f next.config.mjs ]; then
+            npm run build
+          fi
+
+  security-audit:
+    runs-on: ubuntu-latest
+    needs: build-test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Install (production only)
+        run: npm install --omit=dev --ignore-scripts
+
+      - name: Audit
+        run: |
+          npm audit --production || true

@@ -1,7 +1,7 @@
 'use client'
 export const dynamic = 'force-dynamic';
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { EyeIcon, EyeSlashIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline'
@@ -13,6 +13,21 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
+
+  const [backendUp, setBackendUp] = useState(true)
+
+  useEffect(() => {
+    // lightweight health check
+    const ping = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL?.replace(/\/api$/, '')}/health`, { cache: 'no-store' })
+        setBackendUp(res.ok)
+      } catch {
+        setBackendUp(false)
+      }
+    }
+    ping()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -28,17 +43,24 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
       })
 
-      const data = await response.json()
+  let data: any = null
+  try { data = await response.json() } catch { /* ignore */ }
 
-      if (response.ok) {
+  if (response.ok) {
         // Store token in localStorage (in production, consider more secure options)
         localStorage.setItem('accessToken', data.accessToken)
         localStorage.setItem('user', JSON.stringify(data.user))
         
         // Redirect to dashboard
         router.push('/dashboard')
+      } else if (response.status === 400) {
+        setError(data?.validation?.[0] || data?.message || 'Validation error')
+      } else if (response.status === 401) {
+        setError(data?.message || 'Invalid credentials')
+      } else if (response.status >= 500) {
+        setError('Server error. Please try again shortly.')
       } else {
-        setError(data.message || 'Login failed')
+        setError(data?.message || 'Login failed')
       }
     } catch (err) {
       setError('Network error. Please try again.')
@@ -60,9 +82,8 @@ export default function LoginPage() {
             <span className="text-2xl font-semibold tracking-tight text-slate-100">Remodely CRM</span>
           </div>
         </div>
-        <h2 className="mt-4 text-center text-3xl font-semibold tracking-tight text-slate-100">
-          Sign in to your account
-        </h2>
+  <h2 className="mt-4 text-center text-3xl font-semibold tracking-tight text-slate-100">Sign in to your account</h2>
+  {!backendUp && <p className="mt-2 text-center text-xs text-red-400">Backend offline or unreachable. Authentication may fail.</p>}
         <p className="mt-2 text-center text-sm text-slate-400">
           Or{' '}
           <Link href="/auth/register" className="font-medium text-amber-400 hover:text-amber-300 transition-colors">
@@ -172,7 +193,11 @@ export default function LoginPage() {
 
             <div className="mt-6">
               <button
-                onClick={() => window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`}
+                onClick={() => {
+                  const base = process.env.NEXT_PUBLIC_API_URL || ''
+                  const googleBase = base.endsWith('/api') ? base : `${base}`
+                  window.location.href = `${googleBase}/auth/google`
+                }}
                 className="w-full flex justify-center items-center gap-2 py-2 px-4 rounded-md text-sm font-medium bg-white text-slate-800 hover:bg-slate-50 border border-slate-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500/60 transition"
               >
                 <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">

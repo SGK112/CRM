@@ -51,7 +51,26 @@ export class ClientsController {
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Bulk import clients via CSV' })
   @ApiResponse({ status: 201, description: 'Clients imported successfully' })
-  async importCsv(@UploadedFile() file: any, @Request() req, @Query('dryRun') dryRun?: string) {
-    return this.clientsService.importCsv(file, req.user.workspaceId, dryRun === 'true');
+  async importCsv(
+    @UploadedFile() file: any,
+    @Request() req,
+    @Query('dryRun') dryRun?: string,
+    @Query('allowEmailOnly') allowEmailOnly?: string,
+    @Query('allowPhoneOnly') allowPhoneOnly?: string,
+    @Query('synthEmailFromPhone') synthEmailFromPhone?: string,
+    @Query('dedupeByPhone') dedupeByPhone?: string,
+  ) {
+    const parseBool = (v: string | undefined, def = false) => v === undefined ? def : /^(1|true|yes|on)$/i.test(v);
+    return this.clientsService.importCsv(
+      file,
+      req.user.workspaceId,
+      parseBool(dryRun),
+      {
+        allowEmailOnly: parseBool(allowEmailOnly),
+        allowPhoneOnly: parseBool(allowPhoneOnly, true), // default: phone-only w/ synthesized email allowed
+        synthEmailFromPhone: parseBool(synthEmailFromPhone, true),
+        dedupeByPhone: parseBool(dedupeByPhone, true),
+      }
+    );
   }
 }

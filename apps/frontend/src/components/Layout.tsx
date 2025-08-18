@@ -212,16 +212,16 @@ export default function Layout({ children }: LayoutProps) {
       <div className="flex h-16 flex-shrink-0 items-center px-4 border-b border-token">
             <Logo />
           </div>
-          <div className="flex flex-1 flex-col overflow-y-auto">
+          <div className="flex flex-1 flex-col overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 dark:hover:scrollbar-thumb-gray-500">
             <nav className="flex-1 px-3 py-6">
               <div className="space-y-1">
                 {updatedNavigation.map((item) => (
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                    className={`group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 transform hover:scale-[1.02] ${
                       item.current
-                        ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border-l-4 border-blue-600 shadow-sm dark:bg-[var(--surface-2)] dark:text-blue-300 dark:border-blue-500'
+                        ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border-l-4 border-blue-600 shadow-sm dark:bg-gradient-to-r dark:from-blue-900/40 dark:to-indigo-900/40 dark:text-blue-300 dark:border-blue-500'
                         : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-[var(--text-dim)] dark:hover:text-[var(--text)] dark:hover:bg-[var(--surface-2)]'
                     }`}
                   >
@@ -232,10 +232,10 @@ export default function Layout({ children }: LayoutProps) {
                     />
                     <span className={item.current ? 'font-semibold' : ''}>{item.name}</span>
                     {item.badge && (
-                          <span className={`ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium tracking-wide transition-colors ${
+                          <span className={`ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium tracking-wide transition-all duration-200 ${
                             item.current 
-                              ? 'bg-blue-600 text-white dark:bg-blue-500 dark:text-white shadow-sm ring-1 ring-blue-400/60 dark:ring-blue-300/50' 
-                              : 'bg-gray-200 text-gray-700 dark:bg-[var(--surface-2)] dark:text-[var(--text-dim)] dark:ring-1 dark:ring-[var(--border)]/60'
+                              ? 'bg-blue-600 text-white dark:bg-blue-500 dark:text-white shadow-sm ring-1 ring-blue-400/60 dark:ring-blue-300/50 scale-110' 
+                              : 'bg-gray-200 text-gray-700 dark:bg-[var(--surface-2)] dark:text-[var(--text-dim)] dark:ring-1 dark:ring-[var(--border)]/60 group-hover:scale-105'
                           }`}>
                         {item.badge}
                       </span>
@@ -305,10 +305,10 @@ export default function Layout({ children }: LayoutProps) {
       {/* Main content */}
   <div className="lg:pl-64 flex flex-col min-h-screen" style={{ background: 'var(--bg)' }}>
         {/* Top navigation */}
-  <div className="sticky top-0 z-10 flex h-16 flex-shrink-0 surface-1 elevated border-b border-token">
+  <div className="sticky top-0 z-50 flex h-16 flex-shrink-0 surface-1 elevated border-b border-token backdrop-blur-md bg-opacity-95">
           <button
             type="button"
-            className="border-r border-gray-200 px-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 lg:hidden"
+            className="border-r border-gray-200 px-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 lg:hidden transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
             onClick={() => setSidebarOpen(true)}
           >
             <span className="sr-only">Open sidebar</span>
@@ -327,11 +327,11 @@ export default function Layout({ children }: LayoutProps) {
               {/* Notifications */}
               <button
                 type="button"
-                className="relative rounded-full surface-2 p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] focus:ring-offset-2 dark:text-[var(--text-dim)] dark:hover:text-[var(--text)] focus:ring-offset-[var(--bg)]"
+                className="relative rounded-full surface-2 p-2 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] focus:ring-offset-2 dark:text-[var(--text-dim)] dark:hover:text-[var(--text)] focus:ring-offset-[var(--bg)] transition-all duration-200 hover:scale-105"
               >
                 <span className="sr-only">View notifications</span>
                 <BellIcon className="h-6 w-6" />
-                <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-red-500 text-xs text-white flex items-center justify-center">
+                <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-red-500 text-xs text-white flex items-center justify-center animate-pulse">
                   3
                 </span>
               </button>
@@ -340,7 +340,7 @@ export default function Layout({ children }: LayoutProps) {
               {/* Help Button */}
               <button
                 type="button"
-                className="group hidden sm:inline-flex items-center px-3 py-2 rounded-md border border-token surface-1 text-xs font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] dark:text-[var(--text-dim)] dark:hover:text-[var(--text)] dark:hover:bg-[var(--surface-2)]"
+                className="group hidden sm:inline-flex items-center px-3 py-2 rounded-md border border-token surface-1 text-xs font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] dark:text-[var(--text-dim)] dark:hover:text-[var(--text)] dark:hover:bg-[var(--surface-2)] transition-all duration-200 hover:scale-105"
                 onClick={() => {
                   // Focus Copilot widget if available
                   const evt = new CustomEvent('copilot:open');
@@ -355,8 +355,8 @@ export default function Layout({ children }: LayoutProps) {
         </div>
 
         {/* Page content */}
-        <main className="flex-1 py-6">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <main className="flex-1 py-6 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 dark:hover:scrollbar-thumb-gray-500">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 scroll-smooth">
             {children}
           </div>
         </main>
@@ -377,33 +377,40 @@ function QuickCreate() {
       <button
         type="button"
         onClick={() => setOpen(o=>!o)}
-        className="inline-flex items-center px-3 py-2 rounded-md bg-blue-600 text-white text-xs font-medium shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="inline-flex items-center px-3 py-2 rounded-md bg-blue-600 text-white text-xs font-medium shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 hover:scale-105 active:scale-95"
       >
         <span className="mr-1">+</span> Create
       </button>
       {open && (
-        <div className="absolute right-0 mt-2 w-44 rounded-md bg-white dark:bg-[var(--surface-1)] border border-gray-200 dark:border-token shadow-lg py-1 z-20 text-sm overflow-hidden">
-          {[
-            { label: 'Project', href: '/dashboard/projects?new=1' },
-            { label: 'Client', href: '/dashboard/clients?new=1' },
-            { label: 'Design', href: '/dashboard/designer?view=new' },
-            { label: 'Message', href: '/dashboard/chat?compose=1' }
-          ].map(item => (
-            <Link
-              key={item.label}
-              href={item.href}
-              className="block px-3 py-1.5 hover:bg-gray-50 dark:hover:bg-[var(--surface-2)] text-gray-700 dark:text-[var(--text)] transition-colors"
+        <>
+          <div 
+            className="fixed inset-0 z-10" 
+            onClick={() => setOpen(false)}
+          />
+          <div className="absolute right-0 mt-2 w-44 rounded-md surface-1 elevated border border-token shadow-lg py-1 z-20 text-sm overflow-hidden animate-in slide-in-from-top-2 duration-200">
+            {[
+              { label: 'Project', href: '/dashboard/projects?new=1' },
+              { label: 'Client', href: '/dashboard/clients?new=1' },
+              { label: 'Design', href: '/dashboard/designer?view=new' },
+              { label: 'Message', href: '/dashboard/chat?compose=1' }
+            ].map(item => (
+              <Link
+                key={item.label}
+                href={item.href}
+                className="block px-3 py-2 hover:bg-gray-50 dark:hover:bg-[var(--surface-2)] text-gray-700 dark:text-[var(--text)] transition-colors duration-150 hover:scale-[1.02] transform"
+                onClick={() => setOpen(false)}
+              >
+                {item.label}
+              </Link>
+            ))}
+            <button
+              onClick={()=>setOpen(false)}
+              className="w-full text-left px-3 py-2 text-xs text-gray-400 dark:text-[var(--text-dim)] hover:text-gray-500 dark:hover:text-[var(--text)] hover:bg-gray-50 dark:hover:bg-[var(--surface-2)] transition-colors duration-150"
             >
-              {item.label}
-            </Link>
-          ))}
-          <button
-            onClick={()=>setOpen(false)}
-            className="w-full text-left px-3 py-1.5 text-xs text-gray-400 dark:text-[var(--text-dim)] hover:text-gray-500 dark:hover:text-[var(--text)] hover:bg-gray-50 dark:hover:bg-[var(--surface-2)] transition-colors"
-          >
-            Close
-          </button>
-        </div>
+              Close
+            </button>
+          </div>
+        </>
       )}
     </div>
   );

@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-  "start:render": "next start -p $PORT",
+    "start:render": "next start -p $PORT",
     "lint": "next lint",
     "type-check": "tsc --noEmit"
   },
@@ -16,6 +16,7 @@
     "@tanstack/react-query": "^4.35.0",
     "autoprefixer": "^10.4.0",
     "axios": "^1.5.0",
+    "bootstrap-icons": "^1.13.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "date-fns": "^2.30.0",

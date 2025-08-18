@@ -12,20 +12,33 @@ export default function ClientsImportPage() {
   const [error, setError] = useState<string|null>(null);
   const fileRef = useRef<HTMLInputElement|null>(null);
 
+  // New option toggles
+  const [allowEmailOnly, setAllowEmailOnly] = useState(false);
+  const [allowPhoneOnly, setAllowPhoneOnly] = useState(true);
+  const [synthEmailFromPhone, setSynthEmailFromPhone] = useState(true);
+  const [dedupeByPhone, setDedupeByPhone] = useState(true);
+
+  const buildQuery = (overrideDry?: boolean) => {
+    const params = new URLSearchParams();
+    params.set('dryRun', String(overrideDry !== undefined ? overrideDry : dryRun));
+    params.set('allowEmailOnly', String(allowEmailOnly));
+    params.set('allowPhoneOnly', String(allowPhoneOnly));
+    params.set('synthEmailFromPhone', String(synthEmailFromPhone));
+    params.set('dedupeByPhone', String(dedupeByPhone));
+    return params.toString();
+  };
+
   const upload = async (file: File, overrideDryRun?: boolean) => {
     setUploading(true); setError(null); setResult(null);
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
       if (!token) { throw new Error('Not authenticated'); }
       const form = new FormData(); form.append('file', file);
-      const dr = (overrideDryRun !== undefined ? overrideDryRun : dryRun);
-      const resp = await fetch(`${API_BASE}/clients/import?dryRun=${dr}`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: form });
+      const query = buildQuery(overrideDryRun);
+      const resp = await fetch(`${API_BASE}/clients/import?${query}`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: form });
       if (!resp.ok) throw new Error(`Import failed (HTTP ${resp.status})`);
       const data = await resp.json();
       setResult(data);
-      if (!data.dryRun) {
-        // optional: notify user to return to list
-      }
     } catch (e:any) { setError(e.message); }
     finally { setUploading(false); }
   };
@@ -41,12 +54,16 @@ export default function ClientsImportPage() {
           <Link href="/dashboard/clients" className="text-sm text-blue-600 hover:underline">← Back to Clients</Link>
         </div>
 
-  <div className="surface-1 rounded-2xl border border-token shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-token bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-[var(--surface-2)] dark:to-[var(--surface-2)] flex items-center justify-between">
+        <div className="surface-1 rounded-2xl border border-token shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-token bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-[var(--surface-2)] dark:to-[var(--surface-2)] flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <h2 className="text-lg font-semibold text-gray-900">Upload CSV</h2>
-            <label className="flex items-center gap-2 text-xs font-medium text-gray-700 cursor-pointer">
-              <input type="checkbox" checked={dryRun} onChange={e=>setDryRun(e.target.checked)} /> Dry Run
-            </label>
+            <div className="flex flex-wrap gap-4 text-xs font-medium text-gray-700 items-center">
+              <label className="flex items-center gap-1 cursor-pointer"><input type="checkbox" checked={dryRun} onChange={e=>setDryRun(e.target.checked)} /> Dry Run</label>
+              <label className="flex items-center gap-1 cursor-pointer" title="Allow rows that have email but no phone."><input type="checkbox" checked={allowEmailOnly} onChange={e=>setAllowEmailOnly(e.target.checked)} /> Allow Email Only</label>
+              <label className="flex items-center gap-1 cursor-pointer" title="Allow rows that have phone but no email."><input type="checkbox" checked={allowPhoneOnly} onChange={e=>setAllowPhoneOnly(e.target.checked)} /> Allow Phone Only</label>
+              <label className="flex items-center gap-1 cursor-pointer" title="Generate placeholder email from phone when missing."><input type="checkbox" checked={synthEmailFromPhone} onChange={e=>setSynthEmailFromPhone(e.target.checked)} /> Synthesize Email</label>
+              <label className="flex items-center gap-1 cursor-pointer" title="Collapse duplicates by phone number."><input type="checkbox" checked={dedupeByPhone} onChange={e=>setDedupeByPhone(e.target.checked)} /> Dedupe by Phone</label>
+            </div>
           </div>
           <div className="p-6 space-y-6">
             <div
@@ -72,11 +89,24 @@ export default function ClientsImportPage() {
             {result && (
               <div className="space-y-5">
                 <div className="flex flex-col gap-1 text-sm">
-                  <div className="flex items-center gap-2">
-                    <span className={`px-2 py-1 rounded-md text-xs font-medium ${result.dryRun ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>{result.dryRun ? 'Dry Run' : 'Applied'}</span>
-                    <span className="text-gray-700">{result.count} processed • {result.created} new • {result.updated} updated • {result.skipped} skipped • {result.duplicatesCollapsed} duplicates collapsed</span>
+                  <div className="flex flex-col md:flex-row md:items-center md:gap-2">
+                    <div className="flex items-center gap-2 mb-1 md:mb-0">
+                      <span className={`px-2 py-1 rounded-md text-xs font-medium ${result.dryRun ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>{result.dryRun ? 'Dry Run' : 'Applied'}</span>
+                      <span className="text-gray-700">{result.count} processed • {result.created} new • {result.updated} updated • {result.skipped} skipped • {result.duplicatesCollapsed} duplicates collapsed</span>
+                    </div>
+                    {result.options && (
+                      <div className="text-[10px] text-gray-500 flex flex-wrap gap-2">
+                        {Object.entries(result.options).map(([k,v]:any)=>(<span key={k} className="px-1.5 py-0.5 border border-gray-300 rounded bg-gray-100 text-gray-600">{k}:{String(v)}</span>))}
+                      </div>
+                    )}
                   </div>
                   {result.skipReasons && <div className="text-[11px] text-gray-500">Skips: {Object.entries(result.skipReasons).map(([k,v]: any) => `${k}:${v}`).join(' | ')}</div>}
+                  {result.remediation && result.remediation.length>0 && (
+                    <div className="text-[11px] text-gray-600 bg-gray-50 border border-gray-200 rounded-md p-2 space-y-1">
+                      <div className="font-medium text-gray-700">Suggestions</div>
+                      {result.remediation.map((r:any)=>(<div key={r.reason}><span className="font-semibold">{r.reason}:</span> {r.suggestion}</div>))}
+                    </div>
+                  )}
                 </div>
                 {result.preview && result.preview.length>0 && (
                   <div>
