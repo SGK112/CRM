@@ -1,8 +1,8 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
-import { AiService, ChatMessage } from './ai.service';
+import { AiService, ChatMessage, ChatOptions } from './ai.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
-interface ChatRequestDto { messages: ChatMessage[] }
+interface ChatRequestDto { messages: ChatMessage[]; strategy?: ChatOptions['strategy']; provider?: string; temperature?: number; maxTokens?: number; }
 
 @Controller('ai')
 @UseGuards(JwtAuthGuard)
@@ -12,8 +12,8 @@ export class AiController {
   @Post('chat')
   async chat(@Body() body: ChatRequestDto) {
     const messages = Array.isArray(body.messages) ? body.messages : [];
-    const reply = await this.ai.chat(messages);
-    return reply;
+    const { strategy, provider, temperature, maxTokens } = body;
+    return this.ai.chat(messages, { strategy, provider, temperature, maxTokens });
   }
 
   @Get('status')
