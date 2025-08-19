@@ -98,30 +98,56 @@ export default function Layout({ children }: LayoutProps) {
     }
   }, [router]);
 
-  const navigation: NavigationItem[] = [
-    { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-    { name: 'Projects', href: '/dashboard/projects', icon: ClipboardDocumentListIcon, badge: 12 },
-    { name: 'Clients', href: '/dashboard/clients', icon: UserGroupIcon, badge: 48 },
-  // Pricing & Estimating (new)
-  { name: 'Vendors', href: '/dashboard/vendors', icon: BuildingOfficeIcon },
-  { name: 'Price List', href: '/dashboard/pricing', icon: WrenchScrewdriverIcon },
-  { name: 'Estimates', href: '/dashboard/estimates', icon: DocumentTextIcon },
-    { name: 'Calendar', href: '/dashboard/calendar', icon: CalendarDaysIcon, badge: 3 },
-    { name: 'Documents', href: '/dashboard/documents', icon: DocumentTextIcon },
-    { name: 'Designer', href: '/dashboard/designer', icon: PencilSquareIcon },
-    { name: 'File Storage', href: '/dashboard/storage', icon: CloudArrowUpIcon },
-  { name: 'Sales', href: '/dashboard/sales', icon: ShoppingBagIcon },
-    { name: 'Online Store', href: '/dashboard/ecommerce', icon: BuildingStorefrontIcon, badge: 7 },
-    { name: 'Business Cards', href: '/dashboard/rolladex', icon: UserGroupIcon },
-  { name: 'Voice Agent', href: '/dashboard/voice-agent', icon: SparklesIcon },
-    { name: 'Messages', href: '/dashboard/chat', icon: ChatBubbleLeftRightIcon, badge: 5 },
-    { name: 'Marketing', href: '/dashboard/marketing', icon: MegaphoneIcon },
-    { name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon },
-    { name: 'Settings', href: '/dashboard/settings', icon: CogIcon }
+  const navigationGroups: { label: string; items: NavigationItem[] }[] = [
+    {
+      label: 'Core',
+      items: [
+        { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+        { name: 'Projects', href: '/dashboard/projects', icon: ClipboardDocumentListIcon, badge: 12 },
+        { name: 'Clients', href: '/dashboard/clients', icon: UserGroupIcon, badge: 48 },
+        { name: 'Calendar', href: '/dashboard/calendar', icon: CalendarDaysIcon, badge: 3 },
+      ]
+    },
+    {
+      label: 'Content & Files',
+      items: [
+        { name: 'Documents', href: '/dashboard/documents', icon: DocumentTextIcon },
+        { name: 'Designer', href: '/dashboard/designer', icon: PencilSquareIcon },
+        { name: 'File Storage', href: '/dashboard/storage', icon: CloudArrowUpIcon },
+      ]
+    },
+    {
+      label: 'Pricing & Sales',
+      items: [
+        { name: 'Catalog', href: '/dashboard/catalog', icon: WrenchScrewdriverIcon },
+        { name: 'Vendors', href: '/dashboard/vendors', icon: BuildingOfficeIcon },
+        { name: 'Price List', href: '/dashboard/pricing', icon: WrenchScrewdriverIcon },
+        { name: 'Estimates', href: '/dashboard/estimates', icon: DocumentTextIcon },
+        { name: 'Sales', href: '/dashboard/sales', icon: ShoppingBagIcon },
+        { name: 'Online Store', href: '/dashboard/ecommerce', icon: BuildingStorefrontIcon, badge: 7 },
+      ]
+    },
+    {
+      label: 'Communication',
+      items: [
+        { name: 'Voice Agent', href: '/dashboard/voice-agent', icon: SparklesIcon },
+        { name: 'Messages', href: '/dashboard/chat', icon: ChatBubbleLeftRightIcon, badge: 5 },
+        { name: 'Business Cards', href: '/dashboard/rolladex', icon: UserGroupIcon },
+        { name: 'Marketing', href: '/dashboard/marketing', icon: MegaphoneIcon },
+      ]
+    },
+    {
+      label: 'Insights & Admin',
+      items: [
+        { name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon },
+        { name: 'Settings', href: '/dashboard/settings', icon: CogIcon }
+      ]
+    }
   ];
 
   // Update current state based on pathname with better matching logic
-  const updatedNavigation = navigation.map(item => {
+  const flatNav: NavigationItem[] = navigationGroups.flatMap(g=>g.items);
+  const updatedNavigation = flatNav.map(item => {
     let current = false;
     
     if (item.href === '/dashboard') {
@@ -219,33 +245,41 @@ export default function Layout({ children }: LayoutProps) {
           <div className="flex flex-1 flex-col overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 dark:hover:scrollbar-thumb-gray-500">
             <nav className="flex-1 px-3 py-6">
               <div className="space-y-1">
-                {updatedNavigation.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 transform hover:scale-[1.02] ${
-                      item.current
-                        ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border-l-4 border-blue-600 shadow-sm dark:bg-gradient-to-r dark:from-blue-900/40 dark:to-indigo-900/40 dark:text-blue-300 dark:border-blue-500'
-                        : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-[var(--text-dim)] dark:hover:text-[var(--text)] dark:hover:bg-[var(--surface-2)]'
-                    }`}
-                  >
-                    <item.icon
-                      className={`mr-3 h-5 w-5 transition-colors ${
-                        item.current ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300'
-                      }`}
-                    />
-                    <span className={item.current ? 'font-semibold' : ''}>{item.name}</span>
-                    {item.badge && (
-                          <span className={`ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium tracking-wide transition-all duration-200 ${
-                            item.current 
-                              ? 'bg-blue-600 text-white dark:bg-blue-500 dark:text-white shadow-sm ring-1 ring-blue-400/60 dark:ring-blue-300/50 scale-110' 
-                              : 'bg-gray-200 text-gray-700 dark:bg-[var(--surface-2)] dark:text-[var(--text-dim)] dark:ring-1 dark:ring-[var(--border)]/60 group-hover:scale-105'
-                          }`}>
-                        {item.badge}
-                      </span>
-                    )}
-                  </Link>
-                ))}
+                {navigationGroups.map(group => {
+                  const groupItems = updatedNavigation.filter(i=> group.items.some(gItem=> gItem.href === i.href));
+                  return (
+                    <div key={group.label} className="mb-6">
+                      <div className="px-3 pb-1 text-[10px] uppercase tracking-wide font-semibold text-gray-500 dark:text-gray-500/80">{group.label}</div>
+                      {groupItems.map(item => (
+                        <Link
+                          key={item.name}
+                          href={item.href}
+                          className={`group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 transform hover:scale-[1.02] ${
+                            item.current
+                              ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border-l-4 border-blue-600 shadow-sm dark:bg-gradient-to-r dark:from-blue-900/40 dark:to-indigo-900/40 dark:text-blue-300 dark:border-blue-500'
+                              : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-[var(--text-dim)] dark:hover:text-[var(--text)] dark:hover:bg-[var(--surface-2)]'
+                          }`}
+                        >
+                          <item.icon
+                            className={`mr-3 h-5 w-5 transition-colors ${
+                              item.current ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300'
+                            }`}
+                          />
+                          <span className={item.current ? 'font-semibold' : ''}>{item.name}</span>
+                          {item.badge && (
+                                <span className={`ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium tracking-wide transition-all duration-200 ${
+                                  item.current 
+                                    ? 'bg-blue-600 text-white dark:bg-blue-500 dark:text-white shadow-sm ring-1 ring-blue-400/60 dark:ring-blue-300/50 scale-110' 
+                                    : 'bg-gray-200 text-gray-700 dark:bg-[var(--surface-2)] dark:text-[var(--text-dim)] dark:ring-1 dark:ring-[var(--border)]/60 group-hover:scale-105'
+                                }`}>
+                              {item.badge}
+                            </span>
+                          )}
+                        </Link>
+                      ))}
+                    </div>
+                  );
+                })}
               </div>
             </nav>
 
