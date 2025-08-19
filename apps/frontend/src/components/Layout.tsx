@@ -102,6 +102,10 @@ export default function Layout({ children }: LayoutProps) {
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
     { name: 'Projects', href: '/dashboard/projects', icon: ClipboardDocumentListIcon, badge: 12 },
     { name: 'Clients', href: '/dashboard/clients', icon: UserGroupIcon, badge: 48 },
+  // Pricing & Estimating (new)
+  { name: 'Vendors', href: '/dashboard/vendors', icon: BuildingOfficeIcon },
+  { name: 'Price List', href: '/dashboard/pricing', icon: WrenchScrewdriverIcon },
+  { name: 'Estimates', href: '/dashboard/estimates', icon: DocumentTextIcon },
     { name: 'Calendar', href: '/dashboard/calendar', icon: CalendarDaysIcon, badge: 3 },
     { name: 'Documents', href: '/dashboard/documents', icon: DocumentTextIcon },
     { name: 'Designer', href: '/dashboard/designer', icon: PencilSquareIcon },
@@ -356,7 +360,9 @@ export default function Layout({ children }: LayoutProps) {
 
         {/* Page content */}
         <main className="flex-1 py-6 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 dark:hover:scrollbar-thumb-gray-500">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 scroll-smooth">
+          <div className={`mx-auto scroll-smooth ${
+            pathname.startsWith('/dashboard/clients') ? 'max-w-none px-4 sm:px-6 lg:px-8' : 'max-w-7xl px-4 sm:px-6 lg:px-8'
+          }`}>
             {children}
           </div>
         </main>
