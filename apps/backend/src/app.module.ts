@@ -21,6 +21,7 @@ import { BillingModule } from './billing/billing.module';
 import { VendorsModule } from './vendors/vendors.module';
 import { PricingModule } from './pricing/pricing.module';
 import { EstimatesModule } from './estimates/estimates.module';
+import { CatalogModule } from './catalog/catalog.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { EstimatesModule } from './estimates/estimates.module';
   VendorsModule,
   PricingModule,
   EstimatesModule,
+  CatalogModule,
   ],
   controllers: [RootController],
 })
