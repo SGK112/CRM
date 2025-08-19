@@ -18,6 +18,9 @@ import { DesignsModule } from './designs/designs.module';
 import { AiModule } from './ai/ai.module';
 import { HealthModule } from './health/health.module';
 import { BillingModule } from './billing/billing.module';
+import { VendorsModule } from './vendors/vendors.module';
+import { PricingModule } from './pricing/pricing.module';
+import { EstimatesModule } from './estimates/estimates.module';
 
 @Module({
   imports: [
@@ -47,6 +50,9 @@ import { BillingModule } from './billing/billing.module';
   AiModule,
   HealthModule,
   BillingModule,
+  VendorsModule,
+  PricingModule,
+  EstimatesModule,
   ],
   controllers: [RootController],
 })
