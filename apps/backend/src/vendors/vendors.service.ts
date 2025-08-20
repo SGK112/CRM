@@ -14,4 +14,12 @@ export class VendorsService {
   findAll(workspaceId: string) {
     return this.vendorModel.find({ workspaceId }).sort({ name: 1 });
   }
+
+  findOne(id: string, workspaceId: string) {
+    return this.vendorModel.findOne({ _id: id, workspaceId });
+  }
+
+  async update(id: string, dto: Partial<Vendor>, workspaceId: string) {
+    return this.vendorModel.findOneAndUpdate({ _id: id, workspaceId }, { $set: dto }, { new: true });
+  }
 }

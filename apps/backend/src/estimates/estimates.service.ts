@@ -14,6 +14,13 @@ interface CreateEstimateDto {
   taxRate?: number;
   notes?: string;
 }
+interface UpdateEstimateDto {
+  items?: { priceItemId?: string; name?: string; description?: string; quantity?: number; baseCost?: number; marginPct?: number; taxable?: boolean; sku?: string; }[];
+  discountType?: 'percent'|'fixed';
+  discountValue?: number;
+  taxRate?: number;
+  notes?: string;
+}
 
 @Injectable()
 export class EstimatesService {
@@ -100,5 +107,54 @@ export class EstimatesService {
 
   async list(workspaceId: string) {
     return this.estimateModel.find({ workspaceId }).sort({ createdAt: -1 });
+  }
+
+  async findOne(id: string, workspaceId: string) {
+    return this.estimateModel.findOne({ _id: id, workspaceId });
+  }
+
+  async send(id: string, workspaceId: string) {
+    const doc = await this.estimateModel.findOne({ _id: id, workspaceId });
+    if (!doc) return null;
+    if (doc.status === 'draft') {
+      doc.status = 'sent';
+      await doc.save();
+    }
+    // TODO: integrate email service or notification dispatch
+    return doc;
+  }
+
+  async updateStatus(id: string, workspaceId: string, status: string) {
+    const doc = await this.estimateModel.findOne({ _id: id, workspaceId });
+    if (!doc) return null;
+    doc.status = status;
+    await doc.save();
+    return doc;
+  }
+
+  async update(id: string, workspaceId: string, dto: UpdateEstimateDto) {
+    const doc = await this.estimateModel.findOne({ _id: id, workspaceId });
+    if (!doc) return null;
+    if (dto.items) {
+      // replace items with new list (simplified)
+      doc.items = dto.items.map(li => ({
+        priceItemId: li.priceItemId,
+        name: li.name || li.sku || 'Item',
+        description: li.description || '',
+        quantity: li.quantity ?? 1,
+        baseCost: li.baseCost ?? 0,
+        marginPct: li.marginPct ?? 50,
+        sellPrice: 0,
+        taxable: !!li.taxable,
+        sku: li.sku,
+      })) as any;
+    }
+    if (dto.discountType) doc.discountType = dto.discountType;
+    if (dto.discountValue !== undefined) doc.discountValue = dto.discountValue;
+    if (dto.taxRate !== undefined) doc.taxRate = dto.taxRate;
+    if (dto.notes !== undefined) doc.notes = dto.notes;
+    this.computeTotals(doc as any);
+    await doc.save();
+    return doc;
   }
 }

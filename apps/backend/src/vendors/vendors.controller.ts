@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Body, UseGuards, Request } from '@nestjs/common';
 import { VendorsService } from './vendors.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ActiveSubscriptionGuard } from '../billing/billing.service';
@@ -20,5 +20,17 @@ export class VendorsController {
   @RequiresFeature('vendors.read')
   findAll(@Request() req) {
     return this.vendors.findAll(req.user.workspaceId);
+  }
+
+  @Get(':id')
+  @RequiresFeature('vendors.read')
+  findOne(@Param('id') id: string, @Request() req) {
+    return this.vendors.findOne(id, req.user.workspaceId);
+  }
+
+  @Patch(':id')
+  @RequiresFeature('vendors.manage')
+  update(@Param('id') id: string, @Body() body: any, @Request() req) {
+    return this.vendors.update(id, body, req.user.workspaceId);
   }
 }

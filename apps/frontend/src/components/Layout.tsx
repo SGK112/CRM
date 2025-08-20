@@ -365,6 +365,7 @@ export default function Layout({ children }: LayoutProps) {
               {/* Notifications */}
               <button
                 type="button"
+                onClick={() => router.push('/dashboard/notifications')}
                 className="relative rounded-full surface-2 p-2 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] focus:ring-offset-2 dark:text-[var(--text-dim)] dark:hover:text-[var(--text)] focus:ring-offset-[var(--bg)] transition-all duration-200 hover:scale-105"
               >
                 <span className="sr-only">View notifications</span>

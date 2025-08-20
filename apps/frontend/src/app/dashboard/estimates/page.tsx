@@ -1,7 +1,8 @@
 'use client';
 import Layout from '../../../components/Layout';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { API_BASE } from '../../../lib/api';
+import { PageHeader } from '../../../components/ui/PageHeader';
 
 interface Estimate { _id:string; number:string; total:number; status:string; totalMargin:number; subtotalCost:number; subtotalSell:number; taxAmount:number; discountAmount:number; createdAt:string; }
 
@@ -19,21 +20,31 @@ export default function EstimatesPage(){
   useEffect(()=>{ fetchEstimates(); // eslint-disable-next-line react-hooks/exhaustive-deps
   },[]);
 
+  const aggregates = useMemo(()=>{
+    if(!estimates.length) return { sell:0, cost:0, margin:0, tax:0, discount:0 };
+    return estimates.reduce((acc,e)=>{
+      acc.sell += e.subtotalSell; acc.cost += e.subtotalCost; acc.margin += e.totalMargin; acc.tax += e.taxAmount; acc.discount += e.discountAmount; return acc; }, { sell:0, cost:0, margin:0, tax:0, discount:0 });
+  },[estimates]);
+
   return (
     <Layout>
       <div className='space-y-6'>
-        <div className='flex items-center justify-between flex-wrap gap-4'>
-          <div>
-            <h1 className='text-2xl font-semibold'>Estimates</h1>
-            <p className='text-sm text-gray-600 dark:text-[var(--text-dim)]'>Quote proposals & pricing breakdown</p>
-          </div>
-          <div className='flex gap-2'>
-            <button className='pill pill-tint-green sm'>New Estimate</button>
-          </div>
-        </div>
-        <div className='surface-1 border border-token rounded-xl overflow-hidden'>
+        <PageHeader
+          title='Estimates'
+          subtitle='Quote proposals & pricing breakdown'
+          actions={<button className='pill pill-tint-green sm'>New Estimate</button>}
+          stats={[
+            { label:'Count', value: loading? '…' : estimates.length },
+            { label:'Sell', value: aggregates.sell.toFixed(2) },
+            { label:'Cost', value: aggregates.cost.toFixed(2) },
+            { label:'Margin', value: aggregates.margin.toFixed(2) },
+            { label:'Tax', value: aggregates.tax.toFixed(2) },
+            { label:'Discount', value: aggregates.discount.toFixed(2) }
+          ]}
+        />
+        <div className='surface-solid border border-token rounded-xl overflow-hidden'>
           <table className='w-full text-sm'>
-            <thead className='text-left text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-400'>
+            <thead className='text-left text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-400 bg-[var(--surface-1)]'>
               <tr className='border-b border-token'>
                 <th className='py-2 px-3'>Number</th>
                 <th className='py-2 px-3'>Status</th>

@@ -23,6 +23,12 @@ import { PricingModule } from './pricing/pricing.module';
 import { EstimatesModule } from './estimates/estimates.module';
 import { CatalogModule } from './catalog/catalog.module';
 import { HrModule } from './hr/hr.module';
+import { InvitationsModule } from './invitations/invitations.module';
+import { WorkspaceModule } from './workspace/workspace.module';
+import { InvoicesModule } from './invoices/invoices.module';
+import { MediaModule } from './media/media.module';
+import { ShareLinksModule } from './share-links/share-links.module';
+import { AiTokensModule } from './ai-tokens/ai-tokens.module';
 
 @Module({
   imports: [
@@ -57,6 +63,12 @@ import { HrModule } from './hr/hr.module';
   EstimatesModule,
   CatalogModule,
   HrModule,
+  InvitationsModule,
+  WorkspaceModule,
+  InvoicesModule,
+  MediaModule,
+  ShareLinksModule,
+  AiTokensModule,
   ],
   controllers: [RootController],
 })
