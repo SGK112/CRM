@@ -18,15 +18,17 @@
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
-    "typescript": "^5.0.0",
-    
-    "eslint": "^8.0.0",
-    "prettier": "^3.0.0",
-  "eslint-config-prettier": "^9.0.0",
-    "@typescript-eslint/parser": "^7.0.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^8.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "postcss": "^8.5.6",
+    "prettier": "^3.0.0",
+    "rimraf": "^5.0.0",
+    "tailwindcss": "^4.1.12",
     "turbo": "^2.0.0",
-    "rimraf": "^5.0.0"
+    "typescript": "^5.0.0"
   },
   "engines": {
     "node": ">=18.0.0",
@@ -42,6 +44,6 @@
     "mongodb"
   ],
   "author": "SGK112",
-  "license": "MIT"
-  ,"packageManager": "npm@10.0.0"
+  "license": "MIT",
+  "packageManager": "npm@10.0.0"
 }
