@@ -49,7 +49,10 @@ const statusColors = {
   prospect: 'bg-blue-100 text-blue-800 dark:bg-blue-600/20 dark:text-blue-300',
   active: 'bg-green-100 text-green-800 dark:bg-green-600/20 dark:text-green-300',
   inactive: 'bg-gray-100 text-gray-800 dark:bg-[var(--surface-2)] dark:text-[var(--text-dim)]',
-  churned: 'bg-red-100 text-red-800 dark:bg-red-600/20 dark:text-red-300'
+  churned: 'bg-red-100 text-red-800 dark:bg-red-600/20 dark:text-red-300',
+  completed: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-600/20 dark:text-emerald-300',
+  client: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-600/20 dark:text-indigo-300',
+  dead_lead: 'bg-gray-200 text-gray-600 dark:bg-gray-700/40 dark:text-gray-400'
 };
 
 export default function ClientsPage() {
@@ -87,7 +90,13 @@ export default function ClientsPage() {
 
       if (response.ok) {
         const data = await response.json();
-        setClients(data);
+        // Normalize: ensure tags array & status fallback
+        const normalized = Array.isArray(data) ? data.map((c:any) => ({
+          ...c,
+          tags: Array.isArray(c.tags) ? c.tags : [],
+          status: c.status || 'lead'
+        })) : [];
+        setClients(normalized);
       } else {
         console.error('Failed to fetch clients');
       }
@@ -102,13 +111,20 @@ export default function ClientsPage() {
     let filtered = clients;
 
     if (searchTerm) {
-      filtered = filtered.filter(client =>
-        `${client.firstName} ${client.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (client.company && client.company.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (client.phone && client.phone.includes(searchTerm)) ||
-        client.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(client => {
+        try {
+          return (
+            `${client.firstName} ${client.lastName}`.toLowerCase().includes(term) ||
+            client.email.toLowerCase().includes(term) ||
+            (client.company && client.company.toLowerCase().includes(term)) ||
+            (client.phone && client.phone.includes(searchTerm)) ||
+            ((client.tags || []).some(tag => tag.toLowerCase().includes(term)))
+          );
+        } catch {
+          return false;
+        }
+      });
     }
 
     if (statusFilter !== 'all') {
@@ -160,9 +176,18 @@ export default function ClientsPage() {
 
   return (
     <Layout>
-      <div>
+      <div className="h-full flex flex-col">
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mb-2 text-xs text-gray-500 font-mono flex flex-wrap gap-4">
+            <span>Total fetched: {clients.length}</span>
+            <span>Filtered: {filteredClients.length}</span>
+            <span>Status filter: {statusFilter}</span>
+            <span>Source filter: {sourceFilter}</span>
+            <span>Search: "{searchTerm}"</span>
+          </div>
+        )}
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4 flex-shrink-0">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Clients</h1>
             <p className="text-gray-600">Manage your client relationships and contact information</p>
@@ -186,7 +211,7 @@ export default function ClientsPage() {
         </div>
 
       {/* Status summary chips (pill style like Projects) */}
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 mb-4 flex-shrink-0">
         {[{ key: 'all', label: 'All' }, ...Object.keys(statusColors).map(k => ({ key: k, label: k }))].map(chip => {
           const count = chip.key === 'all' ? clients.length : clients.filter(c => c.status === chip.key).length;
           const colorClass = chip.key === 'all'
@@ -209,7 +234,7 @@ export default function ClientsPage() {
       </div>
 
   {/* Filters */}
-  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4 flex-shrink-0">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Search */}
           <div className="relative">
@@ -235,6 +260,9 @@ export default function ClientsPage() {
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
             <option value="churned">Churned</option>
+            <option value="completed">Completed</option>
+            <option value="client">Client</option>
+            <option value="dead_lead">Dead Lead</option>
           </select>
 
           {/* Source Filter */}
@@ -258,7 +286,7 @@ export default function ClientsPage() {
 
   {/* Clients Table */}
       {filteredClients.length === 0 ? (
-        <div className="text-center py-12">
+        <div className="text-center py-12 flex-shrink-0">
           <UserIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">No clients found</h3>
           <p className="text-gray-600 mb-4">Get started by adding your first client.</p>
@@ -271,10 +299,10 @@ export default function ClientsPage() {
           </Link>
         </div>
       ) : (
-        <div className="surface-1 rounded-lg shadow-sm border border-token overflow-hidden">
-          <div className="overflow-x-auto">
+        <div className="surface-1 rounded-lg shadow-sm border border-token overflow-hidden flex-1 min-h-0">
+          <div className="overflow-auto h-full">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-[color-mix(in_oklab,var(--border),transparent_40%)]">
-              <thead className="bg-gray-50 dark:bg-[var(--surface-2)]">
+              <thead className="bg-gray-50 dark:bg-[var(--surface-2)] sticky top-0 z-10">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Client
@@ -344,8 +372,8 @@ export default function ClientsPage() {
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-[11px] font-medium backdrop-blur-sm ${statusColors[client.status]}`}>
-                        {client.status}
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-[11px] font-medium backdrop-blur-sm ${statusColors[client.status as keyof typeof statusColors] || 'bg-gray-100 text-gray-700'}`}>
+                        {client.status.replace('_',' ')}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -364,14 +392,14 @@ export default function ClientsPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end space-x-2">
                         <Link
-                          href={`/clients/${client._id}`}
+                          href={`/dashboard/clients/${client._id}`}
                           className="text-gray-400 hover:text-blue-600 transition-colors"
                           title="View"
                         >
                           <EyeIcon className="h-5 w-5" />
                         </Link>
                         <Link
-                          href={`/clients/${client._id}/edit`}
+                          href={`/dashboard/clients/${client._id}/edit`}
                           className="text-gray-400 hover:text-green-600 transition-colors"
                           title="Edit"
                         >

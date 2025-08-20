@@ -73,4 +73,14 @@ export class ClientsController {
       }
     );
   }
+
+  @Post('bulk')
+  @ApiOperation({ summary: 'Bulk create/update clients via JSON payload' })
+  @ApiResponse({ status: 201, description: 'Bulk operation processed' })
+  async bulkJson(
+    @Body('clients') clients: any[],
+    @Request() req,
+  ) {
+    return this.clientsService.bulkJson(clients || [], req.user.workspaceId);
+  }
 }

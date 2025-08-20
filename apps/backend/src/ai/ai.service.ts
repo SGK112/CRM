@@ -4,6 +4,7 @@ import { ChatProvider } from './providers/base.provider';
 import { OpenAIProvider } from './providers/openai.provider';
 import { AnthropicProvider } from './providers/anthropic.provider';
 import { GeminiProvider } from './providers/gemini.provider';
+import { XAIProvider } from './providers/xai.provider';
 
 export interface ChatMessage { role: 'system' | 'user' | 'assistant'; content: string; }
 export interface ChatResponse { reply: string; model: string; provider?: string; usage?: { inputTokens?: number; outputTokens?: number }; fallbackTried?: string[]; errorChain?: { provider: string; error: string }[]; cacheHit?: boolean; }
@@ -20,11 +21,16 @@ export class AiService {
   constructor(private config: ConfigService) { this.bootstrapProviders(); }
 
   private bootstrapProviders() {
-    this.providers = [
-      new GeminiProvider(this.config.get<string>('GEMINI_API_KEY') || this.config.get<string>('GOOGLE_API_KEY'), this.config.get<string>('GEMINI_MODEL')),
+    const disableGemini = (this.config.get<string>('DISABLE_GEMINI') || '').toLowerCase() === 'true';
+    const list: ChatProvider[] = [
       new OpenAIProvider(this.config.get<string>('OPENAI_API_KEY'), this.config.get<string>('OPENAI_MODEL')),
+      new XAIProvider(this.config.get<string>('XAI_API_KEY') || this.config.get<string>('GROK_API_KEY'), this.config.get<string>('XAI_MODEL')),
       new AnthropicProvider(this.config.get<string>('ANTHROPIC_API_KEY'), this.config.get<string>('ANTHROPIC_MODEL')),
     ];
+    if (!disableGemini) {
+      list.push(new GeminiProvider(this.config.get<string>('GEMINI_API_KEY') || this.config.get<string>('GOOGLE_API_KEY'), this.config.get<string>('GEMINI_MODEL')));
+    }
+    this.providers = list;
     this.logger.log('AI providers: ' + this.providers.map(p=> `${p.meta.name}:${p.isEnabled()?'on':'off'}`).join(', '));
   }
 
@@ -55,8 +61,7 @@ export class AiService {
     const strategy = options.strategy || (options.provider ? 'specific' : 'balanced');
     const candidates = this.orderProviders(strategy, options.provider);
     if (!candidates.length) {
-      const lastUser = [...messages].reverse().find(m=> m.role==='user');
-      return { reply: `AI disabled (no providers configured). You said: "${lastUser?.content?.slice(0,140)}"`, model: 'offline', provider: 'none' };
+      return { reply: 'No AI providers active. Add an API key (e.g. OPENAI_API_KEY or XAI_API_KEY) and try again.', model: 'offline', provider: 'none' };
     }
     const cacheKey = this.buildCacheKey(messages, { strategy, provider: options.provider, temperature: options.temperature });
     const cached = this.cache.get(cacheKey); if (cached && cached.expires > Date.now()) return { ...cached.response, cacheHit: true };

@@ -70,7 +70,7 @@ export class ClientsService {
           const registerSkip = (reason: string) => { skipReasonsCount[reason] = (skipReasonsCount[reason] || 0) + 1; };
 
           const headerCanon = (key: string) => key.toLowerCase().replace(/^\uFEFF/, '').trim().replace(/\s+/g, '_');
-          const mappedRaw = rows.map(raw => {
+            const mappedRaw = rows.map(raw => {
             const norm: any = {};
             for (const k of Object.keys(raw)) {
               if (!k) continue;
@@ -117,7 +117,10 @@ export class ClientsService {
             const tags = norm.tags ? String(norm.tags).split(/[;,]/).map((t: string) => t.trim()).filter(Boolean) : [];
             const statusRaw = (norm.status || norm.client_status || '').toString();
             let status = 'lead';
-            if (/active/i.test(statusRaw)) status = 'active';
+            if (/client/i.test(statusRaw)) status = 'client';
+            else if (/dead\s*lead/i.test(statusRaw)) status = 'dead_lead';
+            else if (/completed|done|finished/i.test(statusRaw)) status = 'completed';
+            else if (/active/i.test(statusRaw)) status = 'active';
             else if (/new\s*lead/i.test(statusRaw)) status = 'lead';
             else if (/contractor|ready\s*for\s*measure/i.test(statusRaw)) status = 'active';
             else if (/not\s*interested|inactive|closed/i.test(statusRaw)) status = 'inactive';
@@ -165,31 +168,45 @@ export class ClientsService {
 
             const emails = unique.filter(u => u.email).map(u => u.email);
             (async () => {
-            const existingList = await this.clientModel.find({ email: { $in: emails }, workspaceId }).select('_id email');
-            const existingMap = new Map(existingList.map(e => [e.email, e] as const));
+            const phones = unique.filter(u => u.phone).map(u => u.phone);
+            // Fetch existing by email OR phone
+            const existingList = await this.clientModel.find({
+              workspaceId,
+              $or: [
+                emails.length ? { email: { $in: emails } } : undefined,
+                phones.length ? { phone: { $in: phones } } : undefined
+              ].filter(Boolean)
+            }).select('_id email phone address');
+            const existingEmailMap = new Map(existingList.filter(e=>e.email).map(e => [e.email, e] as const));
+            const existingPhoneMap = new Map(existingList.filter(e=>e.phone).map(e => [e.phone, e] as const));
 
             const bulkOps: any[] = [];
             let createCount = 0; let updateCount = 0;
             for (const u of unique) {
-              const hasEmail = !!u.email && existingMap.has(u.email);
-              if (hasEmail) {
+              const existingByEmail = u.email ? existingEmailMap.get(u.email) : undefined;
+              const existingByPhone = u.phone ? existingPhoneMap.get(u.phone) : undefined;
+              const target = existingByEmail || existingByPhone;
+              if (target) {
+                // Merge address if provided later (csv import currently doesn't map address here but keep placeholder)
+                const update: any = {
+                  firstName: u.firstName,
+                  lastName: u.lastName,
+                  phone: u.phone || (target.phone || undefined),
+                  company: u.company || target.company || undefined,
+                  notes: u.notes || target.notes || undefined,
+                  workspaceId,
+                  isActive: true,
+                  status: u.status,
+                  source: u.source || target.source || undefined,
+                };
+                // If existing has placeholder synthesized email and new has a real one, replace
+                if (u.email && (!target.email || /@import\.local$/.test(String(target.email)))) {
+                  update.email = u.email;
+                }
                 bulkOps.push({
                   updateOne: {
-                    filter: { _id: existingMap.get(u.email)._id },
-                    update: {
-                      $set: {
-                        firstName: u.firstName,
-                        lastName: u.lastName,
-                        phone: u.phone || undefined,
-                        company: u.company || undefined,
-                        notes: u.notes,
-                        workspaceId,
-                        isActive: true,
-                        status: u.status,
-                        source: u.source,
-                      },
-                      $addToSet: { tags: { $each: u.tags } }
-                    }
+                    filter: { _id: target._id },
+                    update: { $set: update, $addToSet: { tags: { $each: u.tags } } }
                   }
                 });
                 updateCount++;
@@ -244,5 +261,97 @@ export class ClientsService {
     if (skipReasons.missing_first_name) suggestions.push({ reason: 'missing_first_name', suggestion: 'Add first_name column or a full_name field that can be split.' });
     if (skipReasons.missing_core_fields) suggestions.push({ reason: 'missing_core_fields', suggestion: 'Row lacks both email and phone; supply at least one identifier.' });
     return suggestions;
+  }
+
+  async bulkJson(clients: any[], workspaceId: string) {
+    if (!Array.isArray(clients)) throw new BadRequestException('clients must be array');
+    const sanitized = clients.map(c => {
+      const phoneRaw = c.phone?.toString() || '';
+      const phone = phoneRaw.replace(/[^\d]/g, '');
+      let email = c.email?.toString().trim().toLowerCase();
+      if ((!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) && phone) {
+        email = `${phone}@import.local`; // synthesize to satisfy schema requirement
+      }
+      // Address normalization: accept flat fields or nested address
+      const addrSource = c.address || {};
+      const street = c.street || addrSource.street;
+      const city = c.city || addrSource.city;
+      const state = c.state || addrSource.state;
+      const zip = c.zip || c.zipCode || addrSource.zipCode || addrSource.zip;
+      const country = c.country || c.country_name || addrSource.country;
+      const address = (street || city || state || zip || country) ? {
+        street: street || undefined,
+        city: city || undefined,
+        state: state || undefined,
+        zipCode: zip || undefined,
+        country: country || undefined,
+      } : undefined;
+      // Extended statuses support
+      const validStatuses = ['lead','prospect','active','inactive','churned','completed','client','dead_lead'];
+      const status = c.status && validStatuses.includes(c.status) ? c.status : 'lead';
+      return {
+        firstName: c.firstName?.toString().trim() || '',
+        lastName: c.lastName?.toString().trim() || '-',
+        email, // may be synthesized
+        phone,
+        company: c.company?.toString().trim() || undefined,
+        notes: c.notes,
+        tags: Array.isArray(c.tags) ? c.tags : (c.tags ? String(c.tags).split(/[,;]+/).map((t:string)=>t.trim()).filter(Boolean) : []),
+        status,
+        source: c.source || undefined
+        ,address
+      };
+    }).filter(c => c.firstName && (c.email || c.phone));
+
+    // Deduplicate by email first, then by phone for those without distinct email
+    const emailMap = new Map<string, typeof sanitized[0]>();
+    const phoneMap = new Map<string, typeof sanitized[0]>();
+    for (const row of sanitized) {
+      if (row.email && !emailMap.has(row.email)) emailMap.set(row.email, row);
+      if (row.phone && !phoneMap.has(row.phone)) phoneMap.set(row.phone, row);
+    }
+    const unique: typeof sanitized = Array.from(emailMap.values());
+    for (const r of phoneMap.values()) {
+      if ((!r.email || !emailMap.has(r.email)) && !unique.includes(r)) unique.push(r);
+    }
+    const duplicatesCollapsed = sanitized.length - unique.length;
+
+    const existingEmails = unique.filter(c=>c.email).map(c=>c.email);
+    const existingPhones = unique.filter(c=>c.phone).map(c=>c.phone);
+    const existingDocs = (existingEmails.length || existingPhones.length) ? await this.clientModel.find({
+      workspaceId,
+      $or: [
+        existingEmails.length ? { email: { $in: existingEmails } } : undefined,
+        existingPhones.length ? { phone: { $in: existingPhones } } : undefined
+      ].filter(Boolean)
+    }).select('_id email phone address') : [];
+    const existingEmailMap = new Map(existingDocs.filter(d=>d.email).map(d => [d.email, d] as const));
+    const existingPhoneMap = new Map(existingDocs.filter(d=>d.phone).map(d => [d.phone, d] as const));
+    let created = 0, updated = 0;
+    const ops: any[] = [];
+    for (const c of unique) {
+      const existingByEmail = c.email ? existingEmailMap.get(c.email) : undefined;
+      const existingByPhone = c.phone ? existingPhoneMap.get(c.phone) : undefined;
+      const target = existingByEmail || existingByPhone;
+      if (target) {
+        const update: any = { ...c, workspaceId, isActive: true };
+        // Preserve real email if replacing synthesized placeholder
+        if (c.email && target.email && /@import\.local$/.test(String(target.email)) && !/@import\.local$/.test(c.email)) {
+          update.email = c.email;
+        }
+        ops.push({
+          updateOne: {
+            filter: { _id: target._id },
+            update: { $set: update, $addToSet: { tags: { $each: c.tags } } }
+          }
+        });
+        updated++;
+      } else {
+        ops.push({ insertOne: { document: { ...c, workspaceId, isActive: true } } });
+        created++;
+      }
+    }
+    if (ops.length) await this.clientModel.bulkWrite(ops, { ordered: false });
+    return { created, updated, skipped: clients.length - (created + updated), duplicatesCollapsed };
   }
 }
