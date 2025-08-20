@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-// @ts-ignore - fallback if types not installed
+// @ts-expect-error - fallback if types not installed
 import Papa from 'papaparse';
 import Layout from '../../../../components/Layout';
 import Link from 'next/link';

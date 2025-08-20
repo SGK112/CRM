@@ -90,7 +90,7 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
           const personalGreeting = firstName ? `${tod}, ${firstName}.` : `${tod}.`;
           const initial: AIMessage[] = [
             { id: 'sys-1', type: 'system', content: 'Copilot session started. Context awareness enabled. Type / for commands.', timestamp: new Date(), meta: { role } },
-            { id: 'a-1', type: 'assistant', content: `${personalGreeting} I\'m your Construct Copilot. I adapt answers using your workspace context. Try /recent, /projects, /clients, /new-project, /summary or /help. What\'s next?`, timestamp: new Date(), suggestions: [ 'Create a new project','Show me projects','List clients','Open calendar','Help' ], meta: { firstName, role } }
+            { id: 'a-1', type: 'assistant', content: `${personalGreeting} I'm your Construct Copilot. I adapt answers using your workspace context. Try /recent, /projects, /clients, /new-project, /summary or /help. What's next?`, timestamp: new Date(), suggestions: [ 'Create a new project','Show me projects','List clients','Open calendar','Help' ], meta: { firstName, role } }
           ];
           setMessages(initial);
         }
