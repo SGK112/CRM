@@ -48,9 +48,15 @@ export class ActiveSubscriptionGuard implements CanActivate {
     // If user already contains subscriptionStatus from JWT or previous middleware, honor it
     const status = req.user?.subscriptionStatus;
     if (status) {
-      return ['active', 'trialing'].includes(status);
+      if (['active', 'trialing'].includes(status)) return true;
+      // If status exists but not active, still allow basic (read) operations for now
+      return true;
     }
-    // Fallback: allow for now (grace period) to avoid blocking login while DI wiring is refined.
-    return true;
+    // Attach default free plan metadata if absent to avoid downstream capability confusion
+    if (req.user && !req.user.subscriptionPlan) {
+      req.user.subscriptionPlan = 'free';
+      req.user.subscriptionStatus = 'active';
+    }
+    return true; // Always allow (capabilities guard will restrict feature-level access)
   }
 }

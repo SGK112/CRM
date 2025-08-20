@@ -57,7 +57,7 @@ export class EstimatesService {
     // Build line items, enriching from price items if provided
     const items = [] as any[];
     for (const input of dto.items || []) {
-      let li = { ...input } as any;
+      const li = { ...input } as any;
       if (input.priceItemId) {
         const pi = await this.priceModel.findOne({ _id: input.priceItemId, workspaceId });
         if (pi) {

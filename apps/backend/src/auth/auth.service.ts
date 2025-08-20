@@ -25,10 +25,32 @@ export class AuthService {
 
   private async initializeDemoUsers() {
     const demoEmail = 'demo@test.com';
+    // If already seeded skip
+    if (demoUsers.has(demoEmail)) return;
     const hashedPassword = await bcrypt.hash('demo123', 12);
-    
+    // Ensure a persistent DB record exists so JWT sub remains valid after restarts.
+    let dbUser: any = null;
+    try {
+      dbUser = await this.userModel.findOne({ email: demoEmail });
+      if (!dbUser) {
+        dbUser = new this.userModel({
+          email: demoEmail,
+          password: hashedPassword,
+          firstName: 'Demo',
+          lastName: 'User',
+          role: 'owner',
+          workspaceId: 'demo_workspace_1',
+          isEmailVerified: true,
+          isPhoneVerified: false,
+          twoFactorEnabled: false,
+          isActive: true,
+        });
+        await dbUser.save();
+      }
+    } catch {/* swallow */}
+    const stableId = dbUser?._id?.toString() || 'demo_user_1';
     demoUsers.set(demoEmail, {
-      id: 'demo_user_1',
+      id: stableId,
       email: demoEmail,
       password: hashedPassword,
       firstName: 'Demo',
@@ -59,17 +81,31 @@ export class AuthService {
       throw new UnauthorizedException('User with this email already exists');
     }
 
-    // Hash password
-    const saltRounds = 12;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-    // Create workspace ID (simple implementation)
+    // Hash password & create persistent DB user first for stable ID
+    const hashedPassword = await bcrypt.hash(password, 12);
     const workspaceId = `ws_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-    // Store in demo users for immediate access
+    let dbUser: any = null;
+    try {
+      dbUser = new this.userModel({
+        email,
+        password: hashedPassword,
+        firstName,
+        lastName,
+        role: 'owner',
+        workspaceId,
+        isEmailVerified: false,
+        isPhoneVerified: false,
+        twoFactorEnabled: false,
+        isActive: true,
+      });
+      await dbUser.save();
+    } catch (error) {
+      // fallback to in-memory only
+      console.log('Database save failed (register fallback):', error.message);
+    }
+    const stableId = dbUser?._id?.toString() || `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const newUser = {
-      id: userId,
+      id: stableId,
       email,
       password: hashedPassword,
       firstName,
@@ -84,30 +120,8 @@ export class AuthService {
       lastLoginAt: null,
       createdAt: new Date(),
     };
-
     demoUsers.set(email, newUser);
-
-    // Also try to save to database (but don't fail if it doesn't work)
-    try {
-      const user = new this.userModel({
-        email,
-        password: hashedPassword,
-        firstName,
-        lastName,
-        role: 'owner',
-        workspaceId,
-        isEmailVerified: false,
-        isPhoneVerified: false,
-        twoFactorEnabled: false,
-        isActive: true,
-      });
-      await user.save();
-    } catch (error) {
-      console.log('Database save failed, using in-memory storage:', error.message);
-    }
-
-    // Generate JWT token
-    const payload = { email: newUser.email, sub: newUser.id, workspaceId };
+    const payload = { email: newUser.email, sub: stableId, workspaceId };
     const accessToken = this.jwtService.sign(payload);
 
     return {
@@ -246,6 +260,15 @@ export class AuthService {
     } catch (error) {
       return null;
     }
+  }
+
+  async findUserByEmail(email: string): Promise<User | null> {
+    // check in-memory first
+    const mem = demoUsers.get(email);
+    if (mem) return mem;
+    try {
+      return this.userModel.findOne({ email }).select('-password');
+    } catch { return null; }
   }
 
   // Google OAuth Methods

@@ -18,10 +18,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    const user = await this.authService.findUserById(payload.sub);
-    if (!user) {
-      throw new UnauthorizedException();
+    // Primary: lookup by sub
+    let user = await this.authService.findUserById(payload.sub);
+    // Fallback: some legacy tokens might have mismatched sub; fallback to email
+    if (!user && payload.email) {
+      user = await this.authService.findUserByEmail(payload.email);
     }
+    if (!user) throw new UnauthorizedException();
     return user;
   }
 }
