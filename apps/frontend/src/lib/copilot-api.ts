@@ -91,7 +91,10 @@ class CopilotAPI {
     try {
       // Get existing appointments for the day
       const eventsResponse = await this.getCalendarEvents(date, date);
-      if (!eventsResponse.success) return eventsResponse;
+      if (!eventsResponse.success) {
+        // Cast to maintain return type CopilotAPIResponse<string[]>
+        return { success: false, error: eventsResponse.error } as CopilotAPIResponse<string[]>;
+      }
       
       const existingEvents = eventsResponse.data || [];
       const businessHours = { start: 9, end: 17 }; // 9 AM to 5 PM
