@@ -6,35 +6,6 @@ module.exports = {
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
-  safelist: [
-    // Ensure custom classes from globals.css are not purged
-    'gradient-amber',
-    'surface-solid',
-    'btn',
-    'btn-amber',
-    'btn-outline',
-    'btn-primary',
-    'btn-alt',
-    'btn-ghost',
-    'btn-sm',
-    'heading-primary',
-    'heading-secondary',
-    'text-gradient',
-    'reveal-stagger',
-    {
-      pattern: /btn-.*/,
-      variants: ['hover', 'focus', 'active'],
-    },
-    {
-      pattern: /gradient-.*/,
-    },
-    {
-      pattern: /surface-.*/,
-    },
-    {
-      pattern: /heading-.*/,
-    },
-  ],
   theme: {
     extend: {
       colors: {
