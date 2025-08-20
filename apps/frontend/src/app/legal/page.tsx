@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import { DocumentTextIcon, ScaleIcon, ShieldCheckIcon, UserIcon } from '@heroicons/react/24/outline'
+import { MarketingPage, MarketingHero } from '@/components/marketing/MarketingPage'
 
 export const metadata: Metadata = {
   title: 'Legal | Remodely CRM',
@@ -93,22 +94,8 @@ const contactInfo = [
 
 export default function LegalPage() {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
-      {/* Mobile-first Hero */}
-      <section className="px-4 sm:px-6 lg:px-8 pt-16 pb-12">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-indigo-600/15 ring-1 ring-indigo-500/30 mb-6">
-            <ScaleIcon className="w-6 h-6 sm:w-8 sm:h-8 text-indigo-400" />
-          </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight mb-6">
-            Legal Information
-          </h1>
-          <p className="text-lg sm:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
-            Access our legal documents, privacy policies, and compliance information. 
-            We're committed to transparency and protecting your rights.
-          </p>
-        </div>
-      </section>
+    <MarketingPage>
+      <MarketingHero title="Legal & Compliance" subtitle="Documents, policies & regulatory standards in one place." />
 
       {/* Mobile-first Legal Documents */}
       <section className="px-4 sm:px-6 lg:px-8 pb-16">
@@ -313,6 +300,6 @@ export default function LegalPage() {
           </div>
         </div>
       </section>
-    </div>
+  </MarketingPage>
   )
 }

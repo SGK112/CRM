@@ -82,9 +82,15 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
           const parsed: AIMessage[] = JSON.parse(raw).map((m: any) => ({ ...m, timestamp: new Date(m.timestamp) }));
           setMessages(parsed);
         } else {
+          const userRaw = localStorage.getItem('user');
+          let firstName: string | undefined; let role: string | undefined;
+          if (userRaw) { try { const u = JSON.parse(userRaw); firstName = u.firstName; role = u.role; } catch {/* ignore */} }
+          const hour = new Date().getHours();
+          const tod = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+          const personalGreeting = firstName ? `${tod}, ${firstName}.` : `${tod}.`;
           const initial: AIMessage[] = [
-            { id: 'sys-1', type: 'system', content: 'Copilot session started. Context awareness enabled. Type / for commands.', timestamp: new Date() },
-            { id: 'a-1', type: 'assistant', content: 'Hi! I\'m your Construct Copilot. I maintain context of recent chats and pages you visit. Ask naturally or try /recent, /projects, /clients, /new-project, /summary or /help. What\'s next?', timestamp: new Date(), suggestions: [ 'Create a new project','Show me projects','List clients','Open calendar','Help' ]}
+            { id: 'sys-1', type: 'system', content: 'Copilot session started. Context awareness enabled. Type / for commands.', timestamp: new Date(), meta: { role } },
+            { id: 'a-1', type: 'assistant', content: `${personalGreeting} I\'m your Construct Copilot. I adapt answers using your workspace context. Try /recent, /projects, /clients, /new-project, /summary or /help. What\'s next?`, timestamp: new Date(), suggestions: [ 'Create a new project','Show me projects','List clients','Open calendar','Help' ], meta: { firstName, role } }
           ];
           setMessages(initial);
         }
@@ -137,6 +143,8 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
     const lowerInput = input.toLowerCase();
     let actions: AIAction[] = [];
     let responseContent = '';
+  // Central intent dedupe: ensures this is the only conversational source after ChatBot consolidation
+  // Future: Could plug a lightweight classifier here.
 
     // Quick search detection: if user prefixes with ? or the phrase 'search '
     if (/^(\?|search\s)/i.test(input)) {
@@ -437,6 +445,15 @@ What specific task would you like me to help you with?`;
     // Quick intent parse first for commands/search routing
     const immediateIntent = parseUserIntent(input);
     setMessages(prev => [...prev, immediateIntent]);
+
+    // Heuristic: if the immediate intent already produced concrete actions (navigate/create/etc.)
+    // for a direct entity/task phrase, skip the secondary LLM call to prevent "double" responses.
+    const actionablePattern = /(create|add|new)\s+(project|client)|\b(projects?|clients?|calendar|documents?|settings?|ecommerce|store|rolladex|contacts?)\b/i;
+    const hasActions = !!immediateIntent.actions?.length;
+    if (hasActions && actionablePattern.test(input)) {
+      setIsLoading(false);
+      return; // Avoid duplicate conversational AI follow-up; user sees one concise response with actions.
+    }
 
     // If search pattern, poll results then stop (skip LLM)
     if (/^(\?|search\s)/i.test(input)) {

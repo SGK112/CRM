@@ -59,6 +59,16 @@ export default function ChatBot() {
 
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
+
+    // If the user intent is to add/create a new client, suppress this lightweight bot's
+    // auto-reply to avoid duplicate answers alongside the advanced Copilot.
+    // Regex checks for phrases like "add new client", "create client", "new client", etc.
+    const clientIntentPattern = /(add|create|new)\s+client|client\s+(add|create|new)/i;
+    if (clientIntentPattern.test(message)) {
+      setIsTyping(false);
+      return; // Do not generate a local bot response; defer to main AI assistant.
+    }
+
     setIsTyping(true);
 
     // Simulate bot response

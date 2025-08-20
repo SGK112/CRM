@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Layout from '../../components/Layout';
 // Legacy ChatBot removed; CopilotWidget supersedes it.
 import {
@@ -48,6 +49,7 @@ interface Project {
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [stats, setStats] = useState<DashboardStats>({
     totalRevenue: 234500,
     activeProjects: 12,
@@ -192,7 +194,10 @@ export default function DashboardPage() {
             <p className="text-gray-600 mt-1">Welcome back! Here's what's happening with your business.</p>
           </div>
           <div className="flex items-center space-x-4">
-            <button className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <button
+              onClick={() => router.push('/dashboard/analytics')}
+              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
               <EyeIcon className="h-5 w-5 mr-2" />
               View Reports
             </button>

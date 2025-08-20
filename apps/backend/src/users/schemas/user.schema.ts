@@ -69,3 +69,7 @@ export class User {
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+
+// Indexes to support seat counting and role queries
+UserSchema.index({ workspaceId: 1, role: 1 });
+UserSchema.index({ workspaceId: 1, isActive: 1 });

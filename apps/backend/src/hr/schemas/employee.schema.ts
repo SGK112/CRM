@@ -153,3 +153,8 @@ export class Employee {
 }
 
 export const EmployeeSchema = SchemaFactory.createForClass(Employee);
+
+// Indexes for faster multi-tenant queries & lookups
+EmployeeSchema.index({ workspaceId: 1, email: 1 }, { unique: true });
+EmployeeSchema.index({ workspaceId: 1, active: 1 });
+EmployeeSchema.index({ workspaceId: 1, lastName: 1, firstName: 1 });

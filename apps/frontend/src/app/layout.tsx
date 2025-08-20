@@ -48,7 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                       <h4 className="font-semibold text-slate-200 mb-3 text-xs uppercase tracking-wide">Product</h4>
                       <ul className="space-y-2 text-slate-400">
                         <li><a className="hover:text-amber-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 rounded-sm transition-colors" href="/features">Features</a></li>
-                        <li><a className="hover:text-amber-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 rounded-sm transition-colors" href="/trial#pricing">Pricing</a></li>
+                        <li><a className="hover:text-amber-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 rounded-sm transition-colors" href="/pricing">Pricing</a></li>
                         <li><a className="hover:text-amber-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 rounded-sm transition-colors" href="/demo">Demo</a></li>
                         <li><a className="hover:text-amber-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 rounded-sm transition-colors" href="/roadmap">Roadmap</a></li>
                       </ul>
@@ -57,6 +57,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                       <h4 className="font-semibold text-slate-200 mb-3 text-xs uppercase tracking-wide">Resources</h4>
                       <ul className="space-y-2 text-slate-400">
                         <li><a className="hover:text-amber-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 rounded-sm transition-colors" href="/docs">Docs</a></li>
+                        <li><a className="hover:text-amber-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 rounded-sm transition-colors" href="/integrations">Integrations</a></li>
                         <li><a className="hover:text-amber-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 rounded-sm transition-colors" href="/blog">Blog</a></li>
                         <li><a className="hover:text-amber-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 rounded-sm transition-colors" href="/support">Support</a></li>
                         <li><a className="hover:text-amber-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 rounded-sm transition-colors" href="/status">Status</a></li>

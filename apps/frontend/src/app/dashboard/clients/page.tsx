@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Layout from '../../../components/Layout';
+import { PageHeader } from '../../../components/ui/PageHeader';
 import { 
   PlusIcon, 
   MagnifyingGlassIcon,
@@ -60,8 +61,10 @@ export default function ClientsPage() {
   const [filteredClients, setFilteredClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [sourceFilter, setSourceFilter] = useState('all');
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
   // Bulk import logic moved to dedicated page
   const router = useRouter();
 
@@ -69,9 +72,15 @@ export default function ClientsPage() {
     fetchClients();
   }, []);
 
+  // Debounce search input for lighter filtering cost
+  useEffect(()=> {
+    const id = setTimeout(()=> setDebouncedSearch(searchTerm.trim().toLowerCase()), 220);
+    return ()=> clearTimeout(id);
+  }, [searchTerm]);
+
   useEffect(() => {
     filterClients();
-  }, [clients, searchTerm, statusFilter, sourceFilter]);
+  }, [clients, debouncedSearch, statusFilter, sourceFilter]);
 
   const fetchClients = async () => {
     try {
@@ -109,32 +118,21 @@ export default function ClientsPage() {
 
   const filterClients = () => {
     let filtered = clients;
-
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
+    if (debouncedSearch) {
+      const term = debouncedSearch;
       filtered = filtered.filter(client => {
-        try {
-          return (
-            `${client.firstName} ${client.lastName}`.toLowerCase().includes(term) ||
-            client.email.toLowerCase().includes(term) ||
-            (client.company && client.company.toLowerCase().includes(term)) ||
-            (client.phone && client.phone.includes(searchTerm)) ||
-            ((client.tags || []).some(tag => tag.toLowerCase().includes(term)))
-          );
-        } catch {
-          return false;
-        }
+        const name = `${client.firstName} ${client.lastName}`.toLowerCase();
+        return (
+          name.includes(term) ||
+          client.email?.toLowerCase().includes(term) ||
+          (client.company && client.company.toLowerCase().includes(term)) ||
+          (client.phone && client.phone.includes(term)) ||
+          (client.tags || []).some(t => t.toLowerCase().includes(term))
+        );
       });
     }
-
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(client => client.status === statusFilter);
-    }
-
-    if (sourceFilter !== 'all') {
-      filtered = filtered.filter(client => client.source === sourceFilter);
-    }
-
+    if (statusFilter !== 'all') filtered = filtered.filter(c => c.status === statusFilter);
+    if (sourceFilter !== 'all') filtered = filtered.filter(c => c.source === sourceFilter);
     setFilteredClients(filtered);
   };
 
@@ -166,17 +164,23 @@ export default function ClientsPage() {
     return source.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
+  const toggleExpand = (id:string) => {
+    setExpanded(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const stats = useMemo(()=> [
+    { label:'Total', value: clients.length },
+    { label:'Active', value: clients.filter(c=> c.status==='active').length },
+    { label:'Leads', value: clients.filter(c=> c.status==='lead' || c.status==='prospect').length }
+  ], [clients]);
 
   return (
     <Layout>
-      <div className="h-full flex flex-col">
+      <div className="h-[calc(100vh-140px)] flex flex-col gap-4">{/* viewport height adjust under global header */}
         {process.env.NODE_ENV === 'development' && (
           <div className="mb-2 text-xs text-gray-500 font-mono flex flex-wrap gap-4">
             <span>Total fetched: {clients.length}</span>
@@ -186,29 +190,17 @@ export default function ClientsPage() {
             <span>Search: "{searchTerm}"</span>
           </div>
         )}
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4 flex-shrink-0">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Clients</h1>
-            <p className="text-gray-600">Manage your client relationships and contact information</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/dashboard/clients/import"
-              className="inline-flex items-center px-4 py-2 border border-indigo-200 text-indigo-700 bg-white rounded-lg hover:bg-indigo-50 transition-colors"
-            >
-              <ArrowUpTrayIcon className="h-5 w-5 mr-2" />
-              Bulk Import
-            </Link>
-            <Link
-              href="/dashboard/clients/new"
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <PlusIcon className="h-5 w-5 mr-2" />
-              New Client
-            </Link>
-          </div>
-        </div>
+        <PageHeader
+          title="Clients"
+          subtitle="Manage relationships, contact info and lifecycle across your pipeline."
+          stats={stats}
+          actions={(
+            <>
+              <Link href="/dashboard/clients/import" className="pill pill-tint-purple inline-flex items-center gap-1 text-xs"><ArrowUpTrayIcon className="h-4 w-4"/>Import</Link>
+              <Link href="/dashboard/clients/new" className="pill pill-tint-green inline-flex items-center gap-1 text-xs"><PlusIcon className="h-4 w-4"/>New Client</Link>
+            </>
+          )}
+        />
 
       {/* Status summary chips (pill style like Projects) */}
       <div className="flex flex-wrap gap-2 mb-4 flex-shrink-0">
@@ -234,17 +226,17 @@ export default function ClientsPage() {
       </div>
 
   {/* Filters */}
-  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4 flex-shrink-0">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+  <div className="surface-1 rounded-lg border border-token p-4 mb-2 flex-shrink-0">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Search */}
-          <div className="relative">
-            <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <div className="relative md:col-span-2">
+            <MagnifyingGlassIcon className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Search clients..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="input pl-9"
             />
           </div>
 
@@ -252,7 +244,7 @@ export default function ClientsPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--surface-2)] dark:border-token"
+            className="input"
           >
             <option value="all">All Statuses</option>
             <option value="lead">Lead</option>
@@ -269,7 +261,7 @@ export default function ClientsPage() {
           <select
             value={sourceFilter}
             onChange={(e) => setSourceFilter(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--surface-2)] dark:border-token"
+            className="input"
           >
             <option value="all">All Sources</option>
             <option value="referral">Referral</option>
@@ -279,6 +271,7 @@ export default function ClientsPage() {
             <option value="cold_outreach">Cold Outreach</option>
             <option value="other">Other</option>
           </select>
+          <button onClick={()=> { setSearchTerm(''); setStatusFilter('all'); setSourceFilter('all'); }} className="pill pill-tint-gray text-xs h-10 self-end">Reset</button>
         </div>
       </div>
 
@@ -299,55 +292,47 @@ export default function ClientsPage() {
           </Link>
         </div>
       ) : (
-        <div className="surface-1 rounded-lg shadow-sm border border-token overflow-hidden flex-1 min-h-0">
-          <div className="overflow-auto h-full">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-[color-mix(in_oklab,var(--border),transparent_40%)]">
-              <thead className="bg-gray-50 dark:bg-[var(--surface-2)] sticky top-0 z-10">
+        <div className="surface-1 rounded-lg border border-token overflow-hidden flex-1 min-h-0 flex flex-col">
+          <div className="overflow-auto h-full rounded-b-lg">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-[color-mix(in_oklab,var(--border),transparent_40%)] text-sm">
+              <thead className="bg-gray-50 dark:bg-[var(--surface-2)] sticky top-0 z-10 text-xs uppercase tracking-wide text-slate-500">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Client
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Contact
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Company
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Source
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Location
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
+                  <th className="px-4 py-2 text-left">Client</th>
+                  <th className="px-4 py-2 text-left hidden lg:table-cell">Contact</th>
+                  <th className="px-4 py-2 text-left hidden md:table-cell">Company</th>
+                  <th className="px-4 py-2 text-left">Status</th>
+                  <th className="px-4 py-2 text-left hidden xl:table-cell">Source</th>
+                  <th className="px-4 py-2 text-left hidden xl:table-cell">Location</th>
+                  <th className="px-4 py-2 text-right">Actions</th>
                 </tr>
               </thead>
         <tbody className="surface-1 divide-y divide-gray-200 dark:divide-[color-mix(in_oklab,var(--border),transparent_40%)]">
-                {filteredClients.map((client) => (
-          <tr key={client._id} className="hover:bg-gray-50 dark:hover:bg-[var(--surface-2)]">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                {loading && Array.from({length:8}).map((_,i)=> (
+                  <tr key={i} className="animate-pulse">
+                    <td className="px-4 py-3"><div className="h-5 w-40 bg-slate-200 dark:bg-[var(--surface-2)] rounded"/></td>
+                    <td className="px-4 py-3 hidden lg:table-cell"><div className="h-5 w-32 bg-slate-200 dark:bg-[var(--surface-2)] rounded"/></td>
+                    <td className="px-4 py-3 hidden md:table-cell"><div className="h-5 w-24 bg-slate-200 dark:bg-[var(--surface-2)] rounded"/></td>
+                    <td className="px-4 py-3"><div className="h-5 w-16 bg-slate-200 dark:bg-[var(--surface-2)] rounded"/></td>
+                    <td className="px-4 py-3 hidden xl:table-cell"><div className="h-5 w-20 bg-slate-200 dark:bg-[var(--surface-2)] rounded"/></td>
+                    <td className="px-4 py-3 hidden xl:table-cell"><div className="h-5 w-24 bg-slate-200 dark:bg-[var(--surface-2)] rounded"/></td>
+                    <td className="px-4 py-3"></td>
+                  </tr>
+                ))}
+                {!loading && filteredClients.map((client) => (
+          <>
+          <tr key={client._id} className="hover:bg-gray-50 dark:hover:bg-[var(--surface-2)] cursor-pointer" onClick={()=> toggleExpand(client._id)}>
+                    <td className="px-4 py-3 align-top">
                       <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
-                          <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                            <UserIcon className="h-6 w-6 text-gray-500" />
-                          </div>
+                        <div className="h-9 w-9 rounded-full bg-gradient-to-br from-indigo-200 to-blue-200 dark:from-indigo-600/30 dark:to-blue-600/30 flex items-center justify-center text-xs font-semibold text-indigo-700 dark:text-indigo-300 shadow-inner">
+                          {client.firstName.charAt(0)}{client.lastName.charAt(0)}
                         </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {client.firstName} {client.lastName}
-                          </div>
-                          {client.jobTitle && (
-                            <div className="text-sm text-gray-500">{client.jobTitle}</div>
-                          )}
+                        <div className="ml-3 space-y-0.5">
+                          <div className="font-medium text-slate-800 dark:text-[var(--text)] leading-tight">{client.firstName} {client.lastName}</div>
+                          {client.company && <div className="text-[11px] text-slate-500 hidden md:block">{client.company}</div>}
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-3 hidden lg:table-cell align-top">
                       <div className="text-sm text-gray-900">
                         <div className="flex items-center mb-1">
                           <EnvelopeIcon className="h-4 w-4 text-gray-400 mr-1" />
@@ -361,36 +346,16 @@ export default function ClientsPage() {
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {client.company ? (
-                        <div className="flex items-center text-sm text-gray-900">
-                          <BuildingOfficeIcon className="h-4 w-4 text-gray-400 mr-1" />
-                          {client.company}
-                        </div>
-                      ) : (
-                        <span className="text-sm text-gray-500">—</span>
-                      )}
+                    <td className="px-4 py-3 hidden md:table-cell align-top">
+                      {client.company ? <div className="flex items-center text-xs text-slate-600 dark:text-[var(--text-dim)]"><BuildingOfficeIcon className="h-4 w-4 text-slate-400 mr-1" />{client.company}</div> : <span className="text-xs text-slate-400">—</span>}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-[11px] font-medium backdrop-blur-sm ${statusColors[client.status as keyof typeof statusColors] || 'bg-gray-100 text-gray-700'}`}>
-                        {client.status.replace('_',' ')}
-                      </span>
+                    <td className="px-4 py-3 align-top">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${statusColors[client.status as keyof typeof statusColors] || 'bg-gray-100 text-gray-700'}`}>{client.status.replace('_',' ')}</span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {formatSource(client.source)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {client.address ? (
-                        <div className="flex items-center text-sm text-gray-900">
-                          <MapPinIcon className="h-4 w-4 text-gray-400 mr-1" />
-                          {client.address.city}, {client.address.state}
-                        </div>
-                      ) : (
-                        <span className="text-sm text-gray-500">—</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center justify-end space-x-2">
+                    <td className="px-4 py-3 hidden xl:table-cell align-top text-xs text-slate-700 dark:text-[var(--text-dim)]">{formatSource(client.source)}</td>
+                    <td className="px-4 py-3 hidden xl:table-cell align-top text-xs text-slate-600 dark:text-[var(--text-dim)]">{client.address ? (<span className="inline-flex items-center"><MapPinIcon className="h-4 w-4 text-slate-400 mr-1" />{client.address.city}, {client.address.state}</span>) : '—'}</td>
+                    <td className="px-4 py-3 text-right text-xs font-medium align-top" onClick={e=> e.stopPropagation()}>
+                      <div className="flex items-center justify-end gap-1">
                         <Link
                           href={`/dashboard/clients/${client._id}`}
                           className="text-gray-400 hover:text-blue-600 transition-colors"
@@ -415,6 +380,41 @@ export default function ClientsPage() {
                       </div>
                     </td>
                   </tr>
+                  {expanded.has(client._id) && (
+                    <tr className="bg-gradient-to-r from-slate-50 to-white dark:from-[var(--surface-2)] dark:to-[var(--surface-1)]">
+                      <td colSpan={7} className="px-6 pt-0 pb-4">
+                        <div className="mt-2 grid md:grid-cols-4 gap-4 text-xs">
+                          <div className="space-y-1">
+                            <p className="font-semibold text-slate-700 dark:text-[var(--text)] tracking-wide">Profile</p>
+                            <p className="text-slate-600 dark:text-[var(--text-dim)]">{client.firstName} {client.lastName}{client.jobTitle ? ` • ${client.jobTitle}`:''}</p>
+                            <p className="text-slate-500">Added {new Date(client.createdAt).toLocaleDateString()}</p>
+                          </div>
+                          <div className="space-y-1">
+                            <p className="font-semibold text-slate-700 dark:text-[var(--text)] tracking-wide">Contact</p>
+                            <p className="text-slate-600 dark:text-[var(--text-dim)]">{client.email}</p>
+                            {client.phone && <p className="text-slate-600 dark:text-[var(--text-dim)]">{client.phone}</p>}
+                          </div>
+                          <div className="space-y-1">
+                            <p className="font-semibold text-slate-700 dark:text-[var(--text)] tracking-wide">Tags</p>
+                            <div className="flex flex-wrap gap-1">
+                              {(client.tags||[]).slice(0,6).map(t=> <span key={t} className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-[var(--surface-2)] text-[10px] border border-slate-200 dark:border-[var(--border)] text-slate-600 dark:text-[var(--text-dim)]">{t}</span>)}
+                              {!client.tags?.length && <span className="text-slate-400">—</span>}
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <p className="font-semibold text-slate-700 dark:text-[var(--text)] tracking-wide">Quick Actions</p>
+                            <div className="flex flex-wrap gap-2">
+                              <Link href={`/dashboard/estimates/new?client=${client._id}`} className="pill pill-tint-blue text-[10px]">New Estimate</Link>
+                              <Link href={`/dashboard/projects/new?client=${client._id}`} className="pill pill-tint-purple text-[10px]">New Project</Link>
+                              <Link href={`mailto:${client.email}`} className="pill pill-tint-green text-[10px]">Email</Link>
+                            </div>
+                          </div>
+                          {client.notes && <div className="md:col-span-4 border-t border-dashed border-token pt-3 text-slate-600 dark:text-[var(--text-dim)] line-clamp-2">{client.notes}</div>}
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+          </>
                 ))}
               </tbody>
             </table>
