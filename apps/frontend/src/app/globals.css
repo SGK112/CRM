@@ -3,17 +3,56 @@
 @tailwind utilities;
 
 /* Theme Tokens */
-:root {
-  --bg:#f8fafc; --surface-1:#f1f5f9; --surface-2:#ffffff; --surface-3:#e2e8f0;
-  --border:#e2e8f0; --border-strong:#cbd5e1; --text:#0f172a; --text-dim:#475569; --text-faint:#64748b;
-  --input-bg:#f1f5f9; --accent:#d97706; --accent-hover:#f59e0b; --accent-alt:#3b82f6; --accent-alt-hover:#1d4ed8;
-  --danger:#ef4444; --warning:#f59e0b; --success:#22c55e; --focus-ring:var(--accent); --shadow-color:210 40% 96%;
-}
-.dark {
-  --bg:#070a0f; --surface-1:#0d1117; --surface-2:#141b23; --surface-3:#1d2732;
-  --border:#233041; --border-strong:#334556; --text:#f1f5f9; --text-dim:#94a3b8; --text-faint:#64748b;
-  --input-bg:#141b23; --accent:#d97706; --accent-hover:#f59e0b; --accent-alt:#3b82f6; --accent-alt-hover:#2563eb;
-  --danger:#f87171; --warning:#fbbf24; --success:#4ade80; --focus-ring:var(--accent); --shadow-color:215 25% 8%;
+@layer base {
+  :root {
+    --bg: #f8fafc; 
+    --surface-1: #f1f5f9; 
+    --surface-2: #ffffff; 
+    --surface-3: #e2e8f0;
+    --border: #e2e8f0; 
+    --border-strong: #cbd5e1; 
+    --text: #0f172a; 
+    --text-dim: #475569; 
+    --text-faint: #64748b;
+    --input-bg: #f1f5f9; 
+    --accent: #d97706; 
+    --accent-hover: #f59e0b; 
+    --accent-alt: #3b82f6; 
+    --accent-alt-hover: #1d4ed8;
+    --danger: #ef4444; 
+    --warning: #f59e0b; 
+    --success: #22c55e; 
+    --focus-ring: var(--accent); 
+    --shadow-color: 210 40% 96%;
+  }
+  
+  .dark {
+    --bg: #070a0f; 
+    --surface-1: #0d1117; 
+    --surface-2: #141b23; 
+    --surface-3: #1d2732;
+    --border: #233041; 
+    --border-strong: #334556; 
+    --text: #f1f5f9; 
+    --text-dim: #94a3b8; 
+    --text-faint: #64748b;
+    --input-bg: #141b23; 
+    --accent: #d97706; 
+    --accent-hover: #f59e0b; 
+    --accent-alt: #3b82f6; 
+    --accent-alt-hover: #2563eb;
+    --danger: #f87171; 
+    --warning: #fbbf24; 
+    --success: #4ade80; 
+    --focus-ring: var(--accent); 
+    --shadow-color: 215 25% 8%;
+  }
+
+  /* Apply theme variables to body */
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+  }
 }
 
 /* Smooth scrolling and professional animations */
