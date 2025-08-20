@@ -9,6 +9,27 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // Use CSS custom properties for theme variables
+        'surface': {
+          1: 'var(--surface-1)',
+          2: 'var(--surface-2)',
+          3: 'var(--surface-3)',
+        },
+        'text': {
+          DEFAULT: 'var(--text)',
+          dim: 'var(--text-dim)',
+          faint: 'var(--text-faint)',
+        },
+        'border': {
+          DEFAULT: 'var(--border)',
+          strong: 'var(--border-strong)',
+        },
+        'accent': {
+          DEFAULT: 'var(--accent)',
+          hover: 'var(--accent-hover)',
+          alt: 'var(--accent-alt)',
+          'alt-hover': 'var(--accent-alt-hover)',
+        },
         primary: {
           50: '#eff6ff',
           100: '#dbeafe',
@@ -69,6 +90,12 @@ module.exports = {
           800: '#991b1b',
           900: '#7f1d1d',
         },
+      },
+      backgroundColor: {
+        'primary': 'var(--bg)',
+        'surface-1': 'var(--surface-1)',
+        'surface-2': 'var(--surface-2)',
+        'surface-3': 'var(--surface-3)',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
