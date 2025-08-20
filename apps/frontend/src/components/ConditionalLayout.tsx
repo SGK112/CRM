@@ -1,26 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { TopBar } from './top-bar';
+// TopBar now rendered globally in layout; keep placeholder export if imports linger.
+export function ConditionalTopBar() { return null; }
 
-export function ConditionalTopBar() {
-  const pathname = usePathname();
-  
-  // Don't show TopBar on dashboard pages, trial pages, demo pages, or if no pathname available
-  if (!pathname || pathname.startsWith('/dashboard') || pathname.startsWith('/trial') || pathname.startsWith('/demo')) {
-    return null;
-  }
-  
-  return <TopBar />;
-}
-
-export function ConditionalFooter({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  
-  // Don't show footer on dashboard pages, trial pages, demo pages, or if no pathname available
-  if (!pathname || pathname.startsWith('/dashboard') || pathname.startsWith('/trial') || pathname.startsWith('/demo')) {
-    return null;
-  }
-  
-  return <>{children}</>;
-}
+export function ConditionalFooter({ children }: { children: React.ReactNode }) { return <>{children}</>; }
