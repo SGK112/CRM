@@ -1,8 +1,7 @@
 import './globals.css'
 import { Inter } from 'next/font/google'
 import { Providers } from './providers'
-import { ConditionalFooter } from '../components/ConditionalLayout'
-import { TopBar } from '../components/top-bar'
+import { ConditionalTopBar, ConditionalFooter } from '../components/ConditionalLayout'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -22,7 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={inter.className + ' bg-slate-950 text-slate-100 antialiased'}>
         <Providers>
           <div className="flex min-h-screen flex-col">
-            <TopBar />
+            <ConditionalTopBar />
             <main className="flex-1">
               {children}
             </main>
