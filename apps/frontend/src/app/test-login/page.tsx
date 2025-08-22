@@ -32,7 +32,7 @@ export default function TestLoginPage() {
         setResult(`❌ Login failed: ${data.message || 'Unknown error'}`)
       }
     } catch (error) {
-      setResult(`❌ Network error: ${error.message}`)
+      setResult(`❌ Network error: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setLoading(false)
     }
@@ -67,7 +67,7 @@ export default function TestLoginPage() {
         setResult(`❌ Registration failed: ${data.message || 'Unknown error'}`)
       }
     } catch (error) {
-      setResult(`❌ Network error: ${error.message}`)
+      setResult(`❌ Network error: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setLoading(false)
     }
