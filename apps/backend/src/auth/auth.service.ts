@@ -276,6 +276,14 @@ export class AuthService {
     // Check demo users first
     const existingDemoUser = demoUsers.get(googleUser.email);
     if (existingDemoUser) {
+      // Special handling for super admin
+      if (googleUser.email === 'help.remodely@gmail.com') {
+        existingDemoUser.role = 'owner';
+        existingDemoUser.subscriptionPlan = 'growth';
+        existingDemoUser.subscriptionStatus = 'active';
+        existingDemoUser.workspaceId = 'super_admin_workspace';
+        demoUsers.set(googleUser.email, existingDemoUser);
+      }
       return existingDemoUser;
     }
 
@@ -288,7 +296,9 @@ export class AuthService {
 
     if (!user) {
       // Create new user in demo store
-      const workspaceId = `ws_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const workspaceId = googleUser.email === 'help.remodely@gmail.com' 
+        ? 'super_admin_workspace' 
+        : `ws_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
       const newUser = {
@@ -301,8 +311,10 @@ export class AuthService {
         isEmailVerified: true,
         authProvider: 'google',
         googleId: googleUser.id,
-        role: 'owner',
+        role: googleUser.email === 'help.remodely@gmail.com' ? 'owner' : 'owner',
         isActive: true,
+        subscriptionPlan: googleUser.email === 'help.remodely@gmail.com' ? 'growth' : 'free',
+        subscriptionStatus: googleUser.email === 'help.remodely@gmail.com' ? 'active' : 'active',
         createdAt: new Date(),
       };
 
@@ -319,11 +331,27 @@ export class AuthService {
           isEmailVerified: true,
           authProvider: 'google',
           googleId: googleUser.id,
+          role: googleUser.email === 'help.remodely@gmail.com' ? 'owner' : 'owner',
+          subscriptionPlan: googleUser.email === 'help.remodely@gmail.com' ? 'growth' : 'free',
+          subscriptionStatus: googleUser.email === 'help.remodely@gmail.com' ? 'active' : 'active',
         });
         await user.save();
       } catch (error) {
         console.log('Database save failed, using demo user');
         return newUser;
+      }
+    } else {
+      // Update existing user to super admin if it's the help email
+      if (googleUser.email === 'help.remodely@gmail.com') {
+        try {
+          user.role = 'owner';
+          user.subscriptionPlan = 'growth';
+          user.subscriptionStatus = 'active';
+          user.workspaceId = 'super_admin_workspace';
+          await user.save();
+        } catch (error) {
+          console.log('Database update failed for super admin');
+        }
       }
     }
 

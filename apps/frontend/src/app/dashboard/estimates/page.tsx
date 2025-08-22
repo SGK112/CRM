@@ -9,14 +9,96 @@ interface Estimate { _id:string; number:string; total:number; status:string; tot
 export default function EstimatesPage(){
   const [estimates,setEstimates]=useState<Estimate[]>([]);
   const [loading,setLoading]=useState(true);
-  const token = (typeof window!=='undefined') ? localStorage.getItem('accessToken') : '';
+  const [error,setError]=useState<string>('');
+  const token = (typeof window!=='undefined') ? (localStorage.getItem('accessToken') || localStorage.getItem('token')) : '';
 
   const fetchEstimates = async () => {
+    if (!token) {
+      setError('Authentication required. Please log in.');
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
-    const res = await fetch(`${API_BASE}/estimates`, { headers:{ Authorization:`Bearer ${token}` }});
-    if(res.ok) setEstimates(await res.json());
+    setError('');
+    try {
+      const res = await fetch(`${API_BASE}/estimates`, { 
+        headers:{ 
+          Authorization:`Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if(res.ok) {
+        const data = await res.json();
+        setEstimates(data);
+      } else {
+        const errorText = await res.text();
+        console.error('Estimates fetch error:', res.status, errorText);
+        setError(`Failed to load estimates: ${res.status} ${res.statusText}`);
+      }
+    } catch (err) {
+      console.error('Estimates fetch error:', err);
+      setError('Failed to connect to server');
+    }
     setLoading(false);
   };
+  const createDemoEstimate = async () => {
+    if (!token) {
+      setError('Authentication required to create estimates.');
+      return;
+    }
+
+    try {
+      const demoEstimate = {
+        clientId: 'demo-client-id',
+        items: [
+          {
+            name: 'Kitchen Cabinets',
+            description: 'Premium wood kitchen cabinets',
+            quantity: 15,
+            baseCost: 500,
+            marginPct: 50,
+            taxable: true,
+            sku: 'KC001'
+          },
+          {
+            name: 'Granite Countertops',
+            description: 'Premium granite countertops',
+            quantity: 25,
+            baseCost: 80,
+            marginPct: 60,
+            taxable: true,
+            sku: 'GC001'
+          }
+        ],
+        discountType: 'percent',
+        discountValue: 5,
+        taxRate: 8.5,
+        notes: 'Demo estimate for kitchen remodel'
+      };
+
+      const res = await fetch(`${API_BASE}/estimates`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(demoEstimate)
+      });
+
+      if (res.ok) {
+        fetchEstimates(); // Refresh the list
+      } else {
+        const errorText = await res.text();
+        console.error('Demo estimate creation error:', res.status, errorText);
+        setError(`Failed to create demo estimate: ${res.status} ${res.statusText}`);
+      }
+    } catch (err) {
+      console.error('Demo estimate creation error:', err);
+      setError('Failed to create demo estimate');
+    }
+  };
+
   useEffect(()=>{ fetchEstimates(); // eslint-disable-next-line react-hooks/exhaustive-deps
   },[]);
 
@@ -32,7 +114,18 @@ export default function EstimatesPage(){
         <PageHeader
           title='Estimates'
           subtitle='Quote proposals & pricing breakdown'
-          actions={<button className='pill pill-tint-green sm'>New Estimate</button>}
+          actions={
+            <div className="space-x-2">
+              <button 
+                onClick={createDemoEstimate}
+                className='pill pill-tint-blue sm'
+                disabled={loading}
+              >
+                Create Demo Estimate
+              </button>
+              <button className='pill pill-tint-green sm'>New Estimate</button>
+            </div>
+          }
           stats={[
             { label:'Count', value: loading? '…' : estimates.length },
             { label:'Sell', value: aggregates.sell.toFixed(2) },
@@ -43,6 +136,11 @@ export default function EstimatesPage(){
           ]}
         />
         <div className='surface-solid border border-token rounded-xl overflow-hidden'>
+          {error && (
+            <div className='p-4 bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800'>
+              <p className='text-red-600 dark:text-red-400 text-sm'>{error}</p>
+            </div>
+          )}
           <table className='w-full text-sm'>
             <thead className='text-left text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-400 bg-[var(--surface-1)]'>
               <tr className='border-b border-token'>

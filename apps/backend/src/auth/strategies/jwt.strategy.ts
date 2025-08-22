@@ -25,6 +25,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       user = await this.authService.findUserByEmail(payload.email);
     }
     if (!user) throw new UnauthorizedException();
+
+    // Special handling for super admin - ensure they have full access
+    if (user.email === 'help.remodely@gmail.com') {
+      user.role = 'owner';
+      user.subscriptionPlan = 'growth';
+      user.subscriptionStatus = 'active';
+      user.workspaceId = user.workspaceId || 'super_admin_workspace';
+    }
+
     return user;
   }
 }
