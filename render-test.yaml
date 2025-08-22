@@ -1,0 +1,16 @@
+# Super simple render.yaml for testing
+services:
+  - type: web
+    name: remodely-backend
+    env: node
+    plan: starter
+    buildCommand: "cd apps/backend && npm install && npm run build"
+    startCommand: "cd apps/backend && npm run start:prod"
+    healthCheckPath: /health
+    
+  - type: web  
+    name: remodely-frontend
+    env: node
+    plan: starter
+    buildCommand: "cd apps/frontend && npm install && npm run build"
+    startCommand: "cd apps/frontend && npm start"
