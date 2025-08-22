@@ -47,10 +47,12 @@ export default function LoginPage() {
   try { data = await response.json() } catch { /* ignore */ }
 
   if (response.ok) {
-        // Store token in localStorage (in production, consider more secure options)
+        // Store token in localStorage and cookie (cookie for middleware protection)
+        try {
+          document.cookie = `accessToken=${data.accessToken}; Path=/; SameSite=Lax`;
+        } catch {}
         localStorage.setItem('accessToken', data.accessToken)
         localStorage.setItem('user', JSON.stringify(data.user))
-        
         // Redirect to dashboard
         router.push('/dashboard')
       } else if (response.status === 400) {
@@ -195,8 +197,9 @@ export default function LoginPage() {
               <button
                 onClick={() => {
                   const base = process.env.NEXT_PUBLIC_API_URL || ''
-                  const googleBase = base.endsWith('/api') ? base : `${base}`
-                  window.location.href = `${googleBase}/auth/google`
+                  // Support both http://localhost:3001 and http://localhost:3001/api
+                  const withApi = base.endsWith('/api') ? base : `${base}/api`
+                  window.location.href = `${withApi}/auth/google`
                 }}
                 className="w-full flex justify-center items-center gap-2 py-2 px-4 rounded-md text-sm font-medium bg-white text-slate-800 hover:bg-slate-50 border border-slate-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500/60 transition"
               >

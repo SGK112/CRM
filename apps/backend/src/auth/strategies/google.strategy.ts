@@ -15,7 +15,8 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   const configuredCallback = configService.get('GOOGLE_REDIRECT_URI');
     
     // Use provided credentials or dummy values to prevent startup errors
-    const callbackURL = configuredCallback || 'http://localhost:3001/auth/google/callback';
+  // Important: Global prefix is 'api', controller base includes 'auth', so default callback must be /api/auth/google/callback
+  const callbackURL = configuredCallback || 'http://localhost:3001/api/auth/google/callback';
     super({
       clientID: (clientID && !clientID.includes('your-google')) ? clientID : 'dummy-client-id',
       clientSecret: (clientSecret && !clientSecret.includes('your-google')) ? clientSecret : 'dummy-client-secret',
