@@ -26,15 +26,11 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: FRONTEND_URL
-        fromService:
-          type: web
-          name: remodely-crm-frontend
-          property: host
+        sync: false
+        value: https://remodely-crm-frontend.onrender.com
       - key: CORS_ORIGINS
-        fromService:
-          type: web
-          name: remodely-crm-frontend
-          property: host
+        sync: false
+        value: https://remodely-crm-frontend.onrender.com
 
   # Frontend Web Service  
   - type: web
@@ -55,15 +51,11 @@ services:
           name: remodely-crm-frontend
           property: port
       - key: NEXT_PUBLIC_API_URL
-        fromService:
-          type: web
-          name: remodely-crm-backend
-          property: host
-      - key: NEXT_PUBLIC_FRONTEND_URL
-        fromService:
-          type: web
-          name: remodely-crm-frontend
-          property: host
+        sync: false
+        value: https://remodely-crm-backend.onrender.com/api
+      - key: NEXT_PUBLIC_SOCKET_URL
+        sync: false 
+        value: https://remodely-crm-backend.onrender.com
 
 databases:
   - name: remodely-crm-db
