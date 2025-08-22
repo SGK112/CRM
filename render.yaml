@@ -1,0 +1,71 @@
+services:
+  # Backend API Service
+  - type: web
+    name: remodely-crm-backend
+    env: node
+    region: oregon
+    plan: starter
+    buildCommand: |
+      npm install --workspace-root
+      npm run build --workspace=@remodely-crm/backend
+    startCommand: npm run start:render --workspace=@remodely-crm/backend
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        fromService:
+          type: web
+          name: remodely-crm-backend
+          property: port
+      - key: MONGODB_URI
+        fromDatabase:
+          type: mongodb
+          name: remodely-crm-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        fromService:
+          type: web
+          name: remodely-crm-frontend
+          property: host
+      - key: CORS_ORIGINS
+        fromService:
+          type: web
+          name: remodely-crm-frontend
+          property: host
+
+  # Frontend Web Service  
+  - type: web
+    name: remodely-crm-frontend
+    env: node
+    region: oregon
+    plan: starter
+    buildCommand: |
+      npm install --workspace-root
+      npm run build --workspace=@remodely-crm/frontend
+    startCommand: npm run start:render --workspace=@remodely-crm/frontend
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        fromService:
+          type: web
+          name: remodely-crm-frontend
+          property: port
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: remodely-crm-backend
+          property: host
+      - key: NEXT_PUBLIC_FRONTEND_URL
+        fromService:
+          type: web
+          name: remodely-crm-frontend
+          property: host
+
+databases:
+  - name: remodely-crm-db
+    databaseName: crm
+    user: crmuser
