@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "start:render": "next start -p $PORT",
+    "start:render": "node .next/standalone/apps/frontend/server.js",
     "lint": "next lint",
     "type-check": "tsc --noEmit"
   },

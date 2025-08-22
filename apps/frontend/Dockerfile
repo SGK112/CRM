@@ -35,7 +35,7 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 # Copy the built application
-COPY --from=builder /app/apps/frontend/public ./apps/frontend/public
+# COPY --from=builder /app/apps/frontend/public ./apps/frontend/public
 
 # Set the correct permission for prerender cache
 RUN mkdir -p /app/apps/frontend/.next
@@ -45,6 +45,9 @@ RUN chown nextjs:nodejs /app/apps/frontend/.next
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/static ./apps/frontend/.next/static
+
+# Copy public files for static assets
+COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/public ./apps/frontend/public
 
 USER nextjs
 
