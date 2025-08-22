@@ -9,11 +9,16 @@ import * as express from 'express';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Raw body for Stripe webhook signature verification (BEFORE global prefix)
+  app.use('/billing/webhook', express.raw({ type: 'application/json' }));
+
+  // Set global prefix for all routes except webhooks
+  app.setGlobalPrefix('api', {
+    exclude: ['/billing/webhook']
+  });
+
   // Security headers
   app.use(helmet());
-
-  // Raw body for Stripe webhook signature verification
-  app.use('/billing/webhook', express.raw({ type: 'application/json' }));
 
   // ---- CORS CONFIGURATION ----
   // Accept comma-separated list in CORS_ORIGINS (preferred) or fallback to FRONTEND_URL.

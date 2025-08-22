@@ -11,7 +11,7 @@ services:
       npm install
       npm run build
     startCommand: cd apps/backend && npm run start:prod
-    healthCheckPath: /health
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production
@@ -43,7 +43,7 @@ services:
       cd apps/frontend
       npm install
       npm run build
-    startCommand: cd apps/frontend && npm start
+    startCommand: cd apps/frontend && node .next/standalone/apps/frontend/server.js
     envVars:
       - key: NODE_ENV
         value: production
