@@ -19,8 +19,149 @@ export class ClientsService {
     return client.save();
   }
 
-  async findAll(workspaceId: string): Promise<Client[]> {
-    return this.clientModel.find({ workspaceId, isActive: true }).exec();
+  async findAll(workspaceId: string, searchParams?: { 
+    search?: string; 
+    status?: string; 
+    source?: string; 
+    limit?: number; 
+    offset?: number; 
+  }): Promise<Client[]> {
+    const query: any = { workspaceId, isActive: true };
+    
+    // Add search functionality
+    if (searchParams?.search) {
+      const searchTerm = searchParams.search.trim();
+      
+      // Try MongoDB text search first (if available)
+      try {
+        // Use text search for better performance and relevance
+        const textSearchQuery = { 
+          ...query, 
+          $text: { $search: searchTerm } 
+        };
+        
+        // Test if text search works by doing a count query
+        const textCount = await this.clientModel.countDocuments(textSearchQuery);
+        if (textCount >= 0) {
+          // Text search is available, use it
+          query.$text = { $search: searchTerm };
+        } else {
+          throw new Error('Text search not available');
+        }
+      } catch (textSearchError) {
+        // Fallback to regex search if text search is not available
+        const searchRegex = new RegExp(searchTerm, 'i');
+        query.$or = [
+          { firstName: searchRegex },
+          { lastName: searchRegex },
+          { email: searchRegex },
+          { phone: searchRegex },
+          { company: searchRegex },
+          { tags: { $in: [searchRegex] } },
+          { 
+            $expr: {
+              $regexMatch: {
+                input: { $concat: ['$firstName', ' ', '$lastName'] },
+                regex: searchTerm,
+                options: 'i'
+              }
+            }
+          }
+        ];
+      }
+    }
+    
+    // Add status filter
+    if (searchParams?.status && searchParams.status !== 'all') {
+      query.status = searchParams.status;
+    }
+    
+    // Add source filter
+    if (searchParams?.source && searchParams.source !== 'all') {
+      query.source = searchParams.source;
+    }
+    
+    let queryBuilder = this.clientModel.find(query);
+    
+    // Add pagination
+    if (searchParams?.offset) {
+      queryBuilder = queryBuilder.skip(searchParams.offset);
+    }
+    if (searchParams?.limit) {
+      queryBuilder = queryBuilder.limit(searchParams.limit);
+    }
+    
+    // Sort by name for consistent results, or by text score if using text search
+    if (query.$text) {
+      queryBuilder = queryBuilder.sort({ score: { $meta: 'textScore' }, lastName: 1, firstName: 1 });
+    } else {
+      queryBuilder = queryBuilder.sort({ lastName: 1, firstName: 1 });
+    }
+    
+    return queryBuilder.exec();
+  }
+
+  async count(workspaceId: string, searchParams?: { 
+    search?: string; 
+    status?: string; 
+    source?: string; 
+  }): Promise<number> {
+    const query: any = { workspaceId, isActive: true };
+    
+    // Add search functionality (same logic as findAll)
+    if (searchParams?.search) {
+      const searchTerm = searchParams.search.trim();
+      
+      // Try MongoDB text search first (if available)
+      try {
+        // Use text search for better performance and relevance
+        const textSearchQuery = { 
+          ...query, 
+          $text: { $search: searchTerm } 
+        };
+        
+        // Test if text search works by doing a simple count
+        const textCount = await this.clientModel.countDocuments(textSearchQuery);
+        if (textCount >= 0) {
+          // Text search is available, use it
+          query.$text = { $search: searchTerm };
+        } else {
+          throw new Error('Text search not available');
+        }
+      } catch (textSearchError) {
+        // Fallback to regex search if text search is not available
+        const searchRegex = new RegExp(searchTerm, 'i');
+        query.$or = [
+          { firstName: searchRegex },
+          { lastName: searchRegex },
+          { email: searchRegex },
+          { phone: searchRegex },
+          { company: searchRegex },
+          { tags: { $in: [searchRegex] } },
+          { 
+            $expr: {
+              $regexMatch: {
+                input: { $concat: ['$firstName', ' ', '$lastName'] },
+                regex: searchTerm,
+                options: 'i'
+              }
+            }
+          }
+        ];
+      }
+    }
+    
+    // Add status filter
+    if (searchParams?.status && searchParams.status !== 'all') {
+      query.status = searchParams.status;
+    }
+    
+    // Add source filter
+    if (searchParams?.source && searchParams.source !== 'all') {
+      query.source = searchParams.source;
+    }
+    
+    return this.clientModel.countDocuments(query).exec();
   }
 
   async findOne(id: string, workspaceId: string): Promise<Client> {
