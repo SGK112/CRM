@@ -37,6 +37,10 @@ const nextConfig = {
   
   // Headers for better caching
   async headers() {
+    // In development, avoid aggressive caching to prevent stale chunks
+    if (process.env.NODE_ENV !== 'production') {
+      return [];
+    }
     return [
       {
         source: '/_next/static/:path*',

@@ -65,32 +65,50 @@ export default function ClientsPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [sourceFilter, setSourceFilter] = useState('all');
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
-  // Bulk import logic moved to dedicated page
+  const [totalCount, setTotalCount] = useState(0);
+  const [useServerSearch, setUseServerSearch] = useState(true);
+  const [searchError, setSearchError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     fetchClients();
   }, []);
 
-  // Debounce search input for lighter filtering cost
-  useEffect(()=> {
-    const id = setTimeout(()=> setDebouncedSearch(searchTerm.trim().toLowerCase()), 220);
-    return ()=> clearTimeout(id);
+  // Debounce search input for lighter server load
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedSearch(searchTerm.trim()), 300);
+    return () => clearTimeout(id);
   }, [searchTerm]);
 
+  // Trigger search when filters change
   useEffect(() => {
-    filterClients();
-  }, [clients, debouncedSearch, statusFilter, sourceFilter]);
+    if (useServerSearch) {
+      fetchClients();
+    } else {
+      filterClientsLocally();
+    }
+  }, [debouncedSearch, statusFilter, sourceFilter, useServerSearch]);
 
   const fetchClients = async () => {
     try {
+      setLoading(true);
+      setSearchError(null);
       const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
       if (!token) {
         router.push('/auth/login');
         return;
       }
 
-      const response = await fetch(`${API_BASE}/clients`, {
+      // Build query parameters
+      const params = new URLSearchParams();
+      if (debouncedSearch) params.append('search', debouncedSearch);
+      if (statusFilter !== 'all') params.append('status', statusFilter);
+      if (sourceFilter !== 'all') params.append('source', sourceFilter);
+
+      const queryString = params.toString();
+      const url = `${API_BASE}/clients${queryString ? `?${queryString}` : ''}`;
+
+      const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -100,40 +118,107 @@ export default function ClientsPage() {
       if (response.ok) {
         const data = await response.json();
         // Normalize: ensure tags array & status fallback
-        const normalized = Array.isArray(data) ? data.map((c:any) => ({
+        const normalized = Array.isArray(data) ? data.map((c: any) => ({
           ...c,
           tags: Array.isArray(c.tags) ? c.tags : [],
           status: c.status || 'lead'
         })) : [];
         setClients(normalized);
+        setFilteredClients(normalized);
+        
+        // Fetch total count for pagination info
+        const countUrl = `${API_BASE}/clients/count${queryString ? `?${queryString}` : ''}`;
+        try {
+          const countResponse = await fetch(countUrl, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+          if (countResponse.ok) {
+            const count = await countResponse.json();
+            setTotalCount(typeof count === 'number' ? count : count.count || normalized.length);
+          } else {
+            setTotalCount(normalized.length);
+          }
+        } catch (countError) {
+          console.warn('Could not fetch count, using result length:', countError);
+          setTotalCount(normalized.length);
+        }
+      } else if (response.status === 401) {
+        router.push('/auth/login');
       } else {
-        console.error('Failed to fetch clients');
+        throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
       }
     } catch (error) {
       console.error('Error fetching clients:', error);
+      setSearchError(error instanceof Error ? error.message : 'Failed to search clients');
+      
+      // Fallback to local filtering if server search fails
+      if (useServerSearch) {
+        console.log('Falling back to local search due to server error');
+        setUseServerSearch(false);
+        setSearchError(null);
+        // Fetch all clients and filter locally
+        fetchAllClientsForLocalFiltering();
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const filterClients = () => {
-    let filtered = clients;
+  const fetchAllClientsForLocalFiltering = async () => {
+    try {
+      const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+      const response = await fetch(`${API_BASE}/clients`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const normalized = Array.isArray(data) ? data.map((c: any) => ({
+          ...c,
+          tags: Array.isArray(c.tags) ? c.tags : [],
+          status: c.status || 'lead'
+        })) : [];
+        setClients(normalized);
+        filterClientsLocally(normalized);
+      }
+    } catch (error) {
+      console.error('Error fetching clients for local filtering:', error);
+    }
+  };
+
+  const filterClientsLocally = (clientList = clients) => {
+    let filtered = clientList;
+    
     if (debouncedSearch) {
-      const term = debouncedSearch;
+      const term = debouncedSearch.toLowerCase();
       filtered = filtered.filter(client => {
         const name = `${client.firstName} ${client.lastName}`.toLowerCase();
         return (
           name.includes(term) ||
           client.email?.toLowerCase().includes(term) ||
           (client.company && client.company.toLowerCase().includes(term)) ||
-          (client.phone && client.phone.includes(term)) ||
+          (client.phone && client.phone.toLowerCase().includes(term)) ||
           (client.tags || []).some(t => t.toLowerCase().includes(term))
         );
       });
     }
-    if (statusFilter !== 'all') filtered = filtered.filter(c => c.status === statusFilter);
-    if (sourceFilter !== 'all') filtered = filtered.filter(c => c.source === sourceFilter);
+    
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(c => c.status === statusFilter);
+    }
+    
+    if (sourceFilter !== 'all') {
+      filtered = filtered.filter(c => c.source === sourceFilter);
+    }
+    
     setFilteredClients(filtered);
+    setTotalCount(filtered.length);
   };
 
   const deleteClient = async (id: string) => {
@@ -172,11 +257,22 @@ export default function ClientsPage() {
     });
   };
 
-  const stats = useMemo(()=> [
-    { label:'Total', value: clients.length },
-    { label:'Active', value: clients.filter(c=> c.status==='active').length },
-    { label:'Leads', value: clients.filter(c=> c.status==='lead' || c.status==='prospect').length }
-  ], [clients]);
+  const stats = useMemo(() => {
+    // Use all clients for stats regardless of current filter, but if using server search show filtered count
+    const dataSource = useServerSearch ? filteredClients : clients;
+    const allClients = useServerSearch && (debouncedSearch || statusFilter !== 'all' || sourceFilter !== 'all') ? clients : dataSource;
+    
+    return [
+      { 
+        label: 'Total', 
+        value: useServerSearch && (debouncedSearch || statusFilter !== 'all' || sourceFilter !== 'all') 
+          ? `${filteredClients.length}${totalCount !== filteredClients.length ? ` of ${totalCount}` : ''}` 
+          : allClients.length 
+      },
+      { label: 'Active', value: allClients.filter(c => c.status === 'active').length },
+      { label: 'Leads', value: allClients.filter(c => c.status === 'lead' || c.status === 'prospect').length }
+    ];
+  }, [clients, filteredClients, totalCount, useServerSearch, debouncedSearch, statusFilter, sourceFilter]);
 
   return (
     <Layout>
@@ -188,6 +284,13 @@ export default function ClientsPage() {
             <span>Status filter: {statusFilter}</span>
             <span>Source filter: {sourceFilter}</span>
             <span>Search: "{searchTerm}"</span>
+            <span>Server search: {useServerSearch ? 'enabled' : 'disabled'}</span>
+          </div>
+        )}
+        
+        {searchError && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            <strong>Search Error:</strong> {searchError}
           </div>
         )}
         <PageHeader
@@ -233,11 +336,30 @@ export default function ClientsPage() {
             <MagnifyingGlassIcon className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              placeholder="Search clients..."
+              placeholder="Search clients by name, email, company, phone, or tags..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="input pl-9"
+              className="input pl-9 pr-8"
             />
+            {loading && useServerSearch && (
+              <div className="absolute right-8 top-1/2 -translate-y-1/2">
+                <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin"></div>
+              </div>
+            )}
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
+                title="Clear search"
+              >
+                ×
+              </button>
+            )}
+            {!useServerSearch && (
+              <div className="absolute -bottom-5 left-0 text-xs text-amber-600">
+                Server search unavailable, using local search
+              </div>
+            )}
           </div>
 
           {/* Status Filter */}
@@ -271,7 +393,17 @@ export default function ClientsPage() {
             <option value="cold_outreach">Cold Outreach</option>
             <option value="other">Other</option>
           </select>
-          <button onClick={()=> { setSearchTerm(''); setStatusFilter('all'); setSourceFilter('all'); }} className="pill pill-tint-gray text-xs h-10 self-end">Reset</button>
+          <button 
+            onClick={() => { 
+              setSearchTerm(''); 
+              setStatusFilter('all'); 
+              setSourceFilter('all'); 
+            }} 
+            className="pill pill-tint-gray text-xs h-10 self-end"
+            disabled={!searchTerm && statusFilter === 'all' && sourceFilter === 'all'}
+          >
+            Reset
+          </button>
         </div>
       </div>
 

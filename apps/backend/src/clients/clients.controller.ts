@@ -22,8 +22,55 @@ export class ClientsController {
   @Get()
   @ApiOperation({ summary: 'Get all clients' })
   @ApiResponse({ status: 200, description: 'Clients retrieved successfully' })
-  findAll(@Request() req) {
-    return this.clientsService.findAll(req.user.workspaceId);
+  findAll(
+    @Request() req,
+    @Query('search') search?: string,
+    @Query('status') status?: string,
+    @Query('source') source?: string,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+  ) {
+    const searchParams = {
+      search: search?.trim(),
+      status: status?.trim(),
+      source: source?.trim(),
+      limit: limit ? parseInt(limit, 10) : undefined,
+      offset: offset ? parseInt(offset, 10) : undefined,
+    };
+    
+    // Remove undefined values
+    Object.keys(searchParams).forEach(key => {
+      if (searchParams[key] === undefined || searchParams[key] === '') {
+        delete searchParams[key];
+      }
+    });
+    
+    return this.clientsService.findAll(req.user.workspaceId, Object.keys(searchParams).length > 0 ? searchParams : undefined);
+  }
+
+  @Get('count')
+  @ApiOperation({ summary: 'Get total count of clients' })
+  @ApiResponse({ status: 200, description: 'Client count retrieved successfully' })
+  count(
+    @Request() req,
+    @Query('search') search?: string,
+    @Query('status') status?: string,
+    @Query('source') source?: string,
+  ) {
+    const searchParams = {
+      search: search?.trim(),
+      status: status?.trim(),
+      source: source?.trim(),
+    };
+    
+    // Remove undefined values
+    Object.keys(searchParams).forEach(key => {
+      if (searchParams[key] === undefined || searchParams[key] === '') {
+        delete searchParams[key];
+      }
+    });
+    
+    return this.clientsService.count(req.user.workspaceId, Object.keys(searchParams).length > 0 ? searchParams : undefined);
   }
 
   @Get(':id')

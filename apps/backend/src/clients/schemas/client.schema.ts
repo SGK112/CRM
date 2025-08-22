@@ -93,3 +93,25 @@ ClientSchema.pre('validate', function(this: any, next) {
 ClientSchema.index({ workspaceId: 1, isActive: 1, lastName: 1, firstName: 1 });
 ClientSchema.index({ 'address.city': 1, workspaceId: 1 });
 ClientSchema.index({ email: 1, workspaceId: 1 }, { unique: false });
+ClientSchema.index({ phone: 1, workspaceId: 1 });
+ClientSchema.index({ company: 1, workspaceId: 1 });
+ClientSchema.index({ status: 1, workspaceId: 1 });
+ClientSchema.index({ source: 1, workspaceId: 1 });
+ClientSchema.index({ tags: 1, workspaceId: 1 });
+
+// Text index for full-text search
+ClientSchema.index({ 
+  firstName: 'text', 
+  lastName: 'text', 
+  email: 'text', 
+  company: 'text',
+  phone: 'text'
+}, { 
+  weights: { 
+    firstName: 10, 
+    lastName: 10, 
+    email: 5, 
+    company: 3,
+    phone: 1
+  } 
+});
