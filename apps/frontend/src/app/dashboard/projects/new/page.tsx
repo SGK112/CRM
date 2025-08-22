@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Layout from '@/components/Layout';
@@ -11,6 +11,9 @@ import {
 	MapPinIcon,
 	TagIcon,
 	UserIcon,
+	ChevronDownIcon,
+	CheckIcon,
+	MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
 import { API_BASE } from '@/lib/api';
 
@@ -40,6 +43,129 @@ interface CreateProjectData {
 		country: string;
 	};
 	tags: string[];
+}
+
+// Searchable Client Selector Component
+interface ClientSelectorProps {
+	clients: Client[];
+	selectedClientId: string | undefined;
+	onClientSelect: (clientId: string | undefined) => void;
+}
+
+function ClientSelector({ clients, selectedClientId, onClientSelect }: ClientSelectorProps) {
+	const [isOpen, setIsOpen] = useState(false);
+	const [searchTerm, setSearchTerm] = useState('');
+	const [filteredClients, setFilteredClients] = useState<Client[]>(clients);
+	const dropdownRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		const filtered = clients.filter(client => {
+			const fullName = `${client.firstName} ${client.lastName}`.toLowerCase();
+			const company = client.company?.toLowerCase() || '';
+			const email = client.email.toLowerCase();
+			const search = searchTerm.toLowerCase();
+			
+			return fullName.includes(search) || company.includes(search) || email.includes(search);
+		});
+		setFilteredClients(filtered);
+	}, [searchTerm, clients]);
+
+	useEffect(() => {
+		function handleClickOutside(event: MouseEvent) {
+			if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+				setIsOpen(false);
+			}
+		}
+
+		document.addEventListener('mousedown', handleClickOutside);
+		return () => document.removeEventListener('mousedown', handleClickOutside);
+	}, []);
+
+	const selectedClient = clients.find(client => client._id === selectedClientId);
+
+	const handleClientSelect = (client: Client | null) => {
+		onClientSelect(client?._id);
+		setIsOpen(false);
+		setSearchTerm('');
+	};
+
+	return (
+		<div className="relative" ref={dropdownRef}>
+			<label className="block text-sm font-medium text-[var(--text)] mb-2">
+				<UserIcon className="h-4 w-4 inline mr-1" /> Client
+			</label>
+			<div className="relative">
+				<button
+					type="button"
+					onClick={() => setIsOpen(!isOpen)}
+					className="w-full px-3 py-2 border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 bg-[var(--surface-1)] text-left flex items-center justify-between hover:bg-[var(--surface-2)] transition-colors"
+				>
+					<span className={selectedClient ? 'text-[var(--text)]' : 'text-[var(--text-dim)]'}>
+						{selectedClient 
+							? `${selectedClient.firstName} ${selectedClient.lastName}${selectedClient.company ? ` (${selectedClient.company})` : ''}`
+							: 'Select a client (optional)'
+						}
+					</span>
+					<ChevronDownIcon className={`h-4 w-4 text-[var(--text-faint)] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+				</button>
+
+				{isOpen && (
+					<div className="absolute z-10 w-full mt-1 bg-[var(--surface-1)] border border-[var(--border)] rounded-lg shadow-lg max-h-60 overflow-hidden">
+						<div className="p-2 border-b border-[var(--border)]">
+							<div className="relative">
+								<MagnifyingGlassIcon className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--text-faint)]" />
+								<input
+									type="text"
+									placeholder="Search clients..."
+									value={searchTerm}
+									onChange={(e) => setSearchTerm(e.target.value)}
+									className="w-full pl-9 pr-3 py-2 border border-[var(--border)] rounded-md focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 text-sm bg-[var(--input-bg)] text-[var(--text)] placeholder-[var(--text-faint)]"
+									autoFocus
+								/>
+							</div>
+						</div>
+						
+						<div className="max-h-48 overflow-y-auto">
+							<div
+								className="px-3 py-2 hover:bg-[var(--surface-2)] cursor-pointer flex items-center justify-between"
+								onClick={() => handleClientSelect(null)}
+							>
+								<span className="text-[var(--text-dim)]">No client selected</span>
+								{!selectedClientId && <CheckIcon className="h-4 w-4 text-amber-600" />}
+							</div>
+							
+							{filteredClients.length === 0 && searchTerm ? (
+								<div className="px-3 py-2 text-[var(--text-dim)] text-sm">
+									No clients found matching "{searchTerm}"
+								</div>
+							) : (
+								filteredClients.map((client) => (
+									<div
+										key={client._id}
+										className="px-3 py-2 hover:bg-[var(--surface-2)] cursor-pointer flex items-center justify-between"
+										onClick={() => handleClientSelect(client)}
+									>
+										<div>
+											<div className="font-medium text-[var(--text)]">
+												{client.firstName} {client.lastName}
+											</div>
+											{client.company && (
+												<div className="text-sm text-[var(--text-dim)]">{client.company}</div>
+											)}
+											<div className="text-xs text-[var(--text-faint)]">{client.email}</div>
+										</div>
+										{selectedClientId === client._id && (
+											<CheckIcon className="h-4 w-4 text-amber-600" />
+										)}
+									</div>
+								))
+							)}
+						</div>
+					</div>
+				)}
+			</div>
+		</div>
+	);
 }
 
 export default function NewDashboardProjectPage() {
@@ -181,20 +307,20 @@ export default function NewDashboardProjectPage() {
 				<div className="flex items-center mb-8">
 					<Link
 						href="/dashboard/projects"
-						className="inline-flex items-center text-gray-600 hover:text-gray-900 mr-4"
+						className="inline-flex items-center text-secondary hover:text-primary mr-4 transition-colors"
 					>
 						<ArrowLeftIcon className="h-5 w-5 mr-1" /> Back to Projects
 					</Link>
 					<div>
-						<h1 className="text-3xl font-bold text-gray-900">Create New Project</h1>
-						<p className="text-gray-600 mt-1">Fill in the details to create a new project</p>
+						<h1 className="text-3xl font-bold text-primary">Create New Project</h1>
+						<p className="text-secondary mt-1">Fill in the details to create a new project</p>
 					</div>
 				</div>
 
 				<form onSubmit={handleSubmit} className="space-y-8">
 					{/* Basic Information */}
-					<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-						<h2 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h2>
+					<div className="surface-1 rounded-lg shadow-sm border border-token p-6">
+						<h2 className="text-lg font-semibold text-primary mb-4">Basic Information</h2>
 						<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 							<div className="lg:col-span-2">
 								<label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
@@ -261,25 +387,11 @@ export default function NewDashboardProjectPage() {
 									<option value="urgent">Urgent</option>
 								</select>
 							</div>
-							<div>
-								<label htmlFor="clientId" className="block text-sm font-medium text-gray-700 mb-2">
-									<UserIcon className="h-4 w-4 inline mr-1" /> Client
-								</label>
-								<select
-									id="clientId"
-									name="clientId"
-									value={formData.clientId || ''}
-									onChange={handleInputChange}
-									className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-								>
-									<option value="">Select a client (optional)</option>
-									{clients.map((client) => (
-										<option key={client._id} value={client._id}>
-											{client.firstName} {client.lastName} {client.company && `(${client.company})`}
-										</option>
-									))}
-								</select>
-							</div>
+							<ClientSelector
+								clients={clients}
+								selectedClientId={formData.clientId}
+								onClientSelect={(clientId) => setFormData(prev => ({ ...prev, clientId }))}
+							/>
 						</div>
 					</div>
 

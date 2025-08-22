@@ -49,11 +49,11 @@ const statusColors = {
   lead: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-500/20 dark:text-yellow-300',
   prospect: 'bg-blue-100 text-blue-800 dark:bg-blue-600/20 dark:text-blue-300',
   active: 'bg-green-100 text-green-800 dark:bg-green-600/20 dark:text-green-300',
-  inactive: 'bg-gray-100 text-gray-800 dark:bg-[var(--surface-2)] dark:text-[var(--text-dim)]',
+  inactive: 'surface-2 text-secondary',
   churned: 'bg-red-100 text-red-800 dark:bg-red-600/20 dark:text-red-300',
   completed: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-600/20 dark:text-emerald-300',
   client: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-600/20 dark:text-indigo-300',
-  dead_lead: 'bg-gray-200 text-gray-600 dark:bg-gray-700/40 dark:text-gray-400'
+  dead_lead: 'surface-3 text-tertiary'
 };
 
 export default function ClientsPage() {

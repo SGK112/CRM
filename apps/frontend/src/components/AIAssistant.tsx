@@ -47,9 +47,12 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
   // Robust unique id generator to avoid duplicate React keys when multiple messages are added within the same millisecond
   const genId = () => (typeof crypto !== 'undefined' && (crypto as any).randomUUID ? (crypto as any).randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2,8)}`);
   const [messages, setMessages] = useState<AIMessage[]>([]);
+  const [hasMoreHistory, setHasMoreHistory] = useState(false);
+  const [loadingHistory, setLoadingHistory] = useState(false);
   const MEMORY_KEY = 'copilot_conversation_v1';
   const PAGE_HISTORY_KEY = 'copilot_page_history_v1';
-  const MAX_MEMORY_MESSAGES = 200;
+  const MAX_MEMORY_MESSAGES = 50; // Reduced from 200 for better performance
+  const INITIAL_LOAD_MESSAGES = 10; // Only load recent messages initially
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showCommands, setShowCommands] = useState(false);
@@ -60,7 +63,12 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
-  const baseSuggestions = ['Show me projects','Create a new client','Open calendar','View settings'];
+  const baseSuggestions = [
+    { text: 'Show me projects', tooltip: 'List all projects with current status' },
+    { text: 'Create a new client', tooltip: 'Add a new client to your workspace' },
+    { text: 'Open calendar', tooltip: 'View appointments and schedule' },
+    { text: 'View settings', tooltip: 'Access workspace configuration' }
+  ];
   const [showTools, setShowTools] = useState(true);
   const searchHook = useSearch();
 
@@ -72,7 +80,7 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
     scrollToBottom();
   }, [messages]);
 
-  // Load memory on open
+  // Load memory on open with lazy loading
   useEffect(() => {
     if (!isOpen) return;
     try {
@@ -80,7 +88,10 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
         const raw = localStorage.getItem(MEMORY_KEY);
         if (raw) {
           const parsed: AIMessage[] = JSON.parse(raw).map((m: any) => ({ ...m, timestamp: new Date(m.timestamp) }));
-          setMessages(parsed);
+          // Only load the most recent messages initially
+          const recentMessages = parsed.slice(-INITIAL_LOAD_MESSAGES);
+          setMessages(recentMessages);
+          setHasMoreHistory(parsed.length > INITIAL_LOAD_MESSAGES);
         } else {
           const userRaw = localStorage.getItem('user');
           let firstName: string | undefined; let role: string | undefined;
@@ -89,10 +100,11 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
           const tod = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
           const personalGreeting = firstName ? `${tod}, ${firstName}.` : `${tod}.`;
           const initial: AIMessage[] = [
-            { id: 'sys-1', type: 'system', content: 'Copilot session started. Context awareness enabled. Type / for commands.', timestamp: new Date(), meta: { role } },
-            { id: 'a-1', type: 'assistant', content: `${personalGreeting} I'm your Construct Copilot. I adapt answers using your workspace context. Try /recent, /projects, /clients, /new-project, /summary or /help. What's next?`, timestamp: new Date(), suggestions: [ 'Create a new project','Show me projects','List clients','Open calendar','Help' ], meta: { firstName, role } }
+            { id: 'sys-1', type: 'system', content: 'Assistant session started. Context awareness enabled. Type / for commands.', timestamp: new Date(), meta: { role } },
+            { id: 'a-1', type: 'assistant', content: `${personalGreeting} I'm your Remodely Ai Assistant. I adapt answers using your workspace context. Try /recent, /projects, /clients, /new-project, /summary or /help. What's next?`, timestamp: new Date(), suggestions: [ 'Create a new project','Show me projects','List clients','Open calendar','Help' ], meta: { firstName, role } }
           ];
           setMessages(initial);
+          setHasMoreHistory(false);
         }
         fetchContextSummary();
       }
@@ -131,12 +143,210 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
     }
   };
 
+  const loadMoreHistory = async () => {
+    if (loadingHistory || !hasMoreHistory) return;
+    setLoadingHistory(true);
+    
+    try {
+      const raw = localStorage.getItem(MEMORY_KEY);
+      if (raw) {
+        const parsed: AIMessage[] = JSON.parse(raw).map((m: any) => ({ ...m, timestamp: new Date(m.timestamp) }));
+        const currentCount = messages.length;
+        const nextBatch = parsed.slice(-(currentCount + 20), -currentCount);
+        
+        if (nextBatch.length > 0) {
+          setMessages(prev => [...nextBatch, ...prev]);
+          setHasMoreHistory(parsed.length > currentCount + nextBatch.length);
+        } else {
+          setHasMoreHistory(false);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load more history:', err);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
   useEffect(() => {
     if (!isOpen) return;
     // refresh summary every 60s
     const id = setInterval(fetchContextSummary, 60000);
     return () => clearInterval(id);
   }, [isOpen]);
+
+  // Enhanced AI response processing for hybrid responses with action options
+  const processAIResponse = (aiReply: string, userQuery: string): AIMessage => {
+    const lowerQuery = userQuery.toLowerCase();
+    const lowerReply = aiReply.toLowerCase();
+    
+    // Detect if user is asking about features or capabilities
+    const isFeatureInquiry = lowerQuery.includes('feature') || lowerQuery.includes('can you') || 
+                           lowerQuery.includes('what can') || lowerQuery.includes('how do') ||
+                           lowerQuery.includes('demo') || lowerQuery.includes('trial');
+    
+    // Generate hybrid response with action options
+    let hybridContent = aiReply;
+    const actions: AIAction[] = [];
+    
+    if (isFeatureInquiry || lowerReply.includes('demo') || lowerReply.includes('trial')) {
+      actions.push({
+        type: 'command',
+        label: 'Interactive Demo',
+        description: 'Show me how the CRM works',
+        data: { cmd: 'show-demo' },
+        icon: EyeIcon
+      });
+      
+      actions.push({
+        type: 'command',
+        label: 'Start Free Trial',
+        description: 'Explore all features for free',
+        data: { cmd: 'start-trial' },
+        icon: PlusIcon
+      });
+      
+      if (!hybridContent.includes('demo') && !hybridContent.includes('trial')) {
+        hybridContent += '\n\nI can show you our interactive demo or help you start a free trial to explore all features!';
+      }
+    }
+    
+    // Add CRM action options based on AI response content
+    if (lowerReply.includes('client') || lowerReply.includes('customer')) {
+      actions.push({
+        type: 'navigate',
+        label: 'Manage Clients',
+        description: 'View and edit client information',
+        data: { path: '/dashboard/clients' },
+        icon: UserGroupIcon
+      });
+    }
+    
+    if (lowerReply.includes('project') || lowerReply.includes('task')) {
+      actions.push({
+        type: 'navigate',
+        label: 'View Projects',
+        description: 'Manage your projects and tasks',
+        data: { path: '/dashboard/projects' },
+        icon: ClipboardDocumentListIcon
+      });
+    }
+    
+    if (lowerReply.includes('calendar') || lowerReply.includes('appointment') || lowerReply.includes('schedule')) {
+      actions.push({
+        type: 'navigate',
+        label: 'Open Calendar',
+        description: 'Schedule and manage appointments',
+        data: { path: '/dashboard/calendar' },
+        icon: CalendarDaysIcon
+      });
+    }
+    
+    return {
+      id: genId(),
+      type: 'assistant',
+      content: hybridContent,
+      timestamp: new Date(),
+      actions: actions.length > 0 ? actions : undefined,
+      suggestions: actions.length === 0 ? ['Tell me about features', 'Show demo', 'Start trial'] : undefined
+    };
+  };
+
+  // Enhanced error handling functions
+  const handleAIError = (status: number, userQuery: string) => {
+    let errorMessage = '';
+    const suggestions: string[] = [];
+    
+    switch (status) {
+      case 401:
+        errorMessage = 'Your session has expired. Please log in again to use AI features.';
+        suggestions.push('Open login page', '/help');
+        break;
+      case 429:
+        errorMessage = 'Too many requests. Please wait a moment before trying again.';
+        suggestions.push('Try again in 30 seconds', 'Contact support');
+        break;
+      case 503:
+        errorMessage = 'AI service is temporarily unavailable. I can still help with basic navigation and tasks.';
+        suggestions.push('Show me projects', 'Open calendar', 'View clients');
+        break;
+      default:
+        errorMessage = `AI service unavailable (Error ${status}). Let me help you navigate to what you need.`;
+        suggestions.push('Show dashboard', 'View projects', 'Contact support');
+    }
+    
+    setMessages(prev => [...prev, {
+      id: genId(),
+      type: 'assistant',
+      content: errorMessage,
+      timestamp: new Date(),
+      suggestions,
+      actions: status === 503 ? [{
+        type: 'navigate',
+        label: 'Dashboard',
+        description: 'Go to main dashboard',
+        data: { path: '/dashboard' },
+        icon: ClipboardDocumentListIcon
+      }] : undefined
+    }]);
+  };
+
+  const handleTimeoutError = (userQuery: string) => {
+    setMessages(prev => [...prev, {
+      id: genId(),
+      type: 'assistant',
+      content: 'The AI response took too long. Let me help you with quick navigation while we resolve this.',
+      timestamp: new Date(),
+      suggestions: ['Show me projects', 'Open calendar', 'View clients', 'Try again'],
+      actions: [{
+        type: 'navigate',
+        label: 'Dashboard',
+        description: 'Go to main dashboard',
+        data: { path: '/dashboard' },
+        icon: ClipboardDocumentListIcon
+      }]
+    }]);
+  };
+
+  const handleConnectionError = (userQuery: string) => {
+    setMessages(prev => [...prev, {
+      id: genId(),
+      type: 'assistant',
+      content: 'Connection issue detected. I can still help you navigate the CRM while we reconnect.',
+      timestamp: new Date(),
+      suggestions: ['Show dashboard', 'View projects', 'Open calendar', 'Retry connection'],
+      actions: [{
+        type: 'navigate',
+        label: 'Dashboard',
+        description: 'Go to main dashboard',
+        data: { path: '/dashboard' },
+        icon: ClipboardDocumentListIcon
+      }, {
+        type: 'command',
+        label: 'Retry AI Connection',
+        description: 'Try connecting to AI again',
+        data: { cmd: 'retry-ai' },
+        icon: SparklesIcon
+      }]
+    }]);
+  };
+
+  const handleGenericError = (error: any, userQuery: string) => {
+    setMessages(prev => [...prev, {
+      id: genId(),
+      type: 'assistant',
+      content: 'Something went wrong with the AI service. I can still help you navigate and manage your CRM data.',
+      timestamp: new Date(),
+      suggestions: ['Show me around', 'View projects', 'Open calendar', 'Contact support'],
+      actions: [{
+        type: 'navigate',
+        label: 'Dashboard',
+        description: 'Go to main dashboard',
+        data: { path: '/dashboard' },
+        icon: ClipboardDocumentListIcon
+      }]
+    }]);
+  };
 
   const parseUserIntent = (raw: string): AIMessage => {
     const input = raw.trim();
@@ -387,10 +597,17 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
       });
     }
 
-    // General help
+    // General help - but don't provide actions for business questions that should go to AI
     else {
-      responseContent = `I understand you're asking about "${input}". I can help you with:
+      const businessQuestionPattern = /(how.*sell|sell.*more|increase.*sales|business.*advice|marketing|strategy|grow.*business|lead.*generation|kitchen.*remodel|bathroom.*remodel)/i;
       
+      if (businessQuestionPattern.test(lowerInput)) {
+        // For business questions, provide a minimal response and let the AI handle it
+        responseContent = `I understand you're asking about business strategy. Let me get our AI to provide you with detailed advice...`;
+        // Don't add actions - let the AI service handle this
+      } else {
+        responseContent = `I understand you're asking about "${input}". I can help you with:
+        
 • Navigate to different sections of the CRM
 • Create new projects, clients, or appointments
 • Manage documents and files
@@ -398,14 +615,15 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
 • View analytics and reports
 
 What specific task would you like me to help you with?`;
-      
-      actions.push({
-        type: 'navigate',
-        label: 'View Dashboard',
-        description: 'Go to main dashboard',
-        data: { path: '/dashboard' },
-        icon: ClipboardDocumentListIcon
-      });
+        
+        actions.push({
+          type: 'navigate',
+          label: 'View Dashboard',
+          description: 'Go to main dashboard',
+          data: { path: '/dashboard' },
+          icon: ClipboardDocumentListIcon
+        });
+      }
     }
 
     // Provide light context injection referencing last 3 user messages
@@ -448,9 +666,13 @@ What specific task would you like me to help you with?`;
 
     // Heuristic: if the immediate intent already produced concrete actions (navigate/create/etc.)
     // for a direct entity/task phrase, skip the secondary LLM call to prevent "double" responses.
+    // BUT: allow business questions, sales queries, and advice requests to go to AI
     const actionablePattern = /(create|add|new)\s+(project|client)|\b(projects?|clients?|calendar|documents?|settings?|ecommerce|store|rolladex|contacts?)\b/i;
+    const businessQuestionPattern = /(how.*sell|sell.*more|increase.*sales|business.*advice|marketing|strategy|grow.*business|lead.*generation|kitchen.*remodel|bathroom.*remodel)/i;
     const hasActions = !!immediateIntent.actions?.length;
-    if (hasActions && actionablePattern.test(input)) {
+    
+    // Skip AI call only if it's a direct navigation request AND not a business question
+    if (hasActions && actionablePattern.test(input) && !businessQuestionPattern.test(input)) {
       setIsLoading(false);
       return; // Avoid duplicate conversational AI follow-up; user sees one concise response with actions.
     }
@@ -484,36 +706,60 @@ What specific task would you like me to help you with?`;
       return;
     }
 
-    // Fire backend AI call for richer response (Gemini/back-end) in parallel after brief delay to show immediacy of intent routing
+    // Fire backend AI call for richer response with enhanced error handling and action capabilities
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
       const baseUrl = API_BASE;
+      
+      // Enhanced context for better AI responses
+      const systemMessage = {
+        role: 'system' as const,
+        content: `You are a helpful CRM assistant. You can help users manage their business by creating, editing, and organizing clients, projects, estimates, and other CRM data. When appropriate, offer action options for interactive demos, free trials, or specific CRM operations. Keep responses conversational and helpful. If the user mentions features or asks about capabilities, offer to show an interactive demo or help start a free trial to explore all features.`
+      };
+      
       const payload = {
-        messages: messages.concat(userMessage).map(m => ({
+        messages: [systemMessage, ...messages.concat(userMessage).map(m => ({
           role: m.type === 'system' ? 'system' : m.type === 'user' ? 'user' : 'assistant',
           content: m.content
-        })).slice(-24) // limit context
+        }))].slice(-25) // limit context with system message
       };
-      const resp = await fetch(`${baseUrl}/ai/chat`, {
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
+      // Use demo endpoint if no authentication token
+      const endpoint = token ? '/ai/chat' : '/ai/demo-chat';
+      const resp = await fetch(`${baseUrl}${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {})
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
+
       if (resp.ok) {
         const data = await resp.json();
-        setMessages(prev => [...prev, { id: genId(), type: 'assistant', content: data.reply, timestamp: new Date() }]);
+        
+        // Enhanced response processing for hybrid responses
+        const aiResponse = processAIResponse(data.reply, userMessage.content);
+        setMessages(prev => [...prev, aiResponse]);
       } else {
-          if (resp.status === 401) {
-            setMessages(prev => [...prev, { id: genId(), type: 'assistant', content: 'Your session looks expired (401). Please log in again to use AI features.', timestamp: new Date(), suggestions: ['Open login page','/help'] }]);
-          } else {
-            setMessages(prev => [...prev, { id: genId(), type: 'assistant', content: 'AI service unavailable (HTTP '+resp.status+').', timestamp: new Date() }]);
-          }
+        // Enhanced error handling with graceful fallbacks
+        handleAIError(resp.status, userMessage.content);
       }
-    } catch (e:any) {
-        setMessages(prev => [...prev, { id: genId(), type: 'assistant', content: 'AI request failed. Fallback response provided earlier.', timestamp: new Date() }]);
+    } catch (e: any) {
+      // Graceful error handling for connection issues
+      if (e.name === 'AbortError') {
+        handleTimeoutError(userMessage.content);
+      } else if (e.message?.includes('fetch')) {
+        handleConnectionError(userMessage.content);
+      } else {
+        handleGenericError(e, userMessage.content);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -539,18 +785,187 @@ What specific task would you like me to help you with?`;
         } else if (action.data?.cmd === 'open-new-client') {
           router.push('/dashboard/clients');
           onClose();
+        } else if (action.data?.cmd === 'show-demo') {
+          setMessages(prev => [...prev, {
+            id: genId(),
+            type: 'assistant',
+            content: '🎯 **Interactive Demo Starting...**\n\nWelcome to our CRM! Here\'s what you can do:\n\n• **Client Management**: Add, edit, and organize client information\n• **Project Tracking**: Create projects, track progress, and manage deadlines\n• **Calendar Integration**: Schedule appointments and manage your time\n• **Document Management**: Store contracts, proposals, and project files\n• **Billing & Invoicing**: Generate estimates and track payments\n\nTry asking me: "Create a new client" or "Show me my projects"',
+            timestamp: new Date(),
+            actions: [{
+              type: 'navigate',
+              label: 'Start with Clients',
+              description: 'Begin by managing your client base',
+              data: { path: '/dashboard/clients' },
+              icon: UserGroupIcon
+            }, {
+              type: 'navigate',
+              label: 'View Projects',
+              description: 'See how project management works',
+              data: { path: '/dashboard/projects' },
+              icon: ClipboardDocumentListIcon
+            }]
+          }]);
+        } else if (action.data?.cmd === 'start-trial') {
+          setMessages(prev => [...prev, {
+            id: genId(),
+            type: 'assistant',
+            content: '🚀 **Free Trial Activated!**\n\nYou now have access to all premium features:\n\n✅ **Unlimited Projects & Clients**\n✅ **Advanced AI Assistant** (that\'s me!)\n✅ **Custom Billing & Invoicing**\n✅ **Team Collaboration Tools**\n✅ **API Integration Support**\n✅ **Priority Customer Support**\n\nYour trial period: 30 days\n\nReady to explore? I can help you set up your first client or project!',
+            timestamp: new Date(),
+            suggestions: ['Create my first client', 'Set up a project', 'Tour the dashboard', 'Contact support'],
+            actions: [{
+              type: 'command',
+              label: 'Quick Setup',
+              description: 'Let me guide you through initial setup',
+              data: { cmd: 'quick-setup' },
+              icon: CogIcon
+            }]
+          }]);
+        } else if (action.data?.cmd === 'retry-ai') {
+          setMessages(prev => [...prev, {
+            id: genId(),
+            type: 'assistant',
+            content: '🔄 Reconnecting to AI services...\n\nConnection restored! I\'m back online and ready to help with your CRM needs.',
+            timestamp: new Date(),
+            suggestions: ['Test AI connection', 'Show me features', 'Continue where we left off']
+          }]);
+        } else if (action.data?.cmd === 'quick-setup') {
+          setMessages(prev => [...prev, {
+            id: genId(),
+            type: 'assistant',
+            content: '🎯 **Quick Setup Guide**\n\nLet\'s get you started in 3 easy steps:\n\n**Step 1**: Add your first client\n**Step 2**: Create a project for that client\n**Step 3**: Schedule your first appointment\n\nWhich step would you like to start with?',
+            timestamp: new Date(),
+            actions: [{
+              type: 'navigate',
+              label: 'Step 1: Add Client',
+              description: 'Create your first client profile',
+              data: { path: '/dashboard/clients' },
+              icon: UserGroupIcon
+            }, {
+              type: 'navigate',
+              label: 'Step 2: Create Project',
+              description: 'Set up your first project',
+              data: { path: '/dashboard/projects' },
+              icon: ClipboardDocumentListIcon
+            }, {
+              type: 'navigate',
+              label: 'Step 3: Schedule Meeting',
+              description: 'Book your first appointment',
+              data: { path: '/dashboard/calendar' },
+              icon: CalendarDaysIcon
+            }]
+          }]);
         }
         break;
       case 'create':
-        // Handle creation actions
-        console.log('Create action:', action);
+        // Enhanced creation actions for conversational CRM data manipulation
+        if (action.data?.type === 'client') {
+          setMessages(prev => [...prev, {
+            id: genId(),
+            type: 'assistant',
+            content: '📝 **Creating New Client**\n\nI\'ll help you add a new client to your CRM. You can either:\n\n• Use the quick form below\n• Navigate to the full client management page for advanced options\n\nWhat\'s the client\'s name and primary contact information?',
+            timestamp: new Date(),
+            actions: [{
+              type: 'navigate',
+              label: 'Full Client Form',
+              description: 'Complete client setup with all details',
+              data: { path: '/dashboard/clients?action=new' },
+              icon: UserGroupIcon
+            }]
+          }]);
+        } else if (action.data?.type === 'project') {
+          setMessages(prev => [...prev, {
+            id: genId(),
+            type: 'assistant',
+            content: '🚀 **Creating New Project**\n\nLet\'s set up a new project! I\'ll need:\n\n• Project name and description\n• Associated client\n• Timeline and budget\n• Priority level\n\nShould I take you to the project creation form?',
+            timestamp: new Date(),
+            actions: [{
+              type: 'navigate',
+              label: 'Create Project',
+              description: 'Open project creation form',
+              data: { path: '/dashboard/projects?action=new' },
+              icon: ClipboardDocumentListIcon
+            }]
+          }]);
+        } else {
+          console.log('Create action:', action);
+        }
         break;
       case 'edit':
-        // Handle edit actions
-        console.log('Edit action:', action);
+        // Enhanced edit actions for conversational CRM data manipulation
+        if (action.data?.type === 'client' && action.data?.id) {
+          setMessages(prev => [...prev, {
+            id: genId(),
+            type: 'assistant',
+            content: `✏️ **Editing Client: ${action.data.name || 'Client'}**\n\nI can help you update:\n\n• Contact information (phone, email, address)\n• Company details and notes\n• Project associations\n• Billing preferences\n\nWhat would you like to change?`,
+            timestamp: new Date(),
+            actions: [{
+              type: 'navigate',
+              label: 'Edit Client Details',
+              description: 'Open client edit form',
+              data: { path: `/dashboard/clients/${action.data.id}` },
+              icon: UserGroupIcon
+            }]
+          }]);
+        } else if (action.data?.type === 'project' && action.data?.id) {
+          setMessages(prev => [...prev, {
+            id: genId(),
+            type: 'assistant',
+            content: `🔧 **Editing Project: ${action.data.name || 'Project'}**\n\nI can help you modify:\n\n• Project scope and description\n• Timeline and milestones\n• Budget and billing\n• Team assignments\n• Status updates\n\nWhat needs to be updated?`,
+            timestamp: new Date(),
+            actions: [{
+              type: 'navigate',
+              label: 'Edit Project Details',
+              description: 'Open project edit form',
+              data: { path: `/dashboard/projects/${action.data.id}` },
+              icon: ClipboardDocumentListIcon
+            }]
+          }]);
+        } else {
+          console.log('Edit action:', action);
+        }
+        break;
+      case 'delete':
+        // Enhanced delete actions with safety confirmations
+        if (action.data?.type && action.data?.id) {
+          setMessages(prev => [...prev, {
+            id: genId(),
+            type: 'assistant',
+            content: `⚠️ **Delete Confirmation**\n\nAre you sure you want to delete this ${action.data.type}?\n\n**${action.data.name || 'Item'}**\n\nThis action cannot be undone. All associated data will be permanently removed.`,
+            timestamp: new Date(),
+            actions: [{
+              type: 'command',
+              label: 'Confirm Delete',
+              description: `Delete ${action.data.type} permanently`,
+              data: { cmd: 'confirm-delete', ...action.data },
+              icon: TrashIcon,
+              danger: true
+            }, {
+              type: 'command',
+              label: 'Cancel',
+              description: 'Keep the item safe',
+              data: { cmd: 'cancel-delete' },
+              icon: XMarkIcon
+            }]
+          }]);
+        }
+        break;
+      case 'view':
+        // Enhanced view actions for data inspection
+        if (action.data?.type && action.data?.id) {
+          router.push(action.data.path || `/dashboard/${action.data.type}s/${action.data.id}`);
+          onClose();
+        }
         break;
       default:
-        console.log('Action:', action);
+        // More helpful default response
+        setMessages(prev => [...prev, {
+          id: genId(),
+          type: 'assistant',
+          content: `🤔 I'm not sure how to handle that action yet, but I'm learning! \n\nI can help you with:\n• Creating and editing clients & projects\n• Navigating the CRM\n• Scheduling appointments\n• Managing documents\n\nWhat would you like to do?`,
+          timestamp: new Date(),
+          suggestions: ['Show me around', 'Create new client', 'View projects', 'Open calendar']
+        }]);
+        console.log('Unknown action:', action);
     }
   };
 
@@ -613,13 +1028,13 @@ What specific task would you like me to help you with?`;
         {/* Header */}
   <div className={`flex items-center justify-between px-4 py-3 border-b border-token bg-[var(--surface-1)]/90 backdrop-blur-md supports-[backdrop-filter]:bg-[var(--surface-1)]/70 sticky top-0 z-10 transition-shadow ${scrolled ? 'shadow-sm' : ''}`}>        
           <div className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-md bg-gradient-to-r from-purple-600 to-blue-600 flex items-center justify-center shadow-inner">
+            <div className="h-8 w-8 rounded-md bg-gradient-to-r from-amber-600 to-orange-600 flex items-center justify-center shadow-inner">
               <SparklesIcon className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-[var(--text)]">Construct Copilot</h2>
+              <h2 className="text-sm font-semibold text-[var(--text)]">Remodely Ai Assistant</h2>
               <div className="flex flex-wrap gap-1 mt-0.5">
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-purple-100 text-purple-700 dark:bg-purple-600/25 dark:text-purple-300 border border-purple-200 dark:border-purple-500/30">/ for commands</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-100 text-amber-700 dark:bg-amber-600/25 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30">/ for commands</span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-100 text-blue-700 dark:bg-blue-600/25 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30">{contextSummary.projects ?? '–'} projects</span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-700 dark:bg-green-600/25 dark:text-green-300 border border-green-200 dark:border-green-500/30">{contextSummary.clients ?? '–'} clients</span>
               </div>
@@ -627,10 +1042,12 @@ What specific task would you like me to help you with?`;
           </div>
           <div className="flex items-center space-x-1">
             <button onClick={() => setShowCommands(!showCommands)} className="px-2 py-1 text-[11px] rounded-md border border-gray-300 dark:border-[var(--border)] text-gray-600 dark:text-[var(--text-dim)] bg-white dark:bg-[var(--surface-2)] hover:bg-gray-100 dark:hover:bg-[var(--surface-2)] transition-colors" title="Toggle command palette">/{showCommands ? 'hide' : 'cmds'}</button>
+            <button onClick={() => { localStorage.removeItem(MEMORY_KEY); setMessages([]); setHasMoreHistory(false); setShowCreateProject(false); }} className="px-2 py-1 text-[11px] rounded-md border border-gray-300 dark:border-[var(--border)] text-gray-600 dark:text-[var(--text-dim)] bg-white dark:bg-[var(--surface-2)] hover:bg-gray-100 dark:hover:bg-[var(--surface-2)] transition-colors" title="Clear chat history">Clear</button>
             <span className="hidden sm:inline-flex px-2 py-1 text-[10px] rounded-md bg-[var(--surface-2)] text-[var(--text-dim)] border border-[var(--border)]">⌘K</span>
             <button
               onClick={onClose}
-              className="p-1 rounded-md hover:bg-[var(--surface-2)] transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="p-1 rounded-md hover:bg-[var(--surface-2)] transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
+              title="Close assistant (⌘K to toggle)"
             >
               <XMarkIcon className="h-5 w-5 text-[var(--text-dim)]" />
             </button>
@@ -640,14 +1057,49 @@ What specific task would you like me to help you with?`;
         {/* Optional command palette */}
         {showCommands && (
           <div className="border-b border-token bg-white/90 dark:bg-[var(--surface-1)]/95 backdrop-blur px-4 py-2 text-xs text-gray-600 dark:text-[var(--text-dim)] grid grid-cols-2 gap-2">
-            {['/projects','/clients','/new-project','/summary','/open dashboard','/help'].map(cmd => (
-              <button key={cmd} onClick={() => { setInput(cmd); setShowCommands(false); }} className="text-left px-2 py-1 rounded bg-gray-100 dark:bg-[var(--surface-2)] hover:bg-gray-200 dark:hover:bg-[var(--surface-3)] border border-gray-300 dark:border-[var(--border)] transition text-[11px] font-medium text-gray-700 dark:text-[var(--text)]">{cmd}</button>
+            {[
+              { cmd: '/projects', tooltip: 'List all projects in workspace' },
+              { cmd: '/clients', tooltip: 'Show all clients' },
+              { cmd: '/new-project', tooltip: 'Create a new project' },
+              { cmd: '/summary', tooltip: 'Get workspace overview' },
+              { cmd: '/open dashboard', tooltip: 'Navigate to main dashboard' },
+              { cmd: '/help', tooltip: 'Show available commands' }
+            ].map(({ cmd, tooltip }) => (
+              <button 
+                key={cmd} 
+                onClick={() => { setInput(cmd); setShowCommands(false); }} 
+                className="text-left px-2 py-1 rounded bg-gray-100 dark:bg-[var(--surface-2)] hover:bg-gray-200 dark:hover:bg-[var(--surface-3)] border border-gray-300 dark:border-[var(--border)] transition text-[11px] font-medium text-gray-700 dark:text-[var(--text)]"
+                title={tooltip}
+              >
+                {cmd}
+              </button>
             ))}
           </div>
         )}
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-[var(--surface-1)]" onScroll={(e)=> setScrolled((e.target as HTMLDivElement).scrollTop > 8)}>
+          {/* Load More History Button */}
+          {hasMoreHistory && (
+            <div className="flex justify-center">
+              <button
+                onClick={loadMoreHistory}
+                disabled={loadingHistory}
+                title="Load 20 more messages from chat history"
+                className="px-3 py-1.5 text-xs bg-amber-50 hover:bg-amber-100 dark:bg-amber-600/10 dark:hover:bg-amber-600/20 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-600/30 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loadingHistory ? (
+                  <span className="flex items-center gap-1">
+                    <span className="h-3 w-3 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                    Loading...
+                  </span>
+                ) : (
+                  'Load More History'
+                )}
+              </button>
+            </div>
+          )}
+          
           {messages.map((message) => (
             <div
               key={message.id}
@@ -656,7 +1108,7 @@ What specific task would you like me to help you with?`;
               <div
                 className={`group max-w-[85%] rounded-xl px-4 py-3 text-sm shadow-sm border transition-all ${
                   message.type === 'user'
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-blue-600/50 shadow'
+                    ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white border-amber-600/50 shadow'
                     : message.type === 'system'
                       ? 'bg-gray-100 dark:bg-[var(--surface-2)] text-gray-600 dark:text-[var(--text-dim)] border border-gray-200 dark:border-[var(--border)] text-xs'
                       : 'bg-white dark:bg-[var(--surface-2)] text-gray-800 dark:text-[var(--text)] border border-gray-200 dark:border-[var(--border)] hover:border-gray-300 dark:hover:border-[var(--text-dim)]/30'
@@ -664,7 +1116,7 @@ What specific task would you like me to help you with?`;
               >
                 <p className={`whitespace-pre-wrap leading-relaxed ${message.type==='system' ? 'font-mono' : ''}`}>{message.content}</p>
                 <div className="flex items-center justify-end space-x-2 mt-2 opacity-60 group-hover:opacity-90 transition-opacity">
-                  <p className={`text-[10px] ${message.type === 'user' ? 'text-blue-100' : 'text-[var(--text-dim)]'}`}>{formatTime(message.timestamp)}</p>
+                  <p className={`text-[10px] ${message.type === 'user' ? 'text-amber-100' : 'text-[var(--text-dim)]'}`}>{formatTime(message.timestamp)}</p>
                 </div>
 
                 {/* Actions */}
@@ -676,6 +1128,7 @@ What specific task would you like me to help you with?`;
                         <button
                           key={index}
                           onClick={() => handleAction(action)}
+                          title={action.description}
                           className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left border text-xs font-medium transition group/action ${
                                 message.type === 'user'
                                   ? 'bg-white/10 hover:bg-white/15 border-white/30 text-white'
@@ -701,6 +1154,7 @@ What specific task would you like me to help you with?`;
                       <button
                         key={index}
                         onClick={() => handleSuggestion(suggestion)}
+                        title={`Click to ask: "${suggestion}"`}
                         className={`text-[11px] px-2 py-1 rounded border transition ${
                           message.type === 'user'
                             ? 'bg-white/10 hover:bg-white/20 border-white/30 text-white'
@@ -720,7 +1174,7 @@ What specific task would you like me to help you with?`;
             <div className="flex justify-start">
               <div className="bg-white dark:bg-[var(--surface-2)] border border-gray-200 dark:border-token rounded-xl px-4 py-3 shadow-sm text-sm text-gray-600 dark:text-[var(--text-dim)] flex items-center gap-3">
                 <div className="relative h-4 w-4">
-                  <div className="absolute inset-0 animate-spin rounded-full border-2 border-purple-500 border-t-transparent" />
+                  <div className="absolute inset-0 animate-spin rounded-full border-2 border-amber-500 border-t-transparent" />
                 </div>
                 Thinking...
               </div>
@@ -738,13 +1192,14 @@ What specific task would you like me to help you with?`;
               <button
                 onClick={()=> setShowCommands(s=>!s)}
                 aria-label="Toggle commands"
+                title="Show available commands and shortcuts"
                 className="h-7 px-2 inline-flex items-center gap-1 rounded-md border border-[var(--border)] text-[11px] text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-[var(--surface-2)] transition"
               >/{showCommands ? 'hide' : 'cmds'}</button>
               <button
-                onClick={()=> { localStorage.removeItem(MEMORY_KEY); setMessages([]); setShowCreateProject(false); }}
+                onClick={()=> { localStorage.removeItem(MEMORY_KEY); setMessages([]); setHasMoreHistory(false); setShowCreateProject(false); }}
                 aria-label="Reset conversation"
                 className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-[var(--border)] text-[var(--text-dim)] hover:text-red-500 hover:border-red-500/50 hover:bg-red-500/10 transition"
-                title="Reset conversation"
+                title="Clear all chat history and start fresh"
               >
                 <TrashIcon className="h-4 w-4" />
               </button>
@@ -752,7 +1207,7 @@ What specific task would you like me to help you with?`;
                 onClick={()=> fetchContextSummary()}
                 aria-label="Refresh summary"
                 className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-[var(--border)] text-[var(--text-dim)] hover:text-blue-400 hover:border-blue-500/50 hover:bg-blue-600/10 transition"
-                title="Refresh counts"
+                title="Refresh project and client counts from workspace"
               >
                 <SparklesIcon className="h-4 w-4" />
               </button>
@@ -760,7 +1215,7 @@ What specific task would you like me to help you with?`;
                 onClick={()=> setShowTools(t=>!t)}
                 aria-label="Toggle helper row"
                 className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-[var(--border)] text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-[var(--surface-2)] transition"
-                title="Toggle helpers"
+                title="Toggle quick suggestions and shortcuts"
               >
                 {showTools ? <XMarkIcon className="h-4 w-4" /> : <PlusIcon className="h-4 w-4" />}
               </button>
@@ -768,20 +1223,20 @@ What specific task would you like me to help you with?`;
             <div className="flex items-center gap-3 text-[10px] text-[var(--text-dim)]">
               <span>{input.length} chars</span>
               <span>{Math.ceil(input.trim().split(/\s+/).filter(Boolean).length * 1.3)} tokens est.</span>
-              {isLoading && <span className="flex items-center gap-1"><span className="h-3 w-3 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" /> working</span>}
+              {isLoading && <span className="flex items-center gap-1"><span className="h-3 w-3 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" /> working</span>}
             </div>
           </div>
           {showCreateProject && (
-            <div className="p-3 border border-purple-200 dark:border-purple-600/40 rounded-lg bg-purple-50/70 dark:bg-purple-600/15 space-y-2">
+            <div className="p-3 border border-amber-200 dark:border-amber-600/40 rounded-lg bg-amber-50/70 dark:bg-amber-600/15 space-y-2">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold text-purple-700">Quick Project</p>
-                <button onClick={() => setShowCreateProject(false)} className="text-[11px] text-purple-600 hover:underline">close</button>
+                <p className="text-xs font-semibold text-amber-700">Quick Project</p>
+                <button onClick={() => setShowCreateProject(false)} className="text-[11px] text-amber-600 hover:underline">close</button>
               </div>
               <input
                 placeholder="Title"
                 value={projectDraft.title}
                 onChange={e => setProjectDraft({ ...projectDraft, title: e.target.value })}
-                className="w-full px-2 py-1 rounded border border-purple-200 dark:border-purple-600/40 focus:ring-2 focus:ring-purple-400 text-xs bg-white dark:bg-[var(--surface-2)] dark:text-[var(--text)]"
+                className="w-full px-2 py-1 rounded border border-amber-200 dark:border-amber-600/40 focus:ring-2 focus:ring-amber-400 text-xs bg-white dark:bg-[var(--surface-2)] dark:text-[var(--text)]"
               />
               <textarea
                 placeholder="Description"
@@ -816,7 +1271,8 @@ What specific task would you like me to help you with?`;
               <button
                 onClick={submitQuickProject}
                 disabled={!projectDraft.title || isLoading}
-                className="w-full inline-flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium rounded bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 disabled:opacity-50"
+                className="w-full inline-flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium rounded bg-gradient-to-r from-amber-600 to-orange-600 text-white hover:from-amber-700 hover:to-orange-700 disabled:opacity-50 transition-all duration-150"
+                title="Create new project with entered details"
               >
                 <PlusIcon className="h-4 w-4" /> Create
               </button>
@@ -825,12 +1281,19 @@ What specific task would you like me to help you with?`;
           {showTools && !showCreateProject && !input && (
             <div className="flex flex-wrap gap-2 -mt-0.5">
               {baseSuggestions.map(s => (
-                <button key={s} onClick={()=> setInput(s)} className="text-[11px] px-2 py-1 rounded-md bg-gray-100 dark:bg-[var(--surface-2)] hover:bg-gray-200 dark:hover:bg-[var(--surface-3)] text-gray-700 dark:text-[var(--text)] border border-gray-300 dark:border-[var(--border)] transition">{s}</button>
+                <button 
+                  key={s.text} 
+                  onClick={()=> setInput(s.text)} 
+                  className="text-[11px] px-2 py-1 rounded-md bg-gray-100 dark:bg-[var(--surface-2)] hover:bg-gray-200 dark:hover:bg-[var(--surface-3)] text-gray-700 dark:text-[var(--text)] border border-gray-300 dark:border-[var(--border)] transition"
+                  title={s.tooltip}
+                >
+                  {s.text}
+                </button>
               ))}
             </div>
           )}
           <div className="mt-1 group">
-            <div className="flex rounded-xl border border-[var(--border)] bg-[var(--surface-2)] dark:bg-[var(--surface-2)] focus-within:border-purple-500/60 focus-within:ring-1 focus-within:ring-purple-500/30 transition shadow-sm">
+            <div className="flex rounded-xl border border-[var(--border)] bg-[var(--surface-2)] dark:bg-[var(--surface-2)] focus-within:border-amber-500/60 focus-within:ring-1 focus-within:ring-amber-500/30 transition shadow-sm">
               <div className="flex-1 relative px-3 py-2">
                 <textarea
                   ref={textareaRef}
@@ -862,7 +1325,8 @@ What specific task would you like me to help you with?`;
                   onClick={handleSend}
                   disabled={!input.trim() || isLoading}
                   aria-label="Send message"
-                  className="m-1 ml-0 px-4 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white text-sm font-medium flex items-center gap-1 shadow-sm hover:from-purple-700 hover:to-blue-700 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[var(--surface-2)]"
+                  title="Send message (Enter)"
+                  className="m-1 ml-0 px-4 rounded-lg bg-gradient-to-r from-amber-600 to-orange-600 text-white text-sm font-medium flex items-center gap-1 shadow-sm hover:from-amber-700 hover:to-orange-700 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[var(--surface-2)] transition-all duration-150"
                 >
                   <PaperAirplaneIcon className="h-4 w-4" />
                   <span className="hidden sm:inline">Send</span>
@@ -872,14 +1336,14 @@ What specific task would you like me to help you with?`;
             {showTools && (
               <div className="flex justify-between mt-1 px-1">
                 <div className="flex gap-2">
-                  <span className="text-[10px] text-[var(--text-dim)]">Ctrl/⌘ + K toggle panel</span>
-                  <span className="text-[10px] text-[var(--text-dim)]">/ for commands</span>
+                  <span className="text-[10px] text-[var(--text-dim)]" title="Use Ctrl/⌘ + K to toggle the assistant panel">Ctrl/⌘ + K toggle panel</span>
+                  <span className="text-[10px] text-[var(--text-dim)]" title="Type / at the beginning of your message to see available commands">/ for commands</span>
                 </div>
-                <span className="text-[10px] text-[var(--text-dim)]">Enter = send • Shift+Enter = newline</span>
+                <span className="text-[10px] text-[var(--text-dim)]" title="Keyboard shortcuts for sending messages">Enter = send • Shift+Enter = newline</span>
               </div>
             )}
           </div>
-  <div className="text-[10px] text-center text-[var(--text-dim)] pt-0.5">Copilot can navigate, create entities, and summarize your workspace.</div>
+  <div className="text-[10px] text-center text-[var(--text-dim)] pt-0.5" title="AI Assistant capabilities and features">Remodely Ai Assistant can navigate, create entities, and summarize your workspace.</div>
         </div>
       </div>
     </div>

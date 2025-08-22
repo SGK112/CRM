@@ -1,10 +1,12 @@
-import { Metadata } from 'next'
-import { BriefcaseIcon, MapPinIcon, ClockIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline'
+'use client'
 
-export const metadata: Metadata = {
-  title: 'Careers | Remodely CRM',
-  description: 'Join the Remodely team and help build the future of contractor business management software.'
-}
+import { Metadata } from 'next'
+import { useState } from 'react'
+import { BriefcaseIcon, MapPinIcon, ClockIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline'
+import JobApplicationModal from '../../components/JobApplicationModal'
+
+// Note: Since this is now a client component, we'll handle metadata differently
+// You might want to move metadata to layout.tsx or use next/head
 
 const benefits = [
   {
@@ -136,6 +138,26 @@ const values = [
 ]
 
 export default function CareersPage() {
+  const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false)
+  const [selectedJob, setSelectedJob] = useState<{
+    title: string
+    department: string
+    location: string
+  } | null>(null)
+
+  const handleApplyClick = (job: typeof openings[0]) => {
+    setSelectedJob({
+      title: job.title,
+      department: job.department,
+      location: job.location
+    })
+    setIsApplicationModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsApplicationModalOpen(false)
+    setSelectedJob(null)
+  }
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       {/* Mobile-first Hero */}
@@ -271,7 +293,10 @@ export default function CareersPage() {
                         <span className="text-slate-400">{job.type}</span>
                       </div>
                     </div>
-                    <button className="px-6 py-3 rounded-md bg-purple-600 hover:bg-purple-500 text-white font-medium text-sm transition shadow shadow-purple-600/30 whitespace-nowrap w-fit">
+                    <button 
+                      onClick={() => handleApplyClick(job)}
+                      className="px-6 py-3 rounded-md bg-purple-600 hover:bg-purple-500 text-white font-medium text-sm transition shadow shadow-purple-600/30 whitespace-nowrap w-fit"
+                    >
                       Apply Now
                     </button>
                   </div>
@@ -354,6 +379,17 @@ export default function CareersPage() {
           </div>
         </div>
       </section>
+
+      {/* Job Application Modal */}
+      {selectedJob && (
+        <JobApplicationModal
+          isOpen={isApplicationModalOpen}
+          onClose={handleCloseModal}
+          jobTitle={selectedJob.title}
+          jobDepartment={selectedJob.department}
+          jobLocation={selectedJob.location}
+        />
+      )}
     </div>
   )
 }

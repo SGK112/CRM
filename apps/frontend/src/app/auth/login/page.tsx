@@ -70,7 +70,7 @@ export default function LoginPage() {
   }
 
   return (
-  <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+  <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
       <div className="pointer-events-none select-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-amber-600/10 blur-3xl" />
       <div className="pointer-events-none select-none absolute top-1/3 -right-40 h-[28rem] w-[28rem] rounded-full bg-amber-500/5 blur-3xl" />
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -79,12 +79,12 @@ export default function LoginPage() {
             <div className="h-12 w-12 rounded-xl bg-amber-600 flex items-center justify-center shadow-inner ring-1 ring-amber-400/40">
               <WrenchScrewdriverIcon className="h-6 w-6 text-white" />
             </div>
-            <span className="text-2xl font-semibold tracking-tight text-slate-100">Remodely CRM</span>
+            <span className="text-2xl font-semibold tracking-tight text-[var(--text)]">Remodely Ai</span>
           </div>
         </div>
-  <h2 className="mt-4 text-center text-3xl font-semibold tracking-tight text-slate-100">Sign in to your account</h2>
+  <h2 className="mt-4 text-center text-3xl font-semibold tracking-tight text-[var(--text)]">Sign in to your account</h2>
   {!backendUp && <p className="mt-2 text-center text-xs text-red-400">Backend offline or unreachable. Authentication may fail.</p>}
-        <p className="mt-2 text-center text-sm text-slate-400">
+        <p className="mt-2 text-center text-sm text-[var(--text-dim)]">
           Or{' '}
           <Link href="/auth/register" className="font-medium text-amber-400 hover:text-amber-300 transition-colors">
             create a new workspace
@@ -93,7 +93,7 @@ export default function LoginPage() {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="relative py-8 px-5 sm:px-10 rounded-2xl border border-slate-800 bg-slate-900/70 backdrop-blur-sm shadow-xl shadow-black/40">
+        <div className="relative py-8 px-5 sm:px-10 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)]/70 backdrop-blur-sm shadow-xl">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
               <div className="bg-red-500/10 border border-red-500/40 text-red-300 px-4 py-3 rounded-md text-sm">
@@ -102,7 +102,7 @@ export default function LoginPage() {
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-200">
+              <label htmlFor="email" className="block text-sm font-medium text-[var(--text)]">
                 Email address
               </label>
               <div className="mt-1">
@@ -114,14 +114,14 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 rounded-md bg-slate-900/60 border border-slate-700 placeholder-slate-500 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 sm:text-sm transition"
+                  className="appearance-none block w-full px-3 py-2 rounded-md bg-[var(--input-bg)] border border-[var(--border)] placeholder-[var(--text-faint)] text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 sm:text-sm transition"
                   placeholder="Enter your email"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-200">
+              <label htmlFor="password" className="block text-sm font-medium text-[var(--text)]">
                 Password
               </label>
               <div className="mt-1 relative">
@@ -133,7 +133,7 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 pr-10 rounded-md bg-slate-900/60 border border-slate-700 placeholder-slate-500 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 sm:text-sm transition"
+                  className="appearance-none block w-full px-3 py-2 pr-10 rounded-md bg-[var(--input-bg)] border border-[var(--border)] placeholder-[var(--text-faint)] text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 sm:text-sm transition"
                   placeholder="Enter your password"
                 />
                 <button
@@ -142,9 +142,9 @@ export default function LoginPage() {
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <EyeSlashIcon className="h-5 w-5 text-slate-500" />
+                    <EyeSlashIcon className="h-5 w-5 text-[var(--text-faint)]" />
                   ) : (
-                    <EyeIcon className="h-5 w-5 text-slate-500" />
+                    <EyeIcon className="h-5 w-5 text-[var(--text-faint)]" />
                   )}
                 </button>
               </div>
@@ -156,9 +156,9 @@ export default function LoginPage() {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 text-amber-600 focus:ring-amber-500/60 border-slate-600 rounded bg-slate-800"
+                  className="h-4 w-4 text-amber-600 focus:ring-amber-500/60 border-[var(--border)] rounded bg-[var(--input-bg)]"
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-slate-300">
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-[var(--text-dim)]">
                   Remember me
                 </label>
               </div>
@@ -184,10 +184,10 @@ export default function LoginPage() {
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
+                <div className="w-full border-t border-[var(--border)]" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-slate-900/70 text-slate-400">Or continue with</span>
+                <span className="px-2 bg-[var(--surface-2)]/70 text-[var(--text-dim)]">Or continue with</span>
               </div>
             </div>
 
@@ -214,17 +214,17 @@ export default function LoginPage() {
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-700" />
+                <div className="w-full border-t border-[var(--border)]" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-slate-900/70 text-slate-400">New to Remodely CRM?</span>
+                <span className="px-2 bg-[var(--surface-2)]/70 text-[var(--text-dim)]">New to Remodely Ai?</span>
               </div>
             </div>
 
             <div className="mt-6">
               <Link
                 href="/auth/register"
-                className="w-full flex justify-center py-2 px-4 rounded-md text-sm font-medium text-slate-100 bg-slate-800/60 hover:bg-slate-800 border border-slate-700 hover:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/60 transition"
+                className="w-full flex justify-center py-2 px-4 rounded-md text-sm font-medium text-[var(--text)] bg-[var(--surface-1)] hover:bg-[var(--surface-3)] border border-[var(--border)] hover:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/60 transition"
               >
                 Create new workspace
               </Link>

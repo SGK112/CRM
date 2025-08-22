@@ -9,12 +9,18 @@
   ],
   "scripts": {
     "dev": "turbo run dev --parallel",
+    "dev:robust": "./start-dev-robust.sh",
+    "dev:monitor": "./monitor-dev.sh",
+    "dev:stop": "pkill -f 'npm run dev' && lsof -ti:3000,3001 | xargs kill -9 2>/dev/null || true",
+    "dev:status": "lsof -i:3000,3001 && echo '\\n=== Processes ===' && ps aux | grep -E '(nest|3000|3001)' | grep -v grep",
     "build": "turbo run build",
     "start": "turbo run start",
     "lint": "turbo run lint",
     "test": "turbo run test",
     "type-check": "turbo run type-check",
-    "clean": "rimraf node_modules apps/*/node_modules"
+    "clean": "rimraf node_modules apps/*/node_modules",
+    "backend:dev": "npm run dev --workspace=@remodely-crm/backend",
+    "frontend:dev": "npm run dev --workspace=@remodely-crm/frontend"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
