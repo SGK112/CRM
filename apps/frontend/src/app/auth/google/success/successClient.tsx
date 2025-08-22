@@ -10,6 +10,9 @@ export default function GoogleAuthSuccessInner() {
   useEffect(() => {
     const token = searchParams.get('token');
     if (token) {
+      try {
+        document.cookie = `accessToken=${token}; Path=/; SameSite=Lax`;
+      } catch {}
       localStorage.setItem('accessToken', token);
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
