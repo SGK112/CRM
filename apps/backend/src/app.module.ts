@@ -29,6 +29,7 @@ import { InvoicesModule } from './invoices/invoices.module';
 import { MediaModule } from './media/media.module';
 import { ShareLinksModule } from './share-links/share-links.module';
 import { AiTokensModule } from './ai-tokens/ai-tokens.module';
+import { DevModule } from './dev/dev.module';
 
 @Module({
   imports: [
@@ -69,6 +70,7 @@ import { AiTokensModule } from './ai-tokens/ai-tokens.module';
   MediaModule,
   ShareLinksModule,
   AiTokensModule,
+  DevModule,
   ],
   controllers: [RootController],
 })
