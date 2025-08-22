@@ -153,17 +153,17 @@ export default function DashboardPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'planning':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300';
       case 'in_progress':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300';
       case 'review':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300';
       case 'completed':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300';
       case 'on_hold':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'surface-2 text-secondary';
     }
   };
 
@@ -190,13 +190,13 @@ export default function DashboardPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-600 mt-1">Welcome back! Here's what's happening with your business.</p>
+            <h1 className="text-3xl font-bold text-primary">Dashboard</h1>
+            <p className="text-secondary mt-1">Welcome back! Here's what's happening with your business.</p>
           </div>
           <div className="flex items-center space-x-4">
             <button
               onClick={() => router.push('/dashboard/analytics')}
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="inline-flex items-center px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-surface-1"
             >
               <EyeIcon className="h-5 w-5 mr-2" />
               View Reports
@@ -210,8 +210,8 @@ export default function DashboardPage() {
           <div className="surface-1 rounded-xl shadow-sm border border-token p-6 overflow-hidden">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-[var(--text-dim)]">Total Revenue</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-[var(--text)]">{formatCurrency(stats.totalRevenue)}</p>
+                <p className="text-sm font-medium text-secondary">Total Revenue</p>
+                <p className="text-3xl font-bold text-primary">{formatCurrency(stats.totalRevenue)}</p>
               </div>
               <div className="p-3 bg-green-100 dark:bg-green-600/20 rounded-full flex-shrink-0">
                 <CurrencyDollarIcon className="h-8 w-8 text-green-600 dark:text-green-400" />
@@ -226,7 +226,7 @@ export default function DashboardPage() {
               <span className={`text-sm font-medium ${stats.revenueChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {Math.abs(stats.revenueChange)}%
               </span>
-              <span className="text-sm text-gray-600 dark:text-[var(--text-dim)] ml-1">vs last month</span>
+              <span className="text-sm text-secondary ml-1">vs last month</span>
             </div>
           </div>
 
@@ -234,8 +234,8 @@ export default function DashboardPage() {
           <div className="surface-1 rounded-xl shadow-sm border border-token p-6 overflow-hidden">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-[var(--text-dim)]">Active Projects</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-[var(--text)]">{stats.activeProjects}</p>
+                <p className="text-sm font-medium text-secondary">Active Projects</p>
+                <p className="text-3xl font-bold text-primary">{stats.activeProjects}</p>
               </div>
               <div className="p-3 bg-blue-100 dark:bg-blue-600/20 rounded-full flex-shrink-0">
                 <ClipboardDocumentListIcon className="h-8 w-8 text-blue-600 dark:text-blue-400" />
@@ -250,7 +250,7 @@ export default function DashboardPage() {
               <span className={`text-sm font-medium ${stats.projectsChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {Math.abs(stats.projectsChange)}%
               </span>
-              <span className="text-sm text-gray-600 dark:text-[var(--text-dim)] ml-1">vs last month</span>
+              <span className="text-sm text-secondary ml-1">vs last month</span>
             </div>
           </div>
 
@@ -258,8 +258,8 @@ export default function DashboardPage() {
           <div className="surface-1 rounded-xl shadow-sm border border-token p-6 overflow-hidden">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-[var(--text-dim)]">Total Clients</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-[var(--text)]">{stats.totalClients}</p>
+                <p className="text-sm font-medium text-secondary">Total Clients</p>
+                <p className="text-3xl font-bold text-primary">{stats.totalClients}</p>
               </div>
               <div className="p-3 bg-purple-100 dark:bg-purple-600/20 rounded-full flex-shrink-0">
                 <UserGroupIcon className="h-8 w-8 text-purple-600 dark:text-purple-400" />
@@ -274,7 +274,7 @@ export default function DashboardPage() {
               <span className={`text-sm font-medium ${stats.clientsChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {Math.abs(stats.clientsChange)}%
               </span>
-              <span className="text-sm text-gray-600 dark:text-[var(--text-dim)] ml-1">vs last month</span>
+              <span className="text-sm text-secondary ml-1">vs last month</span>
             </div>
           </div>
 
@@ -282,8 +282,8 @@ export default function DashboardPage() {
           <div className="surface-1 rounded-xl shadow-sm border border-token p-6 overflow-hidden">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-[var(--text-dim)]">Pending Tasks</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-[var(--text)]">{stats.pendingTasks}</p>
+                <p className="text-sm font-medium text-secondary">Pending Tasks</p>
+                <p className="text-3xl font-bold text-primary">{stats.pendingTasks}</p>
               </div>
               <div className="p-3 bg-orange-100 dark:bg-orange-600/20 rounded-full flex-shrink-0">
                 <BellIcon className="h-8 w-8 text-orange-600 dark:text-orange-400" />
@@ -298,7 +298,7 @@ export default function DashboardPage() {
               <span className={`text-sm font-medium ${stats.tasksChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {Math.abs(stats.tasksChange)}%
               </span>
-              <span className="text-sm text-gray-600 dark:text-[var(--text-dim)] ml-1">vs last month</span>
+              <span className="text-sm text-secondary ml-1">vs last month</span>
             </div>
           </div>
         </div>
@@ -307,11 +307,11 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Active Projects */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-              <div className="p-6 border-b border-gray-200">
+            <div className="surface-1 rounded-xl shadow-sm border border-token">
+              <div className="p-6 border-b border-token">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold text-gray-900">Active Projects</h2>
-                  <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                  <h2 className="text-xl font-semibold text-primary">Active Projects</h2>
+                  <button className="text-amber-600 hover:text-amber-700 text-sm font-medium">
                     View All
                   </button>
                 </div>
@@ -319,11 +319,11 @@ export default function DashboardPage() {
               <div className="p-6">
                 <div className="space-y-4">
                   {activeProjects.map((project) => (
-                    <div key={project.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div key={project.id} className="border border-token rounded-lg p-4 hover:shadow-md transition-shadow">
                       <div className="flex items-center justify-between mb-3">
                         <div>
-                          <h3 className="font-semibold text-gray-900">{project.title}</h3>
-                          <p className="text-sm text-gray-600">{project.client}</p>
+                          <h3 className="font-semibold text-primary">{project.title}</h3>
+                          <p className="text-sm text-secondary">{project.client}</p>
                         </div>
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(project.status)}`}>
                           {project.status.replace('_', ' ')}

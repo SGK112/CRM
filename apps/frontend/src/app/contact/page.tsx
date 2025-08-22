@@ -1,10 +1,9 @@
-import { Metadata } from 'next'
+'use client'
+
+import { useState } from 'react'
 import { PhoneIcon, EnvelopeIcon, MapPinIcon, ClockIcon } from '@heroicons/react/24/outline'
 
-export const metadata: Metadata = {
-  title: 'Contact Us | Remodely CRM',
-  description: 'Get in touch with the Remodely CRM team. Contact us for support, sales, or general inquiries.'
-}
+// Note: Metadata handling moved to layout or use next/head for client components
 
 const contactMethods = [
   {
@@ -68,6 +67,73 @@ const departments = [
 ]
 
 export default function ContactPage() {
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    company: '',
+    inquiryType: '',
+    message: '',
+    newsletter: false
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitSuccess, setSubmitSuccess] = useState(false)
+  const [submitError, setSubmitError] = useState('')
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target
+    const checked = (e.target as HTMLInputElement).checked
+    
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    setSubmitError('')
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ...formData,
+          source: 'contact_page',
+          page: 'contact'
+        })
+      })
+
+      const result = await response.json()
+
+      if (response.ok) {
+        setSubmitSuccess(true)
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          phone: '',
+          company: '',
+          inquiryType: '',
+          message: '',
+          newsletter: false
+        })
+        // Hide success message after 5 seconds
+        setTimeout(() => setSubmitSuccess(false), 5000)
+      } else {
+        setSubmitError(result.message || 'Failed to send message. Please try again.')
+      }
+    } catch (error) {
+      setSubmitError('Network error. Please check your connection and try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       {/* Mobile-first Hero */}
@@ -154,7 +220,19 @@ export default function ContactPage() {
           </div>
 
           <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-6 sm:p-8">
-            <form className="space-y-6">
+            {submitSuccess && (
+              <div className="bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-3 rounded-md text-sm mb-6">
+                Message sent successfully! We'll get back to you soon.
+              </div>
+            )}
+            
+            {submitError && (
+              <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-md text-sm mb-6">
+                {submitError}
+              </div>
+            )}
+
+            <form className="space-y-6" onSubmit={handleSubmit}>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
@@ -162,6 +240,9 @@ export default function ContactPage() {
                   </label>
                   <input
                     type="text"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleInputChange}
                     required
                     className="w-full px-4 py-3 rounded-md border border-slate-700 bg-slate-800/60 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/60 focus:border-teal-500/60 text-sm"
                     placeholder="John"
@@ -173,6 +254,9 @@ export default function ContactPage() {
                   </label>
                   <input
                     type="text"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleInputChange}
                     required
                     className="w-full px-4 py-3 rounded-md border border-slate-700 bg-slate-800/60 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/60 focus:border-teal-500/60 text-sm"
                     placeholder="Doe"
@@ -187,6 +271,9 @@ export default function ContactPage() {
                   </label>
                   <input
                     type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
                     required
                     className="w-full px-4 py-3 rounded-md border border-slate-700 bg-slate-800/60 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/60 focus:border-teal-500/60 text-sm"
                     placeholder="john@example.com"
@@ -198,6 +285,9 @@ export default function ContactPage() {
                   </label>
                   <input
                     type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
                     className="w-full px-4 py-3 rounded-md border border-slate-700 bg-slate-800/60 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/60 focus:border-teal-500/60 text-sm"
                     placeholder="+1 (555) 123-4567"
                   />
@@ -210,6 +300,9 @@ export default function ContactPage() {
                 </label>
                 <input
                   type="text"
+                  name="company"
+                  value={formData.company}
+                  onChange={handleInputChange}
                   className="w-full px-4 py-3 rounded-md border border-slate-700 bg-slate-800/60 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/60 focus:border-teal-500/60 text-sm"
                   placeholder="Your Company Name"
                 />
@@ -220,6 +313,9 @@ export default function ContactPage() {
                   Inquiry Type <span className="text-red-400">*</span>
                 </label>
                 <select
+                  name="inquiryType"
+                  value={formData.inquiryType}
+                  onChange={handleInputChange}
                   required
                   className="w-full px-4 py-3 rounded-md border border-slate-700 bg-slate-800/60 text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500/60 focus:border-teal-500/60 text-sm"
                 >
@@ -238,6 +334,9 @@ export default function ContactPage() {
                 </label>
                 <textarea
                   rows={5}
+                  name="message"
+                  value={formData.message}
+                  onChange={handleInputChange}
                   required
                   className="w-full px-4 py-3 rounded-md border border-slate-700 bg-slate-800/60 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/60 focus:border-teal-500/60 text-sm resize-none"
                   placeholder="Please describe your inquiry in detail..."
@@ -248,6 +347,9 @@ export default function ContactPage() {
                 <input
                   type="checkbox"
                   id="newsletter"
+                  name="newsletter"
+                  checked={formData.newsletter}
+                  onChange={handleInputChange}
                   className="mt-1 w-4 h-4 text-teal-600 bg-slate-800 border-slate-600 rounded focus:ring-teal-500 focus:ring-2"
                 />
                 <label htmlFor="newsletter" className="text-sm text-slate-400">
@@ -257,9 +359,17 @@ export default function ContactPage() {
 
               <button
                 type="submit"
-                className="w-full px-6 py-4 rounded-md bg-teal-600 hover:bg-teal-500 text-white font-medium text-sm transition shadow shadow-teal-600/30"
+                disabled={isSubmitting}
+                className="w-full px-6 py-4 rounded-md bg-teal-600 hover:bg-teal-500 disabled:bg-slate-700 disabled:text-slate-500 text-white font-medium text-sm transition shadow shadow-teal-600/30 flex items-center justify-center gap-2"
               >
-                Send Message
+                {isSubmitting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  'Send Message'
+                )}
               </button>
             </form>
           </div>

@@ -12,7 +12,7 @@ import {
 } from '@heroicons/react/24/outline'
 
 export const metadata: Metadata = {
-  title: 'Remodely CRM | Run, Grow & Automate Your Construction Business',
+  title: 'Remodely Ai | Run, Grow & Automate Your Construction Business',
   description: 'All‑in‑one construction CRM: clients, estimates → invoices, HR & teams, AI assistant, secure media sharing, flexible usage-based AI tokens.'
 }
 
@@ -35,80 +35,30 @@ const pillars = [
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
-  <RevealInit />
-      {/* Hero (Simplified) */}
-      <section className="px-4 sm:px-8 pt-24 pb-14 text-center reveal-stagger">
-        <h1 data-reveal className="heading-primary gradient-amber">
-          Contracting Runs On Remodely
-        </h1>
-        <p data-reveal style={{'--stagger':1} as any} className="mt-3 heading-secondary">
-          Construct CRM
-        </p>
-        <p data-reveal style={{'--stagger':2} as any} className="mt-6 max-w-3xl mx-auto text-block text-sm sm:text-base leading-relaxed">
-          For construction, remodeling, specialty trades, IT & field service contractors. One fast workspace to estimate, schedule, track, share, invoice & get paid — with on‑demand AI assist.
-        </p>
-        <div data-reveal style={{'--stagger':3} as any} className="mt-7 flex flex-wrap gap-2 justify-center text-[11px] sm:text-xs font-medium text-slate-400">
-          {['Construction','Remodeling','Trades','IT / Field','Consulting'].map(tag => (
-            <span key={tag} className="px-3 py-1 rounded-full border border-slate-700 bg-slate-800/60 tracking-wide float-pulse gpu">{tag}</span>
-          ))}
-        </div>
-        <div data-reveal style={{'--stagger':4} as any} className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-          <a href="/signup" className="btn btn-amber shadow-soft shine">Start Free</a>
+    <div className="min-h-screen flex flex-col justify-center items-center px-4 bg-[var(--bg)] text-[var(--text)] relative overflow-hidden">
+      <RevealInit />
+      {/* Background gradients for visual appeal */}
+      <div className="pointer-events-none select-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-amber-600/10 blur-3xl" />
+      <div className="pointer-events-none select-none absolute top-1/3 -right-40 h-[28rem] w-[28rem] rounded-full bg-amber-500/5 blur-3xl" />
+      
+      <section className="w-full max-w-3xl text-center py-24 relative z-10">
+        <h1 className="heading-primary gradient-amber mb-4">Remodely Ai</h1>
+        <p className="text-2xl font-semibold mb-6 text-[var(--text)]">Turn Every Project Into Profit</p>
+        <p className="mb-8 text-[var(--text-dim)] text-base sm:text-lg">Stop chasing paperwork and losing track of costs. Our construction CRM streamlines client management, automates estimates to invoices, and keeps your team organized — so you can focus on building great projects.</p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+          <a href="/auth/register" className="btn btn-amber shadow-soft shine">Start Free</a>
+          <a href="/auth/login" className="btn btn-outline hover:border-amber-500/60 hover:text-amber-300 transition">Sign In</a>
           <a href="/dashboard" className="btn btn-outline hover:border-amber-500/60 hover:text-amber-300 transition">Live Demo →</a>
         </div>
-        <p data-reveal style={{'--stagger':5} as any} className="mt-5 text-[10px] tracking-wide text-slate-500 uppercase">No credit card • Seats controlled • Usage-based AI</p>
-      </section>
-
-      {/* Features (Concise) */}
-      <section className="px-4 sm:px-8 pb-12">
-        <div className="max-w-5xl mx-auto grid sm:grid-cols-2 lg:grid-cols-4 gap-4 reveal-stagger">
-          {features.map((f, i) => (
-            <div data-reveal style={{'--stagger': i} as any} key={i} className="surface-solid p-4 flex flex-col gap-2 transition group hover:shadow-lg">
-              <div className="flex items-center gap-2 text-amber-300 text-sm font-medium">
-                <f.icon className="w-4 h-4 float-pulse" /> {f.title}
-              </div>
-              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed group-hover:text-slate-800 dark:group-hover:text-slate-300 transition-colors">{f.blurb}</p>
-            </div>
+        <div className="flex flex-wrap gap-2 justify-center text-xs font-medium text-[var(--text-dim)] mb-8">
+          {['Construction','Remodeling','Trades','IT / Field','Consulting'].map(tag => (
+            <span key={tag} className="px-3 py-1 rounded-full border border-[var(--border)] bg-[var(--surface-2)] tracking-wide">{tag}</span>
           ))}
         </div>
-      </section>
-      {/* Pillars (Minimal) */}
-      <section className="px-4 sm:px-8 pb-12">
-        <div className="max-w-5xl mx-auto grid sm:grid-cols-3 gap-4 reveal-stagger">
-          {pillars.map((p, i) => (
-            <div data-reveal style={{'--stagger': i} as any} key={i} className="surface-solid p-4 transition hover:shadow-md">
-              <h3 className="text-sm font-semibold text-amber-600 dark:text-amber-300 mb-3">{p.label}</h3>
-              <ul className="space-y-2 text-[11px] text-slate-600 dark:text-slate-400">
-                {p.points.map((pt, j) => (
-                  <li key={j} className="flex gap-1 items-start">
-                    <span className="w-1 h-1 mt-1.5 rounded-full bg-amber-400" />
-                    <span>{pt}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </section>
-      {/* Social Proof Placeholder (Optional simple block) */}
-      <section className="px-4 sm:px-8 pb-12">
-        <div className="max-w-4xl mx-auto text-center text-slate-400 text-xs sm:text-sm">
-          <p><span className="text-slate-200 font-medium">Fast setup.</span> Clear pricing. Built for real field workflows.</p>
-        </div>
-      </section>
-
-      {/* Final CTA (Short) */}
-      <section className="px-4 sm:px-8 pb-20">
-        <div data-reveal className="max-w-3xl mx-auto text-center surface-solid p-8">
-          <h2 className="heading-secondary mb-4">Get Started</h2>
-          <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base mb-6">Create a workspace in seconds. Invite your team. Ship more projects.</p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <a href="/signup" className="btn btn-amber shadow-soft">Start Free</a>
-            <a href="/support" className="btn btn-outline hover:border-amber-500/60 hover:text-amber-300 transition">Questions?</a>
-          </div>
+        <div className="inline-flex items-center justify-center px-4 py-2 bg-amber-600/10 border border-amber-500/30 rounded-full mb-4">
+          <p className="text-xs font-semibold tracking-wide text-amber-600 dark:text-amber-400 uppercase">No credit card • Seats controlled • Usage-based AI</p>
         </div>
       </section>
     </div>
-  )
+  );
 }

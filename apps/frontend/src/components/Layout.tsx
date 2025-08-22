@@ -34,6 +34,7 @@ import {
 } from '@heroicons/react/24/outline';
 import Logo from './Logo';
 import { ThemeProvider, useTheme } from './ThemeProvider';
+import ThemeToggle from './ThemeToggle';
 
 interface User {
   id: string;
@@ -58,6 +59,7 @@ interface NavigationItem {
 
 export default function Layout({ children }: LayoutProps) {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const router = useRouter();
@@ -76,12 +78,14 @@ export default function Layout({ children }: LayoutProps) {
       if (!window.location.pathname.startsWith('/auth/')) {
         router.push('/auth/login');
       }
+      setLoading(false);
       return;
     }
 
     try {
       const parsedUser = JSON.parse(userData);
       setUser(parsedUser);
+      setLoading(false);
       
       // If user is authenticated and on auth page, redirect to dashboard
       if (window.location.pathname.startsWith('/auth/')) {
@@ -92,6 +96,7 @@ export default function Layout({ children }: LayoutProps) {
       localStorage.removeItem('token');
       localStorage.removeItem('accessToken');
       localStorage.removeItem('user');
+      setLoading(false);
       if (!window.location.pathname.startsWith('/auth/')) {
         router.push('/auth/login');
       }
@@ -175,12 +180,16 @@ export default function Layout({ children }: LayoutProps) {
     return classes.filter(Boolean).join(' ');
   }
 
-  if (!user) {
+  if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
       </div>
     );
+  }
+
+  if (!user) {
+    return null;
   }
 
   return (
@@ -195,10 +204,10 @@ export default function Layout({ children }: LayoutProps) {
       )}
 
       {/* Mobile sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out lg:hidden`}>
-        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
+      <div className={`fixed inset-y-0 left-0 z-50 w-64 surface-1 elevated shadow-lg transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out lg:hidden`}>
+        <div className="flex items-center justify-between h-16 px-4 border-b border-token">
           <Logo />
-          <button onClick={() => setSidebarOpen(false)} className="p-2 rounded-md text-gray-400 hover:text-gray-600">
+          <button onClick={() => setSidebarOpen(false)} className="p-2 rounded-md text-secondary hover:text-primary">
             <XMarkIcon className="h-6 w-6" />
           </button>
         </div>
@@ -211,21 +220,21 @@ export default function Layout({ children }: LayoutProps) {
                 onClick={() => setSidebarOpen(false)}
                 className={`group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
                   item.current
-                    ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border-l-4 border-blue-600 shadow-sm'
-                    : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                    ? 'surface-2 text-primary border-l-4 border-primary shadow-sm'
+                    : 'text-secondary hover:surface-2 hover:text-primary'
                 }`}
               >
                 <item.icon
                   className={`mr-3 h-5 w-5 transition-colors ${
-                    item.current ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'
+                    item.current ? 'text-primary' : 'text-secondary group-hover:text-primary'
                   }`}
                 />
                 <span className={item.current ? 'font-semibold' : ''}>{item.name}</span>
                 {item.badge && (
                   <span className={`ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
                     item.current 
-                      ? 'bg-blue-100 text-blue-800' 
-                      : 'bg-gray-100 text-gray-800'
+                      ? 'surface-3 text-primary' 
+                      : 'surface-2 text-secondary'
                   }`}>
                     {item.badge}
                   </span>
@@ -249,28 +258,28 @@ export default function Layout({ children }: LayoutProps) {
                   const groupItems = updatedNavigation.filter(i=> group.items.some(gItem=> gItem.href === i.href));
                   return (
                     <div key={group.label} className="mb-6">
-                      <div className="px-3 pb-1 text-[10px] uppercase tracking-wide font-semibold text-gray-500 dark:text-gray-500/80">{group.label}</div>
+                      <div className="px-3 pb-1 text-[10px] uppercase tracking-wide font-semibold text-tertiary">{group.label}</div>
                       {groupItems.map(item => (
                         <Link
                           key={item.name}
                           href={item.href}
                           className={`group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 transform hover:scale-[1.02] ${
                             item.current
-                              ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border-l-4 border-blue-600 shadow-sm dark:bg-gradient-to-r dark:from-blue-900/40 dark:to-indigo-900/40 dark:text-blue-300 dark:border-blue-500'
-                              : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-[var(--text-dim)] dark:hover:text-[var(--text)] dark:hover:bg-[var(--surface-2)]'
+                              ? 'surface-2 text-primary border-l-4 border-primary shadow-sm'
+                              : 'text-secondary hover:surface-2 hover:text-primary'
                           }`}
                         >
                           <item.icon
                             className={`mr-3 h-5 w-5 transition-colors ${
-                              item.current ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300'
+                              item.current ? 'text-primary' : 'text-secondary group-hover:text-primary'
                             }`}
                           />
                           <span className={item.current ? 'font-semibold' : ''}>{item.name}</span>
                           {item.badge && (
                                 <span className={`ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium tracking-wide transition-all duration-200 ${
                                   item.current 
-                                    ? 'bg-blue-600 text-white dark:bg-blue-500 dark:text-white shadow-sm ring-1 ring-blue-400/60 dark:ring-blue-300/50 scale-110' 
-                                    : 'bg-gray-200 text-gray-700 dark:bg-[var(--surface-2)] dark:text-[var(--text-dim)] dark:ring-1 dark:ring-[var(--border)]/60 group-hover:scale-105'
+                                    ? 'bg-amber-600 text-white shadow-sm ring-1 ring-amber-400/60 scale-110' 
+                                    : 'surface-2 text-secondary ring-1 ring-border/60 group-hover:scale-105'
                                 }`}>
                               {item.badge}
                             </span>
@@ -288,27 +297,32 @@ export default function Layout({ children }: LayoutProps) {
               <div className="relative">
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="group block w-full rounded-lg p-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:text-gray-300 dark:hover:bg-gray-800 dark:focus:ring-offset-gray-900"
+                  className="group block w-full rounded-lg p-2 text-left text-sm font-medium text-secondary hover:surface-2 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-surface-1"
                 >
                   <div className="flex items-center">
                     <div className="flex-shrink-0">
-                      <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
-                        <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                      <div className="h-8 w-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
+                        <span className="text-sm font-medium text-amber-700 dark:text-amber-300">
                           {user.firstName?.[0]}{user.lastName?.[0]}
                         </span>
                       </div>
                     </div>
                     <div className="ml-3 flex-1">
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{user.firstName} {user.lastName}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
+                      <p className="text-sm font-medium text-primary">{user.firstName} {user.lastName}</p>
+                      <p className="text-xs text-secondary">{user.email}</p>
                     </div>
-                    <ChevronDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                    <ChevronDownIcon className="h-4 w-4 text-secondary" />
                   </div>
                 </button>
 
                 {showUserMenu && (
                   <div className="absolute bottom-full left-0 right-0 mb-2 rounded-md surface-2 py-1 shadow-lg ring-1 ring-black/10 border border-token">
-                    <ThemeSelect />
+                    <div className="px-4 py-2 border-b border-token mb-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs uppercase tracking-wide text-tertiary">Appearance</span>
+                        <ThemeToggle variant="compact" />
+                      </div>
+                    </div>
                     <Link
                       href="/dashboard/settings/profile"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700/80"
@@ -346,7 +360,7 @@ export default function Layout({ children }: LayoutProps) {
   <div className="sticky top-0 z-50 flex h-16 flex-shrink-0 surface-1 elevated border-b border-token backdrop-blur-md bg-opacity-95">
           <button
             type="button"
-            className="border-r border-gray-200 px-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 lg:hidden transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+            className="border-r border-token px-4 text-secondary focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 lg:hidden transition-colors hover:surface-2"
             onClick={() => setSidebarOpen(true)}
           >
             <span className="sr-only">Open sidebar</span>
@@ -362,11 +376,13 @@ export default function Layout({ children }: LayoutProps) {
             </div>
 
       <div className="ml-4 flex items-center md:ml-6 shrink-0 space-x-3">
+              {/* Theme Toggle */}
+              <ThemeToggle variant="button" />
               {/* Notifications */}
               <button
                 type="button"
                 onClick={() => router.push('/dashboard/notifications')}
-                className="relative rounded-full surface-2 p-2 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] focus:ring-offset-2 dark:text-[var(--text-dim)] dark:hover:text-[var(--text)] focus:ring-offset-[var(--bg)] transition-all duration-200 hover:scale-105"
+                className="relative rounded-full surface-2 p-2 text-secondary hover:text-primary focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-surface-1 transition-all duration-200 hover:scale-105"
               >
                 <span className="sr-only">View notifications</span>
                 <BellIcon className="h-6 w-6" />
@@ -379,7 +395,7 @@ export default function Layout({ children }: LayoutProps) {
               {/* Help Button */}
               <button
                 type="button"
-                className="group hidden sm:inline-flex items-center px-3 py-2 rounded-md border border-token surface-1 text-xs font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] dark:text-[var(--text-dim)] dark:hover:text-[var(--text)] dark:hover:bg-[var(--surface-2)] transition-all duration-200 hover:scale-105"
+                className="group hidden sm:inline-flex items-center px-3 py-2 rounded-md border border-token surface-1 text-xs font-medium text-secondary hover:surface-2 hover:border-token focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-200 hover:scale-105"
                 onClick={() => {
                   // Focus Copilot widget if available
                   const evt = new CustomEvent('copilot:open');
@@ -438,7 +454,7 @@ function QuickCreate() {
               <Link
                 key={item.label}
                 href={item.href}
-                className="block px-3 py-2 hover:bg-gray-50 dark:hover:bg-[var(--surface-2)] text-gray-700 dark:text-[var(--text)] transition-colors duration-150 hover:scale-[1.02] transform"
+                className="block px-3 py-2 hover:surface-2 text-primary transition-colors duration-150 hover:scale-[1.02] transform"
                 onClick={() => setOpen(false)}
               >
                 {item.label}
@@ -446,47 +462,13 @@ function QuickCreate() {
             ))}
             <button
               onClick={()=>setOpen(false)}
-              className="w-full text-left px-3 py-2 text-xs text-gray-400 dark:text-[var(--text-dim)] hover:text-gray-500 dark:hover:text-[var(--text)] hover:bg-gray-50 dark:hover:bg-[var(--surface-2)] transition-colors duration-150"
+              className="w-full text-left px-3 py-2 text-xs text-tertiary hover:text-secondary hover:surface-2 transition-colors duration-150"
             >
               Close
             </button>
           </div>
         </>
       )}
-    </div>
-  );
-}
-
-// Inline theme select component for user menu
-function ThemeSelect() {
-  const { theme, setTheme, toggleTheme, system } = useTheme();
-  return (
-    <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700 mb-1">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Appearance</span>
-        <button
-          onClick={toggleTheme}
-          className="text-xs px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600"
-        >
-          Toggle
-        </button>
-      </div>
-      <div className="flex gap-2">
-        {(['light','dark'] as const).map(t => (
-          <button
-            key={t}
-            onClick={() => setTheme(t)}
-            className={`flex-1 text-xs py-1.5 rounded-md border transition-colors ${
-              theme === t
-                ? 'bg-blue-600 text-white border-blue-600'
-                : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
-          >
-            {t.charAt(0).toUpperCase()+t.slice(1)}
-          </button>
-        ))}
-      </div>
-      <p className="mt-2 text-[10px] text-gray-400 dark:text-gray-500">System: {system}</p>
     </div>
   );
 }

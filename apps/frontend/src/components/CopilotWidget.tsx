@@ -55,13 +55,13 @@ export default function CopilotWidget() {
             <button
               onClick={cycleFromClosed}
               aria-label="Open Copilot"
-              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[var(--surface-2)] dark:hover:bg-[var(--surface-2)] focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[var(--surface-2)] dark:hover:bg-[var(--surface-2)] focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors"
             >
-              <div className="h-10 w-10 rounded-md bg-purple-600 dark:bg-purple-500 flex items-center justify-center shadow-inner">
+              <div className="h-10 w-10 rounded-md bg-amber-600 dark:bg-amber-500 flex items-center justify-center shadow-inner">
                 <SparklesIcon className="h-5 w-5 text-white" />
               </div>
               <div className="flex-1 text-left">
-                <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">Copilot</p>
+                <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">Remodely Ai</p>
                 <p className="text-[11px] text-gray-500 dark:text-gray-400">Click to activate</p>
               </div>
               <span className="text-[10px] font-medium text-gray-400 dark:text-gray-500">⌘K</span>
@@ -77,11 +77,11 @@ export default function CopilotWidget() {
           className="fixed bottom-4 right-4 z-40 w-72 rounded-xl border border-token surface-1 backdrop-blur-md shadow-lg hover:shadow-xl transition-shadow bg-[var(--surface-1)]"
         >
           <div className="flex items-center gap-2 px-3 py-2 border-b border-token bg-[var(--surface-2)] dark:bg-[var(--surface-2)] rounded-t-xl">
-            <div className="h-8 w-8 rounded-md bg-purple-600 dark:bg-purple-500 flex items-center justify-center shadow-inner">
+            <div className="h-8 w-8 rounded-md bg-amber-600 dark:bg-amber-500 flex items-center justify-center shadow-inner">
               <SparklesIcon className="h-5 w-5 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-gray-800 dark:text-gray-100">Construct Copilot</p>
+              <p className="text-xs font-semibold text-gray-800 dark:text-gray-100">Remodely Ai Assistant</p>
               <p className="text-[10px] text-gray-500 dark:text-gray-400 tracking-tight">AI workspace assistant</p>
             </div>
             <div className="flex items-center gap-1">
@@ -106,7 +106,7 @@ export default function CopilotWidget() {
               <input
                 ref={inputRef}
                 placeholder="Ask or type / ..."
-                className="w-full rounded-md border border-[var(--border)] dark:border-gray-700 bg-[var(--surface-2)] dark:bg-[var(--surface-2)] px-3 py-2 pr-14 text-xs text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent placeholder:text-gray-500 dark:placeholder:text-gray-500"
+                className="w-full rounded-md border border-[var(--border)] dark:border-gray-700 bg-[var(--surface-2)] dark:bg-[var(--surface-2)] px-3 py-2 pr-14 text-xs text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent placeholder:text-gray-500 dark:placeholder:text-gray-500"
                 value={draft}
                 onChange={e => setDraft(e.target.value)}
                 onFocus={() => setStage('open')}
@@ -133,7 +133,7 @@ export default function CopilotWidget() {
               <div className="flex items-center gap-1">
                 <button
                   onClick={openAssistant}
-                  className="inline-flex items-center gap-1 text-[10px] text-purple-600 dark:text-purple-400 hover:underline"
+                  className="inline-flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400 hover:underline"
                 >
                   Open
                 </button>

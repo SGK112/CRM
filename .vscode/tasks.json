@@ -1,0 +1,111 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start CRM Development Server",
+      "type": "shell",
+      "command": "./start-dev-robust.sh",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "isBackground": true,
+      "problemMatcher": [
+        {
+          "pattern": [
+            {
+              "regexp": ".",
+              "file": 1,
+              "location": 2,
+              "message": 3
+            }
+          ],
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": "Starting Nest application",
+            "endsPattern": "(Backend server running|Ready in \\d+ms)"
+          }
+        }
+      ]
+    },
+    {
+      "label": "Monitor CRM Servers",
+      "type": "shell",
+      "command": "./monitor-dev.sh",
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "isBackground": true
+    },
+    {
+      "label": "Stop All CRM Servers",
+      "type": "shell",
+      "command": "pkill -f 'npm run dev' && lsof -ti:3000,3001 | xargs kill -9 2>/dev/null || true",
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new"
+      }
+    },
+    {
+      "label": "Check Server Status",
+      "type": "shell",
+      "command": "echo '=== Port Status ===' && lsof -i:3000,3001 && echo '\\n=== Process Status ===' && ps aux | grep -E '(nest|3000|3001)' | grep -v grep",
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "new"
+      }
+    },
+    {
+      "label": "Frontend Only",
+      "type": "shell",
+      "command": "npm run frontend:dev",
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new"
+      },
+      "isBackground": true
+    },
+    {
+      "label": "Backend Only",
+      "type": "shell",
+      "command": "npm run backend:dev",
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new"
+      },
+      "isBackground": true
+    }
+  ]
+}

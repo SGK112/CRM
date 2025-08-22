@@ -34,7 +34,7 @@ import { AiTokensModule } from './ai-tokens/ai-tokens.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: ['.env', '../../.env'],
     }),
     MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb://localhost:27017/remodely-crm'),
     ThrottlerModule.forRoot([
