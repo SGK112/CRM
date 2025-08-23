@@ -24,7 +24,9 @@ export default function VoiceAgentPage() {
         if (res.ok) {
           setStatus(await res.json());
         }
-      } catch {}
+      } catch (error) {
+        console.error('Failed to fetch voice agent status:', error);
+      }
     })();
   }, []);
 
@@ -46,8 +48,8 @@ export default function VoiceAgentPage() {
       } else {
         setError('Failed to start call');
       }
-    } catch (e:any) {
-      setError(e.message);
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : 'An error occurred');
     } finally { setLoading(false); }
   };
 
