@@ -12,7 +12,7 @@ export default function SuperAdminSetup() {
     setStatus('Setting up super admin...');
     
     try {
-      const token = localStorage.getItem('auth_token');
+  const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
       
       if (!token) {
         setStatus('Error: No auth token found. Please login first.');
@@ -48,7 +48,7 @@ export default function SuperAdminSetup() {
     setStatus('Verifying access...');
     
     try {
-      const token = localStorage.getItem('auth_token');
+  const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
       
       if (!token) {
         setStatus('Error: No auth token found. Please login first.');

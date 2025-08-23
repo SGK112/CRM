@@ -12,9 +12,11 @@ async function bootstrap() {
   // Raw body for Stripe webhook signature verification (BEFORE global prefix)
   app.use('/billing/webhook', express.raw({ type: 'application/json' }));
 
-  // Set global prefix for all routes except webhooks
+  // Set global prefix for all routes except webhooks and Google OAuth callbacks (to support plain /auth/* paths)
+  // Note: We expose /auth/google and /auth/google/callback without the /api prefix because some OAuth providers
+  // are configured with fixed redirect URIs. All other routes remain under /api/*.
   app.setGlobalPrefix('api', {
-    exclude: ['/billing/webhook']
+    exclude: ['/billing/webhook', '/auth/google', '/auth/google/callback']
   });
 
   // Security headers

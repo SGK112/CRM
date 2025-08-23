@@ -2,7 +2,7 @@
 import Layout from '../../../../components/Layout';
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { API_BASE } from '../../../../lib/api';
+// Use rewrite path for API calls
 
 interface LineItem { _id?:string; name:string; description?:string; quantity:number; baseCost:number; marginPct:number; sellPrice:number; taxable:boolean; }
 interface Estimate { _id:string; number:string; status:string; items:LineItem[]; subtotalSell:number; subtotalCost:number; discountType:string; discountValue:number; discountAmount:number; taxRate:number; taxAmount:number; total:number; notes?:string; }
@@ -17,7 +17,7 @@ export default function EstimateDetailPage(){
 
   const fetchOne = async () => {
     setLoading(true);
-    const res = await fetch(`${API_BASE}/estimates/${id}`, { headers:{ Authorization:`Bearer ${token}` }});
+  const res = await fetch(`/api/estimates/${id}`, { headers:{ Authorization:`Bearer ${token}` }});
     if(res.ok) setEst(await res.json());
     setLoading(false);
   };
@@ -25,19 +25,19 @@ export default function EstimateDetailPage(){
 
   const recalc = async () => {
     if(!id) return; setSaving(true);
-    await fetch(`${API_BASE}/estimates/${id}/recalc`, { method:'POST', headers:{ Authorization:`Bearer ${token}` }});
+  await fetch(`/api/estimates/${id}/recalc`, { method:'POST', headers:{ Authorization:`Bearer ${token}` }});
     await fetchOne(); setSaving(false);
   };
 
   const sendEstimate = async () => {
     if(!id) return; setSaving(true);
-    await fetch(`${API_BASE}/estimates/${id}/send`, { method:'POST', headers:{ Authorization:`Bearer ${token}` }});
+  await fetch(`/api/estimates/${id}/send`, { method:'POST', headers:{ Authorization:`Bearer ${token}` }});
     await fetchOne(); setSaving(false);
   };
 
   const convert = async () => {
     if(!id) return; setSaving(true);
-    await fetch(`${API_BASE}/estimates/${id}/convert`, { method:'POST', headers:{ Authorization:`Bearer ${token}` }});
+  await fetch(`/api/estimates/${id}/convert`, { method:'POST', headers:{ Authorization:`Bearer ${token}` }});
     setSaving(false);
     // Optionally redirect to invoices list after conversion
   };

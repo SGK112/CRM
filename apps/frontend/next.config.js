@@ -26,11 +26,15 @@ const nextConfig = {
   
   // API rewrites - use environment variable for backend URL
   async rewrites() {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  const raw = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  // Normalize: remove trailing slash and any repeated trailing /api segments to avoid double prefixing
+  const apiUrl = raw
+      .replace(/\/$/, '')
+      .replace(/(?:\/api)+$/, '');
     return [
       {
-        source: '/api/:path*',
-        destination: `${apiUrl}/:path*`,
+  source: '/api/:path*',
+  destination: `${apiUrl}/api/:path*`,
       },
     ];
   },

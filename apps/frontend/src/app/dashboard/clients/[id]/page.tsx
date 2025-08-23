@@ -267,15 +267,15 @@ export default function ClientDetailPage() {
               <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Call Purpose</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"><option>Follow-up</option><option>Update</option><option>Reminder</option></select>
+                  <select className="input text-sm"><option>Follow-up</option><option>Update</option><option>Reminder</option></select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Voice Tone</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"><option>Professional</option><option>Friendly</option><option>Casual</option></select>
+                  <select className="input text-sm"><option>Professional</option><option>Friendly</option><option>Casual</option></select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Custom Message</label>
-                  <textarea rows={4} className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" placeholder="Optional instructions..." />
+                  <textarea rows={4} className="input text-sm" placeholder="Optional instructions..." />
                 </div>
               </div>
               <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">

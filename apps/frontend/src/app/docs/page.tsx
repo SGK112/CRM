@@ -78,7 +78,7 @@ export default function DocsPage() {
             <input
               type="text"
               placeholder="Search documentation..."
-              className="w-full px-4 py-3 pl-10 rounded-lg border border-slate-700 bg-slate-900/60 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 text-sm sm:text-base"
+              className="input pl-10"
             />
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center">
               <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

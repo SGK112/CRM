@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Layout from '../../../components/Layout';
+import { PageHeader } from '../../../components/ui/PageHeader';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { 
@@ -16,10 +17,10 @@ import {
   PencilIcon,
   TrashIcon
 } from '@heroicons/react/24/outline';
-import { API_BASE } from '@/lib/api';
+// Use frontend rewrite to avoid CORS and prefix issues; call /api/* from the browser
 
 // Backend schema differs from original assumed shape. We'll create a normalized internal representation.
-interface RawProject { [key:string]: any; _id: string; title: string; description?: string; status: string; priority: string; clientId: string; assignedTo?: string[]; startDate?: string; endDate?: string; budget?: number; workspaceId: string; address?: any; createdAt?: string; updatedAt?: string; }
+interface RawProject { [key:string]: any; _id: string; title: string; description?: string; status: string; priority: string; clientId: string; assignedTo?: string[]; startDate?: string; endDate?: string; budget?: number; workspaceId: string; address?: any; createdAt?: string; updatedAt?: string; tags?: string[] }
 
 interface Project {
   _id: string;
@@ -101,6 +102,7 @@ export default function ProjectsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [refreshing, setRefreshing] = useState(false);
@@ -113,9 +115,15 @@ export default function ProjectsPage() {
     return () => clearInterval(id);
   }, []);
 
+  // Debounce search input to reduce re-filter churn
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedSearch(searchTerm.trim()), 250);
+    return () => clearTimeout(id);
+  }, [searchTerm]);
+
   useEffect(() => {
     filterProjects();
-  }, [projects, searchTerm, statusFilter, priorityFilter]);
+  }, [projects, debouncedSearch, statusFilter, priorityFilter]);
 
   const fetchProjects = async (silent = false) => {
     try {
@@ -128,7 +136,7 @@ export default function ProjectsPage() {
         return;
       }
 
-      const response = await fetch(`${API_BASE}/projects`, {
+  const response = await fetch(`/api/projects`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -154,16 +162,23 @@ export default function ProjectsPage() {
   };
 
   const filterProjects = () => {
-  let filtered = projects;
+    let filtered = projects;
 
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(project =>
-        project.title.toLowerCase().includes(term) ||
-        project.description.toLowerCase().includes(term) ||
-        (project.tags || []).some(tag => tag.toLowerCase().includes(term)) ||
-        project.rawStatus.toLowerCase().includes(term)
-      );
+    if (debouncedSearch) {
+      const term = debouncedSearch.toLowerCase();
+      filtered = filtered.filter(project => {
+        const inTitle = project.title.toLowerCase().includes(term);
+        const inDesc = project.description.toLowerCase().includes(term);
+        const inTags = (project.tags || []).some(tag => tag.toLowerCase().includes(term));
+        const inStatus = project.rawStatus.toLowerCase().includes(term) || project.status.toLowerCase().includes(term);
+        const inPriority = project.priority.toLowerCase().includes(term);
+        const inAddress = project.address && (
+          (project.address.city || '').toLowerCase().includes(term) ||
+          (project.address.state || '').toLowerCase().includes(term) ||
+          (project.address.street || '').toLowerCase().includes(term)
+        );
+        return inTitle || inDesc || inTags || inStatus || inPriority || inAddress;
+      });
     }
 
     if (statusFilter !== 'all') {
@@ -189,7 +204,7 @@ export default function ProjectsPage() {
 
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
-      const response = await fetch(`${API_BASE}/projects/${id}`, {
+  const response = await fetch(`/api/projects/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -243,19 +258,15 @@ export default function ProjectsPage() {
     <Layout>
       <div>
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Projects</h1>
-            <p className="text-gray-600 mt-2 text-sm">Manage your client projects, track progress, budgets, timelines and documentation.</p>
-          </div>
-          <Link
-            href="/dashboard/projects/new"
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mt-4 md:mt-0"
-          >
-            <PlusIcon className="h-5 w-5 mr-2" />
-            New Project
-          </Link>
-        </div>
+        <PageHeader
+          title="Projects"
+          subtitle="Manage client projects, track progress, budgets, and timelines."
+          actions={(
+            <Link href="/dashboard/projects/new" className="pill pill-tint-blue sm inline-flex items-center gap-1">
+              <PlusIcon className="h-4 w-4" /> New Project
+            </Link>
+          )}
+        />
 
         {/* Status summary chips */}
         <div className="flex flex-wrap gap-2 mb-6">
@@ -299,7 +310,7 @@ export default function ProjectsPage() {
                 placeholder="Search projects..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input pl-10 pr-8"
               />
             </div>
 

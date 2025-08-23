@@ -57,7 +57,7 @@ export const viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="scroll-smooth">
+  <html lang="en" className="scroll-smooth dark">
       <body className={`${inter.className} antialiased transition-colors duration-300`}>
         <ThemeProvider>
           <SubscriptionProvider>

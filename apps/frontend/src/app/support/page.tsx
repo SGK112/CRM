@@ -192,7 +192,7 @@ export default function SupportPage() {
                 </label>
                 <input
                   type="text"
-                  className="w-full px-4 py-3 rounded-md border border-slate-700 bg-slate-800/60 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 text-sm"
+                  className="input"
                   placeholder="Brief description of your issue"
                 />
               </div>
@@ -203,7 +203,7 @@ export default function SupportPage() {
                 </label>
                 <textarea
                   rows={4}
-                  className="w-full px-4 py-3 rounded-md border border-slate-700 bg-slate-800/60 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 text-sm resize-none"
+                  className="input resize-none"
                   placeholder="Please provide as much detail as possible..."
                 />
               </div>

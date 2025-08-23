@@ -452,7 +452,7 @@ function DesignEditorPageInner() {
                 <div className="space-y-3">
                   <div>
                     <label className="block text-xs text-gray-600 dark:text-gray-400">Design Title</label>
-                    <input className="w-full px-2 py-1 text-sm border rounded bg-white dark:bg-[var(--surface-2)] dark:border-gray-800 dark:text-gray-200" value={design?.title || ''} onChange={e => { setDesign({ ...design, title: e.target.value }); setIsDirty(true); }} />
+                    <input className="input text-sm" value={design?.title || ''} onChange={e => { setDesign({ ...design, title: e.target.value }); setIsDirty(true); }} />
                   </div>
                   {selection && nodes[selection] && (() => {
                     const node = nodes[selection];

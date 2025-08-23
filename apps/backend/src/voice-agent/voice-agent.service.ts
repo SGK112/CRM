@@ -16,13 +16,19 @@ export class VoiceAgentService {
   }
 
   async initiateOutboundCall(to: string, agentId?: string) {
-    if (!this.enableOutbound) {
+    if (!this.enableOutbound || !this.twilio.isConfigured) {
       this.logger.warn(`Twilio not configured. Simulating outbound call to ${to}`);
       return { simulated: true, to, agentId: agentId || this.eleven.getDefaultAgentId(), sid: 'SIMULATED_CALL', status: 'initiated' };
     }
     try {
-      // TODO integrate real twilio call creation
-      return { simulated: true, to, agentId: agentId || this.eleven.getDefaultAgentId(), sid: 'TWILIO_CALL_SID_PLACEHOLDER', status: 'initiated' };
+      const backendBase = process.env.BACKEND_BASE_URL || `http://localhost:${process.env.PORT || 3001}`;
+      const webhookUrl = `${backendBase}/api/voice-agent/webhook`;
+      const result = await this.twilio.createOutboundCall(to, webhookUrl);
+      if ('error' in result) {
+        this.logger.warn(`Falling back to simulation: ${result.error}`);
+        return { simulated: true, to, agentId: agentId || this.eleven.getDefaultAgentId(), sid: 'SIMULATED_CALL', status: 'initiated' };
+      }
+      return { simulated: false, to, agentId: agentId || this.eleven.getDefaultAgentId(), sid: result.sid, status: 'initiated' };
     } catch (e) {
       this.logger.error('Failed to initiate outbound call', e as any);
       throw e;

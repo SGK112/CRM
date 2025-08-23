@@ -209,7 +209,7 @@ export default function SettingsPage() {
               type="text"
               value={formData.firstName}
               onChange={(e) => handleInputChange('firstName', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-token rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--surface-2)] dark:text-[var(--text)]"
+              className="input"
             />
           </div>
           <div>
@@ -218,7 +218,7 @@ export default function SettingsPage() {
               type="text"
               value={formData.lastName}
               onChange={(e) => handleInputChange('lastName', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-token rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--surface-2)] dark:text-[var(--text)]"
+              className="input"
             />
           </div>
           <div>
@@ -227,7 +227,7 @@ export default function SettingsPage() {
               type="email"
               value={formData.email}
               onChange={(e) => handleInputChange('email', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-token rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--surface-2)] dark:text-[var(--text)]"
+              className="input"
             />
           </div>
           <div>
@@ -236,7 +236,7 @@ export default function SettingsPage() {
               type="tel"
               value={formData.phone}
               onChange={(e) => handleInputChange('phone', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-token rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--surface-2)] dark:text-[var(--text)]"
+              className="input"
             />
           </div>
           <div className="md:col-span-2">
@@ -245,7 +245,7 @@ export default function SettingsPage() {
               type="text"
               value={formData.company}
               onChange={(e) => handleInputChange('company', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-token rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--surface-2)] dark:text-[var(--text)]"
+              className="input"
             />
           </div>
         </div>
@@ -259,7 +259,7 @@ export default function SettingsPage() {
             <select
               value={formData.timezone}
               onChange={(e) => handleInputChange('timezone', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-token rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--surface-2)] dark:text-[var(--text)]"
+              className="input"
             >
               <option value="America/Los_Angeles">Pacific Time (PT)</option>
               <option value="America/Denver">Mountain Time (MT)</option>
@@ -272,7 +272,7 @@ export default function SettingsPage() {
             <select
               value={formData.language}
               onChange={(e) => handleInputChange('language', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-token rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--surface-2)] dark:text-[var(--text)]"
+              className="input"
             >
               <option value="en">English</option>
               <option value="es">Spanish</option>
@@ -371,7 +371,7 @@ export default function SettingsPage() {
             <select
               value={formData.security.sessionTimeout}
               onChange={(e) => handleNestedInputChange('security', 'sessionTimeout', parseInt(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="input"
             >
               <option value={30}>30 minutes</option>
               <option value={60}>1 hour</option>
@@ -447,7 +447,7 @@ export default function SettingsPage() {
                               value={field.value}
                               onChange={(e) => handleIntegrationFieldChange(integration.id, field.name, e.target.value)}
                               placeholder={`Enter ${field.label.toLowerCase()}`}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              className="input"
                             />
                             {field.type === 'password' && (
                               <button

@@ -12,7 +12,9 @@ export default function GoogleAuthSuccessInner() {
     if (token) {
       try {
         document.cookie = `accessToken=${token}; Path=/; SameSite=Lax`;
-      } catch {}
+      } catch {
+        void 0; // ignore cookie set errors
+      }
       localStorage.setItem('accessToken', token);
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));

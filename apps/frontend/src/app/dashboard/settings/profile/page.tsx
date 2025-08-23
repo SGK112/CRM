@@ -66,7 +66,7 @@ export default function ProfileSettingsPage() {
                       <input
                         type="text"
                         defaultValue="John"
-                        className="w-full px-4 py-3 rounded-md border border-slate-700 bg-slate-800/60 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 text-sm"
+                        className="input"
                       />
                     </div>
                     <div>
@@ -76,7 +76,7 @@ export default function ProfileSettingsPage() {
                       <input
                         type="text"
                         defaultValue="Doe"
-                        className="w-full px-4 py-3 rounded-md border border-slate-700 bg-slate-800/60 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 text-sm"
+                        className="input"
                       />
                     </div>
                   </div>
@@ -88,7 +88,7 @@ export default function ProfileSettingsPage() {
                     <input
                       type="email"
                       defaultValue="john@example.com"
-                      className="w-full px-4 py-3 rounded-md border border-slate-700 bg-slate-800/60 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 text-sm"
+                      className="input"
                     />
                   </div>
 
@@ -99,7 +99,7 @@ export default function ProfileSettingsPage() {
                     <input
                       type="tel"
                       defaultValue="+1 (555) 123-4567"
-                      className="w-full px-4 py-3 rounded-md border border-slate-700 bg-slate-800/60 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 text-sm"
+                      className="input"
                     />
                   </div>
 
@@ -110,7 +110,7 @@ export default function ProfileSettingsPage() {
                     <input
                       type="text"
                       defaultValue="Doe Construction"
-                      className="w-full px-4 py-3 rounded-md border border-slate-700 bg-slate-800/60 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 text-sm"
+                      className="input"
                     />
                   </div>
 
@@ -121,7 +121,7 @@ export default function ProfileSettingsPage() {
                     <input
                       type="text"
                       defaultValue="General Contractor"
-                      className="w-full px-4 py-3 rounded-md border border-slate-700 bg-slate-800/60 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 text-sm"
+                      className="input"
                     />
                   </div>
 
@@ -132,7 +132,7 @@ export default function ProfileSettingsPage() {
                     <textarea
                       rows={3}
                       defaultValue="Experienced general contractor specializing in residential remodeling projects."
-                      className="w-full px-4 py-3 rounded-md border border-slate-700 bg-slate-800/60 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 text-sm resize-none"
+                      className="input resize-none"
                     />
                   </div>
 
@@ -164,7 +164,7 @@ export default function ProfileSettingsPage() {
                     </label>
                     <input
                       type="password"
-                      className="w-full px-4 py-3 rounded-md border border-slate-700 bg-slate-800/60 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 text-sm"
+                      className="input"
                       placeholder="Enter current password"
                     />
                   </div>
@@ -175,7 +175,7 @@ export default function ProfileSettingsPage() {
                     </label>
                     <input
                       type="password"
-                      className="w-full px-4 py-3 rounded-md border border-slate-700 bg-slate-800/60 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 text-sm"
+                      className="input"
                       placeholder="Enter new password"
                     />
                   </div>
@@ -186,7 +186,7 @@ export default function ProfileSettingsPage() {
                     </label>
                     <input
                       type="password"
-                      className="w-full px-4 py-3 rounded-md border border-slate-700 bg-slate-800/60 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 text-sm"
+                      className="input"
                       placeholder="Confirm new password"
                     />
                   </div>

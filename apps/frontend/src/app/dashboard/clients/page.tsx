@@ -105,8 +105,8 @@ export default function ClientsPage() {
       if (statusFilter !== 'all') params.append('status', statusFilter);
       if (sourceFilter !== 'all') params.append('source', sourceFilter);
 
-      const queryString = params.toString();
-      const url = `${API_BASE}/clients${queryString ? `?${queryString}` : ''}`;
+  const queryString = params.toString();
+  const url = `/api/clients${queryString ? `?${queryString}` : ''}`;
 
       const response = await fetch(url, {
         headers: {
@@ -127,7 +127,7 @@ export default function ClientsPage() {
         setFilteredClients(normalized);
         
         // Fetch total count for pagination info
-        const countUrl = `${API_BASE}/clients/count${queryString ? `?${queryString}` : ''}`;
+  const countUrl = `/api/clients/count${queryString ? `?${queryString}` : ''}`;
         try {
           const countResponse = await fetch(countUrl, {
             headers: {
@@ -170,7 +170,7 @@ export default function ClientsPage() {
   const fetchAllClientsForLocalFiltering = async () => {
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
-      const response = await fetch(`${API_BASE}/clients`, {
+  const response = await fetch(`/api/clients`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

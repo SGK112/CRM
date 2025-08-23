@@ -184,7 +184,7 @@ export default function NewClientPage() {
                 required
                 value={formData.firstName}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input"
                 placeholder="John"
               />
             </div>
@@ -200,7 +200,7 @@ export default function NewClientPage() {
                 required
                 value={formData.lastName}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input"
                 placeholder="Doe"
               />
             </div>
@@ -217,7 +217,7 @@ export default function NewClientPage() {
                 required
                 value={formData.email}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input"
                 placeholder="john.doe@example.com"
               />
             </div>
@@ -233,7 +233,7 @@ export default function NewClientPage() {
                 name="phone"
                 value={formData.phone || ''}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input"
                 placeholder="+1 (555) 123-4567"
               />
             </div>
@@ -258,7 +258,7 @@ export default function NewClientPage() {
                 name="company"
                 value={formData.company || ''}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input"
                 placeholder="Acme Corporation"
               />
             </div>
@@ -273,7 +273,7 @@ export default function NewClientPage() {
                 name="jobTitle"
                 value={formData.jobTitle || ''}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input"
                 placeholder="Marketing Director"
               />
             </div>
@@ -298,7 +298,7 @@ export default function NewClientPage() {
                 name="address.street"
                 value={formData.address?.street || ''}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input"
                 placeholder="123 Main Street"
               />
             </div>
@@ -313,7 +313,7 @@ export default function NewClientPage() {
                 name="address.city"
                 value={formData.address?.city || ''}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input"
                 placeholder="New York"
               />
             </div>
@@ -328,7 +328,7 @@ export default function NewClientPage() {
                 name="address.state"
                 value={formData.address?.state || ''}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input"
                 placeholder="NY"
               />
             </div>
@@ -343,7 +343,7 @@ export default function NewClientPage() {
                 name="address.zipCode"
                 value={formData.address?.zipCode || ''}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input"
                 placeholder="10001"
               />
             </div>
@@ -358,7 +358,7 @@ export default function NewClientPage() {
                 name="address.country"
                 value={formData.address?.country || ''}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input"
                 placeholder="United States"
               />
             </div>
@@ -379,7 +379,7 @@ export default function NewClientPage() {
                 name="status"
                 value={formData.status}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input"
               >
                 <option value="lead">Lead</option>
                 <option value="prospect">Prospect</option>
@@ -398,7 +398,7 @@ export default function NewClientPage() {
                 name="source"
                 value={formData.source}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input"
               >
                 <option value="referral">Referral</option>
                 <option value="website">Website</option>
@@ -428,7 +428,7 @@ export default function NewClientPage() {
               rows={4}
               value={formData.notes || ''}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="input"
               placeholder="Any additional information about this client..."
             />
           </div>
@@ -448,7 +448,7 @@ export default function NewClientPage() {
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input flex-1"
                 placeholder="Enter a tag and press Enter"
               />
               <button

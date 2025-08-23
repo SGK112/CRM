@@ -338,7 +338,7 @@ export default function ChatPage() {
                 placeholder="Search conversations..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-token rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--surface-1)] dark:text-[var(--text)] placeholder:text-gray-400 dark:placeholder:text-[var(--text-faint)]"
+                className="input pl-10"
               />
             </div>
           </div>
@@ -514,7 +514,7 @@ export default function ChatPage() {
                       onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
                       placeholder="Type your message..."
                       disabled={isLoading}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-token rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 bg-white dark:bg-[var(--surface-1)] dark:text-[var(--text)] placeholder:text-gray-400 dark:placeholder:text-[var(--text-faint)]"
+                      className="input"
                     />
                   </div>
                   

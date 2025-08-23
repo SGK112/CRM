@@ -70,7 +70,7 @@ export default function Layout({ children }: LayoutProps) {
     if (typeof window === 'undefined') return;
     
     // Check if user is authenticated
-    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+  const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
     const userData = localStorage.getItem('user');
 
     if (!token || !userData) {
@@ -103,14 +103,37 @@ export default function Layout({ children }: LayoutProps) {
     }
   }, [router]);
 
+  // Dynamic counts for sidebar badges (fetched after auth)
+  const [counts, setCounts] = useState<{ projects?: number; clients?: number } | null>(null);
+
+  useEffect(() => {
+    async function fetchCounts() {
+      try {
+        const token = typeof window !== 'undefined' ? (localStorage.getItem('accessToken') || localStorage.getItem('token')) : null;
+        if (!token) return;
+        // Fetch projects and clients counts; clients has a count endpoint; projects doesn't, so use list length
+        const [projectsRes, clientsRes] = await Promise.all([
+          fetch('/api/projects', { headers: { Authorization: `Bearer ${token}` } }).catch(() => null),
+          fetch('/api/clients/count', { headers: { Authorization: `Bearer ${token}` } }).catch(() => null),
+        ]);
+        const projectsJson = projectsRes && projectsRes.ok ? await projectsRes.json() : [];
+        const clientsCount = clientsRes && clientsRes.ok ? await clientsRes.json() : undefined;
+        setCounts({ projects: Array.isArray(projectsJson) ? projectsJson.length : undefined, clients: typeof clientsCount === 'number' ? clientsCount : (clientsCount?.count ?? undefined) });
+      } catch {
+        // ignore badge errors
+      }
+    }
+    fetchCounts();
+  }, []);
+
   const navigationGroups: { label: string; items: NavigationItem[] }[] = [
     {
       label: 'Core',
       items: [
-        { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-        { name: 'Projects', href: '/dashboard/projects', icon: ClipboardDocumentListIcon, badge: 12 },
-        { name: 'Clients', href: '/dashboard/clients', icon: UserGroupIcon, badge: 48 },
-        { name: 'Calendar', href: '/dashboard/calendar', icon: CalendarDaysIcon, badge: 3 },
+  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+  { name: 'Projects', href: '/dashboard/projects', icon: ClipboardDocumentListIcon, badge: counts?.projects },
+  { name: 'Clients', href: '/dashboard/clients', icon: UserGroupIcon, badge: counts?.clients },
+  { name: 'Calendar', href: '/dashboard/calendar', icon: CalendarDaysIcon },
       ]
     },
     {
