@@ -33,11 +33,9 @@ export default function EstimatesPage(){
         setEstimates(data);
       } else {
         const errorText = await res.text();
-        console.error('Estimates fetch error:', res.status, errorText);
         setError(`Failed to load estimates: ${res.status} ${res.statusText}`);
       }
     } catch (err) {
-      console.error('Estimates fetch error:', err);
       setError('Failed to connect to server');
     }
     setLoading(false);
@@ -90,11 +88,9 @@ export default function EstimatesPage(){
         fetchEstimates(); // Refresh the list
       } else {
         const errorText = await res.text();
-        console.error('Demo estimate creation error:', res.status, errorText);
         setError(`Failed to create demo estimate: ${res.status} ${res.statusText}`);
       }
     } catch (err) {
-      console.error('Demo estimate creation error:', err);
       setError('Failed to create demo estimate');
     }
   };
