@@ -19,6 +19,26 @@ export class TwilioService {
     }
   }
 
+  get isConfigured(): boolean {
+    return !!this.client && !!this.fromNumber;
+  }
+
+  get from(): string | undefined {
+    return this.fromNumber;
+  }
+
+  async createOutboundCall(to: string, webhookUrl: string): Promise<{ sid: string } | { error: string }> {
+    if (!this.client || !this.fromNumber) {
+      return { error: 'Twilio not configured' };
+    }
+    const result = await this.client.calls.create({
+      to,
+      from: this.fromNumber,
+      url: webhookUrl,
+    });
+    return { sid: result.sid };
+  }
+
   async sendSMS(to: string, message: string): Promise<boolean> {
     try {
       if (!this.client) {

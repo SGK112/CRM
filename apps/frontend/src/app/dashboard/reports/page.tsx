@@ -236,14 +236,14 @@ export default function ReportsPage() {
               <label className="block text-sm font-medium text-gray-700 mb-2">Report Name</label>
               <input
                 type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="input"
                 placeholder="Enter report name"
               />
             </div>
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Report Type</label>
-              <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <select className="input">
                 <option value="financial">Financial Report</option>
                 <option value="project">Project Report</option>
                 <option value="client">Client Report</option>
@@ -256,11 +256,11 @@ export default function ReportsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <input
                   type="date"
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="input"
                 />
                 <input
                   type="date"
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="input"
                 />
               </div>
             </div>
@@ -349,7 +349,7 @@ export default function ReportsPage() {
                   placeholder="Search reports..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="input pl-10"
                 />
               </div>
               <button className="inline-flex items-center px-3 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">

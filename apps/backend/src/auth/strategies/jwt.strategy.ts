@@ -34,6 +34,17 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       user.workspaceId = user.workspaceId || 'super_admin_workspace';
     }
 
+    // Dev-only testing override for demo account
+    try {
+      const allowOverride = (process.env.NODE_ENV !== 'production') || process.env.ALLOW_DEMO_OVERRIDE === '1';
+      if (allowOverride && user.email?.toLowerCase() === 'demo@test.com') {
+        user.subscriptionPlan = 'growth';
+        user.subscriptionStatus = 'active';
+      }
+    } catch {
+      // no-op
+    }
+
     return user;
   }
 }

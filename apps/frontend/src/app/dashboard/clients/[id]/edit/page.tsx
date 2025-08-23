@@ -135,37 +135,37 @@ export default function EditClientPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
-              <input required value={form.firstName} onChange={e=>updateField('firstName', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" />
+              <input required value={form.firstName} onChange={e=>updateField('firstName', e.target.value)} className="input" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
-              <input required value={form.lastName} onChange={e=>updateField('lastName', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" />
+              <input required value={form.lastName} onChange={e=>updateField('lastName', e.target.value)} className="input" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-              <input type="email" required value={form.email} onChange={e=>updateField('email', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" />
+              <input type="email" required value={form.email} onChange={e=>updateField('email', e.target.value)} className="input" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-              <input value={form.phone||''} onChange={e=>updateField('phone', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" />
+              <input value={form.phone||''} onChange={e=>updateField('phone', e.target.value)} className="input" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
-              <input value={form.company||''} onChange={e=>updateField('company', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" />
+              <input value={form.company||''} onChange={e=>updateField('company', e.target.value)} className="input" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Job Title</label>
-              <input value={form.jobTitle||''} onChange={e=>updateField('jobTitle', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" />
+              <input value={form.jobTitle||''} onChange={e=>updateField('jobTitle', e.target.value)} className="input" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-              <select value={form.status} onChange={e=>updateField('status', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+              <select value={form.status} onChange={e=>updateField('status', e.target.value)} className="input">
                 {['lead','prospect','active','inactive','churned','completed'].map(s=> <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Source</label>
-              <select value={form.source||'other'} onChange={e=>updateField('source', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+              <select value={form.source||'other'} onChange={e=>updateField('source', e.target.value)} className="input">
                 {['referral','website','social_media','advertisement','cold_outreach','other'].map(s=> <option key={s} value={s}>{s.replace('_',' ')}</option>)}
               </select>
             </div>
@@ -178,23 +178,23 @@ export default function EditClientPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">Street</label>
-              <input value={form.address?.street||''} onChange={e=>updateAddress('street', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" />
+              <input value={form.address?.street||''} onChange={e=>updateAddress('street', e.target.value)} className="input" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
-              <input value={form.address?.city||''} onChange={e=>updateAddress('city', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" />
+              <input value={form.address?.city||''} onChange={e=>updateAddress('city', e.target.value)} className="input" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
-              <input value={form.address?.state||''} onChange={e=>updateAddress('state', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" />
+              <input value={form.address?.state||''} onChange={e=>updateAddress('state', e.target.value)} className="input" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">ZIP</label>
-              <input value={form.address?.zipCode||''} onChange={e=>updateAddress('zipCode', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" />
+              <input value={form.address?.zipCode||''} onChange={e=>updateAddress('zipCode', e.target.value)} className="input" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
-              <input value={form.address?.country||''} onChange={e=>updateAddress('country', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" />
+              <input value={form.address?.country||''} onChange={e=>updateAddress('country', e.target.value)} className="input" />
             </div>
           </div>
         </section>
@@ -202,14 +202,14 @@ export default function EditClientPage() {
         {/* Notes */}
         <section className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
           <h2 className="text-lg font-semibold">Notes</h2>
-          <textarea rows={4} value={form.notes||''} onChange={e=>updateField('notes', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" placeholder="Internal notes about this client..." />
+          <textarea rows={4} value={form.notes||''} onChange={e=>updateField('notes', e.target.value)} className="input" placeholder="Internal notes about this client..." />
         </section>
 
         {/* Tags */}
         <section className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
           <h2 className="text-lg font-semibold">Tags</h2>
           <div className="flex gap-2">
-            <input value={tagInput} onChange={e=>setTagInput(e.target.value)} onKeyDown={e=>{ if(e.key==='Enter'){ e.preventDefault(); addTag(); } }} placeholder="Add tag and press Enter" className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" />
+            <input value={tagInput} onChange={e=>setTagInput(e.target.value)} onKeyDown={e=>{ if(e.key==='Enter'){ e.preventDefault(); addTag(); } }} placeholder="Add tag and press Enter" className="input flex-1" />
             <button type="button" onClick={addTag} className="px-4 py-2 text-sm rounded-md bg-gray-100 hover:bg-gray-200">Add</button>
           </div>
           <div className="flex flex-wrap gap-2">

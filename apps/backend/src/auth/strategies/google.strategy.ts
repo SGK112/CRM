@@ -13,10 +13,11 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   const clientID = configService.get('GOOGLE_CLIENT_ID');
   const clientSecret = configService.get('GOOGLE_CLIENT_SECRET');
   const configuredCallback = configService.get('GOOGLE_REDIRECT_URI');
-    
+
     // Use provided credentials or dummy values to prevent startup errors
-  // Important: Global prefix is 'api', controller base includes 'auth', so default callback must be /api/auth/google/callback
-  const callbackURL = configuredCallback || 'http://localhost:3001/api/auth/google/callback';
+  // Prefer explicit GOOGLE_REDIRECT_URI; else default to non-prefixed path for local dev
+  // We expose both /auth/google/callback (no prefix) and /api/auth/google/callback (prefixed) via main.ts exclusion
+  const callbackURL = configuredCallback || 'http://localhost:3001/auth/google/callback';
     super({
       clientID: (clientID && !clientID.includes('your-google')) ? clientID : 'dummy-client-id',
       clientSecret: (clientSecret && !clientSecret.includes('your-google')) ? clientSecret : 'dummy-client-secret',

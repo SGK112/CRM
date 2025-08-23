@@ -6,8 +6,9 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Authentication')
-// Support both legacy '/auth' and prefixed '/api/auth' paths so production URL /api/auth/google works
-@Controller(['auth','api/auth'])
+// Controller base is '/auth'. With global prefix 'api', most routes are available under '/api/auth/*'.
+// We also expose '/auth/google' and '/auth/google/callback' without the prefix (configured in main.ts exclusions)
+@Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
   private readonly logger = new Logger('AuthController');
@@ -59,6 +60,7 @@ export class AuthController {
   }
 
   // Google OAuth Routes
+  // Note: With global prefix 'api', this is available at /api/auth/google; we also allow /auth/google via prefix exclusion.
   @Get('google')
   @UseGuards(AuthGuard('google'))
   @ApiOperation({ summary: 'Initiate Google OAuth login' })
@@ -66,6 +68,7 @@ export class AuthController {
     // Initiates Google OAuth flow
   }
 
+  // Callback supports both /api/auth/google/callback and /auth/google/callback
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   @ApiOperation({ summary: 'Google OAuth callback' })

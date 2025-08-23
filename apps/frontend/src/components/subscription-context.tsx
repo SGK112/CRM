@@ -19,13 +19,24 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  function getEmailFromToken(): string | null {
+    try {
+      const token = (typeof window !== 'undefined') ? (localStorage.getItem('accessToken') || localStorage.getItem('token')) : null;
+      if (!token) return null;
+      const parts = token.split('.');
+      if (parts.length < 2) return null;
+      const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+      return payload?.email || payload?.user?.email || payload?.upn || null;
+    } catch { return null; }
+  }
+
   const load = async () => {
     if (typeof window === 'undefined') return;
     const token = localStorage.getItem('accessToken');
     if (!token) { setLoading(false); return; }
     try {
       setError(null);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/billing/me`, {
+  const res = await fetch(`/api/billing/me`, {
         headers: { Authorization: `Bearer ${token}` },
         cache: 'no-store'
       });
@@ -37,6 +48,19 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     } catch (e: any) {
       setError(e.message);
     } finally {
+      // Testing override for demo account (dev/local only)
+      try {
+        const email = getEmailFromToken();
+        const host = typeof window !== 'undefined' ? window.location.hostname : '';
+        const isLocal = ['localhost', '127.0.0.1', '::1'].includes(host);
+        const allowOverride = isLocal || process.env.NEXT_PUBLIC_DEMO_OVERRIDE === '1';
+        if (allowOverride && email && email.toLowerCase() === 'demo@test.com') {
+          // Force Enterprise-like capabilities for testing regardless of backend value
+          setPlan('enterprise');
+          setStatus('trial');
+          setTrialEndsAt('2099-12-31T23:59:59.000Z');
+        }
+      } catch {/* no-op */}
       setLoading(false);
     }
   };

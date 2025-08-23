@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Layout from '@/components/Layout';
 import {
@@ -14,15 +14,25 @@ import {
 	ChevronDownIcon,
 	CheckIcon,
 	MagnifyingGlassIcon,
+	UserPlusIcon,
 } from '@heroicons/react/24/outline';
-import { API_BASE } from '@/lib/api';
+// Use rewrite paths for API calls
 
 interface Client {
 	_id: string;
 	firstName: string;
 	lastName: string;
-	email: string;
+	email?: string;
+	phone?: string;
 	company?: string;
+	address?: {
+		street?: string;
+		city?: string;
+		state?: string;
+		zipCode?: string;
+		country?: string;
+	};
+	tags?: string[];
 }
 
 interface CreateProjectData {
@@ -50,22 +60,52 @@ interface ClientSelectorProps {
 	clients: Client[];
 	selectedClientId: string | undefined;
 	onClientSelect: (clientId: string | undefined) => void;
+	onClientCreated?: (client: Client) => void;
 }
 
-function ClientSelector({ clients, selectedClientId, onClientSelect }: ClientSelectorProps) {
+function ClientSelector({ clients, selectedClientId, onClientSelect, onClientCreated }: ClientSelectorProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const [searchTerm, setSearchTerm] = useState('');
 	const [filteredClients, setFilteredClients] = useState<Client[]>(clients);
 	const dropdownRef = useRef<HTMLDivElement>(null);
+	const [showCreateForm, setShowCreateForm] = useState(false);
+	const [creating, setCreating] = useState(false);
+	const [createError, setCreateError] = useState<string | null>(null);
+	const [newClient, setNewClient] = useState<{ firstName: string; lastName: string; email?: string; phone?: string; company?: string }>({
+		firstName: '',
+		lastName: '',
+		email: '',
+		phone: '',
+		company: '',
+	});
 
 	useEffect(() => {
 		const filtered = clients.filter(client => {
-			const fullName = `${client.firstName} ${client.lastName}`.toLowerCase();
-			const company = client.company?.toLowerCase() || '';
-			const email = client.email.toLowerCase();
 			const search = searchTerm.toLowerCase();
-			
-			return fullName.includes(search) || company.includes(search) || email.includes(search);
+			if (!search) return true;
+			const fullName = `${client.firstName || ''} ${client.lastName || ''}`.toLowerCase();
+			const company = client.company?.toLowerCase() || '';
+			const email = client.email?.toLowerCase() || '';
+			const phone = client.phone?.toLowerCase() || '';
+			const addr = [
+				client.address?.street,
+				client.address?.city,
+				client.address?.state,
+				client.address?.zipCode,
+				client.address?.country,
+			]
+				.filter(Boolean)
+				.join(' ')
+				.toLowerCase();
+			const tags = (client.tags || []).join(' ').toLowerCase();
+			return (
+				fullName.includes(search) ||
+				company.includes(search) ||
+				email.includes(search) ||
+				phone.includes(search) ||
+				addr.includes(search) ||
+				tags.includes(search)
+			);
 		});
 		setFilteredClients(filtered);
 	}, [searchTerm, clients]);
@@ -89,6 +129,70 @@ function ClientSelector({ clients, selectedClientId, onClientSelect }: ClientSel
 		setSearchTerm('');
 	};
 
+	// Heuristic: seed create form from searchTerm
+	useEffect(() => {
+		if (!showCreateForm) return;
+		const s = searchTerm.trim();
+		if (!s) return;
+		const looksLikeEmail = /@/.test(s);
+		const looksLikePhone = /\d{3,}/.test(s.replace(/[^\d]/g, ''));
+		if (looksLikeEmail) {
+			setNewClient(prev => ({ ...prev, email: s }));
+		} else if (looksLikePhone) {
+			setNewClient(prev => ({ ...prev, phone: s.replace(/[^\d]/g, '') }));
+		} else {
+			const parts = s.split(/\s+/);
+			setNewClient(prev => ({ ...prev, firstName: parts[0] || '', lastName: parts.slice(1).join(' ') }));
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [showCreateForm]);
+
+	const handleCreate = async () => {
+		setCreateError(null);
+		// minimal validation
+		if (!newClient.firstName || (!newClient.email && !newClient.phone)) {
+			setCreateError('First name and either email or phone are required.');
+			return;
+		}
+		try {
+			setCreating(true);
+			const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+			if (!token) {
+				setCreateError('You are not logged in.');
+				return;
+			}
+			const payload: any = {
+				firstName: newClient.firstName,
+				lastName: newClient.lastName || '-',
+				email: newClient.email?.trim() || undefined,
+				phone: newClient.phone?.toString() || undefined,
+				company: newClient.company?.trim() || undefined,
+				status: 'client',
+			};
+			const res = await fetch('/api/clients', {
+				method: 'POST',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(payload),
+			});
+			if (!res.ok) {
+				const err = await res.json().catch(() => ({}));
+				throw new Error(err?.message || 'Failed to create client');
+			}
+			const created: Client = await res.json();
+			onClientCreated && onClientCreated(created);
+			handleClientSelect(created);
+			setShowCreateForm(false);
+			setNewClient({ firstName: '', lastName: '', email: '', phone: '', company: '' });
+		} catch (e: any) {
+			setCreateError(e.message || 'Failed to create client');
+		} finally {
+			setCreating(false);
+		}
+	};
+
 	return (
 		<div className="relative" ref={dropdownRef}>
 			<label className="block text-sm font-medium text-[var(--text)] mb-2">
@@ -110,13 +214,13 @@ function ClientSelector({ clients, selectedClientId, onClientSelect }: ClientSel
 				</button>
 
 				{isOpen && (
-					<div className="absolute z-10 w-full mt-1 bg-[var(--surface-1)] border border-[var(--border)] rounded-lg shadow-lg max-h-60 overflow-hidden">
+					<div className="absolute z-10 w-full mt-1 bg-[var(--surface-1)] border border-[var(--border)] rounded-lg shadow-lg max-h-80 overflow-hidden">
 						<div className="p-2 border-b border-[var(--border)]">
 							<div className="relative">
 								<MagnifyingGlassIcon className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--text-faint)]" />
 								<input
 									type="text"
-									placeholder="Search clients..."
+									placeholder="Search by name, email, phone, company, or address..."
 									value={searchTerm}
 									onChange={(e) => setSearchTerm(e.target.value)}
 									className="w-full pl-9 pr-3 py-2 border border-[var(--border)] rounded-md focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 text-sm bg-[var(--input-bg)] text-[var(--text)] placeholder-[var(--text-faint)]"
@@ -125,7 +229,70 @@ function ClientSelector({ clients, selectedClientId, onClientSelect }: ClientSel
 							</div>
 						</div>
 						
-						<div className="max-h-48 overflow-y-auto">
+						<div className="max-h-64 overflow-y-auto">
+							{/* Add new client trigger inside list */}
+							<div className="px-3 py-2 border-b border-[var(--border)]">
+								<button
+									type="button"
+									onClick={() => { setShowCreateForm(v => !v); setCreateError(null); }}
+									className="w-full inline-flex items-center gap-2 text-sm text-amber-500 hover:text-amber-400"
+								>
+									<UserPlusIcon className="h-4 w-4" />
+									{showCreateForm ? 'Close new client form' : 'Add new client'}
+								</button>
+								{showCreateForm && (
+									<div className="mt-2 rounded-md border border-[var(--border)] bg-[var(--surface-2)] p-3 space-y-2">
+										<div className="grid grid-cols-2 gap-2">
+											<input
+												className="col-span-1 px-2 py-1 rounded border border-[var(--border)] bg-[var(--input-bg)] text-[var(--text)] text-xs"
+												placeholder="First name*"
+												value={newClient.firstName}
+												onChange={e => setNewClient({ ...newClient, firstName: e.target.value })}
+											/>
+											<input
+												className="col-span-1 px-2 py-1 rounded border border-[var(--border)] bg-[var(--input-bg)] text-[var(--text)] text-xs"
+												placeholder="Last name"
+												value={newClient.lastName}
+												onChange={e => setNewClient({ ...newClient, lastName: e.target.value })}
+											/>
+											<input
+												className="col-span-1 px-2 py-1 rounded border border-[var(--border)] bg-[var(--input-bg)] text-[var(--text)] text-xs"
+												placeholder="Email"
+												value={newClient.email}
+												onChange={e => setNewClient({ ...newClient, email: e.target.value })}
+											/>
+											<input
+												className="col-span-1 px-2 py-1 rounded border border-[var(--border)] bg-[var(--input-bg)] text-[var(--text)] text-xs"
+												placeholder="Phone"
+												value={newClient.phone}
+												onChange={e => setNewClient({ ...newClient, phone: e.target.value })}
+											/>
+											<input
+												className="col-span-2 px-2 py-1 rounded border border-[var(--border)] bg-[var(--input-bg)] text-[var(--text)] text-xs"
+												placeholder="Company (optional)"
+												value={newClient.company}
+												onChange={e => setNewClient({ ...newClient, company: e.target.value })}
+											/>
+										</div>
+										{createError && (
+											<div className="text-xs text-red-400">{createError}</div>
+										)}
+										<div className="flex gap-2 justify-end">
+											<button
+												type="button"
+												onClick={() => { setShowCreateForm(false); setCreateError(null); }}
+												className="px-2 py-1 text-xs rounded border border-[var(--border)] text-[var(--text-dim)] hover:bg-[var(--surface-3)]"
+											>Cancel</button>
+											<button
+												type="button"
+												disabled={creating}
+												onClick={handleCreate}
+												className="px-2 py-1 text-xs rounded bg-amber-600 text-white hover:bg-amber-500 disabled:opacity-60"
+											>{creating ? 'Creating…' : 'Create & select'}</button>
+										</div>
+									</div>
+								)}
+							</div>
 							<div
 								className="px-3 py-2 hover:bg-[var(--surface-2)] cursor-pointer flex items-center justify-between"
 								onClick={() => handleClientSelect(null)}
@@ -136,7 +303,7 @@ function ClientSelector({ clients, selectedClientId, onClientSelect }: ClientSel
 							
 							{filteredClients.length === 0 && searchTerm ? (
 								<div className="px-3 py-2 text-[var(--text-dim)] text-sm">
-									No clients found matching "{searchTerm}"
+									<div>No clients found matching "{searchTerm}"</div>
 								</div>
 							) : (
 								filteredClients.map((client) => (
@@ -149,10 +316,16 @@ function ClientSelector({ clients, selectedClientId, onClientSelect }: ClientSel
 											<div className="font-medium text-[var(--text)]">
 												{client.firstName} {client.lastName}
 											</div>
-											{client.company && (
-												<div className="text-sm text-[var(--text-dim)]">{client.company}</div>
+											{(client.company || client.phone) && (
+												<div className="text-sm text-[var(--text-dim)]">
+													{client.company}
+													{client.company && client.phone ? ' • ' : ''}
+													{client.phone}
+												</div>
 											)}
-											<div className="text-xs text-[var(--text-faint)]">{client.email}</div>
+											{(client.email) && (
+												<div className="text-xs text-[var(--text-faint)]">{client.email}</div>
+											)}
 										</div>
 										{selectedClientId === client._id && (
 											<CheckIcon className="h-4 w-4 text-amber-600" />
@@ -170,6 +343,7 @@ function ClientSelector({ clients, selectedClientId, onClientSelect }: ClientSel
 
 export default function NewDashboardProjectPage() {
 	const router = useRouter();
+	const searchParams = useSearchParams();
 	const [clients, setClients] = useState<Client[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [tagInput, setTagInput] = useState('');
@@ -186,6 +360,15 @@ export default function NewDashboardProjectPage() {
 		fetchClients();
 	}, []);
 
+	// Preselect client from query string if provided
+	useEffect(() => {
+		const client = searchParams?.get('client');
+		if (client) {
+			setFormData(prev => ({ ...prev, clientId: client }));
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
+
 	const fetchClients = async () => {
 		try {
 			const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
@@ -194,7 +377,7 @@ export default function NewDashboardProjectPage() {
 				return;
 			}
 
-			const response = await fetch(`${API_BASE}/clients`, {
+			const response = await fetch(`/api/clients`, {
 				headers: {
 					Authorization: `Bearer ${token}`,
 					'Content-Type': 'application/json',
@@ -234,7 +417,7 @@ export default function NewDashboardProjectPage() {
 						if (!hasAddressData) delete submitData.address;
 					}
 
-			const response = await fetch(`${API_BASE}/projects`, {
+			const response = await fetch(`/api/projects`, {
 				method: 'POST',
 				headers: {
 					Authorization: `Bearer ${token}`,
@@ -333,7 +516,7 @@ export default function NewDashboardProjectPage() {
 									required
 									value={formData.title}
 									onChange={handleInputChange}
-									className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+									className="input"
 									placeholder="Enter project title"
 								/>
 							</div>
@@ -348,7 +531,7 @@ export default function NewDashboardProjectPage() {
 									rows={4}
 									value={formData.description}
 									onChange={handleInputChange}
-									className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+									className="input"
 									placeholder="Describe the project goals, requirements, and deliverables"
 								/>
 							</div>
@@ -361,7 +544,7 @@ export default function NewDashboardProjectPage() {
 									name="status"
 									value={formData.status}
 									onChange={handleInputChange}
-									className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+									className="input"
 								>
 									<option value="planning">Planning</option>
 									<option value="active">Active</option>
@@ -379,7 +562,7 @@ export default function NewDashboardProjectPage() {
 									name="priority"
 									value={formData.priority}
 									onChange={handleInputChange}
-									className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+									className="input"
 								>
 									<option value="low">Low</option>
 									<option value="medium">Medium</option>
@@ -391,6 +574,10 @@ export default function NewDashboardProjectPage() {
 								clients={clients}
 								selectedClientId={formData.clientId}
 								onClientSelect={(clientId) => setFormData(prev => ({ ...prev, clientId }))}
+								onClientCreated={(client) => {
+									setClients(prev => [client, ...prev]);
+									setFormData(prev => ({ ...prev, clientId: client._id }));
+								}}
 							/>
 						</div>
 					</div>
@@ -413,7 +600,7 @@ export default function NewDashboardProjectPage() {
 									step="0.01"
 									value={formData.budget || ''}
 									onChange={handleInputChange}
-									className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+									className="input"
 									placeholder="0.00"
 								/>
 							</div>
@@ -428,7 +615,7 @@ export default function NewDashboardProjectPage() {
 									min="0"
 									value={formData.estimatedHours || ''}
 									onChange={handleInputChange}
-									className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+									className="input"
 									placeholder="0"
 								/>
 							</div>
@@ -442,7 +629,7 @@ export default function NewDashboardProjectPage() {
 									name="startDate"
 									value={formData.startDate || ''}
 									onChange={handleInputChange}
-									className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+									className="input"
 								/>
 							</div>
 							<div>
@@ -455,7 +642,7 @@ export default function NewDashboardProjectPage() {
 									name="endDate"
 									value={formData.endDate || ''}
 									onChange={handleInputChange}
-									className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+									className="input"
 								/>
 							</div>
 						</div>
@@ -477,7 +664,7 @@ export default function NewDashboardProjectPage() {
 									name="address.street"
 									value={formData.address?.street || ''}
 									onChange={handleInputChange}
-									className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+									className="input"
 									placeholder="123 Main Street"
 								/>
 							</div>
@@ -491,7 +678,7 @@ export default function NewDashboardProjectPage() {
 									name="address.city"
 									value={formData.address?.city || ''}
 									onChange={handleInputChange}
-									className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+									className="input"
 									placeholder="City"
 								/>
 							</div>
@@ -505,7 +692,7 @@ export default function NewDashboardProjectPage() {
 									name="address.state"
 									value={formData.address?.state || ''}
 									onChange={handleInputChange}
-									className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+									className="input"
 									placeholder="State"
 								/>
 							</div>
@@ -519,7 +706,7 @@ export default function NewDashboardProjectPage() {
 									name="address.zipCode"
 									value={formData.address?.zipCode || ''}
 									onChange={handleInputChange}
-									className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+									className="input"
 									placeholder="12345"
 								/>
 							</div>
@@ -533,7 +720,7 @@ export default function NewDashboardProjectPage() {
 									name="address.country"
 									value={formData.address?.country || ''}
 									onChange={handleInputChange}
-									className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+									className="input"
 									placeholder="United States"
 								/>
 							</div>
@@ -552,7 +739,7 @@ export default function NewDashboardProjectPage() {
 									value={tagInput}
 									onChange={(e) => setTagInput(e.target.value)}
 									onKeyPress={handleKeyPress}
-									className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+									className="input flex-1"
 									placeholder="Enter a tag and press Enter"
 								/>
 								<button

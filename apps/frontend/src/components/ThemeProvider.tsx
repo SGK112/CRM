@@ -17,7 +17,8 @@ interface Props { children: ReactNode }
 const THEME_KEY = 'crm.theme';
 
 export function ThemeProvider({ children }: Props) {
-  const [theme, setThemeState] = useState<Theme>('light');
+  // Default to dark to match marketing preference when no stored choice exists
+  const [theme, setThemeState] = useState<Theme>('dark');
   const [system, setSystem] = useState<Theme>('light');
 
   const applyThemeClass = useCallback((t: Theme) => {
@@ -38,7 +39,8 @@ export function ThemeProvider({ children }: Props) {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const stored = localStorage.getItem(THEME_KEY) as Theme | null;
-    let initial: Theme = stored || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    // Prefer stored choice; otherwise, default to dark for landing/marketing pages
+    let initial: Theme = stored || 'dark';
     setThemeState(initial);
     applyThemeClass(initial);
   }, [applyThemeClass]);

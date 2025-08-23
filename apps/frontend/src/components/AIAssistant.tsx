@@ -485,7 +485,7 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
           data: { path: '/dashboard/projects' },
           icon: ClipboardDocumentListIcon
         });
-        responseContent = 'I can show you all your projects. You\'ll be able to see their status, progress, and manage them from there.';
+        responseContent = 'Sure! Let me take you to your projects.';
       }
     }
     
@@ -498,7 +498,7 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
           data: { path: '/dashboard/clients/new' },
           icon: PlusIcon
         });
-        responseContent = 'I can help you add a new client. This will open the client registration form where you can enter their contact information and project preferences.';
+        responseContent = 'I can help you add a new client. Just click the button to get started.';
       } else {
         actions.push({
           type: 'navigate',
@@ -507,7 +507,7 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
           data: { path: '/dashboard/clients' },
           icon: UserGroupIcon
         });
-        responseContent = 'I can show you all your clients. You\'ll be able to view their information, project history, and contact details.';
+        responseContent = 'Let me show you your clients.';
       }
     }
     
@@ -519,7 +519,7 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
         data: { path: '/dashboard/calendar' },
         icon: CalendarDaysIcon
       });
-      responseContent = 'I can open your calendar where you can view, schedule, and manage appointments with clients and team members.';
+      responseContent = 'Let me open your calendar for you.';
     }
     
     else if (lowerInput.includes('document') || lowerInput.includes('file')) {
@@ -530,7 +530,7 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
         data: { path: '/dashboard/documents' },
         icon: DocumentTextIcon
       });
-      responseContent = 'I can take you to the documents section where you can manage contracts, plans, and other project files.';
+      responseContent = 'I can take you to your documents.';
     }
     
     else if (lowerInput.includes('setting') || lowerInput.includes('config')) {
@@ -541,7 +541,7 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
         data: { path: '/dashboard/settings' },
         icon: CogIcon
       });
-      responseContent = 'I can open the settings page where you can configure your account, notifications, and system preferences.';
+      responseContent = 'Let me open your settings.';
     }
     
     else if (lowerInput.includes('ecommerce') || lowerInput.includes('store') || lowerInput.includes('shop')) {
@@ -552,7 +552,7 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
         data: { path: '/dashboard/ecommerce' },
         icon: ArrowTopRightOnSquareIcon
       });
-      responseContent = 'I can open your online store management where you can handle product listings, orders, and integration settings.';
+      responseContent = 'Let me open your online store management.';
     }
     
     else if (lowerInput.includes('business card') || lowerInput.includes('rolladex') || lowerInput.includes('contacts')) {
@@ -563,7 +563,7 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
         data: { path: '/dashboard/rolladex' },
         icon: UserGroupIcon
       });
-      responseContent = 'I can show you your business card rolladex where you can manage professional contacts and networking connections.';
+      responseContent = 'I can show you your business contacts.';
     }
     
     // Demo and trial related
@@ -582,12 +582,12 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
         data: { path: '/trial' },
         icon: SparklesIcon
       });
-      responseContent = 'I can show you our interactive demo or help you start a free trial to explore all features.';
+      responseContent = 'I can show you our demo or help you start a trial.';
     }
 
     // Form creation intents
     else if (lowerInput.includes('form') || lowerInput.includes('quote') || lowerInput.includes('estimate')) {
-      responseContent = 'I can help you create various forms for your business. You can create project quotes, client intake forms, or custom forms for your workflow.';
+      responseContent = 'I can help you create forms for quotes and estimates.';
       actions.push({
         type: 'create',
         label: 'Create Quote Form',
@@ -603,18 +603,10 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
       
       if (businessQuestionPattern.test(lowerInput)) {
         // For business questions, provide a minimal response and let the AI handle it
-        responseContent = `I understand you're asking about business strategy. Let me get our AI to provide you with detailed advice...`;
+        responseContent = `Let me help you with that...`;
         // Don't add actions - let the AI service handle this
       } else {
-        responseContent = `I understand you're asking about "${input}". I can help you with:
-        
-• Navigate to different sections of the CRM
-• Create new projects, clients, or appointments
-• Manage documents and files
-• Configure settings and preferences
-• View analytics and reports
-
-What specific task would you like me to help you with?`;
+        responseContent = `What can I help you with? I can show you around the CRM or help with specific tasks.`;
         
         actions.push({
           type: 'navigate',
@@ -622,15 +614,28 @@ What specific task would you like me to help you with?`;
           description: 'Go to main dashboard',
           data: { path: '/dashboard' },
           icon: ClipboardDocumentListIcon
+        }, {
+          type: 'navigate',
+          label: 'Manage Clients',
+          description: 'View and edit client information',
+          data: { path: '/dashboard/clients' },
+          icon: UserGroupIcon
+        }, {
+          type: 'navigate',
+          label: 'View Projects',
+          description: 'Manage your projects and tasks',
+          data: { path: '/dashboard/projects' },
+          icon: ClipboardDocumentListIcon
+        }, {
+          type: 'navigate',
+          label: 'Open Calendar',
+          description: 'Schedule and manage appointments',
+          data: { path: '/dashboard/calendar' },
+          icon: CalendarDaysIcon
         });
       }
     }
 
-    // Provide light context injection referencing last 3 user messages
-    const recentUser = messages.filter(m => m.type==='user').slice(-3).map(m=>m.content);
-    if (recentUser.length && responseContent && !responseContent.includes('I can')) {
-      responseContent += `\n\n(Context from earlier: ${recentUser.join(' | ')})`;
-    }
     return {
       id: Date.now().toString(),
       type: 'assistant',
@@ -639,7 +644,7 @@ What specific task would you like me to help you with?`;
       actions: actions.length > 0 ? actions : undefined,
       suggestions: actions.length === 0 ? [
         'Show me projects',
-        'Create a new client',
+        'Create a new client', 
         'Open calendar',
         'View settings'
       ] : undefined
@@ -667,14 +672,29 @@ What specific task would you like me to help you with?`;
     // Heuristic: if the immediate intent already produced concrete actions (navigate/create/etc.)
     // for a direct entity/task phrase, skip the secondary LLM call to prevent "double" responses.
     // BUT: allow business questions, sales queries, and advice requests to go to AI
-    const actionablePattern = /(create|add|new)\s+(project|client)|\b(projects?|clients?|calendar|documents?|settings?|ecommerce|store|rolladex|contacts?)\b/i;
+    const actionablePattern = /(create|add|new)\s+(project|client)|\b(projects?|clients?|calendar|documents?|settings?|ecommerce|store|rolladex|contacts?|help)\b/i;
     const businessQuestionPattern = /(how.*sell|sell.*more|increase.*sales|business.*advice|marketing|strategy|grow.*business|lead.*generation|kitchen.*remodel|bathroom.*remodel)/i;
     const hasActions = !!immediateIntent.actions?.length;
     
     // Skip AI call only if it's a direct navigation request AND not a business question
     if (hasActions && actionablePattern.test(input) && !businessQuestionPattern.test(input)) {
+      console.log('Skipping AI call for actionable request:', input, 'hasActions:', hasActions);
       setIsLoading(false);
       return; // Avoid duplicate conversational AI follow-up; user sees one concise response with actions.
+    }
+
+    // Additional catch for general help requests that have actions
+    if (hasActions && /\b(help|what|how.*help|can.*help|show.*around)\b/i.test(input)) {
+      console.log('Skipping AI call for help request:', input, 'hasActions:', hasActions);
+      setIsLoading(false);
+      return;
+    }
+
+    // Catch-all: if we have actions and it's not a business question, skip AI
+    if (hasActions && !businessQuestionPattern.test(input)) {
+      console.log('Skipping AI call for request with actions:', input, 'hasActions:', hasActions);
+      setIsLoading(false);
+      return;
     }
 
     // If search pattern, poll results then stop (skip LLM)
@@ -714,7 +734,7 @@ What specific task would you like me to help you with?`;
       // Enhanced context for better AI responses
       const systemMessage = {
         role: 'system' as const,
-        content: `You are a helpful CRM assistant. You can help users manage their business by creating, editing, and organizing clients, projects, estimates, and other CRM data. When appropriate, offer action options for interactive demos, free trials, or specific CRM operations. Keep responses conversational and helpful. If the user mentions features or asks about capabilities, offer to show an interactive demo or help start a free trial to explore all features.`
+        content: `You are a helpful, conversational CRM assistant. Keep responses brief and friendly - avoid bullet points and long lists. Focus on being helpful and natural. When users ask for help with business tasks, provide practical advice in a conversational tone. Don't repeat what the user just said back to them.`
       };
       
       const payload = {
@@ -961,7 +981,7 @@ What specific task would you like me to help you with?`;
         setMessages(prev => [...prev, {
           id: genId(),
           type: 'assistant',
-          content: `🤔 I'm not sure how to handle that action yet, but I'm learning! \n\nI can help you with:\n• Creating and editing clients & projects\n• Navigating the CRM\n• Scheduling appointments\n• Managing documents\n\nWhat would you like to do?`,
+          content: `I'm still learning that action. What else can I help you with?`,
           timestamp: new Date(),
           suggestions: ['Show me around', 'Create new client', 'View projects', 'Open calendar']
         }]);
@@ -1293,7 +1313,7 @@ What specific task would you like me to help you with?`;
             </div>
           )}
           <div className="mt-1 group">
-            <div className="flex rounded-xl border border-[var(--border)] bg-[var(--surface-2)] dark:bg-[var(--surface-2)] focus-within:border-amber-500/60 focus-within:ring-1 focus-within:ring-amber-500/30 transition shadow-sm">
+            <div className="flex rounded-xl border border-gray-200 dark:border-gray-700 bg-[var(--surface-2)] dark:bg-[var(--surface-2)] focus-within:border-amber-500/60 focus-within:ring-1 focus-within:ring-amber-500/20 transition">
               <div className="flex-1 relative px-3 py-2">
                 <textarea
                   ref={textareaRef}
@@ -1315,8 +1335,8 @@ What specific task would you like me to help you with?`;
                   className="w-full bg-transparent outline-none resize-none text-sm leading-relaxed min-h-[42px] max-h-[160px] pr-2 text-gray-800 dark:text-gray-200 placeholder:text-gray-500"
                   disabled={isLoading}
                 />
-                <div className="absolute bottom-1 right-2 flex items-center gap-1 text-[10px] text-gray-500 dark:text-gray-600 select-none pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span>/</span><span>Enter</span>
+                <div className="absolute bottom-3 right-4 flex items-center gap-1.5 text-[10px] text-gray-400 dark:text-gray-400 select-none pointer-events-none opacity-0 group-hover:opacity-90 transition-opacity bg-white/80 dark:bg-gray-800/80 px-1.5 py-0.5 rounded backdrop-blur-sm">
+                  <span className="font-mono">/</span><span className="font-mono">Enter</span>
                 </div>
               </div>
               <div className="flex items-stretch">

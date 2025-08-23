@@ -219,7 +219,7 @@ export default function NewProjectPage() {
                 required
                 value={formData.title}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input"
                 placeholder="Enter project title"
               />
             </div>
@@ -235,7 +235,7 @@ export default function NewProjectPage() {
                 rows={4}
                 value={formData.description}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input"
                 placeholder="Describe the project goals, requirements, and deliverables"
               />
             </div>
@@ -249,7 +249,7 @@ export default function NewProjectPage() {
                 name="status"
                 value={formData.status}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input"
               >
                 <option value="planning">Planning</option>
                 <option value="active">Active</option>
@@ -268,7 +268,7 @@ export default function NewProjectPage() {
                 name="priority"
                 value={formData.priority}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input"
               >
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
@@ -287,7 +287,7 @@ export default function NewProjectPage() {
                 name="clientId"
                 value={formData.clientId || ''}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input"
               >
                 <option value="">Select a client (optional)</option>
                 {clients.map((client) => (
@@ -320,7 +320,7 @@ export default function NewProjectPage() {
                 step="0.01"
                 value={formData.budget || ''}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input"
                 placeholder="0.00"
               />
             </div>
@@ -336,7 +336,7 @@ export default function NewProjectPage() {
                 min="0"
                 value={formData.estimatedHours || ''}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input"
                 placeholder="0"
               />
             </div>
@@ -352,7 +352,7 @@ export default function NewProjectPage() {
                 name="startDate"
                 value={formData.startDate || ''}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input"
               />
             </div>
 
@@ -367,7 +367,7 @@ export default function NewProjectPage() {
                 name="endDate"
                 value={formData.endDate || ''}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input"
               />
             </div>
           </div>
@@ -391,7 +391,7 @@ export default function NewProjectPage() {
                 name="address.street"
                 value={formData.address?.street || ''}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input"
                 placeholder="123 Main Street"
               />
             </div>
@@ -406,7 +406,7 @@ export default function NewProjectPage() {
                 name="address.city"
                 value={formData.address?.city || ''}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input"
                 placeholder="City"
               />
             </div>
@@ -421,7 +421,7 @@ export default function NewProjectPage() {
                 name="address.state"
                 value={formData.address?.state || ''}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input"
                 placeholder="State"
               />
             </div>
@@ -436,7 +436,7 @@ export default function NewProjectPage() {
                 name="address.zipCode"
                 value={formData.address?.zipCode || ''}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input"
                 placeholder="12345"
               />
             </div>
@@ -451,7 +451,7 @@ export default function NewProjectPage() {
                 name="address.country"
                 value={formData.address?.country || ''}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input"
                 placeholder="United States"
               />
             </div>
@@ -472,7 +472,7 @@ export default function NewProjectPage() {
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input flex-1"
                 placeholder="Enter a tag and press Enter"
               />
               <button

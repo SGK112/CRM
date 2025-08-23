@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Layout from '../../../components/Layout';
+import { CapabilityGate } from '../../../components/CapabilityGate';
 import { listTemplates, createTemplate, updateTemplate, deleteTemplate, getTemplate, createDesign } from '../../../lib/designsApi';
 import {
   PencilSquareIcon,
@@ -193,9 +194,11 @@ export default function DesignerPage() {
           >
             ★
           </button>
-          <button className="flex-1 px-3 py-2 bg-blue-600 text-white text-xs font-medium rounded-md hover:bg-blue-700 transition-colors dark:bg-blue-500 dark:hover:bg-blue-600" onClick={() => router.push(`/dashboard/designer/editor?template=${template.id}`)}>
-            Use Template
-          </button>
+          <CapabilityGate need="design.lab" fallback={<a href="/billing/cart" className="text-amber-500 underline text-xs">Upgrade to use templates</a>}>
+            <button className="flex-1 px-3 py-2 bg-blue-600 text-white text-xs font-medium rounded-md hover:bg-blue-700 transition-colors dark:bg-blue-500 dark:hover:bg-blue-600" onClick={() => router.push(`/dashboard/designer/editor?template=${template.id}`)}>
+              Use Template
+            </button>
+          </CapabilityGate>
           <button
             onClick={() => setPreviewTemplate(template)}
             className="p-2 border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
@@ -284,7 +287,9 @@ export default function DesignerPage() {
             <div className="md:col-span-1 xl:col-span-2 flex items-end">
               <div className="w-full flex gap-2 flex-wrap">
         <button onClick={() => setManagingTemplate({ mode: 'create', data: { name: '', type: 'residential', category: 'full-house', description: '', features: [] } })} className="px-3 py-2 text-xs font-medium rounded-md bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600">+ Template</button>
-        <button onClick={() => setActiveView('new')} className="px-3 py-2 text-xs font-medium rounded-md bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600">New Design</button>
+          <CapabilityGate need="design.lab" fallback={<a href="/billing/cart" className="text-amber-500 underline text-xs">Upgrade to create designs</a>}>
+            <button onClick={() => setActiveView('new')} className="px-3 py-2 text-xs font-medium rounded-md bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600">New Design</button>
+          </CapabilityGate>
         <button onClick={() => { setSelectedCategory('all'); setSelectedType('all'); setSearchTerm(''); }} className="px-3 py-2 text-xs font-medium border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300">Reset Filters</button>
               </div>
             </div>

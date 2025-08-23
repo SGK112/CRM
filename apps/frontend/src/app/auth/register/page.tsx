@@ -1,4 +1,4 @@
-'use client'
+"use client"
 export const dynamic = 'force-dynamic';
 
 import { useState, useEffect } from 'react'
@@ -21,22 +21,42 @@ export default function RegisterPage() {
   const router = useRouter()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    })
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }))
   }
 
   const [backendUp, setBackendUp] = useState(true)
+  const [checkingHealth, setCheckingHealth] = useState(false)
 
   useEffect(() => {
-    const ping = async () => {
+    let cancelled = false
+    const ping = async (attempt = 1) => {
+      setCheckingHealth(true)
+      let ok = false
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL?.replace(/\/api$/, '')}/health`, { cache: 'no-store' })
-        setBackendUp(res.ok)
-      } catch { setBackendUp(false) }
+        const res = await fetch('/api/health', { cache: 'no-store' })
+        ok = res.ok
+        if (!cancelled && ok) { setBackendUp(true); setCheckingHealth(false); return }
+      } catch {
+        // ignore and try direct backend fallback
+      }
+      try {
+        const base = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001')
+          .replace(/\/$/, '')
+          .replace(/(?:\/api)+$/, '')
+        const res2 = await fetch(`${base}/api/health`, { cache: 'no-store' })
+        ok = res2.ok
+        if (!cancelled) setBackendUp(ok)
+      } catch {
+        if (!cancelled) setBackendUp(false)
+      } finally {
+        if (!cancelled) setCheckingHealth(false)
+      }
+      if (!cancelled && !ok && attempt < 3) {
+        setTimeout(() => ping(attempt + 1), attempt * 800)
+      }
     }
     ping()
+    return () => { cancelled = true }
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,23 +65,20 @@ export default function RegisterPage() {
     setError('')
 
     try {
-      const base = process.env.NEXT_PUBLIC_API_URL || ''
-      const url = `${base}/auth/register`
-      const response = await fetch(url, {
+      const response = await fetch(`/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       })
 
-  let data: any = null
-  try { data = await response.json() } catch { /* ignore */ }
+      let data: any = null
+      try { data = await response.json() } catch {
+        // ignore json parse error
+      }
 
-  if (response.ok) {
-        // Store token in localStorage
+      if (response.ok) {
         localStorage.setItem('accessToken', data.accessToken)
         localStorage.setItem('user', JSON.stringify(data.user))
-        
-        // Redirect to dashboard
         router.push('/dashboard')
       } else if (response.status === 400) {
         setError(data?.validation?.[0] || data?.message || 'Validation error')
@@ -74,11 +91,13 @@ export default function RegisterPage() {
       }
     } catch (err) {
       setError('Network error. Please try again.')
-    } finally { setIsLoading(false) }
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
-  <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
       <div className="pointer-events-none select-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-amber-600/10 blur-3xl" />
       <div className="pointer-events-none select-none absolute top-1/3 -right-40 h-[28rem] w-[28rem] rounded-full bg-amber-500/5 blur-3xl" />
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -90,8 +109,43 @@ export default function RegisterPage() {
             <span className="text-2xl font-semibold tracking-tight text-[var(--text)]">Remodely Ai</span>
           </div>
         </div>
-  <h2 className="mt-4 text-center text-3xl font-semibold tracking-tight text-[var(--text)]">Create your workspace</h2>
-  {!backendUp && <p className="mt-2 text-center text-xs text-red-400">Backend offline or unreachable. Registration may fail.</p>}
+        <h2 className="mt-4 text-center text-3xl font-semibold tracking-tight text-[var(--text)]">Create your workspace</h2>
+        {!backendUp && (
+          <div className="mt-2 text-center">
+            <p className="text-xs text-red-400">Backend offline or unreachable. Registration may fail.</p>
+            <button
+              type="button"
+              onClick={() => {
+                const run = async () => {
+                  setCheckingHealth(true)
+                  let ok = false
+                  try {
+                    const res = await fetch('/api/health', { cache: 'no-store' })
+                    ok = res.ok
+                    if (ok) { setBackendUp(true); return }
+                  } catch {
+                    // ignore and try direct backend
+                  }
+                  try {
+                    const base = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001')
+                      .replace(/\/$/, '')
+                      .replace(/(?:\/api)+$/, '')
+                    const res2 = await fetch(`${base}/api/health`, { cache: 'no-store' })
+                    ok = res2.ok
+                    setBackendUp(ok)
+                  } catch {
+                    setBackendUp(false)
+                  } finally { setCheckingHealth(false) }
+                }
+                run()
+              }}
+              disabled={checkingHealth}
+              className="mt-1 inline-flex items-center rounded-md border border-[var(--border)] bg-[var(--surface-2)] px-2.5 py-1 text-xs text-[var(--text)] hover:bg-[var(--surface-3)] disabled:opacity-50"
+            >
+              {checkingHealth ? 'Checking…' : 'Retry health check'}
+            </button>
+          </div>
+        )}
         <p className="mt-2 text-center text-sm text-[var(--text-dim)]">
           Or{' '}
           <Link href="/auth/login" className="font-medium text-amber-400 hover:text-amber-300 transition-colors">
@@ -100,17 +154,17 @@ export default function RegisterPage() {
         </p>
       </div>
 
-  <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-    <div className="relative py-8 px-5 sm:px-10 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)]/70 backdrop-blur-sm shadow-xl">
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="relative py-8 px-5 sm:px-10 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)]/70 backdrop-blur-sm shadow-xl">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
-      <div className="bg-red-500/10 border border-red-500/40 text-red-300 px-4 py-3 rounded-md text-sm">
+              <div className="bg-red-500/10 border border-red-500/40 text-red-300 px-4 py-3 rounded-md text-sm">
                 {error}
               </div>
             )}
 
             <div>
-        <label htmlFor="workspaceName" className="block text-sm font-medium text-[var(--text)]">
+              <label htmlFor="workspaceName" className="block text-sm font-medium text-[var(--text)]">
                 Company Name
               </label>
               <div className="mt-1">
@@ -121,7 +175,7 @@ export default function RegisterPage() {
                   required
                   value={formData.workspaceName}
                   onChange={handleChange}
-          className="appearance-none block w-full px-3 py-2 rounded-md bg-[var(--input-bg)] border border-[var(--border)] placeholder-[var(--text-faint)] text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 sm:text-sm transition"
+                  className="input"
                   placeholder="Your Construction Company"
                 />
               </div>
@@ -129,7 +183,7 @@ export default function RegisterPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-        <label htmlFor="firstName" className="block text-sm font-medium text-[var(--text)]">
+                <label htmlFor="firstName" className="block text-sm font-medium text-[var(--text)]">
                   First Name
                 </label>
                 <div className="mt-1">
@@ -140,14 +194,14 @@ export default function RegisterPage() {
                     required
                     value={formData.firstName}
                     onChange={handleChange}
-          className="appearance-none block w-full px-3 py-2 rounded-md bg-[var(--input-bg)] border border-[var(--border)] placeholder-[var(--text-faint)] text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 sm:text-sm transition"
+                    className="input"
                     placeholder="John"
                   />
                 </div>
               </div>
 
               <div>
-        <label htmlFor="lastName" className="block text-sm font-medium text-[var(--text)]">
+                <label htmlFor="lastName" className="block text-sm font-medium text-[var(--text)]">
                   Last Name
                 </label>
                 <div className="mt-1">
@@ -158,7 +212,7 @@ export default function RegisterPage() {
                     required
                     value={formData.lastName}
                     onChange={handleChange}
-          className="appearance-none block w-full px-3 py-2 rounded-md bg-[var(--input-bg)] border border-[var(--border)] placeholder-[var(--text-faint)] text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 sm:text-sm transition"
+                    className="input"
                     placeholder="Doe"
                   />
                 </div>
@@ -166,7 +220,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-        <label htmlFor="email" className="block text-sm font-medium text-[var(--text)]">
+              <label htmlFor="email" className="block text-sm font-medium text-[var(--text)]">
                 Email address
               </label>
               <div className="mt-1">
@@ -178,7 +232,7 @@ export default function RegisterPage() {
                   required
                   value={formData.email}
                   onChange={handleChange}
-          className="appearance-none block w-full px-3 py-2 rounded-md bg-[var(--input-bg)] border border-[var(--border)] placeholder-[var(--text-faint)] text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 sm:text-sm transition"
+                  className="input"
                   placeholder="john@company.com"
                 />
               </div>
@@ -195,7 +249,7 @@ export default function RegisterPage() {
                   type="tel"
                   value={formData.phone}
                   onChange={handleChange}
-                  className="appearance-none block w-full px-3 py-2 rounded-md bg-[var(--input-bg)] border border-[var(--border)] placeholder-[var(--text-faint)] text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 sm:text-sm transition"
+                  className="input"
                   placeholder="+1 (555) 123-4567"
                 />
               </div>
@@ -214,7 +268,7 @@ export default function RegisterPage() {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className="appearance-none block w-full px-3 py-2 pr-10 rounded-md bg-[var(--input-bg)] border border-[var(--border)] placeholder-[var(--text-faint)] text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 sm:text-sm transition"
+                  className="input pr-10"
                   placeholder="Create a strong password"
                 />
                 <button

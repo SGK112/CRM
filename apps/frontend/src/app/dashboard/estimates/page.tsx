@@ -1,7 +1,7 @@
 'use client';
 import Layout from '../../../components/Layout';
 import { useEffect, useState, useMemo } from 'react';
-import { API_BASE } from '../../../lib/api';
+// Use frontend rewrite for API calls
 import { PageHeader } from '../../../components/ui/PageHeader';
 
 interface Estimate { _id:string; number:string; total:number; status:string; totalMargin:number; subtotalCost:number; subtotalSell:number; taxAmount:number; discountAmount:number; createdAt:string; }
@@ -22,7 +22,7 @@ export default function EstimatesPage(){
     setLoading(true);
     setError('');
     try {
-      const res = await fetch(`${API_BASE}/estimates`, { 
+  const res = await fetch(`/api/estimates`, { 
         headers:{ 
           Authorization:`Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -77,7 +77,7 @@ export default function EstimatesPage(){
         notes: 'Demo estimate for kitchen remodel'
       };
 
-      const res = await fetch(`${API_BASE}/estimates`, {
+  const res = await fetch(`/api/estimates`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,

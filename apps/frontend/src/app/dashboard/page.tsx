@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Layout from '../../components/Layout';
+import { PageHeader } from '../../components/ui/PageHeader';
 // Legacy ChatBot removed; CopilotWidget supersedes it.
 import {
   ChartBarIcon,
@@ -23,10 +24,10 @@ interface DashboardStats {
   activeProjects: number;
   totalClients: number;
   pendingTasks: number;
-  revenueChange: number;
-  projectsChange: number;
-  clientsChange: number;
-  tasksChange: number;
+  revenueChange?: number;
+  projectsChange?: number;
+  clientsChange?: number;
+  tasksChange?: number;
 }
 
 interface RecentActivity {
@@ -41,8 +42,8 @@ interface RecentActivity {
 interface Project {
   id: string;
   title: string;
-  client: string;
-  status: 'planning' | 'in_progress' | 'review' | 'completed' | 'on_hold';
+  client?: string;
+  status: 'lead' | 'proposal' | 'approved' | 'in_progress' | 'on_hold' | 'completed' | 'cancelled' | 'planning' | 'review';
   progress: number;
   budget: number;
   dueDate: string;
@@ -51,95 +52,126 @@ interface Project {
 export default function DashboardPage() {
   const router = useRouter();
   const [stats, setStats] = useState<DashboardStats>({
-    totalRevenue: 234500,
-    activeProjects: 12,
-    totalClients: 48,
-    pendingTasks: 23,
-    revenueChange: 12.5,
-    projectsChange: 8.2,
-    clientsChange: 15.3,
-    tasksChange: -5.1
+    totalRevenue: 0,
+    activeProjects: 0,
+    totalClients: 0,
+    pendingTasks: 0,
   });
 
-  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([
-    {
-      id: '1',
-      type: 'project',
-      title: 'Smith Kitchen Renovation',
-      description: 'Project milestone completed - Cabinet installation finished',
-      timestamp: '2 hours ago',
-      status: 'completed'
-    },
-    {
-      id: '2',
-      type: 'client',
-      title: 'New Client Added',
-      description: 'Johnson Family - Bathroom renovation inquiry',
-      timestamp: '4 hours ago'
-    },
-    {
-      id: '3',
-      type: 'payment',
-      title: 'Payment Received',
-      description: '$15,000 payment from Davis Deck Project',
-      timestamp: '6 hours ago',
-      status: 'completed'
-    },
-    {
-      id: '4',
-      type: 'appointment',
-      title: 'Site Visit Scheduled',
-      description: 'Wilson Kitchen - Initial consultation tomorrow 2:00 PM',
-      timestamp: '8 hours ago'
-    },
-    {
-      id: '5',
-      type: 'message',
-      title: 'Client Message',
-      description: 'Brown Family: Question about material selection',
-      timestamp: '1 day ago',
-      status: 'pending'
-    }
-  ]);
+  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
 
-  const [activeProjects, setActiveProjects] = useState<Project[]>([
-    {
-      id: '1',
-      title: 'Smith Kitchen Renovation',
-      client: 'John & Mary Smith',
-      status: 'in_progress',
-      progress: 75,
-      budget: 45000,
-      dueDate: '2025-09-15'
-    },
-    {
-      id: '2',
-      title: 'Johnson Bathroom Remodel',
-      client: 'Sarah Johnson',
-      status: 'planning',
-      progress: 25,
-      budget: 28000,
-      dueDate: '2025-10-01'
-    },
-    {
-      id: '3',
-      title: 'Davis Deck Construction',
-      client: 'Mike Davis',
-      status: 'review',
-      progress: 90,
-      budget: 22000,
-      dueDate: '2025-08-25'
-    },
-    {
-      id: '4',
-      title: 'Wilson Kitchen Extension',
-      client: 'Lisa Wilson',
-      status: 'in_progress',
-      progress: 40,
-      budget: 65000,
-      dueDate: '2025-11-30'
+  const [activeProjects, setActiveProjects] = useState<Project[]>([]);
+
+  // Fetch live data for stats and lists
+  useEffect(() => {
+    let aborted = false;
+    async function load() {
+      try {
+  const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+        if (!token) { router.push('/auth/login'); return; }
+        const headers: HeadersInit = { Authorization: `Bearer ${token}` };
+
+        // Fetch in parallel
+        const [projRes, clientsRes, clientsCountRes, estRes, invRes] = await Promise.all([
+          fetch('/api/projects', { headers }).catch(() => null),
+          fetch('/api/clients?limit=1000', { headers }).catch(() => null),
+          fetch('/api/clients/count', { headers }).catch(() => null),
+          fetch('/api/estimates', { headers }).catch(() => null),
+          fetch('/api/invoices', { headers }).catch(() => null),
+        ]);
+
+        if (aborted) return;
+
+        // Handle auth failures
+        const unauthorized = (r: Response | null) => !!r && r.status === 401;
+        if (unauthorized(projRes) || unauthorized(clientsRes) || unauthorized(clientsCountRes) || unauthorized(estRes) || unauthorized(invRes)) {
+          router.push('/auth/login');
+          return;
+        }
+
+        const projects = projRes && projRes.ok ? await projRes.json() : [];
+        const clients = clientsRes && clientsRes.ok ? await clientsRes.json() : [];
+        const clientsCount = clientsCountRes && clientsCountRes.ok ? await clientsCountRes.json() : { count: clients?.length || 0 };
+        const estimates = estRes && estRes.ok ? await estRes.json() : [];
+        const invoices = invRes && invRes.ok ? await invRes.json() : [];
+
+        // Compute stats
+        const active = (projects || []).filter((p: any) => !['completed','cancelled'].includes(p.status));
+        const totalRevenue = (invoices || []).reduce((sum: number, inv: any) => sum + (inv.amountPaid || 0), 0);
+        const pendingFromEst = (estimates || []).filter((e: any) => ['sent','accepted'].includes(e.status)).length;
+        const pendingFromInv = (invoices || []).filter((i: any) => ['sent','partial'].includes(i.status)).length;
+        const pendingTasks = pendingFromEst + pendingFromInv;
+
+        // Build client map for display
+        const clientName = (c: any) => (c?.company ? c.company : [c?.firstName, c?.lastName].filter(Boolean).join(' ')).trim();
+        const clientMap = new Map<string, string>();
+        (clients || []).forEach((c: any) => clientMap.set(c._id || c.id, clientName(c)));
+
+        // Prepare active projects list (top 4 by updatedAt desc)
+        const statusProgress: Record<string, number> = {
+          lead: 5, proposal: 20, approved: 40, in_progress: 65, on_hold: 65, completed: 100, cancelled: 0, planning: 20, review: 85,
+        };
+        const ap: Project[] = (active || [])
+          .sort((a: any, b: any) => new Date(b.updatedAt || b.createdAt || 0).getTime() - new Date(a.updatedAt || a.createdAt || 0).getTime())
+          .slice(0, 4)
+          .map((p: any) => ({
+            id: p._id || p.id,
+            title: p.title || 'Untitled Project',
+            client: clientMap.get(p.clientId) || '—',
+            status: p.status,
+            progress: statusProgress[p.status] ?? 0,
+            budget: Number(p.budget || 0),
+            dueDate: (p.endDate ? new Date(p.endDate) : new Date((p.createdAt ? new Date(p.createdAt) : new Date()).getTime() + 1000*60*60*24*30)).toISOString(),
+          }));
+
+        // Recent activity: mix of latest projects/estimates/invoices
+        type AnyItem = { _id?: string; id?: string; createdAt?: string; updatedAt?: string } & Record<string, any>;
+        const stamp = (x: AnyItem) => new Date(x.updatedAt || x.createdAt || Date.now()).getTime();
+        const acts: RecentActivity[] = (
+          [
+            ...(projects || []).slice(0, 5).map((p: AnyItem) => ({
+              id: p._id || p.id,
+              type: 'project' as const,
+              title: p.title || 'New Project',
+              description: `Status: ${(p as any).status}`,
+              t: new Date(p.updatedAt || p.createdAt || Date.now()).getTime(),
+            })),
+            ...(estimates || []).slice(0, 5).map((e: AnyItem) => ({
+              id: e._id || e.id,
+              type: 'client' as const,
+              title: `Estimate ${(e as any).number || ''}`.trim(),
+              description: `Status: ${(e as any).status}`,
+              t: new Date(e.updatedAt || e.createdAt || Date.now()).getTime(),
+            })),
+            ...(invoices || []).slice(0, 5).map((i: AnyItem) => ({
+              id: i._id || i.id,
+              type: 'payment' as const,
+              title: `Invoice ${(i as any).number || ''}`.trim(),
+              description: `${(i as any).status === 'paid' ? 'Payment received' : 'Awaiting payment'} — ${(i as any).amountPaid || 0} / ${(i as any).total || 0}`,
+              status: (i as any).status === 'paid' ? 'completed' : (['sent','partial'].includes((i as any).status) ? 'pending' : undefined),
+              t: new Date(i.updatedAt || i.createdAt || Date.now()).getTime(),
+            })),
+          ] as any
+        )
+        .sort((a: any, b: any) => b.t - a.t)
+        .slice(0, 5)
+        .map((x: any) => ({ ...x, timestamp: new Date(x.t).toLocaleString() }));
+
+        setStats({
+          totalRevenue,
+          activeProjects: active.length,
+          totalClients: clientsCount?.count ?? (clients?.length || 0),
+          pendingTasks,
+        });
+        setActiveProjects(ap);
+        setRecentActivity(acts);
+      } catch (e) {
+        // Swallow errors for now; page will show zeros/empty states
+      }
     }
-  ]);
+    load();
+    return () => { aborted = true };
+  }, [router]);
 
   // QuickActions removed; Copilot handles smart actions now.
 
@@ -162,6 +194,14 @@ export default function DashboardPage() {
         return 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300';
       case 'on_hold':
         return 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300';
+      case 'lead':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300';
+      case 'proposal':
+        return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300';
+      case 'approved':
+        return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300';
+      case 'cancelled':
+        return 'bg-gray-200 text-gray-700 dark:bg-gray-700/40 dark:text-gray-300';
       default:
         return 'surface-2 text-secondary';
     }
@@ -188,118 +228,124 @@ export default function DashboardPage() {
     <Layout>
       <div className="space-y-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-primary">Dashboard</h1>
-            <p className="text-secondary mt-1">Welcome back! Here's what's happening with your business.</p>
-          </div>
-          <div className="flex items-center space-x-4">
+        <PageHeader
+          title="Dashboard"
+          subtitle="Overview of your business at a glance."
+          actions={(
             <button
               onClick={() => router.push('/dashboard/analytics')}
-              className="inline-flex items-center px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-surface-1"
+              className="pill pill-tint-amber sm inline-flex items-center gap-2"
             >
-              <EyeIcon className="h-5 w-5 mr-2" />
+              <EyeIcon className="h-4 w-4" />
               View Reports
             </button>
-          </div>
-        </div>
+          )}
+        />
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Stats Grid: auto-fit cards with a sensible min width so large numbers don’t wrap */}
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-6">
           {/* Total Revenue */}
           <div className="surface-1 rounded-xl shadow-sm border border-token p-6 overflow-hidden">
             <div className="flex items-center justify-between">
-              <div>
+              <div className="min-w-0">
                 <p className="text-sm font-medium text-secondary">Total Revenue</p>
-                <p className="text-3xl font-bold text-primary">{formatCurrency(stats.totalRevenue)}</p>
+                <p className="text-3xl font-bold text-primary whitespace-nowrap tabular-nums tracking-tight">{formatCurrency(stats.totalRevenue)}</p>
               </div>
-              <div className="p-3 bg-green-100 dark:bg-green-600/20 rounded-full flex-shrink-0">
+              <div className="p-3 bg-green-100 dark:bg-green-600/20 rounded-full flex-shrink-0 hidden sm:block">
                 <CurrencyDollarIcon className="h-8 w-8 text-green-600 dark:text-green-400" />
               </div>
             </div>
-            <div className="mt-4 flex items-center">
-              {stats.revenueChange >= 0 ? (
-                <ArrowTrendingUpIcon className="h-4 w-4 text-green-500 mr-1" />
-              ) : (
-                <ArrowTrendingDownIcon className="h-4 w-4 text-red-500 mr-1" />
-              )}
-              <span className={`text-sm font-medium ${stats.revenueChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {Math.abs(stats.revenueChange)}%
-              </span>
-              <span className="text-sm text-secondary ml-1">vs last month</span>
-            </div>
+            {typeof stats.revenueChange === 'number' && (
+              <div className="mt-4 flex items-center">
+                {stats.revenueChange >= 0 ? (
+                  <ArrowTrendingUpIcon className="h-4 w-4 text-green-500 mr-1" />
+                ) : (
+                  <ArrowTrendingDownIcon className="h-4 w-4 text-red-500 mr-1" />
+                )}
+                <span className={`text-sm font-medium ${stats.revenueChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {Math.abs(stats.revenueChange)}%
+                </span>
+                <span className="text-sm text-secondary ml-1">vs last month</span>
+              </div>
+            )}
           </div>
 
           {/* Active Projects */}
           <div className="surface-1 rounded-xl shadow-sm border border-token p-6 overflow-hidden">
             <div className="flex items-center justify-between">
-              <div>
+              <div className="min-w-0">
                 <p className="text-sm font-medium text-secondary">Active Projects</p>
-                <p className="text-3xl font-bold text-primary">{stats.activeProjects}</p>
+                <p className="text-3xl font-bold text-primary whitespace-nowrap tabular-nums tracking-tight">{stats.activeProjects}</p>
               </div>
-              <div className="p-3 bg-blue-100 dark:bg-blue-600/20 rounded-full flex-shrink-0">
+              <div className="p-3 bg-blue-100 dark:bg-blue-600/20 rounded-full flex-shrink-0 hidden sm:block">
                 <ClipboardDocumentListIcon className="h-8 w-8 text-blue-600 dark:text-blue-400" />
               </div>
             </div>
-            <div className="mt-4 flex items-center">
-              {stats.projectsChange >= 0 ? (
-                <ArrowTrendingUpIcon className="h-4 w-4 text-green-500 mr-1" />
-              ) : (
-                <ArrowTrendingDownIcon className="h-4 w-4 text-red-500 mr-1" />
-              )}
-              <span className={`text-sm font-medium ${stats.projectsChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {Math.abs(stats.projectsChange)}%
-              </span>
-              <span className="text-sm text-secondary ml-1">vs last month</span>
-            </div>
+            {typeof stats.projectsChange === 'number' && (
+              <div className="mt-4 flex items-center">
+                {stats.projectsChange >= 0 ? (
+                  <ArrowTrendingUpIcon className="h-4 w-4 text-green-500 mr-1" />
+                ) : (
+                  <ArrowTrendingDownIcon className="h-4 w-4 text-red-500 mr-1" />
+                )}
+                <span className={`text-sm font-medium ${stats.projectsChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {Math.abs(stats.projectsChange)}%
+                </span>
+                <span className="text-sm text-secondary ml-1">vs last month</span>
+              </div>
+            )}
           </div>
 
           {/* Total Clients */}
           <div className="surface-1 rounded-xl shadow-sm border border-token p-6 overflow-hidden">
             <div className="flex items-center justify-between">
-              <div>
+              <div className="min-w-0">
                 <p className="text-sm font-medium text-secondary">Total Clients</p>
-                <p className="text-3xl font-bold text-primary">{stats.totalClients}</p>
+                <p className="text-3xl font-bold text-primary whitespace-nowrap tabular-nums tracking-tight">{stats.totalClients}</p>
               </div>
-              <div className="p-3 bg-purple-100 dark:bg-purple-600/20 rounded-full flex-shrink-0">
+              <div className="p-3 bg-purple-100 dark:bg-purple-600/20 rounded-full flex-shrink-0 hidden sm:block">
                 <UserGroupIcon className="h-8 w-8 text-purple-600 dark:text-purple-400" />
               </div>
             </div>
-            <div className="mt-4 flex items-center">
-              {stats.clientsChange >= 0 ? (
-                <ArrowTrendingUpIcon className="h-4 w-4 text-green-500 mr-1" />
-              ) : (
-                <ArrowTrendingDownIcon className="h-4 w-4 text-red-500 mr-1" />
-              )}
-              <span className={`text-sm font-medium ${stats.clientsChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {Math.abs(stats.clientsChange)}%
-              </span>
-              <span className="text-sm text-secondary ml-1">vs last month</span>
-            </div>
+            {typeof stats.clientsChange === 'number' && (
+              <div className="mt-4 flex items-center">
+                {stats.clientsChange >= 0 ? (
+                  <ArrowTrendingUpIcon className="h-4 w-4 text-green-500 mr-1" />
+                ) : (
+                  <ArrowTrendingDownIcon className="h-4 w-4 text-red-500 mr-1" />
+                )}
+                <span className={`text-sm font-medium ${stats.clientsChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {Math.abs(stats.clientsChange)}%
+                </span>
+                <span className="text-sm text-secondary ml-1">vs last month</span>
+              </div>
+            )}
           </div>
 
           {/* Pending Tasks */}
           <div className="surface-1 rounded-xl shadow-sm border border-token p-6 overflow-hidden">
             <div className="flex items-center justify-between">
-              <div>
+              <div className="min-w-0">
                 <p className="text-sm font-medium text-secondary">Pending Tasks</p>
-                <p className="text-3xl font-bold text-primary">{stats.pendingTasks}</p>
+                <p className="text-3xl font-bold text-primary whitespace-nowrap tabular-nums tracking-tight">{stats.pendingTasks}</p>
               </div>
-              <div className="p-3 bg-orange-100 dark:bg-orange-600/20 rounded-full flex-shrink-0">
+              <div className="p-3 bg-orange-100 dark:bg-orange-600/20 rounded-full flex-shrink-0 hidden sm:block">
                 <BellIcon className="h-8 w-8 text-orange-600 dark:text-orange-400" />
               </div>
             </div>
-            <div className="mt-4 flex items-center">
-              {stats.tasksChange >= 0 ? (
-                <ArrowTrendingUpIcon className="h-4 w-4 text-green-500 mr-1" />
-              ) : (
-                <ArrowTrendingDownIcon className="h-4 w-4 text-red-500 mr-1" />
-              )}
-              <span className={`text-sm font-medium ${stats.tasksChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {Math.abs(stats.tasksChange)}%
-              </span>
-              <span className="text-sm text-secondary ml-1">vs last month</span>
-            </div>
+            {typeof stats.tasksChange === 'number' && (
+              <div className="mt-4 flex items-center">
+                {stats.tasksChange >= 0 ? (
+                  <ArrowTrendingUpIcon className="h-4 w-4 text-green-500 mr-1" />
+                ) : (
+                  <ArrowTrendingDownIcon className="h-4 w-4 text-red-500 mr-1" />
+                )}
+                <span className={`text-sm font-medium ${stats.tasksChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {Math.abs(stats.tasksChange)}%
+                </span>
+                <span className="text-sm text-secondary ml-1">vs last month</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -311,7 +357,7 @@ export default function DashboardPage() {
               <div className="p-6 border-b border-token">
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-semibold text-primary">Active Projects</h2>
-                  <button className="text-amber-600 hover:text-amber-700 text-sm font-medium">
+                  <button onClick={() => router.push('/dashboard/projects')} className="text-amber-600 hover:text-amber-700 text-sm font-medium">
                     View All
                   </button>
                 </div>
@@ -356,9 +402,9 @@ export default function DashboardPage() {
 
           {/* Recent Activity */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-              <div className="p-6 border-b border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-900">Recent Activity</h2>
+            <div className="surface-1 rounded-xl shadow-sm border border-token">
+              <div className="p-6 border-b border-token">
+                <h2 className="text-xl font-semibold text-primary">Recent Activity</h2>
               </div>
               <div className="p-6">
                 <div className="space-y-4">
@@ -367,21 +413,21 @@ export default function DashboardPage() {
                     return (
                       <div key={activity.id} className="flex items-start space-x-3">
                         <div className="flex-shrink-0">
-                          <div className="p-2 bg-gray-100 rounded-full">
-                            <IconComponent className="h-4 w-4 text-gray-600" />
+                          <div className="p-2 bg-gray-100 dark:bg-[var(--surface-2)] rounded-full">
+                            <IconComponent className="h-4 w-4 text-gray-600 dark:text-[var(--text-dim)]" />
                           </div>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900">{activity.title}</p>
-                          <p className="text-sm text-gray-600">{activity.description}</p>
-                          <p className="text-xs text-gray-500 mt-1">{activity.timestamp}</p>
+                          <p className="text-sm font-medium text-primary">{activity.title}</p>
+                          <p className="text-sm text-secondary">{activity.description}</p>
+                          <p className="text-xs text-secondary mt-1">{activity.timestamp}</p>
                         </div>
                         {activity.status && (
                           <div className="flex-shrink-0">
                             <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                              activity.status === 'completed' ? 'bg-green-100 text-green-800' :
-                              activity.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                              'bg-red-100 text-red-800'
+                              activity.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300' :
+                              activity.status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300' :
+                              'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300'
                             }`}>
                               {activity.status}
                             </span>
@@ -390,6 +436,9 @@ export default function DashboardPage() {
                       </div>
                     );
                   })}
+                  {recentActivity.length === 0 && (
+                    <p className="text-sm text-secondary">No recent activity yet.</p>
+                  )}
                 </div>
               </div>
             </div>

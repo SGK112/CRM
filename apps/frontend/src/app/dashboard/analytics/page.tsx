@@ -347,7 +347,7 @@ export default function AnalyticsPage() {
             <select
               value={selectedPeriod}
               onChange={(e) => setSelectedPeriod(e.target.value)}
-              className="px-3 py-2 border border-gray-300 dark:border-token rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-[var(--surface-2)] dark:text-[var(--text)]"
+              className="input"
             >
               {periods.map((period) => (
                 <option key={period.id} value={period.id}>

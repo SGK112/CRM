@@ -15,18 +15,39 @@ export default function LoginPage() {
   const router = useRouter()
 
   const [backendUp, setBackendUp] = useState(true)
+  const [checkingHealth, setCheckingHealth] = useState(false)
 
   useEffect(() => {
-    // lightweight health check
-    const ping = async () => {
+    let cancelled = false
+    const ping = async (attempt = 1) => {
+      setCheckingHealth(true)
+      // try rewrite first
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL?.replace(/\/api$/, '')}/health`, { cache: 'no-store' })
-        setBackendUp(res.ok)
+        const res = await fetch('/api/health', { cache: 'no-store' })
+        if (!cancelled && res.ok) { setBackendUp(true); setCheckingHealth(false); return }
       } catch {
-        setBackendUp(false)
+        // ignore and try direct backend fallback
+      }
+      // then direct backend as fallback
+      try {
+        // Normalize base: remove trailing slash and a trailing /api to avoid double prefixing
+        const base = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001')
+          .replace(/\/$/, '')
+          .replace(/(?:\/api)+$/, '')
+        const res2 = await fetch(`${base}/api/health`, { cache: 'no-store' })
+        if (!cancelled) setBackendUp(res2.ok)
+      } catch {
+        if (!cancelled) setBackendUp(false)
+      } finally {
+        if (!cancelled) setCheckingHealth(false)
+      }
+      // light retry with backoff if still down
+      if (!cancelled && !backendUp && attempt < 3) {
+        setTimeout(() => ping(attempt + 1), attempt * 800)
       }
     }
     ping()
+    return () => { cancelled = true }
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,7 +56,7 @@ export default function LoginPage() {
     setError('')
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+      const response = await fetch(`/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -50,7 +71,9 @@ export default function LoginPage() {
         // Store token in localStorage and cookie (cookie for middleware protection)
         try {
           document.cookie = `accessToken=${data.accessToken}; Path=/; SameSite=Lax`;
-        } catch {}
+        } catch {
+          void 0; // ignore cookie set errors
+        }
         localStorage.setItem('accessToken', data.accessToken)
         localStorage.setItem('user', JSON.stringify(data.user))
         // Redirect to dashboard
@@ -85,7 +108,40 @@ export default function LoginPage() {
           </div>
         </div>
   <h2 className="mt-4 text-center text-3xl font-semibold tracking-tight text-[var(--text)]">Sign in to your account</h2>
-  {!backendUp && <p className="mt-2 text-center text-xs text-red-400">Backend offline or unreachable. Authentication may fail.</p>}
+  {!backendUp && (
+    <div className="mt-2 text-center">
+      <p className="text-xs text-red-400">Backend offline or unreachable. Authentication may fail.</p>
+      <button
+        type="button"
+        onClick={() => {
+          // manual retry
+          const run = async () => {
+            setCheckingHealth(true)
+            try {
+              const res = await fetch('/api/health', { cache: 'no-store' })
+              if (res.ok) { setBackendUp(true); return }
+            } catch {
+              // ignore, try direct backend
+            }
+            try {
+              const base = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001')
+                .replace(/\/$/, '')
+                .replace(/(?:\/api)+$/, '')
+              const res2 = await fetch(`${base}/api/health`, { cache: 'no-store' })
+              setBackendUp(res2.ok)
+            } catch {
+              setBackendUp(false)
+            } finally { setCheckingHealth(false) }
+          }
+          run()
+        }}
+        disabled={checkingHealth}
+        className="mt-1 inline-flex items-center rounded-md border border-[var(--border)] bg-[var(--surface-2)] px-2.5 py-1 text-xs text-[var(--text)] hover:bg-[var(--surface-3)] disabled:opacity-50"
+      >
+        {checkingHealth ? 'Checking…' : 'Retry health check'}
+      </button>
+    </div>
+  )}
         <p className="mt-2 text-center text-sm text-[var(--text-dim)]">
           Or{' '}
           <Link href="/auth/register" className="font-medium text-amber-400 hover:text-amber-300 transition-colors">
@@ -116,7 +172,7 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 rounded-md bg-[var(--input-bg)] border border-[var(--border)] placeholder-[var(--text-faint)] text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 sm:text-sm transition"
+                  className="input"
                   placeholder="Enter your email"
                 />
               </div>
@@ -135,12 +191,14 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 pr-10 rounded-md bg-[var(--input-bg)] border border-[var(--border)] placeholder-[var(--text-faint)] text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 sm:text-sm transition"
+                  className="input pr-10"
                   placeholder="Enter your password"
                 />
                 <button
                   type="button"
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  title={showPassword ? 'Hide password' : 'Show password'}
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
@@ -196,12 +254,12 @@ export default function LoginPage() {
             <div className="mt-6">
               <button
                 onClick={() => {
-                  const base = process.env.NEXT_PUBLIC_API_URL || ''
-                  // Support both http://localhost:3001 and http://localhost:3001/api
-                  const withApi = base.endsWith('/api') ? base : `${base}/api`
-                  window.location.href = `${withApi}/auth/google`
+                  // Google OAuth endpoints are exposed without the /api prefix: /auth/google
+                  const base = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/api$/, '')
+                  const target = `${base}/auth/google`
+                  window.location.href = target
                 }}
-                className="w-full flex justify-center items-center gap-2 py-2 px-4 rounded-md text-sm font-medium bg-white text-slate-800 hover:bg-slate-50 border border-slate-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500/60 transition"
+                className="w-full flex justify-center items-center gap-2 py-2 px-4 rounded-md text-sm font-medium bg-[var(--surface-1)] text-[var(--text)] hover:bg-[var(--surface-2)] border border-[var(--border)] shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500/60 transition"
               >
                 <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
