@@ -168,7 +168,7 @@ export default function SearchBar({ className = '', placeholder = 'Search projec
       {!isMobile && isOpen && (
         <div
           ref={dropdownRef}
-          className="absolute top-full left-0 right-0 z-50 mt-1 bg-[var(--surface-1)] rounded-lg shadow-lg ring-1 ring-black/5 max-h-96 overflow-y-auto border border-[var(--border)] backdrop-blur-sm"
+          className="absolute top-full left-0 right-0 z-50 mt-1 bg-[var(--surface-1)] rounded-lg shadow-lg ring-1 ring-black/5 max-h-96 overflow-y-auto border border-[var(--border)]"
         >
           {/* Loading State */}
           {isLoading && (

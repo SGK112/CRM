@@ -1,12 +1,14 @@
 'use client';
 import Layout from '../../../components/Layout';
 import { useEffect, useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 // Use frontend rewrite for API calls
 import { PageHeader } from '../../../components/ui/PageHeader';
 
 interface Estimate { _id:string; number:string; total:number; status:string; totalMargin:number; subtotalCost:number; subtotalSell:number; taxAmount:number; discountAmount:number; createdAt:string; }
 
 export default function EstimatesPage(){
+  const router = useRouter();
   const [estimates,setEstimates]=useState<Estimate[]>([]);
   const [loading,setLoading]=useState(true);
   const [error,setError]=useState<string>('');
@@ -119,7 +121,12 @@ export default function EstimatesPage(){
               >
                 Create Demo Estimate
               </button>
-              <button className='pill pill-tint-green sm'>New Estimate</button>
+              <button 
+                onClick={() => router.push('/dashboard/estimates/new')}
+                className='pill pill-tint-green sm'
+              >
+                New Estimate
+              </button>
             </div>
           }
           stats={[
@@ -155,7 +162,11 @@ export default function EstimatesPage(){
               {!loading && estimates.map(e=> {
                 const marginPct = e.subtotalSell>0 ? ( (e.totalMargin / e.subtotalSell) * 100).toFixed(1) : '0.0';
                 return (
-                  <tr key={e._id} className='hover:bg-[var(--surface-2)]/60'>
+                  <tr 
+                    key={e._id} 
+                    className='hover:bg-[var(--surface-2)]/60 cursor-pointer'
+                    onClick={() => router.push(`/dashboard/estimates/${e._id}`)}
+                  >
                     <td className='py-2 px-3 font-medium'>{e.number}</td>
                     <td className='py-2 px-3 text-[11px]'>{e.status}</td>
                     <td className='py-2 px-3'>{e.subtotalSell.toFixed(2)}</td>
