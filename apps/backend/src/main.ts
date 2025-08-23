@@ -16,7 +16,7 @@ async function bootstrap() {
   // Note: We expose /auth/google and /auth/google/callback without the /api prefix because some OAuth providers
   // are configured with fixed redirect URIs. All other routes remain under /api/*.
   app.setGlobalPrefix('api', {
-    exclude: ['/billing/webhook', '/auth/google', '/auth/google/callback']
+    exclude: ['/billing/webhook', '/auth/google', '/auth/google/callback', '/']
   });
 
   // Security headers
