@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Layout from '../../../../components/Layout';
 import Link from 'next/link';
 // Using rewrite paths for API calls
@@ -23,6 +23,9 @@ interface ClientCreate {
 
 export default function NewClientPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnTo = searchParams?.get('returnTo') || '/dashboard/clients';
+  
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [tagInput, setTagInput] = useState('');
@@ -52,7 +55,12 @@ export default function NewClientPage() {
   const res = await fetch(`/api/clients`, { method:'POST', headers: authHeaders(), body: JSON.stringify(body) });
       if (res.ok) {
         const created = await res.json();
-        router.push(`/dashboard/clients/${created._id}`);
+        // Check if we need to redirect back to estimate creation
+        if (returnTo.includes('estimates/new')) {
+          router.push(`${returnTo}?clientId=${created._id}`);
+        } else {
+          router.push(`/dashboard/clients/${created._id}`);
+        }
       } else {
         const msg = await res.text();
         setError(`Create failed (${res.status}) ${msg}`);
@@ -65,14 +73,14 @@ export default function NewClientPage() {
       <form onSubmit={save} className="max-w-5xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/dashboard/clients" className="text-gray-500 hover:text-gray-700"><ArrowLeftIcon className="h-6 w-6"/></Link>
+            <Link href={returnTo} className="text-gray-500 hover:text-gray-700"><ArrowLeftIcon className="h-6 w-6"/></Link>
             <div>
               <h1 className="text-3xl font-bold text-gray-900">New Client</h1>
               <p className="text-sm text-gray-500 mt-1">Add a new client to your CRM</p>
             </div>
           </div>
           <div className="flex gap-3">
-            <Link href="/dashboard/clients" className="px-4 py-2 text-sm rounded-md border border-gray-300 bg-white hover:bg-gray-50">Cancel</Link>
+            <Link href={returnTo} className="px-4 py-2 text-sm rounded-md border border-gray-300 bg-white hover:bg-gray-50">Cancel</Link>
             <button disabled={saving} type="submit" className="inline-flex items-center px-5 py-2 rounded-md text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"><CheckIcon className="h-5 w-5 mr-1"/>{saving? 'Creating...':'Create'}</button>
           </div>
         </div>

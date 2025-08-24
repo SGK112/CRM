@@ -344,6 +344,9 @@ function ClientSelector({ clients, selectedClientId, onClientSelect, onClientCre
 export default function NewDashboardProjectPage() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
+	const returnTo = searchParams?.get('returnTo') || '/dashboard/projects';
+	const preselectedClientId = searchParams?.get('clientId') || '';
+	
 	const [clients, setClients] = useState<Client[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [tagInput, setTagInput] = useState('');
@@ -354,6 +357,7 @@ export default function NewDashboardProjectPage() {
 		status: 'planning',
 		priority: 'medium',
 		tags: [],
+		clientId: preselectedClientId
 	});
 
 	useEffect(() => {
@@ -427,7 +431,18 @@ export default function NewDashboardProjectPage() {
 			});
 
 			if (response.ok) {
-				router.push('/dashboard/projects');
+				const created = await response.json();
+				// Check if we need to redirect back to estimate creation
+				if (returnTo.includes('estimates/new')) {
+					const url = new URL(returnTo, window.location.origin);
+					url.searchParams.set('projectId', created._id);
+					if (formData.clientId) {
+						url.searchParams.set('clientId', formData.clientId);
+					}
+					router.push(url.pathname + url.search);
+				} else {
+					router.push('/dashboard/projects');
+				}
 			} else {
 				const error = await response.json();
 				console.error('Failed to create project:', error);
@@ -489,10 +504,10 @@ export default function NewDashboardProjectPage() {
 			<div className="max-w-4xl mx-auto">
 				<div className="flex items-center mb-8">
 					<Link
-						href="/dashboard/projects"
+						href={returnTo}
 						className="inline-flex items-center text-secondary hover:text-primary mr-4 transition-colors"
 					>
-						<ArrowLeftIcon className="h-5 w-5 mr-1" /> Back to Projects
+						<ArrowLeftIcon className="h-5 w-5 mr-1" /> Back
 					</Link>
 					<div>
 						<h1 className="text-3xl font-bold text-primary">Create New Project</h1>
@@ -775,7 +790,7 @@ export default function NewDashboardProjectPage() {
 					{/* Submit */}
 					<div className="flex justify-end space-x-4">
 						<Link
-							href="/dashboard/projects"
+							href={returnTo}
 							className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
 						>
 							Cancel

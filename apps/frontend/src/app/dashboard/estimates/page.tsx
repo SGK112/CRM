@@ -105,6 +105,7 @@ export default function EstimatesPage(){
     return estimates.reduce((acc,e)=>{
       acc.sell += e.subtotalSell; acc.cost += e.subtotalCost; acc.margin += e.totalMargin; acc.tax += e.taxAmount; acc.discount += e.discountAmount; return acc; }, { sell:0, cost:0, margin:0, tax:0, discount:0 });
   },[estimates]);
+  const fmt = (n:number) => loading ? '…' : (estimates.length ? n.toFixed(2) : '—');
 
   return (
     <Layout>
@@ -113,7 +114,7 @@ export default function EstimatesPage(){
           title='Estimates'
           subtitle='Quote proposals & pricing breakdown'
           actions={
-            <div className="space-x-2">
+            <div className="flex gap-2 flex-wrap">
               <button 
                 onClick={createDemoEstimate}
                 className='pill pill-tint-blue sm'
@@ -130,12 +131,12 @@ export default function EstimatesPage(){
             </div>
           }
           stats={[
-            { label:'Count', value: loading? '…' : estimates.length },
-            { label:'Sell', value: aggregates.sell.toFixed(2) },
-            { label:'Cost', value: aggregates.cost.toFixed(2) },
-            { label:'Margin', value: aggregates.margin.toFixed(2) },
-            { label:'Tax', value: aggregates.tax.toFixed(2) },
-            { label:'Discount', value: aggregates.discount.toFixed(2) }
+            { label:'Count', value: loading ? '…' : (estimates.length ? estimates.length : '—') },
+            { label:'Sell', value: fmt(aggregates.sell) },
+            { label:'Cost', value: fmt(aggregates.cost) },
+            { label:'Margin', value: fmt(aggregates.margin) },
+            { label:'Tax', value: fmt(aggregates.tax) },
+            { label:'Discount', value: fmt(aggregates.discount) }
           ]}
         />
         <div className='surface-solid border border-token rounded-xl overflow-hidden'>

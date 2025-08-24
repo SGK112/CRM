@@ -154,6 +154,18 @@ export default function ClientDetailPage() {
             <button onClick={handleVoiceCall} className="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium bg-blue-600 text-white hover:bg-blue-700">
               <SpeakerWaveIcon className="h-4 w-4 mr-2" />AI Voice
             </button>
+            <button
+              onClick={() => router.push(`/dashboard/estimates/new?clientId=${clientId}&returnTo=${encodeURIComponent(`/dashboard/clients/${clientId}`)}`)}
+              className="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium bg-green-600 text-white hover:bg-green-700"
+            >
+              <PlusIcon className="h-4 w-4 mr-2" />Create Estimate
+            </button>
+            <button
+              onClick={() => router.push(`/dashboard/invoices?clientId=${clientId}`)}
+              className="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium bg-emerald-600 text-white hover:bg-emerald-700"
+            >
+              <CreditCardIcon className="h-4 w-4 mr-2" />Create Invoice
+            </button>
           </div>
         </div>
 
@@ -214,7 +226,12 @@ export default function ClientDetailPage() {
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold">Projects</h2>
-              <button className="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"><PlusIcon className="h-4 w-4 mr-1"/>New Project</button>
+              <button
+                onClick={() => router.push(`/dashboard/projects/new?clientId=${clientId}&returnTo=${encodeURIComponent(`/dashboard/clients/${clientId}`)}`)}
+                className="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
+              >
+                <PlusIcon className="h-4 w-4 mr-1"/>New Project
+              </button>
             </div>
             <div className="grid gap-4">
               {projects.map(p=> <div key={p._id} className="bg-white border border-gray-200 rounded-lg p-5"><div className="flex justify-between items-start"><div><h3 className="font-medium text-gray-900">{p.title}</h3><p className="text-sm text-gray-500 mt-1 line-clamp-2">{p.description}</p><div className="flex gap-3 mt-3 text-xs items-center"><span className={`px-2 py-1 rounded-full font-medium ${badge(p.status)}`}>{p.status}</span><span className="text-gray-500">Budget {formatMoney(p.budget)}</span><span className="text-gray-500">Progress {p.progress}%</span></div></div><div className="flex gap-2"><button className="p-2 text-gray-400 hover:text-gray-600"><PencilIcon className="h-4 w-4"/></button><button className="p-2 text-gray-400 hover:text-red-600"><TrashIcon className="h-4 w-4"/></button></div></div><div className="mt-4 h-2 bg-gray-200 rounded"><div className="h-2 bg-blue-600 rounded" style={{width:`${p.progress}%`}}/></div></div>)}
@@ -225,7 +242,15 @@ export default function ClientDetailPage() {
 
         {activeTab === 'billing' && (
           <div className="space-y-4">
-            <div className="flex justify-between items-center"><h2 className="text-xl font-semibold">Invoices</h2><button className="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"><PlusIcon className="h-4 w-4 mr-1"/>Create Invoice</button></div>
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">Invoices</h2>
+              <button
+                onClick={()=> router.push(`/dashboard/invoices/new?clientId=${clientId}&returnTo=${encodeURIComponent(`/dashboard/clients/${clientId}`)}`)}
+                className="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
+              >
+                <PlusIcon className="h-4 w-4 mr-1"/>Create Invoice
+              </button>
+            </div>
             <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
               <table className="min-w-full divide-y divide-gray-200 text-sm">
                 <thead className="bg-gray-50"><tr><th className="px-4 py-2 text-left font-medium text-gray-500">Invoice</th><th className="px-4 py-2 text-left font-medium text-gray-500">Amount</th><th className="px-4 py-2 text-left font-medium text-gray-500">Status</th><th className="px-4 py-2 text-left font-medium text-gray-500">Due</th></tr></thead>
@@ -240,7 +265,15 @@ export default function ClientDetailPage() {
 
         {activeTab === 'scheduling' && (
           <div className="space-y-4">
-            <div className="flex justify-between items-center"><h2 className="text-xl font-semibold">Appointments</h2><button className="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"><PlusIcon className="h-4 w-4 mr-1"/>Schedule</button></div>
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">Appointments</h2>
+              <button
+                onClick={()=> router.push(`/dashboard/calendar/new?clientId=${clientId}&returnTo=${encodeURIComponent(`/dashboard/clients/${clientId}`)}`)}
+                className="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
+              >
+                <PlusIcon className="h-4 w-4 mr-1"/>Schedule
+              </button>
+            </div>
             <div className="grid gap-4">
               {appointments.map(a=> <div key={a._id} className="bg-white border border-gray-200 rounded-lg p-5 flex justify-between items-start"><div><h3 className="font-medium text-gray-900">{a.title}</h3><div className="mt-1 text-sm text-gray-500">{formatDate(a.date)} at {a.time}</div><div className="mt-2 flex gap-2 text-xs items-center"><span className={`px-2 py-1 rounded-full font-medium ${badge(a.status)}`}>{a.status}</span><span className="text-gray-500">{a.type}</span></div>{a.notes && <p className="mt-2 text-sm text-gray-600">{a.notes}</p>}</div><div className="flex gap-2"><button className="p-2 text-gray-400 hover:text-gray-600"><PencilIcon className="h-4 w-4"/></button><button className="p-2 text-gray-400 hover:text-red-600"><XMarkIcon className="h-4 w-4"/></button></div></div>)}
               {appointments.length===0 && <div className="text-center py-12 border border-dashed border-gray-300 rounded-lg text-sm text-gray-500">No appointments</div>}
@@ -250,7 +283,23 @@ export default function ClientDetailPage() {
 
         {activeTab === 'communications' && (
           <div className="space-y-4">
-            <div className="flex justify-between items-center"><h2 className="text-xl font-semibold">Communications</h2><div className="flex gap-3"><button className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50"><EnvelopeIcon className="h-4 w-4 mr-1"/>Email</button><button className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50"><PhoneIcon className="h-4 w-4 mr-1"/>SMS</button></div></div>
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">Communications</h2>
+              <div className="flex gap-3">
+                <button
+                  onClick={()=> { if (client?.email) window.location.href = `mailto:${client.email}`; }}
+                  className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50"
+                >
+                  <EnvelopeIcon className="h-4 w-4 mr-1"/>Email
+                </button>
+                <button
+                  onClick={()=> { if (client?.phone) window.location.href = `sms:${client.phone}`; }}
+                  className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50"
+                >
+                  <PhoneIcon className="h-4 w-4 mr-1"/>SMS
+                </button>
+              </div>
+            </div>
             <div className="bg-white border border-gray-200 rounded-lg p-6">
               <ul className="space-y-4">
                 {communications.map((c,i)=> <li key={c._id} className="relative pl-6"><span className="absolute left-0 top-2 h-2 w-2 rounded-full bg-blue-500"/><div className="text-xs text-gray-500 mb-1">{formatDate(c.timestamp)} • {c.direction}</div><p className="text-sm font-medium">{c.subject || c.type}</p><p className="text-sm text-gray-600 mt-1">{c.content}</p>{c.status && <span className={`mt-2 inline-flex px-2 py-1 text-xs font-medium rounded-full ${badge(c.status)}`}>{c.status}</span>}</li>)}

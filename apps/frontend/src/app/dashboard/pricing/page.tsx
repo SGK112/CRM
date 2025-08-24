@@ -2,93 +2,450 @@
 import Layout from '../../../components/Layout';
 import { useEffect, useState, useRef } from 'react';
 import { API_BASE } from '../../../lib/api';
+import { 
+  PlusIcon, 
+  CloudArrowUpIcon, 
+  MagnifyingGlassIcon,
+  TagIcon,
+  CurrencyDollarIcon,
+  BuildingOfficeIcon,
+  DocumentTextIcon,
+  XMarkIcon
+} from '@heroicons/react/24/outline';
 
-interface PriceItem { _id:string; sku:string; name:string; baseCost:number; defaultMarginPct:number; unit:string; vendorId?:string; tags?:string[]; }
+interface PriceItem { 
+  _id: string; 
+  sku: string; 
+  name: string; 
+  description?: string;
+  baseCost: number; 
+  defaultMarginPct: number; 
+  unit: string; 
+  vendorId?: string; 
+  tags?: string[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+interface Vendor {
+  _id: string;
+  name: string;
+  description?: string;
+}
 
 export default function PricingPage(){
-  const [items,setItems]=useState<PriceItem[]>([]);
-  const [loading,setLoading]=useState(true);
-  const [fileName,setFileName]=useState('');
-  const fileRef = useRef<HTMLInputElement|null>(null);
-  const token = (typeof window!=='undefined') ? localStorage.getItem('accessToken') : '';
+  const [items, setItems] = useState<PriceItem[]>([]);
+  const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedVendor, setSelectedVendor] = useState('all');
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  
+  const token = (typeof window !== 'undefined') ? localStorage.getItem('accessToken') : '';
 
-  const fetchItems = async () => {
+  const filteredItems = items.filter(item => {
+    const matchesSearch = !searchTerm || 
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesVendor = selectedVendor === 'all' || item.vendorId === selectedVendor;
+    
+    return matchesSearch && matchesVendor;
+  });
+
+  const fetchData = async () => {
     setLoading(true);
-    const res = await fetch(`${API_BASE}/pricing/items`, { headers:{ Authorization:`Bearer ${token}` }});
-    if(res.ok) setItems(await res.json());
-    setLoading(false);
-  };
-  useEffect(()=>{ fetchItems(); // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[]);
+    try {
+      const [itemsRes, vendorsRes] = await Promise.all([
+        fetch(`${API_BASE}/pricing/items`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API_BASE}/vendors`, { headers: { Authorization: `Bearer ${token}` } })
+      ]);
 
-  const parseCsv = async (file:File) => {
-    const text = await file.text();
-    const lines = text.split(/\r?\n/).filter(l=>l.trim().length);
-    if(!lines.length) return [];
-    const header = lines[0].split(',').map(h=>h.trim().toLowerCase());
-    return lines.slice(1).map(line=>{
-      const cols = line.split(',');
-      const row: any = {};
-      header.forEach((h,i)=> row[h]=cols[i]?.trim());
-      return { sku: row.sku, name: row.name, baseCost: parseFloat(row.cost||row.basecost||'0')||0, unit: row.unit||'each', defaultMarginPct: parseFloat(row.margin||row.defaultmarginpct||'0')||0, tags: (row.tags? row.tags.split('|'):[]) };
-    }).filter(r=>r.sku && r.name);
+      if (itemsRes.ok) {
+        const itemsData = await itemsRes.json();
+        setItems(itemsData);
+      }
+
+      if (vendorsRes.ok) {
+        const vendorsData = await vendorsRes.json();
+        setVendors(vendorsData);
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const uploadCsv = async (file:File) => {
-    const payload = await parseCsv(file);
-    if(!payload.length) return;
-    await fetch(`${API_BASE}/pricing/items/bulk-upsert`, { method:'POST', headers:{ 'Content-Type':'application/json', Authorization:`Bearer ${token}` }, body:JSON.stringify({ items: payload }) });
-    fetchItems();
-  };
+  useEffect(() => {
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="flex justify-center items-center min-h-96">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
-      <div className='space-y-6'>
-        <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className='text-2xl font-semibold'>Price List</h1>
-            <p className='text-sm text-gray-600 dark:text-[var(--text-dim)]'>Manage standard cost & selling margins</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Price Lists & Catalog</h1>
+            <p className="text-gray-600 dark:text-gray-400">Manage vendor price lists and product catalog for estimates and invoices</p>
           </div>
-          <div className='flex gap-2'>
-            <input ref={fileRef} type='file' accept='.csv' hidden onChange={e=>{ const f=e.target.files?.[0]; if(f){ setFileName(f.name); uploadCsv(f);} }} />
-            <button className='pill pill-tint-indigo sm' onClick={()=>fileRef.current?.click()}>Import CSV</button>
-            {fileName && <span className='pill pill-tint-neutral sm'>{fileName}</span>}
+          <div className="flex items-center space-x-4 mt-4 md:mt-0">
+            <button
+              onClick={() => setShowUploadModal(true)}
+              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <CloudArrowUpIcon className="h-5 w-5 mr-2" />
+              Import Price List
+            </button>
           </div>
         </div>
-        <div className='surface-1 border border-token rounded-xl overflow-hidden'>
-          <table className='w-full text-sm'>
-            <thead className='text-left text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-400'>
-              <tr className='border-b border-token'>
-                <th className='py-2 px-3'>SKU</th>
-                <th className='py-2 px-3'>Name</th>
-                <th className='py-2 px-3'>Cost</th>
-                <th className='py-2 px-3'>Margin %</th>
-                <th className='py-2 px-3'>Sell Price</th>
-                <th className='py-2 px-3'>Unit</th>
-                <th className='py-2 px-3'>Tags</th>
-              </tr>
-            </thead>
-            <tbody className='divide-y divide-[var(--border)]/60'>
-              {loading && <tr><td colSpan={7} className='py-6 text-center text-xs'>Loading...</td></tr>}
-              {!loading && items.map(it=> {
-                const sell = it.baseCost * (1 + (it.defaultMarginPct||0)/100);
-                return (
-                  <tr key={it._id} className='hover:bg-[var(--surface-2)]/60'>
-                    <td className='py-2 px-3 font-medium'>{it.sku}</td>
-                    <td className='py-2 px-3'>{it.name}</td>
-                    <td className='py-2 px-3'>{it.baseCost.toFixed(2)}</td>
-                    <td className='py-2 px-3'>{it.defaultMarginPct}</td>
-                    <td className='py-2 px-3'>{sell.toFixed(2)}</td>
-                    <td className='py-2 px-3 text-[11px]'>{it.unit}</td>
-                    <td className='py-2 px-3 text-[11px]'>{(it.tags||[]).join(', ')}</td>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                <DocumentTextIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Items</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{items.length}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
+                <BuildingOfficeIcon className="h-6 w-6 text-green-600 dark:text-green-400" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Vendors</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{vendors.length}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
+                <CurrencyDollarIcon className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Avg Margin</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {items.length > 0 ? Math.round(items.reduce((sum, item) => sum + item.defaultMarginPct, 0) / items.length) : 0}%
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
+                <TagIcon className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Categories</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {Array.from(new Set(items.flatMap(item => item.tags || []))).length}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Filters */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
+            <div className="flex-1">
+              <div className="relative">
+                <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search items by name, SKU, or description..."
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+            </div>
+            <select
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              value={selectedVendor}
+              onChange={(e) => setSelectedVendor(e.target.value)}
+            >
+              <option value="all">All Vendors</option>
+              {vendors.map(vendor => (
+                <option key={vendor._id} value={vendor._id}>{vendor.name}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Items Table */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+              Price Items ({filteredItems.length})
+            </h3>
+          </div>
+          
+          {filteredItems.length === 0 ? (
+            <div className="p-12 text-center">
+              <DocumentTextIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No items found</h3>
+              <p className="text-gray-500 dark:text-gray-400 mb-6">
+                {searchTerm || selectedVendor !== 'all' 
+                  ? 'Try adjusting your search or filter criteria.'
+                  : 'Get started by importing a price list from a vendor.'}
+              </p>
+              <button
+                onClick={() => setShowUploadModal(true)}
+                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                <CloudArrowUpIcon className="h-5 w-5 mr-2" />
+                Import Price List
+              </button>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-900">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Item
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      SKU
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Cost
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Margin
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Sell Price
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Vendor
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Tags
+                    </th>
                   </tr>
-                );
-              })}
-              {!loading && items.length===0 && <tr><td colSpan={7} className='py-6 text-center text-xs text-gray-500'>No items yet.</td></tr>}
-            </tbody>
-          </table>
+                </thead>
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                  {filteredItems.map((item) => {
+                    const sellPrice = item.baseCost * (1 + (item.defaultMarginPct || 0) / 100);
+                    return (
+                      <tr key={item._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div>
+                            <div className="text-sm font-medium text-gray-900 dark:text-white">{item.name}</div>
+                            {item.description && (
+                              <div className="text-sm text-gray-500 dark:text-gray-400">{item.description}</div>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                          {item.sku}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                          ${item.baseCost.toFixed(2)} {item.unit && `/ ${item.unit}`}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                          {item.defaultMarginPct}%
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                          ${sellPrice.toFixed(2)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                          {vendors.find(v => v._id === item.vendorId)?.name || 'Unknown'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex flex-wrap gap-1">
+                            {(item.tags || []).slice(0, 3).map((tag, index) => (
+                              <span
+                                key={index}
+                                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                            {(item.tags || []).length > 3 && (
+                              <span className="text-xs text-gray-500 dark:text-gray-400">+{(item.tags || []).length - 3} more</span>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
+
+        {/* Upload Modal */}
+        {showUploadModal && (
+          <PriceListUploadModal
+            vendors={vendors}
+            onClose={() => setShowUploadModal(false)}
+            onSuccess={() => {
+              setShowUploadModal(false);
+              fetchData();
+            }}
+          />
+        )}
       </div>
     </Layout>
+  );
+}
+
+// Upload Modal Component
+function PriceListUploadModal({ vendors, onClose, onSuccess }: {
+  vendors: Vendor[];
+  onClose: () => void;
+  onSuccess: () => void;
+}) {
+  const [file, setFile] = useState<File | null>(null);
+  const [vendorId, setVendorId] = useState('');
+  const [listName, setListName] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const token = (typeof window !== 'undefined') ? localStorage.getItem('accessToken') : '';
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!file || !vendorId || !listName) return;
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('vendorId', vendorId);
+      formData.append('name', listName);
+      formData.append('format', 'csv');
+      formData.append('mapping', JSON.stringify({
+        skuColumn: 'sku',
+        nameColumn: 'name',
+        descriptionColumn: 'description',
+        priceColumn: 'price',
+        unitColumn: 'unit'
+      }));
+
+      const response = await fetch(`${API_BASE}/pricing/items/import`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      if (response.ok) {
+        onSuccess();
+      } else {
+        const error = await response.json();
+        alert(`Import failed: ${error.message}`);
+      }
+    } catch (error) {
+      console.error('Upload failed:', error);
+      alert('Upload failed. Please try again.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Import Price List</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+            <XMarkIcon className="h-6 w-6" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Select Vendor
+            </label>
+            <select
+              required
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              value={vendorId}
+              onChange={(e) => setVendorId(e.target.value)}
+            >
+              <option value="">Choose a vendor...</option>
+              {vendors.map(vendor => (
+                <option key={vendor._id} value={vendor._id}>{vendor.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Price List Name
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="e.g., Q4 2025 Catalog"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              value={listName}
+              onChange={(e) => setListName(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              CSV File
+            </label>
+            <input
+              type="file"
+              accept=".csv"
+              required
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              onChange={(e) => setFile(e.target.files?.[0] || null)}
+            />
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Expected columns: sku, name, description, price, unit
+            </p>
+          </div>
+
+          <div className="flex space-x-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={uploading || !file || !vendorId || !listName}
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {uploading ? 'Importing...' : 'Import'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }

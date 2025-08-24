@@ -4,18 +4,16 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Layout from '../../../components/Layout';
+import CalendarView from '../../../components/ui/CalendarView';
+import { getGoogleCalendarUrl, generateIcsContent, downloadIcsFile } from '../../../lib/calendar';
 import {
   CalendarDaysIcon,
   ClockIcon,
   UserIcon,
   MapPinIcon,
   PlusIcon,
-  MagnifyingGlassIcon,
-  PencilIcon,
-  TrashIcon,
   CheckCircleIcon,
-  XCircleIcon,
-  ExclamationTriangleIcon
+  XCircleIcon
 } from '@heroicons/react/24/outline';
 
 interface Appointment {
@@ -43,51 +41,74 @@ interface Appointment {
   updatedAt: string;
 }
 
-// Helper mapping to unified pill tint classes
-const statusTint = (s: Appointment['status']) => {
-  switch (s) {
-    case 'scheduled': return 'blue';
-    case 'confirmed': return 'green';
-    case 'completed': return 'neutral';
-    case 'cancelled': return 'red';
-    case 'rescheduled': return 'yellow';
-    default: return 'neutral';
-  }
-};
-
-const typeTint = (t: Appointment['appointmentType']) => {
-  switch (t) {
-    case 'consultation': return 'purple';
-    case 'site_visit': return 'orange';
-    case 'meeting': return 'blue';
-    case 'inspection': return 'green';
-    case 'other': return 'neutral';
-    default: return 'neutral';
-  }
-};
-
-const priorityTint = (p: Appointment['priority']) => {
-  switch (p) {
-    case 'low': return 'neutral';
-    case 'medium': return 'blue';
-    case 'high': return 'yellow';
-    case 'urgent': return 'red';
-    default: return 'neutral';
-  }
-};
-
 export default function CalendarPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<'month' | 'week' | 'day' | 'list'>('list');
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [typeFilter, setTypeFilter] = useState('all');
+  const [view, setView] = useState<'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek'>('dayGridMonth');
+  const [selectedEvent, setSelectedEvent] = useState<Appointment | null>(null);
   const router = useRouter();
 
+  const getEventColor = (status: Appointment['status']) => {
+    switch (status) {
+      case 'confirmed': return '#10b981'; // green-500
+      case 'scheduled': return '#3b82f6'; // blue-500
+      case 'completed': return '#6b7280'; // gray-500
+      case 'cancelled': return '#ef4444'; // red-500
+      case 'rescheduled': return '#f59e0b'; // amber-500
+      default: return '#6366f1'; // indigo-500
+    }
+  };
+
+  // Convert appointments to FullCalendar events
+  const calendarEvents = appointments.map(appointment => ({
+    id: appointment._id,
+    title: appointment.title,
+    start: appointment.startDateTime,
+    end: appointment.endDateTime,
+    backgroundColor: getEventColor(appointment.status),
+    borderColor: getEventColor(appointment.status),
+    extendedProps: {
+      appointment: appointment
+    }
+  }));
+
+  const handleEventClick = (info: any) => {
+    const appointment = info.event.extendedProps.appointment;
+    setSelectedEvent(appointment);
+  };
+
+  const handleDateClick = (info: any) => {
+    // Navigate to new appointment with the clicked date
+    const date = info.dateStr;
+    router.push(`/dashboard/calendar/new?date=${date}`);
+  };
+
+  const handleAddToGoogle = (appointment: Appointment) => {
+    const calendarEvent = {
+      title: appointment.title,
+      description: appointment.description,
+      start: new Date(appointment.startDateTime),
+      end: new Date(appointment.endDateTime),
+      location: appointment.location ? `${appointment.location.street}, ${appointment.location.city}, ${appointment.location.state}` : undefined
+    };
+    const url = getGoogleCalendarUrl(calendarEvent);
+    window.open(url, '_blank');
+  };
+
+  const handleDownloadIcs = (appointment: Appointment) => {
+    const calendarEvent = {
+      title: appointment.title,
+      description: appointment.description,
+      start: new Date(appointment.startDateTime),
+      end: new Date(appointment.endDateTime),
+      location: appointment.location ? `${appointment.location.street}, ${appointment.location.city}, ${appointment.location.state}` : undefined
+    };
+    const icsContent = generateIcsContent(calendarEvent);
+    downloadIcsFile(icsContent, `${appointment.title.replace(/\s+/g, '_')}.ics`);
+  };
+
   useEffect(() => {
-    // For now, using mock data since the backend appointment endpoint isn't implemented yet
+    // Mock data for demo purposes
     const mockAppointments: Appointment[] = [
       {
         _id: '1',
@@ -96,8 +117,8 @@ export default function CalendarPage() {
         appointmentType: 'consultation',
         status: 'scheduled',
         priority: 'high',
-        startDateTime: '2025-08-15T10:00:00Z',
-        endDateTime: '2025-08-15T11:00:00Z',
+        startDateTime: '2025-08-25T10:00:00Z',
+        endDateTime: '2025-08-25T11:00:00Z',
         location: {
           street: '123 Main St',
           city: 'San Francisco',
@@ -117,8 +138,8 @@ export default function CalendarPage() {
         appointmentType: 'site_visit',
         status: 'confirmed',
         priority: 'medium',
-        startDateTime: '2025-08-16T14:00:00Z',
-        endDateTime: '2025-08-16T15:30:00Z',
+        startDateTime: '2025-08-26T14:00:00Z',
+        endDateTime: '2025-08-26T15:30:00Z',
         location: {
           street: '456 Oak Ave',
           city: 'Oakland',
@@ -138,8 +159,8 @@ export default function CalendarPage() {
         appointmentType: 'inspection',
         status: 'completed',
         priority: 'medium',
-        startDateTime: '2025-08-10T09:00:00Z',
-        endDateTime: '2025-08-10T10:00:00Z',
+        startDateTime: '2025-08-24T09:00:00Z',
+        endDateTime: '2025-08-24T10:00:00Z',
         attendees: [],
         reminderSet: false,
         createdAt: '2025-08-12T06:00:00Z',
@@ -150,34 +171,6 @@ export default function CalendarPage() {
     setAppointments(mockAppointments);
     setLoading(false);
   }, []);
-
-  const filteredAppointments = appointments.filter(appointment => {
-    const matchesSearch = appointment.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         appointment.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || appointment.status === statusFilter;
-    const matchesType = typeFilter === 'all' || appointment.appointmentType === typeFilter;
-    
-    return matchesSearch && matchesStatus && matchesType;
-  });
-
-  const formatDateTime = (dateTime: string) => {
-    return new Date(dateTime).toLocaleString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    });
-  };
-
-  const formatTime = (dateTime: string) => {
-    return new Date(dateTime).toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    });
-  };
 
   if (loading) {
     return (
@@ -191,26 +184,33 @@ export default function CalendarPage() {
 
   return (
     <Layout>
-      <div>
+      <div className="space-y-6">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Calendar & Appointments</h1>
-            <p className="text-gray-600">Manage your appointments and schedule</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Schedule & Calendar</h1>
+            <p className="text-gray-600">Manage your appointments and schedule meetings</p>
           </div>
           <div className="flex items-center space-x-4 mt-4 md:mt-0">
-            <div className="flex rounded-lg border border-gray-300">
-              {(['list', 'month', 'week', 'day'] as const).map((viewType) => (
+            {/* View Switcher */}
+            <div className="flex rounded-lg border border-gray-300 bg-white">
+              {[
+                { key: 'dayGridMonth', label: 'Month' },
+                { key: 'timeGridWeek', label: 'Week' },
+                { key: 'timeGridDay', label: 'Day' }
+              ].map((viewOption) => (
                 <button
-                  key={viewType}
-                  onClick={() => setView(viewType)}
-                  className={`px-3 py-2 text-sm font-medium capitalize ${
-                    view === viewType
+                  key={viewOption.key}
+                  onClick={() => setView(viewOption.key as any)}
+                  className={`px-3 py-2 text-sm font-medium ${
+                    view === viewOption.key
                       ? 'bg-blue-600 text-white'
                       : 'text-gray-700 hover:bg-gray-100'
-                  } ${viewType === 'list' ? 'rounded-l-lg' : ''} ${viewType === 'day' ? 'rounded-r-lg' : ''}`}
+                  } ${viewOption.key === 'dayGridMonth' ? 'rounded-l-lg' : ''} ${
+                    viewOption.key === 'timeGridDay' ? 'rounded-r-lg' : ''
+                  }`}
                 >
-                  {viewType}
+                  {viewOption.label}
                 </button>
               ))}
             </div>
@@ -219,13 +219,13 @@ export default function CalendarPage() {
               className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <PlusIcon className="h-5 w-5 mr-2" />
-              New Appointment
+              Schedule Appointment
             </Link>
           </div>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center">
               <div className="p-2 bg-blue-100 rounded-lg">
@@ -279,135 +279,115 @@ export default function CalendarPage() {
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-red-100 rounded-lg">
-                <XCircleIcon className="h-6 w-6 text-red-600" />
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <UserIcon className="h-6 w-6 text-purple-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Cancelled</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {appointments.filter(a => a.status === 'cancelled').length}
-                </p>
+                <p className="text-sm font-medium text-gray-600">Total</p>
+                <p className="text-2xl font-bold text-gray-900">{appointments.length}</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="relative">
-              <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search appointments..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="input pl-10"
-              />
-            </div>
-
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="input"
-            >
-              <option value="all">All Statuses</option>
-              <option value="scheduled">Scheduled</option>
-              <option value="confirmed">Confirmed</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
-              <option value="rescheduled">Rescheduled</option>
-            </select>
-
-            <select
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-              className="input"
-            >
-              <option value="all">All Types</option>
-              <option value="consultation">Consultation</option>
-              <option value="site_visit">Site Visit</option>
-              <option value="meeting">Meeting</option>
-              <option value="inspection">Inspection</option>
-              <option value="other">Other</option>
-            </select>
+        {/* Calendar View */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div className="p-6">
+            <CalendarView
+              events={calendarEvents}
+              initialView={view}
+              currentView={view}
+              onEventClick={handleEventClick}
+              onDateClick={handleDateClick}
+            />
           </div>
         </div>
 
-        {/* Appointments List */}
-        <div className="space-y-4">
-          {filteredAppointments.length === 0 ? (
-            <div className="text-center py-12">
-              <CalendarDaysIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No appointments found</h3>
-              <p className="text-gray-600 mb-4">Schedule your first appointment to get started.</p>
-              <Link
-                href="/dashboard/calendar/new"
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <PlusIcon className="h-5 w-5 mr-2" />
-                Schedule Appointment
-              </Link>
-            </div>
-          ) : (
-            filteredAppointments.map((appointment) => (
-              <div key={appointment._id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex flex-wrap items-center gap-2 mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900 mr-1">{appointment.title}</h3>
-                      <span className={`pill pill-tint-${statusTint(appointment.status)} sm capitalize`}>{appointment.status.replace('_',' ')}</span>
-                      <span className={`pill pill-tint-${typeTint(appointment.appointmentType)} sm capitalize`}>{appointment.appointmentType.replace('_', ' ')}</span>
-                      <span className={`pill pill-tint-${priorityTint(appointment.priority)} sm capitalize flex items-center gap-1`}>{appointment.priority}
-                        {appointment.priority === 'urgent' && <ExclamationTriangleIcon className="h-3.5 w-3.5" />}
-                      </span>
-                    </div>
-                    
-                    {appointment.description && (
-                      <p className="text-gray-600 mb-3">{appointment.description}</p>
-                    )}
+        {/* Event Details Modal */}
+        {selectedEvent && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setSelectedEvent(null)}>
+            <div className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 p-6" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">{selectedEvent.title}</h3>
+                <button onClick={() => setSelectedEvent(null)} className="text-gray-400 hover:text-gray-600">
+                  <XCircleIcon className="h-6 w-6" />
+                </button>
+              </div>
+              
+              {selectedEvent.description && (
+                <p className="text-gray-600 mb-4">{selectedEvent.description}</p>
+              )}
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
-                      <div className="flex items-center">
-                        <ClockIcon className="h-4 w-4 mr-2" />
-                        <span>{formatDateTime(appointment.startDateTime)} - {formatTime(appointment.endDateTime)}</span>
-                      </div>
-                      
-                      {appointment.location && (
-                        <div className="flex items-center">
-                          <MapPinIcon className="h-4 w-4 mr-2" />
-                          <span>{appointment.location.street}, {appointment.location.city}</span>
-                        </div>
-                      )}
-
-                      {appointment.attendees.length > 0 && (
-                        <div className="flex items-center">
-                          <UserIcon className="h-4 w-4 mr-2" />
-                          <span>{appointment.attendees.length} attendees</span>
-                        </div>
-                      )}
-                    </div>
+              <div className="space-y-3 text-sm">
+                <div className="flex items-center">
+                  <ClockIcon className="h-4 w-4 mr-2 text-gray-400" />
+                  <span>{new Date(selectedEvent.startDateTime).toLocaleString()} - {new Date(selectedEvent.endDateTime).toLocaleTimeString()}</span>
+                </div>
+                
+                {selectedEvent.location && (
+                  <div className="flex items-center">
+                    <MapPinIcon className="h-4 w-4 mr-2 text-gray-400" />
+                    <span>{selectedEvent.location.street}, {selectedEvent.location.city}</span>
                   </div>
+                )}
 
-                  <div className="flex items-center space-x-2 ml-4">
-                    <button
-                      className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
-                      title="Edit"
-                    >
-                      <PencilIcon className="h-5 w-5" />
-                    </button>
-                    <button
-                      className="p-2 text-gray-400 hover:text-red-600 transition-colors"
-                      title="Delete"
-                    >
-                      <TrashIcon className="h-5 w-5" />
-                    </button>
-                  </div>
+                <div className="flex items-center">
+                  <UserIcon className="h-4 w-4 mr-2 text-gray-400" />
+                  <span className="capitalize">{selectedEvent.appointmentType.replace('_', ' ')}</span>
+                </div>
+
+                <div className="flex items-center">
+                  <div className={`h-2 w-2 rounded-full mr-2 ${
+                    selectedEvent.status === 'confirmed' ? 'bg-green-500' :
+                    selectedEvent.status === 'scheduled' ? 'bg-blue-500' :
+                    selectedEvent.status === 'completed' ? 'bg-gray-500' :
+                    selectedEvent.status === 'cancelled' ? 'bg-red-500' :
+                    selectedEvent.status === 'rescheduled' ? 'bg-yellow-500' : 'bg-gray-400'
+                  }`} />
+                  <span className="capitalize">{selectedEvent.status}</span>
                 </div>
               </div>
-            ))
-          )}
-        </div>
+
+              <div className="flex justify-between mt-6">
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => {
+                      handleAddToGoogle(selectedEvent);
+                      // Background integration - no UI feedback needed
+                    }}
+                    className="text-sm text-blue-600 hover:text-blue-700"
+                  >
+                    Add to Google Calendar
+                  </button>
+                  <span className="text-gray-300">|</span>
+                  <button
+                    onClick={() => {
+                      handleDownloadIcs(selectedEvent);
+                      // Background integration - no UI feedback needed
+                    }}
+                    className="text-sm text-blue-600 hover:text-blue-700"
+                  >
+                    Export to Calendar
+                  </button>
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => router.push(`/dashboard/calendar/edit/${selectedEvent._id}`)}
+                    className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => setSelectedEvent(null)}
+                    className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );

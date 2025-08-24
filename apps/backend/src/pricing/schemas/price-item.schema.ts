@@ -11,6 +11,9 @@ export class PriceItem {
   @Prop({ required: true })
   name: string;
 
+  @Prop({ default: '' })
+  description?: string;
+
   @Prop({ required: true })
   baseCost: number; // cost from vendor list
 

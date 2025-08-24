@@ -51,5 +51,9 @@
   ],
   "author": "SGK112",
   "license": "MIT",
-  "packageManager": "npm@10.0.0"
+  "packageManager": "npm@10.0.0",
+  "dependencies": {
+    "@types/nodemailer": "^7.0.1",
+    "nodemailer": "^7.0.5"
+  }
 }
