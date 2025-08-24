@@ -31,6 +31,7 @@ export class TwilioService {
     if (!this.client || !this.fromNumber) {
       return { error: 'Twilio not configured' };
     }
+    
     const result = await this.client.calls.create({
       to,
       from: this.fromNumber,

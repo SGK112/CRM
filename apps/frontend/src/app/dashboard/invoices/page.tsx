@@ -28,7 +28,12 @@ export default function InvoicesPage(){
         <PageHeader
           title='Invoices'
           subtitle='Billing documents & payment tracking'
-          actions={<button className='pill pill-tint-green sm'>New Invoice</button>}
+          actions={<button className='pill pill-tint-green sm' onClick={()=>{
+            const params = new URLSearchParams(typeof window!=='undefined' ? window.location.search : '');
+            const clientId = params.get('clientId');
+            // Navigate to a new invoice page if/when added; for now, fallback to creating from estimate or direct API later.
+            window.location.href = clientId ? `/dashboard/invoices/new?clientId=${clientId}` : `/dashboard/invoices/new`;
+          }}>New Invoice</button>}
           stats={[
             { label:'Count', value: loading? '…' : list.length },
             { label:'Subtotal', value: aggregates.subtotal.toFixed(2) },

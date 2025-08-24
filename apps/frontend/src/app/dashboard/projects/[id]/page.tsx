@@ -91,8 +91,10 @@ export default function ProjectDetailPage(){
                 <div className="flex items-center gap-2"><CalendarIcon className="h-4 w-4"/>End: {project.endDate ? new Date(project.endDate).toLocaleDateString() : '—'}</div>
                 <div>Status: <span className="pill pill-tint-blue sm">{project.status?.replace('_',' ')}</span></div>
               </div>
-              <div className="flex gap-2 pt-2">
+              <div className="flex gap-2 pt-2 flex-wrap">
                 <button onClick={createEstimate} disabled={creating} className="pill pill-tint-green sm inline-flex items-center gap-1"><PlusIcon className="h-4 w-4"/>Create Estimate</button>
+                <Link href={`/dashboard/estimates/new?projectId=${id}${project.clientId? `&clientId=${project.clientId}`:''}`} className="pill pill-tint-green sm inline-flex items-center gap-1"><PlusIcon className="h-4 w-4"/>New Estimate (Form)</Link>
+                <Link href={`/dashboard/invoices/new?projectId=${id}${project.clientId? `&clientId=${project.clientId}`:''}`} className="pill pill-tint-amber sm inline-flex items-center gap-1"><DocumentTextIcon className="h-4 w-4"/>New Invoice</Link>
                 <Link href={`/dashboard/calendar?project=${id}${project.clientId? `&client=${project.clientId}`:''}`} className="pill pill-tint-blue sm inline-flex items-center gap-1"><CalendarIcon className="h-4 w-4"/>Schedule Appointment</Link>
               </div>
             </div>

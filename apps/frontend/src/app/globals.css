@@ -87,6 +87,33 @@
 }
 
 @layer components {
+  /* Stat block used in PageHeader */
+  .stat-block {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.25rem 0.5rem;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    min-width: 72px;
+  }
+
+  .stat-block > small {
+    font-size: 10px;
+    line-height: 1;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 2px;
+  }
+
+  .stat-block > span {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: var(--text);
+  }
+
   /* Shared Input component class used across the app */
   .input {
     display: block;
