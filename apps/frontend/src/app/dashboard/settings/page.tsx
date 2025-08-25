@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Layout from '../../../components/Layout';
 import { useTheme } from '../../../components/ThemeProvider';
 import CommunicationSettings from '../../../components/CommunicationSettings';
@@ -40,12 +40,16 @@ interface IntegrationSetting {
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('general');
   const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  
   const [formData, setFormData] = useState({
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    phone: '+1 (555) 123-4567',
-    company: 'Your Construction Company',
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    company: '',
     timezone: 'America/Los_Angeles',
     language: 'en',
     notifications: {
@@ -60,6 +64,135 @@ export default function SettingsPage() {
       sessionTimeout: 60
     }
   });
+
+  // Load user profile data on component mount
+  useEffect(() => {
+    loadUserProfile();
+  }, []);
+
+  const loadUserProfile = async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        setMessage({ type: 'error', text: 'No authentication token found' });
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch('/api/users/profile', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.user) {
+        const user = data.user;
+        setFormData(prev => ({
+          ...prev,
+          firstName: user.firstName || '',
+          lastName: user.lastName || '',
+          email: user.email || '',
+          phone: user.phone || '',
+          company: user.workspaceName || user.company || '',
+          notifications: user.notificationPreferences || prev.notifications,
+        }));
+      } else {
+        setMessage({ type: 'error', text: data.message || 'Failed to load profile' });
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Failed to load profile data' });
+      console.error('Profile load error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    setSaving(true);
+    setMessage(null);
+
+    try {
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        setMessage({ type: 'error', text: 'No authentication token found' });
+        return;
+      }
+
+      const profileData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
+      };
+
+      const response = await fetch('/api/users/profile', {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(profileData),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setMessage({ type: 'success', text: 'Profile updated successfully!' });
+        // Update localStorage user data
+        const userData = localStorage.getItem('user');
+        if (userData) {
+          const user = JSON.parse(userData);
+          user.firstName = formData.firstName;
+          user.lastName = formData.lastName;
+          user.phone = formData.phone;
+          localStorage.setItem('user', JSON.stringify(user));
+        }
+      } else {
+        setMessage({ type: 'error', text: data.message || 'Failed to update profile' });
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Failed to update profile' });
+      console.error('Profile update error:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveNotifications = async () => {
+    setSaving(true);
+    setMessage(null);
+
+    try {
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        setMessage({ type: 'error', text: 'No authentication token found' });
+        return;
+      }
+
+      const response = await fetch('/api/users/notifications', {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData.notifications),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setMessage({ type: 'success', text: 'Notification preferences updated!' });
+      } else {
+        setMessage({ type: 'error', text: data.message || 'Failed to update notifications' });
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Failed to update notification preferences' });
+      console.error('Notification update error:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const [integrations, setIntegrations] = useState<IntegrationSetting[]>([
     {
@@ -581,14 +714,48 @@ export default function SettingsPage() {
           {/* Content */}
           <div className="flex-1">
             <div className="surface-1 rounded-lg shadow-sm border border-token p-6">
-              {renderTabContent()}
+              {loading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <span className="ml-2 text-gray-600">Loading...</span>
+                </div>
+              ) : (
+                renderTabContent()
+              )}
+              
+              {message && (
+                <div className={`mt-4 p-4 rounded-lg ${
+                  message.type === 'success' 
+                    ? 'bg-green-50 text-green-800 border border-green-200' 
+                    : 'bg-red-50 text-red-800 border border-red-200'
+                }`}>
+                  {message.text}
+                </div>
+              )}
               
               <div className="mt-8 pt-6 border-t border-gray-200 flex justify-end space-x-3">
-                <button className="px-4 py-2 border border-gray-300 dark:border-token text-gray-700 dark:text-[var(--text)] rounded-lg hover:bg-gray-50 dark:hover:bg-[var(--surface-2)] transition-colors">
+                <button 
+                  type="button"
+                  className="px-4 py-2 border border-gray-300 dark:border-token text-gray-700 dark:text-[var(--text)] rounded-lg hover:bg-gray-50 dark:hover:bg-[var(--surface-2)] transition-colors"
+                >
                   Cancel
                 </button>
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                  Save Changes
+                <button 
+                  type="button"
+                  onClick={() => {
+                    if (activeTab === 'general') {
+                      handleSaveProfile();
+                    } else if (activeTab === 'notifications') {
+                      handleSaveNotifications();
+                    }
+                  }}
+                  disabled={saving}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                >
+                  {saving && (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  )}
+                  {saving ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
             </div>
