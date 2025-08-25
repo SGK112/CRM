@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Layout from '../../../components/Layout';
@@ -19,6 +19,7 @@ import {
   ArrowUpTrayIcon
 } from '@heroicons/react/24/outline';
 import { API_BASE } from '@/lib/api';
+import CommunicationModal from '@/components/CommunicationModal';
 
 interface Client {
   _id: string;
@@ -68,6 +69,8 @@ export default function ClientsPage() {
   const [totalCount, setTotalCount] = useState(0);
   const [useServerSearch, setUseServerSearch] = useState(true);
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [communicationModalOpen, setCommunicationModalOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -243,9 +246,20 @@ export default function ClientsPage() {
     }
   };
 
+  const openCommunicationModal = (client: Client) => {
+    setSelectedClient(client);
+    setCommunicationModalOpen(true);
+  };
+
+  const closeCommunicationModal = () => {
+    setSelectedClient(null);
+    setCommunicationModalOpen(false);
+  };
+
   // (removed upload handler)
 
-  const formatSource = (source: string) => {
+  const formatSource = (source: string | undefined) => {
+    if (!source) return '';
     return source.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
 
@@ -450,8 +464,8 @@ export default function ClientsPage() {
                     <td className="px-4 py-3"></td>
                   </tr>
                 ))}
-                {!loading && filteredClients.map((client) => (
-          <>
+        {!loading && filteredClients.map((client) => (
+      <React.Fragment key={client._id}>
           <tr key={client._id} className="hover:bg-gray-50 dark:hover:bg-[var(--surface-2)] cursor-pointer" onClick={()=> toggleExpand(client._id)}>
                     <td className="px-4 py-3 align-top">
                       <div className="flex items-center">
@@ -538,15 +552,20 @@ export default function ClientsPage() {
                             <div className="flex flex-wrap gap-2">
                               <Link href={`/dashboard/estimates/new?client=${client._id}`} className="pill pill-tint-blue text-[10px]">New Estimate</Link>
                               <Link href={`/dashboard/projects/new?client=${client._id}`} className="pill pill-tint-purple text-[10px]">New Project</Link>
-                              <Link href={`mailto:${client.email}`} className="pill pill-tint-green text-[10px]">Email</Link>
+                              <button 
+                                onClick={() => openCommunicationModal(client)} 
+                                className="pill pill-tint-green text-[10px] hover:scale-105 transition-transform"
+                              >
+                                Contact
+                              </button>
                             </div>
                           </div>
                           {client.notes && <div className="md:col-span-4 border-t border-dashed border-token pt-3 text-slate-600 dark:text-[var(--text-dim)] line-clamp-2">{client.notes}</div>}
                         </div>
                       </td>
                     </tr>
-                  )}
-          </>
+      )}
+    </React.Fragment>
                 ))}
               </tbody>
             </table>
@@ -554,6 +573,15 @@ export default function ClientsPage() {
         </div>
       )}
       </div>
+
+      {/* Communication Modal */}
+      {selectedClient && (
+        <CommunicationModal
+          isOpen={communicationModalOpen}
+          onClose={closeCommunicationModal}
+          client={selectedClient}
+        />
+      )}
     </Layout>
   );
 }

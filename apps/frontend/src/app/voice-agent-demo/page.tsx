@@ -1,23 +1,47 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ElevenLabsCallComponent from '@/components/voice/ElevenLabsCallComponent-Fixed';
 import ElevenLabsWidgetComponent from '@/components/voice/ElevenLabsWidgetComponent';
 
 // Sample client data for demonstration
 const sampleClient = {
-  id: 'client_sg_001',
-  name: 'Maria Rodriguez',
+  id: 'demo_client_001',
+  name: 'Demo Customer',
   phone: '4802555887',
-  email: 'maria.rodriguez@email.com',
-  address: '1234 Desert View Dr, Phoenix, AZ 85028',
-  notes: 'Interested in granite countertops for kitchen remodel. Budget range $3000-5000. Prefers darker colors.'
+  email: 'customer@example.com',
+  address: '123 Main St, Anytown, USA',
+  notes: 'Interested lead. Example context for agent prompt.'
 };
 
 const workspaceId = 'surprise_granite_workspace';
 
 export default function VoiceAgentDemo() {
   const [activeTab, setActiveTab] = useState<'widget' | 'phone'>('widget');
+  const [status, setStatus] = useState<null | { ok: boolean; feature: string; twilio: { configured: boolean; from: string | null }; elevenlabs: { configured: boolean; agentId: string } }>(null);
+  const [statusError, setStatusError] = useState<string | null>(null);
+  const [agentId, setAgentId] = useState<string>('');
+
+  useEffect(() => {
+    let ignore = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/voice-agent/status');
+        if (!ignore) {
+          if (res.ok) {
+            setStatus(await res.json());
+          } else {
+            setStatusError('Failed to load voice agent status');
+          }
+        }
+      } catch (e) {
+        if (!ignore) setStatusError('Backend unavailable. Is the server running?');
+      }
+    })();
+    return () => {
+      ignore = true;
+    };
+  }, []);
   
   const handleCallInitiated = (callInfo: any) => {
     console.log('Call setup completed:', callInfo);
@@ -27,20 +51,44 @@ export default function VoiceAgentDemo() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4">
-        {/* Header */}
+    {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Remodely CRM - AI Voice Agent
+      AI Voice Agents Demo
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Surprise Granite can now use AI voice agent Sarah to automatically call customers, 
-            schedule appointments, follow up on quotes, and close sales with high-quality ElevenLabs voices.
+      Let customers talk with your agents directly in the CRM using ElevenLabs ConvAI — via browser widget or outbound calls.
           </p>
+        </div>
+
+        {/* System Status */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <h2 className="text-base font-semibold text-gray-900">System Status</h2>
+            {statusError && (
+              <span className="text-sm text-red-600">{statusError}</span>
+            )}
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${status?.elevenlabs?.configured ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-yellow-50 text-yellow-700 border border-yellow-200'}`}>
+              <span className={`w-2 h-2 rounded-full ${status?.elevenlabs?.configured ? 'bg-green-500' : 'bg-yellow-500'}`} />
+              ElevenLabs {status?.elevenlabs?.configured ? `configured (agent ${status?.elevenlabs?.agentId})` : 'not configured'}
+            </span>
+            <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${status?.twilio?.configured ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-gray-50 text-gray-700 border border-gray-200'}`}>
+              <span className={`w-2 h-2 rounded-full ${status?.twilio?.configured ? 'bg-green-500' : 'bg-gray-400'}`} />
+              Twilio {status?.twilio?.configured ? `connected (${status?.twilio?.from})` : 'not connected'}
+            </span>
+          </div>
+          {!status?.elevenlabs?.configured && (
+            <div className="mt-3 text-xs text-gray-600">
+              To enable the demo, add ELEVENLABS_API_KEY and ELEVENLABS_AGENT_ID to the backend environment and restart. The widget and outbound call flows require ElevenLabs.
+            </div>
+          )}
         </div>
 
         {/* Benefits Section */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Why ElevenLabs AI Voice Agent?</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Why AI Voice Agents?</h2>
           <div className="grid md:grid-cols-3 gap-4">
             <div className="text-center p-4 border border-gray-100 rounded-lg">
               <div className="text-2xl mb-2">🎯</div>
@@ -60,18 +108,18 @@ export default function VoiceAgentDemo() {
           </div>
         </div>
 
-        {/* Sarah Agent Info */}
+        {/* Agent Capabilities */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
-          <h2 className="text-xl font-semibold text-blue-900 mb-3">Meet Sarah - Your AI Sales Specialist</h2>
+          <h2 className="text-xl font-semibold text-blue-900 mb-3">Agent Capabilities</h2>
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <h3 className="font-medium text-blue-800 mb-2">Expertise:</h3>
               <ul className="text-sm text-blue-700 space-y-1">
-                <li>• Granite countertop specialist</li>
-                <li>• Surprise Granite product knowledge</li>
-                <li>• Installation process expert</li>
+                <li>• Product/service knowledge</li>
+                <li>• Process explanations</li>
                 <li>• Pricing and quote assistance</li>
                 <li>• Appointment scheduling</li>
+                <li>• Custom prompts per business</li>
               </ul>
             </div>
             <div>
@@ -93,6 +141,19 @@ export default function VoiceAgentDemo() {
           <p className="text-gray-600 mb-6">
             Choose between traditional phone calls or the new widget-based approach for direct browser conversations.
           </p>
+
+          {/* Agent Selector */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Select Agent (optional)</label>
+            <input
+              type="text"
+              placeholder={status?.elevenlabs?.agentId ? `Default agent: ${status.elevenlabs.agentId}` : 'Enter ElevenLabs agent ID'}
+              value={agentId}
+              onChange={(e) => setAgentId(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <p className="text-xs text-gray-500 mt-1">Leave blank to use the default agent configured on the backend.</p>
+          </div>
           
           {/* Tab Navigation */}
           <div className="border-b border-gray-200 mb-6">
@@ -129,11 +190,19 @@ export default function VoiceAgentDemo() {
                   Direct browser-to-agent conversation. No phone calls needed. Instant connection with natural ElevenLabs voice.
                 </p>
               </div>
-              <ElevenLabsWidgetComponent 
-                client={sampleClient}
-                workspaceId={workspaceId}
-                onCallInitiated={handleCallInitiated}
-              />
+        {status?.elevenlabs?.configured ? (
+                <ElevenLabsWidgetComponent 
+                  client={sampleClient}
+                  workspaceId={workspaceId}
+          onCallInitiated={handleCallInitiated}
+          // @ts-expect-error: forward unknown prop to allow future support
+          agentId={agentId || undefined}
+                />
+              ) : (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-yellow-800">
+                  ElevenLabs isn’t configured yet. Configure your ElevenLabs API key and agent in the backend to try the widget conversation here.
+                </div>
+              )}
             </div>
           )}
 
@@ -146,11 +215,19 @@ export default function VoiceAgentDemo() {
                   Calls the customer's phone number. Requires phone system setup and may have connectivity issues.
                 </p>
               </div>
-              <ElevenLabsCallComponent 
-                client={sampleClient}
-                workspaceId={workspaceId}
-                onCallInitiated={handleCallInitiated}
-              />
+        {status?.elevenlabs?.configured ? (
+                <ElevenLabsCallComponent 
+                  client={sampleClient}
+                  workspaceId={workspaceId}
+          onCallInitiated={handleCallInitiated}
+          // @ts-expect-error: forward unknown prop to allow future support
+          agentId={agentId || undefined}
+                />
+              ) : (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-yellow-800">
+                  ElevenLabs isn’t configured yet. Add ELEVENLABS_API_KEY and ELEVENLABS_AGENT_ID to enable phone call setup.
+                </div>
+              )}
             </div>
           )}
         </div>

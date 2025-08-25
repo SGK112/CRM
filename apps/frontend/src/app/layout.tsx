@@ -68,7 +68,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   {children}
                 </main>
                 <ConditionalFooter>
-              <footer className="mt-20 border-t border-[var(--border)] bg-[var(--surface-1)] backdrop-blur-sm relative overflow-hidden">
+                  <footer className="mt-20 border-t border-[var(--border)] bg-[var(--surface-1)] backdrop-blur-sm relative overflow-hidden">
                 <div className="pointer-events-none absolute inset-0">
                   <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-amber-500/30 to-transparent" />
                   <div className="absolute -top-24 right-0 h-64 w-64 rounded-full bg-amber-600/5 blur-3xl" />

@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import PhoneInput from '../../../components/forms/PhoneInput'
 import { EyeIcon, EyeSlashIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline'
 
 export default function RegisterPage() {
@@ -243,14 +244,11 @@ export default function RegisterPage() {
                 Phone Number <span className="text-[var(--text-faint)]">(Optional)</span>
               </label>
               <div className="mt-1">
-                <input
-                  id="phone"
-                  name="phone"
-                  type="tel"
+                <PhoneInput
                   value={formData.phone}
-                  onChange={handleChange}
+                  onChange={(value) => setFormData({ ...formData, phone: value })}
+                  placeholder="Phone number"
                   className="input"
-                  placeholder="+1 (555) 123-4567"
                 />
               </div>
             </div>

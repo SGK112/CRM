@@ -8,7 +8,7 @@ import { API_BASE } from '@/lib/api';
 import { CapabilityGate } from '../../../components/CapabilityGate';
 
 interface OutboundResponse { sid: string; status: string; simulated?: boolean; to: string; agentId?: string }
-interface VoiceAgentStatus { ok: boolean; feature: string; twilio: { configured: boolean; from: string | null }; elevenlabs: { configured: boolean; agentId: string } }
+interface VoiceAgentStatus { ok: boolean; feature: string; twilio: { configured: boolean; from: string | null }; elevenlabs: { configured: boolean; agentId: string }; inbound?: { webhookUrl: string } }
 
 export default function VoiceAgentPage() {
   const [toNumber, setToNumber] = useState('');
@@ -16,6 +16,7 @@ export default function VoiceAgentPage() {
   const [call, setCall] = useState<OutboundResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<VoiceAgentStatus | null>(null);
+  const inboundOnly = (process.env.NEXT_PUBLIC_VOICE_INBOUND_ONLY || '').toLowerCase() === 'true';
 
   useEffect(() => {
     (async () => {
@@ -64,31 +65,49 @@ export default function VoiceAgentPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <div className="surface-1 border border-token rounded-xl p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-[var(--text)] mb-4 flex items-center gap-2"><PhoneIcon className="h-5 w-5" /> Start Outbound Call</h2>
-              <CapabilityGate need="ai.voice" fallback={<div className="text-sm"><a href="/billing/cart" className="text-amber-400 underline">Upgrade your plan</a> to enable Voice Agent calling.</div>}>
-                <div className="flex gap-3">
-                  <input value={toNumber} onChange={e=>setToNumber(e.target.value)} placeholder="Destination phone e.g. +15551234567" className="input flex-1" />
-                  <button onClick={startCall} disabled={!toNumber || loading} className="px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-[var(--surface-2)] disabled:text-gray-600 dark:disabled:text-[var(--text-dim)] disabled:cursor-not-allowed flex items-center gap-2">
-                    {loading && <ArrowPathIcon className="h-4 w-4 animate-spin" />} Call
-                  </button>
-                </div>
-              </CapabilityGate>
-              {status && (
-                <div className="mt-3 text-xs text-gray-600 dark:text-[var(--text-dim)]">
-                  {status.twilio.configured ? (
-                    <p>Twilio is connected. Calls will originate from <span className="font-medium">{status.twilio.from}</span>.</p>
-                  ) : (
-                    <p>Twilio not configured. Calls are simulated for testing.</p>
+              {inboundOnly ? (
+                <>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-[var(--text)] mb-2 flex items-center gap-2"><PhoneIcon className="h-5 w-5" /> Inbound Only Mode</h2>
+                  <p className="text-sm text-gray-600 dark:text-[var(--text-dim)] mb-3">Outbound calling is disabled. Configure a Twilio number to point to your inbound webhook and receive calls handled by the agent.</p>
+                  <div className="text-xs bg-gray-50 dark:bg-[var(--surface-2)] border border-gray-200 dark:border-token rounded p-3">
+                    <p className="font-medium mb-1">Voice Webhook URL:</p>
+                    <code className="block break-all">{status?.inbound?.webhookUrl || '/api/voice-agent/webhook'}</code>
+                    <ul className="list-disc ml-4 mt-3 space-y-1">
+                      <li>In development, expose your backend with ngrok and set BACKEND_BASE_URL to the ngrok URL.</li>
+                      <li>In Twilio Console, set the number’s Voice webhook to POST {status?.inbound?.webhookUrl || '/api/voice-agent/webhook'}.</li>
+                      <li>Optional params: <code>?useElevenLabs=true&amp;agentId=YOUR_AGENT_ID</code> to customize greetings.</li>
+                    </ul>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-[var(--text)] mb-4 flex items-center gap-2"><PhoneIcon className="h-5 w-5" /> Start Outbound Call</h2>
+                  <CapabilityGate need="ai.voice" fallback={<div className="text-sm"><a href="/billing/cart" className="text-amber-400 underline">Upgrade your plan</a> to enable Voice Agent calling.</div>}>
+                    <div className="flex gap-3">
+                      <input value={toNumber} onChange={e=>setToNumber(e.target.value)} placeholder="Destination phone e.g. +15551234567" className="input flex-1" />
+                      <button onClick={startCall} disabled={!toNumber || loading} className="px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-[var(--surface-2)] disabled:text-gray-600 dark:disabled:text-[var(--text-dim)] disabled:cursor-not-allowed flex items-center gap-2">
+                        {loading && <ArrowPathIcon className="h-4 w-4 animate-spin" />} Call
+                      </button>
+                    </div>
+                  </CapabilityGate>
+                  {status && (
+                    <div className="mt-3 text-xs text-gray-600 dark:text-[var(--text-dim)]">
+                      {status.twilio.configured ? (
+                        <p>Twilio is connected. Calls will originate from <span className="font-medium">{status.twilio.from}</span>.</p>
+                      ) : (
+                        <p>Twilio not configured. Calls are simulated for testing.</p>
+                      )}
+                    </div>
                   )}
-                </div>
-              )}
-              {error && <p className="text-sm text-red-600 dark:text-red-400 mt-3">{error}</p>}
-              {call && (
-                <div className="mt-4 text-sm bg-gray-50 dark:bg-[var(--surface-2)] border border-gray-200 dark:border-token rounded-lg p-3 text-gray-700 dark:text-[var(--text)]">
-                  <p><span className="font-medium">Status:</span> {call.status} {call.simulated && <span className="text-xs text-gray-500 dark:text-[var(--text-dim)]">(simulated)</span>}</p>
-                  <p><span className="font-medium">Call SID:</span> {call.sid}</p>
-                  <p><span className="font-medium">To:</span> {call.to}</p>
-                </div>
+                  {error && <p className="text-sm text-red-600 dark:text-red-400 mt-3">{error}</p>}
+                  {call && (
+                    <div className="mt-4 text-sm bg-gray-50 dark:bg-[var(--surface-2)] border border-gray-200 dark:border-token rounded-lg p-3 text-gray-700 dark:text-[var(--text)]">
+                      <p><span className="font-medium">Status:</span> {call.status} {call.simulated && <span className="text-xs text-gray-500 dark:text-[var(--text-dim)]">(simulated)</span>}</p>
+                      <p><span className="font-medium">Call SID:</span> {call.sid}</p>
+                      <p><span className="font-medium">To:</span> {call.to}</p>
+                    </div>
+                  )}
+                </>
               )}
             </div>
 

@@ -1,6 +1,5 @@
 'use client';
 
-import { Metadata } from 'next'
 import { RevealInit } from '@/components/RevealInit'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -32,7 +31,9 @@ import {
   SpeakerWaveIcon,
   BoltIcon,
   LightBulbIcon,
-  RocketLaunchIcon
+  RocketLaunchIcon,
+  Bars3Icon,
+  XMarkIcon
 } from '@heroicons/react/24/outline'
 
 // Features data
@@ -136,38 +137,61 @@ const stats = [
   { label: 'Time Saved Per Week', value: '15hrs' }
 ]
 
-const pricingPlans = [
-  {
-    name: 'Starter',
-    price: 29,
-    yearlyPrice: 24,
-    description: 'Perfect for small crews getting organized',
-    features: ['5 team members', '10 active projects', '50 clients', '5 GB storage', 'Email support'],
-    popular: false
-  },
-  {
-    name: 'Professional', 
-    price: 59,
-    yearlyPrice: 49,
-    description: 'Ideal for growing operations & multi-trade companies',
-    features: ['15 team members', '50 active projects', '500 clients', '50 GB storage', 'Priority support', 'Advanced analytics'],
-    popular: true
-  },
-  {
-    name: 'Enterprise',
-    price: 99,
-    yearlyPrice: 79,
-    description: 'For large companies with complex needs',
-    features: ['Unlimited team members', 'Unlimited projects', 'Unlimited clients', '500 GB storage', '24/7 phone support', 'Custom integrations'],
-    popular: false
-  }
-]
+  const pricingPlans = [
+    {
+      name: "Starter",
+      price: { monthly: 29, yearly: 24 },
+      description: "Perfect for small teams getting started",
+      features: [
+        "Up to 5 users",
+        "100 clients",
+        "Basic project management",
+        "Email support",
+        "Mobile app access",
+        "Basic reporting"
+      ],
+      popular: false
+    },
+    {
+      name: "Professional",
+      price: { monthly: 59, yearly: 49 },
+      description: "For growing teams with advanced needs",
+      features: [
+        "Up to 25 users",
+        "500 clients",
+        "Advanced project management",
+        "Priority support",
+        "AI voice assistant",
+        "Custom integrations",
+        "Advanced analytics",
+        "Document management"
+      ],
+      popular: true
+    },
+    {
+      name: "Scale",
+      price: { monthly: 99, yearly: 79 },
+      description: "For large companies with complex projects",
+      features: [
+        "Unlimited users",
+        "Unlimited clients",
+        "White-label solution",
+        "24/7 phone support",
+        "Custom development",
+        "Advanced security",
+        "API access",
+        "Dedicated account manager"
+      ],
+      popular: false
+    }
+  ]
 
 export default function HomePage() {
-  const [isYearly, setIsYearly] = useState(true)
   const [activeTestimonial, setActiveTestimonial] = useState(0)
+  const [isYearly, setIsYearly] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  // Auto-rotate testimonials
+  // Rotate testimonials every 5 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveTestimonial((prev) => (prev + 1) % testimonials.length)
@@ -176,8 +200,68 @@ export default function HomePage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] relative overflow-hidden">
+    <div className="min-h-screen text-[var(--text)]">
       <RevealInit />
+      
+      {/* Navigation Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[var(--bg-primary)]/90 backdrop-blur-sm border-b border-[var(--border)]">
+        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo */}
+            <div className="flex-shrink-0">
+              <Link href="/" className="flex items-center space-x-2">
+                <BuildingOfficeIcon className="h-8 w-8 text-amber-500" />
+                <span className="text-xl font-bold">Remodely CRM</span>
+              </Link>
+            </div>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:block">
+              <div className="ml-10 flex items-baseline space-x-8">
+                <a href="#features" className="text-[var(--text-dim)] hover:text-[var(--text)] transition-colors">Features</a>
+                <a href="#pricing" className="text-[var(--text-dim)] hover:text-[var(--text)] transition-colors">Pricing</a>
+                <a href="#testimonials" className="text-[var(--text-dim)] hover:text-[var(--text)] transition-colors">Reviews</a>
+                <Link href="/auth/login" className="btn btn-outline">Sign In</Link>
+                <Link href="/auth/register" className="btn gradient-amber">Get Started</Link>
+              </div>
+            </div>
+
+            {/* Mobile menu button */}
+            <div className="md:hidden">
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="inline-flex items-center justify-center p-2 rounded-md text-[var(--text)] hover:bg-[var(--bg-secondary)] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500"
+              >
+                {mobileMenuOpen ? (
+                  <XMarkIcon className="h-6 w-6" />
+                ) : (
+                  <Bars3Icon className="h-6 w-6" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile Navigation Menu */}
+          {mobileMenuOpen && (
+            <div className="md:hidden">
+              <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-[var(--border)] bg-[var(--bg-primary)]">
+                <a href="#features" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 text-base font-medium text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-[var(--bg-secondary)] rounded-md transition-colors">Features</a>
+                <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 text-base font-medium text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-[var(--bg-secondary)] rounded-md transition-colors">Pricing</a>
+                <a href="#testimonials" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 text-base font-medium text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-[var(--bg-secondary)] rounded-md transition-colors">Reviews</a>
+                <div className="pt-4 pb-3 border-t border-[var(--border)]">
+                  <div className="flex items-center space-x-3">
+                    <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)} className="flex-1 text-center btn btn-outline">Sign In</Link>
+                    <Link href="/auth/register" onClick={() => setMobileMenuOpen(false)} className="flex-1 text-center btn gradient-amber">Get Started</Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </nav>
+      </header>
+
+      {/* Add padding top to account for fixed header */}
+      <div className="pt-16">
       
       {/* Background elements */}
       <div className="pointer-events-none select-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-amber-600/10 blur-3xl" />
@@ -266,10 +350,21 @@ export default function HomePage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {businessPillars.map((pillar, index) => (
+            {businessPillars.map((pillar, index) => {
+              const getColorClasses = (color: string) => {
+                const colorMap = {
+                  blue: { bg: 'bg-blue-600/15', ring: 'ring-blue-500/30', text: 'text-blue-600' },
+                  amber: { bg: 'bg-amber-600/15', ring: 'ring-amber-500/30', text: 'text-amber-600' },
+                  emerald: { bg: 'bg-emerald-600/15', ring: 'ring-emerald-500/30', text: 'text-emerald-600' }
+                };
+                return colorMap[color as keyof typeof colorMap] || colorMap.amber;
+              };
+              const colors = getColorClasses(pillar.color);
+              
+              return (
               <div key={index} className="text-center p-8 rounded-2xl bg-[var(--surface-1)] border border-[var(--border)] hover:shadow-lg transition-shadow">
-                <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6 bg-${pillar.color}-600/15 ring-1 ring-${pillar.color}-500/30`}>
-                  <pillar.icon className={`h-8 w-8 text-${pillar.color}-600`} />
+                <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6 ${colors.bg} ring-1 ${colors.ring}`}>
+                  <pillar.icon className={`h-8 w-8 ${colors.text}`} />
                 </div>
                 <h3 className="text-2xl font-bold mb-4">{pillar.label}</h3>
                 <ul className="space-y-2">
@@ -281,13 +376,14 @@ export default function HomePage() {
                   ))}
                 </ul>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* Core Features Grid */}
-      <section className="py-20 bg-[var(--surface-1)]">
+      <section id="features" className="py-20 bg-[var(--surface-1)]">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -321,7 +417,7 @@ export default function HomePage() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-20">
+      <section id="testimonials" className="py-20">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -365,7 +461,7 @@ export default function HomePage() {
       </section>
 
       {/* Pricing */}
-      <section className="py-20 bg-[var(--surface-1)]">
+      <section id="pricing" className="py-20 bg-[var(--surface-1)]">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -416,13 +512,13 @@ export default function HomePage() {
                   <p className="text-[var(--text-dim)] mb-4">{plan.description}</p>
                   <div className="mb-2">
                     <span className="text-4xl font-bold">
-                      ${isYearly ? plan.yearlyPrice : plan.price}
+                      ${isYearly ? plan.price.yearly : plan.price.monthly}
                     </span>
                     <span className="text-[var(--text-dim)]">/month</span>
                   </div>
                   {isYearly && (
                     <div className="text-sm text-emerald-600">
-                      Save ${((plan.price - plan.yearlyPrice) * 12)} annually
+                      Save ${((plan.price.monthly - plan.price.yearly) * 12)} annually
                     </div>
                   )}
                 </div>
@@ -510,6 +606,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      </div> {/* Close the pt-16 container */}
     </div>
   );
 }

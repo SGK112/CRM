@@ -13,6 +13,7 @@ import { Estimate, EstimateSchema } from '../estimates/schemas/estimate.schema';
 import { AppointmentsModule } from '../appointments/appointments.module';
 import { NotesService } from '../clients/notes.service';
 import { Note, NoteSchema } from '../clients/schemas/note.schema';
+import { ElevenLabsIntegrationService } from './elevenlabs-integration.service';
 
 @Module({
   imports: [
@@ -32,7 +33,8 @@ import { Note, NoteSchema } from '../clients/schemas/note.schema';
     TwilioService, 
     ElevenLabsService, 
     EmailService,
-    NotesService,
+  NotesService,
+  ElevenLabsIntegrationService,
   ],
   exports: [VoiceAgentService],
 })
