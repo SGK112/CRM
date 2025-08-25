@@ -16,9 +16,10 @@ interface ElevenLabsCallProps {
   client: Client;
   workspaceId: string;
   onCallInitiated?: (callInfo: any) => void;
+  agentId?: string;
 }
 
-export function ElevenLabsCallComponent({ client, workspaceId, onCallInitiated }: ElevenLabsCallProps) {
+export function ElevenLabsCallComponent({ client, workspaceId, onCallInitiated, agentId }: ElevenLabsCallProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [callResult, setCallResult] = useState<any>(null);
   const [purpose, setPurpose] = useState('');
@@ -49,7 +50,7 @@ export function ElevenLabsCallComponent({ client, workspaceId, onCallInitiated }
     setIsLoading(true);
     
     try {
-      const response = await fetch('/api/voice-agent/elevenlabs-call', {
+    const response = await fetch('/api/voice-agent/elevenlabs-call', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -59,6 +60,7 @@ export function ElevenLabsCallComponent({ client, workspaceId, onCallInitiated }
           clientName: client.name,
           phoneNumber: client.phone,
           workspaceId,
+      agentId,
           purpose,
           context: context || `Client: ${client.name}, Phone: ${client.phone}${client.email ? `, Email: ${client.email}` : ''}${client.address ? `, Address: ${client.address}` : ''}${client.notes ? `, Notes: ${client.notes}` : ''}`
         })
@@ -103,7 +105,7 @@ export function ElevenLabsCallComponent({ client, workspaceId, onCallInitiated }
             ElevenLabs AI Voice Call Setup
           </h2>
           <p className="text-gray-600 mt-1">
-            Initiate a high-quality AI voice call with Sarah (Surprise Granite specialist) to: {client.name}
+            Initiate a high-quality AI voice call to: {client.name}
           </p>
         </div>
         <div className="p-6 space-y-4">

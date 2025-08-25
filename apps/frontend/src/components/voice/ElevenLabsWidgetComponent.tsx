@@ -16,6 +16,7 @@ interface ElevenLabsWidgetComponentProps {
   client: Client;
   workspaceId: string;
   onCallInitiated?: (callInfo: any) => void;
+  agentId?: string;
 }
 
 interface WidgetConfig {
@@ -40,7 +41,8 @@ interface WidgetConfig {
 const ElevenLabsWidgetComponent: React.FC<ElevenLabsWidgetComponentProps> = ({
   client,
   workspaceId,
-  onCallInitiated
+  onCallInitiated,
+  agentId,
 }) => {
   const [widgetConfig, setWidgetConfig] = useState<WidgetConfig | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -87,7 +89,8 @@ const ElevenLabsWidgetComponent: React.FC<ElevenLabsWidgetComponentProps> = ({
         clientId: client.id,
         workspaceId,
         purpose: purpose,
-        context: context || `CRM interaction with ${client.name}. ${client.notes || ''}`
+        context: context || `CRM interaction with ${client.name}. ${client.notes || ''}`,
+        agentId: agentId || undefined,
       };
 
       console.log('🎯 Initiating widget call with payload:', payload);

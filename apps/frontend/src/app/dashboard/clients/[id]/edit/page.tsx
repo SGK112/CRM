@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Layout from '../../../../../components/Layout';
 import Link from 'next/link';
+import PhoneInput from '../../../../../components/forms/PhoneInput';
+import AddressInput from '../../../../../components/forms/AddressInput';
 import { API_BASE } from '@/lib/api';
 import { ArrowLeftIcon, CheckIcon } from '@heroicons/react/24/outline';
 
@@ -147,7 +149,12 @@ export default function EditClientPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-              <input value={form.phone||''} onChange={e=>updateField('phone', e.target.value)} className="input" />
+              <PhoneInput
+                value={form.phone || ''}
+                onChange={(value) => updateField('phone', value)}
+                placeholder="Phone number"
+                className="input"
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
@@ -175,28 +182,12 @@ export default function EditClientPage() {
         {/* Address */}
         <section className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
           <h2 className="text-lg font-semibold">Address</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Street</label>
-              <input value={form.address?.street||''} onChange={e=>updateAddress('street', e.target.value)} className="input" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
-              <input value={form.address?.city||''} onChange={e=>updateAddress('city', e.target.value)} className="input" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
-              <input value={form.address?.state||''} onChange={e=>updateAddress('state', e.target.value)} className="input" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">ZIP</label>
-              <input value={form.address?.zipCode||''} onChange={e=>updateAddress('zipCode', e.target.value)} className="input" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
-              <input value={form.address?.country||''} onChange={e=>updateAddress('country', e.target.value)} className="input" />
-            </div>
-          </div>
+          <AddressInput
+            address={form.address || {}}
+            onChange={(address) => setForm(f => f ? ({ ...f, address }) : null)}
+            className=""
+            showCoordinates={true}
+          />
         </section>
 
         {/* Notes */}

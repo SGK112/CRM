@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Layout from '../../../components/Layout';
 import { useTheme } from '../../../components/ThemeProvider';
+import CommunicationSettings from '../../../components/CommunicationSettings';
 import {
   UserIcon,
   CogIcon,
@@ -132,6 +133,7 @@ export default function SettingsPage() {
     { id: 'general', name: 'General', icon: UserIcon },
     { id: 'notifications', name: 'Notifications', icon: BellIcon },
     { id: 'security', name: 'Security', icon: ShieldCheckIcon },
+    { id: 'communications', name: 'Communications', icon: EnvelopeIcon },
     { id: 'integrations', name: 'Integrations', icon: KeyIcon },
     { id: 'billing', name: 'Billing', icon: CreditCardIcon }
   ];
@@ -532,6 +534,8 @@ export default function SettingsPage() {
         return renderNotificationsTab();
       case 'security':
         return renderSecurityTab();
+      case 'communications':
+        return <CommunicationSettings />;
       case 'integrations':
         return renderIntegrationsTab();
       case 'billing':

@@ -5,6 +5,7 @@ import { ElevenLabsPureCallingService, ElevenLabsPureCallResponse } from './elev
 import { ConfigService } from '@nestjs/config';
 import { TwilioService } from '../services/twilio.service';
 import { ElevenLabsService } from '../services/elevenlabs.service';
+import { ElevenLabsIntegrationService } from './elevenlabs-integration.service';
 
 interface OutboundCallDto { 
   to: string; 
@@ -58,6 +59,7 @@ export class VoiceAgentController {
     private twilio: TwilioService,
     private eleven: ElevenLabsService,
     private config: ConfigService,
+    private elevenIntegration: ElevenLabsIntegrationService,
   ) {}
 
   @Post('outbound')
@@ -97,22 +99,23 @@ export class VoiceAgentController {
     console.log('🎯 WIDGET CONTROLLER: ElevenLabs widget call requested');
     console.log('� Widget payload:', JSON.stringify(body, null, 2));
     
-    const { phoneNumber, clientName, purpose, context } = body;
+  const { phoneNumber, clientName, purpose, context, agentId } = body;
+  const resolvedAgentId = agentId || this.eleven.getDefaultAgentId();
     
     // Generate the widget configuration
     const widgetConfig = {
       success: true,
       callType: "elevenlabs_widget",
       voiceProvider: "ElevenLabs ConvAI Widget",
-      agentId: "agent_5401k1we1dkbf1mvt22mme8wz82a",
+      agentId: resolvedAgentId,
       widget: {
-        embedCode: `<elevenlabs-convai agent-id="agent_5401k1we1dkbf1mvt22mme8wz82a"></elevenlabs-convai>`,
+        embedCode: `<elevenlabs-convai agent-id="${resolvedAgentId}"></elevenlabs-convai>`,
         scriptSrc: "https://unpkg.com/@elevenlabs/convai-widget-embed",
         instructions: [
           "1. Widget will load automatically when embedded",
           "2. User can start voice conversation directly in browser",
-          "3. No phone call needed - direct browser-to-agent communication",
-          "4. Agent (Sarah) will handle the conversation naturally"
+          "3. No phone call needed — direct browser-to-agent communication",
+          "4. The agent will handle the conversation naturally"
         ],
         clientInfo: {
           name: clientName || "Customer",
@@ -132,6 +135,25 @@ export class VoiceAgentController {
 
     console.log('🎉 Widget configuration generated:', widgetConfig);
     return widgetConfig;
+  }
+
+  // Return ElevenLabs batch calling instructions (white-label friendly)
+  @Post('elevenlabs-call')
+  async createElevenLabsCall(@Body() body: any): Promise<any> {
+    const { clientId, clientName, phoneNumber, workspaceId, purpose, context, agentId } = body || {};
+    if (!clientId || !workspaceId || !phoneNumber || !clientName || !purpose) {
+      throw new HttpException('Missing required fields', HttpStatus.BAD_REQUEST);
+    }
+    const result = await this.elevenIntegration.prepareElevenLabsCall({
+      clientId,
+      clientName,
+      phoneNumber,
+      workspaceId,
+      purpose,
+      context,
+      agentId,
+    });
+    return result;
   }
 
   @Post('crm-call')
@@ -321,6 +343,8 @@ export class VoiceAgentController {
 
   @Get('status')
   health() {
+    const backendBase = process.env.BACKEND_BASE_URL || `http://localhost:${process.env.PORT || 3001}`;
+    const webhookUrl = `${backendBase}/api/voice-agent/webhook`;
     return {
       ok: true,
       feature: 'voice-agent',
@@ -331,6 +355,9 @@ export class VoiceAgentController {
       elevenlabs: {
         configured: !!this.eleven.apiKey,
         agentId: this.eleven.getDefaultAgentId(),
+      },
+      inbound: {
+        webhookUrl,
       },
     };
   }

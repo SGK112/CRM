@@ -162,6 +162,8 @@ export default function Layout({ children }: LayoutProps) {
         { name: 'Messages', href: '/dashboard/chat', icon: ChatBubbleLeftRightIcon, badge: 5 },
         { name: 'Business Cards', href: '/dashboard/rolladex', icon: UserGroupIcon },
         { name: 'Marketing', href: '/dashboard/marketing', icon: MegaphoneIcon },
+        { name: 'Integrations', href: '/dashboard/integrations', icon: CogIcon },
+        { name: 'How It Works', href: '/dashboard/system-explanation', icon: QuestionMarkCircleIcon },
       ]
     },
     {
@@ -253,7 +255,7 @@ export default function Layout({ children }: LayoutProps) {
                   }`}
                 />
                 <span className={item.current ? 'font-semibold' : ''}>{item.name}</span>
-                {item.badge && (
+                {item.badge && item.badge > 0 && (
                   <span className={`ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
                     item.current 
                       ? 'surface-3 text-primary' 
@@ -298,7 +300,7 @@ export default function Layout({ children }: LayoutProps) {
                             }`}
                           />
                           <span className={item.current ? 'font-semibold' : ''}>{item.name}</span>
-                          {item.badge && (
+                          {item.badge && item.badge > 0 && (
                                 <span className={`ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium tracking-wide transition-all duration-200 ${
                                   item.current 
                                     ? 'bg-amber-600 text-white shadow-sm ring-1 ring-amber-400/60 scale-110' 

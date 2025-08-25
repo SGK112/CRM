@@ -66,6 +66,45 @@ export class User {
 
   @Prop()
   trialEndsAt?: Date;
+
+  // Communication Configuration
+  @Prop({
+    type: {
+      provider: String, // 'gmail', 'outlook', 'smtp'
+      smtpHost: String,
+      smtpPort: Number,
+      smtpUser: String,
+      smtpPassword: String,
+      fromEmail: String,
+      fromName: String,
+      secure: { type: Boolean, default: true }
+    }
+  })
+  emailConfig?: {
+    provider?: string;
+    smtpHost?: string;
+    smtpPort?: number;
+    smtpUser?: string;
+    smtpPassword?: string;
+    fromEmail?: string;
+    fromName?: string;
+    secure?: boolean;
+  };
+
+  @Prop({
+    type: {
+      accountSid: String,
+      authToken: String,
+      phoneNumber: String,
+      webhookUrl: String
+    }
+  })
+  twilioConfig?: {
+    accountSid?: string;
+    authToken?: string;
+    phoneNumber?: string;
+    webhookUrl?: string;
+  };
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

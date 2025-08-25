@@ -235,12 +235,12 @@ export default function ProjectsPage() {
   };
 
   const SkeletonCard = () => (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 animate-pulse space-y-4">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 animate-pulse space-y-4">
       <div className="h-4 bg-gray-200 rounded w-3/4" />
       <div className="h-3 bg-gray-200 rounded w-full" />
       <div className="flex gap-2 mt-2">
-        <div className="h-5 w-16 bg-gray-200 rounded-full" />
-        <div className="h-5 w-14 bg-gray-200 rounded-full" />
+        <div className="h-6 w-16 bg-gray-200 rounded-full" />
+        <div className="h-6 w-14 bg-gray-200 rounded-full" />
       </div>
       <div className="space-y-2">
         <div className="h-3 bg-gray-200 rounded w-1/2" />
@@ -256,52 +256,52 @@ export default function ProjectsPage() {
 
   return (
     <Layout>
-      <div>
+      <div className="space-y-8">
         {/* Header */}
         <PageHeader
           title="Projects"
           subtitle="Manage client projects, track progress, budgets, and timelines."
           actions={(
-            <Link href="/dashboard/projects/new" className="pill pill-tint-blue sm inline-flex items-center gap-1">
+            <Link href="/dashboard/projects/new" className="pill pill-tint-blue sm inline-flex items-center gap-2 transition-transform hover:scale-105">
               <PlusIcon className="h-4 w-4" /> New Project
             </Link>
           )}
         />
 
-        {/* Status summary chips */}
-        <div className="flex flex-wrap gap-2 mb-6">
+        {/* Status summary chips with improved spacing */}
+        <div className="flex flex-wrap gap-3 mb-8">
           {[
-            { key: 'all', label: 'All', color: 'bg-gray-100 text-gray-800 dark:bg-[var(--surface-2)] dark:text-[var(--text)]' },
-            { key: 'planning', label: `Planning (${statusCounts.planning || 0})`, color: 'bg-blue-100 text-blue-800 dark:bg-blue-600/20 dark:text-blue-300' },
-            { key: 'active', label: `Active (${statusCounts.active || 0})`, color: 'bg-green-100 text-green-800 dark:bg-green-600/20 dark:text-green-300' },
-            { key: 'on_hold', label: `On Hold (${statusCounts.on_hold || 0})`, color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-500/20 dark:text-yellow-300' },
-            { key: 'completed', label: `Completed (${statusCounts.completed || 0})`, color: 'bg-gray-200 text-gray-800 dark:bg-[var(--surface-2)] dark:text-[var(--text-dim)]' },
-            { key: 'cancelled', label: `Cancelled (${statusCounts.cancelled || 0})`, color: 'bg-red-100 text-red-800 dark:bg-red-600/20 dark:text-red-300' }
+            { key: 'all', label: 'All Projects', color: 'pill-tint-neutral', count: projects.length },
+            { key: 'planning', label: 'Planning', color: 'pill-tint-blue', count: statusCounts.planning || 0 },
+            { key: 'active', label: 'Active', color: 'pill-tint-green', count: statusCounts.active || 0 },
+            { key: 'on_hold', label: 'On Hold', color: 'pill-tint-yellow', count: statusCounts.on_hold || 0 },
+            { key: 'completed', label: 'Completed', color: 'pill-tint-gray', count: statusCounts.completed || 0 },
+            { key: 'cancelled', label: 'Cancelled', color: 'pill-tint-red', count: statusCounts.cancelled || 0 }
           ].map(chip => (
             <button
               key={chip.key}
               onClick={() => setStatusFilter(chip.key)}
-              className={`px-3 py-1 rounded-full text-xs font-medium border transition ${
+              className={`pill sm ${chip.color} transition-all duration-200 hover:scale-105 ${
                 statusFilter === chip.key
-                  ? 'ring-2 ring-offset-1 ring-blue-500 border-blue-500 shadow-sm dark:ring-offset-[var(--surface-1)]'
-                  : 'border-transparent hover:border-gray-300 dark:hover:border-[var(--border)]'
-              } ${chip.color}`}
+                  ? 'ring-2 ring-offset-2 ring-blue-500 shadow-md dark:ring-offset-[var(--surface-1)]'
+                  : 'hover:shadow-sm'
+              }`}
             >
-              {chip.label}
+              {chip.label} {chip.count > 0 && `(${chip.count})`}
             </button>
           ))}
           <button
             onClick={() => fetchProjects(true)}
-            className="ml-auto text-xs px-3 py-1.5 rounded-md border border-gray-300 bg-white hover:bg-gray-50 flex items-center gap-2"
+            className="ml-auto pill pill-tint-neutral sm inline-flex items-center gap-2 hover:scale-105 transition-all"
           >
-            {refreshing && <span className="h-3 w-3 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />}
+            {refreshing && <span className="h-3 w-3 border-2 border-current border-t-transparent rounded-full animate-spin" />}
             Refresh
           </button>
         </div>
 
-        {/* Filters */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Enhanced Filters */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Search */}
             <div className="relative">
               <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -310,15 +310,23 @@ export default function ProjectsPage() {
                 placeholder="Search projects..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="input pl-10 pr-8"
+                className="input pl-10 pr-8 h-11 rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
               />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  ×
+                </button>
+              )}
             </div>
 
             {/* Status Filter */}
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--surface-2)] dark:border-token"
+              className="input h-11 rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
             >
               <option value="all">All Statuses</option>
               <option value="planning">Planning</option>
@@ -332,7 +340,7 @@ export default function ProjectsPage() {
             <select
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-[var(--surface-2)] dark:border-token"
+              className="input h-11 rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
             >
               <option value="all">All Priorities</option>
               <option value="low">Low</option>
@@ -345,59 +353,64 @@ export default function ProjectsPage() {
 
   {/* Content */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
           </div>
         ) : error ? (
-          <div className="rounded-lg border border-red-300 bg-red-50 p-6 text-sm text-red-700 space-y-3">
-            <p className="font-medium">{error}</p>
-            <div className="flex gap-2">
-              <button onClick={() => fetchProjects()} className="px-3 py-1.5 text-xs rounded-md bg-red-600 text-white hover:bg-red-700">Retry</button>
-              <button onClick={() => { setError(null); }} className="px-3 py-1.5 text-xs rounded-md border border-red-300 bg-white hover:bg-red-100">Dismiss</button>
+          <div className="rounded-xl border border-red-300 bg-red-50 p-8 text-sm text-red-700 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
+                ⚠️
+              </div>
+              <p className="font-medium">{error}</p>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => fetchProjects()} className="pill pill-tint-red sm">Retry</button>
+              <button onClick={() => { setError(null); }} className="pill pill-tint-neutral sm">Dismiss</button>
             </div>
           </div>
         ) : filteredProjects.length === 0 ? (
-          <div className="text-center py-16 bg-white border border-dashed border-gray-300 rounded-lg">
-            <BuildingOfficeIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No matching projects</h3>
-            <p className="text-gray-600 mb-6 text-sm">Adjust your filters or create a new project to get started.</p>
+          <div className="text-center py-20 bg-white border border-dashed border-gray-300 rounded-xl">
+            <BuildingOfficeIcon className="h-16 w-16 text-gray-400 mx-auto mb-6" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-3">No matching projects</h3>
+            <p className="text-gray-600 mb-8 max-w-md mx-auto">Adjust your filters or create a new project to get started with tracking your construction work.</p>
             <Link
               href="/dashboard/projects/new"
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="pill pill-tint-blue lg inline-flex items-center gap-2 transition-transform hover:scale-105"
             >
-              <PlusIcon className="h-5 w-5 mr-2" />
+              <PlusIcon className="h-5 w-5" />
               Create Project
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredProjects.map((project) => (
-              <div key={project._id} className="group bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md hover:border-blue-200 transition-all flex flex-col">
-                <div className="p-5 flex-1 flex flex-col">
+              <div key={project._id} className="group bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg hover:border-blue-200 transition-all duration-300 flex flex-col overflow-hidden">
+                <div className="p-6 flex-1 flex flex-col">
                   {/* Header */}
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <h3 className="text-base font-semibold text-gray-900 mb-1 line-clamp-2 group-hover:text-blue-700 transition-colors">{project.title}</h3>
-                      <p className="text-gray-600 text-xs line-clamp-2">{project.description}</p>
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-700 transition-colors">{project.title}</h3>
+                      <p className="text-gray-600 text-sm line-clamp-2">{project.description}</p>
                     </div>
-                    <div className="flex space-x-1 ml-2">
+                    <div className="flex space-x-1 ml-3 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Link
                         href={`/dashboard/projects/${project._id}`}
-                        className="p-1 text-gray-400 hover:text-blue-600 transition-colors rounded hover:bg-blue-50"
+                        className="p-2 text-gray-400 hover:text-blue-600 transition-colors rounded-lg hover:bg-blue-50"
                         title="View"
                       >
                         <EyeIcon className="h-4 w-4" />
                       </Link>
                       <Link
                         href={`/dashboard/projects/${project._id}/edit`}
-                        className="p-1 text-gray-400 hover:text-green-600 transition-colors rounded hover:bg-green-50"
+                        className="p-2 text-gray-400 hover:text-green-600 transition-colors rounded-lg hover:bg-green-50"
                         title="Edit"
                       >
                         <PencilIcon className="h-4 w-4" />
                       </Link>
                       <button
                         onClick={() => deleteProject(project._id)}
-                        className="p-1 text-gray-400 hover:text-red-600 transition-colors rounded hover:bg-red-50"
+                        className="p-2 text-gray-400 hover:text-red-600 transition-colors rounded-lg hover:bg-red-50"
                         title="Delete"
                       >
                         <TrashIcon className="h-4 w-4" />
@@ -405,38 +418,42 @@ export default function ProjectsPage() {
                     </div>
                   </div>
 
-                  {/* Status and Priority Badges */}
-                  <div className="flex items-center space-x-2 mb-3">
-                    <span className={`pill pill-tint-${project.status === 'active' ? 'green' : project.status === 'planning' ? 'blue' : project.status === 'on_hold' ? 'yellow' : project.status === 'cancelled' ? 'red' : 'neutral'} sm`}>{project.status.replace('_',' ')}</span>
-                    <span className={`pill pill-tint-${project.priority === 'high' ? 'yellow' : project.priority === 'urgent' ? 'red' : project.priority === 'medium' ? 'blue' : 'neutral'} sm`}>{project.priority}</span>
+                  {/* Status and Priority Badges with improved spacing */}
+                  <div className="flex items-center gap-3 mb-5">
+                    <span className={`pill sm pill-tint-${project.status === 'active' ? 'green' : project.status === 'planning' ? 'blue' : project.status === 'on_hold' ? 'yellow' : project.status === 'cancelled' ? 'red' : 'neutral'}`}>
+                      {project.status.replace('_',' ')}
+                    </span>
+                    <span className={`pill sm pill-tint-${project.priority === 'high' ? 'yellow' : project.priority === 'urgent' ? 'red' : project.priority === 'medium' ? 'blue' : 'neutral'}`}>
+                      {project.priority}
+                    </span>
                   </div>
 
-                  {/* Project Details */}
-                  <div className="space-y-2 text-sm text-gray-600">
+                  {/* Project Details with enhanced layout */}
+                  <div className="space-y-3 text-sm text-gray-600 dark:text-gray-300 flex-1">
                     {project.budget && (
-                      <div className="flex items-center">
-                        <CurrencyDollarIcon className="h-4 w-4 mr-2" />
-                        <span>Budget: {formatCurrency(project.budget)}</span>
+                      <div className="flex items-center bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3">
+                        <CurrencyDollarIcon className="h-4 w-4 mr-3 text-green-600 dark:text-green-400" />
+                        <span className="font-medium">Budget: {formatCurrency(project.budget)}</span>
                       </div>
                     )}
                     
                     {project.startDate && (
-                      <div className="flex items-center">
-                        <CalendarIcon className="h-4 w-4 mr-2" />
+                      <div className="flex items-center bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3">
+                        <CalendarIcon className="h-4 w-4 mr-3 text-blue-600 dark:text-blue-400" />
                         <span>Start: {formatDate(project.startDate)}</span>
                       </div>
                     )}
 
                     {project.assignedUsers && project.assignedUsers.length > 0 && (
-                      <div className="flex items-center">
-                        <UserIcon className="h-4 w-4 mr-2" />
-                        <span>{project.assignedUsers.length} assigned</span>
+                      <div className="flex items-center bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3">
+                        <UserIcon className="h-4 w-4 mr-3 text-purple-600 dark:text-purple-400" />
+                        <span>{project.assignedUsers.length} team member{project.assignedUsers.length > 1 ? 's' : ''}</span>
                       </div>
                     )}
 
                     {project.address && (project.address.city || project.address.state) && (
-                      <div className="flex items-center">
-                        <MapPinIcon className="h-4 w-4 mr-2" />
+                      <div className="flex items-center bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3">
+                        <MapPinIcon className="h-4 w-4 mr-3 text-red-600 dark:text-red-400" />
                         <span className="truncate">
                           {project.address.city}, {project.address.state}
                         </span>
@@ -444,29 +461,32 @@ export default function ProjectsPage() {
                     )}
                   </div>
 
-                  {/* Tags */}
+                  {/* Tags with improved styling */}
                   {project.tags && project.tags.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-1">
+                    <div className="mt-5 flex flex-wrap gap-2">
                       {project.tags.slice(0, 4).map((tag, index) => (
-                        <span key={index} className="inline-flex items-center px-2 py-1 rounded-md text-[11px] font-medium bg-gray-100 text-gray-700 dark:bg-[var(--surface-2)] dark:text-[var(--text-dim)]">
+                        <span key={index} className="pill pill-tint-neutral text-xs">
                           {tag}
                         </span>
                       ))}
                       {project.tags.length > 4 && (
-                        <span className="inline-flex items-center px-2 py-1 rounded-md text-[11px] font-medium bg-gray-100 text-gray-700 dark:bg-[var(--surface-2)] dark:text-[var(--text-dim)]">
-                          +{project.tags.length - 4}
+                        <span className="pill pill-tint-neutral text-xs">
+                          +{project.tags.length - 4} more
                         </span>
                       )}
                     </div>
                   )}
                 </div>
-                {/* Footer area */}
-                <div className="px-5 py-3 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-500 bg-gray-50 rounded-b-lg">
+                
+                {/* Footer area with enhanced styling */}
+                <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 bg-gray-50/50 dark:bg-gray-800/50">
                   <span>Updated {formatDate(project.updatedAt)}</span>
                   <button
                     onClick={() => router.push(`/dashboard/projects/${project._id}`)}
-                    className="text-blue-600 hover:underline font-medium"
-                  >Details</button>
+                    className="pill pill-tint-blue text-xs hover:scale-105 transition-transform"
+                  >
+                    View Details
+                  </button>
                 </div>
               </div>
             ))}

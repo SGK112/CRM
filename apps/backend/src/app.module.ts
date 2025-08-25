@@ -29,6 +29,8 @@ import { InvoicesModule } from './invoices/invoices.module';
 import { MediaModule } from './media/media.module';
 import { ShareLinksModule } from './share-links/share-links.module';
 import { AiTokensModule } from './ai-tokens/ai-tokens.module';
+import { CommunicationsModule } from './communications/communications.module';
+import { UserConfigModule } from './user-config/user-config.module';
 import { DevModule } from './dev/dev.module';
 
 @Module({
@@ -70,6 +72,8 @@ import { DevModule } from './dev/dev.module';
   MediaModule,
   ShareLinksModule,
   AiTokensModule,
+  CommunicationsModule,
+  UserConfigModule,
   DevModule,
   ],
   controllers: [RootController],

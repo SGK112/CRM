@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Layout from '@/components/Layout';
+import PhoneInput from '../../../../components/forms/PhoneInput';
 import {
 	ArrowLeftIcon,
 	CalendarIcon,
@@ -38,7 +39,7 @@ interface Client {
 interface CreateProjectData {
 	title: string;
 	description: string;
-	status: 'planning' | 'active' | 'on_hold' | 'completed' | 'cancelled';
+	status: 'lead' | 'proposal' | 'approved' | 'in_progress' | 'on_hold' | 'completed' | 'cancelled';
 	priority: 'low' | 'medium' | 'high' | 'urgent';
 	budget?: number;
 	estimatedHours?: number;
@@ -261,12 +262,14 @@ function ClientSelector({ clients, selectedClientId, onClientSelect, onClientCre
 												value={newClient.email}
 												onChange={e => setNewClient({ ...newClient, email: e.target.value })}
 											/>
-											<input
-												className="col-span-1 px-2 py-1 rounded border border-[var(--border)] bg-[var(--input-bg)] text-[var(--text)] text-xs"
-												placeholder="Phone"
-												value={newClient.phone}
-												onChange={e => setNewClient({ ...newClient, phone: e.target.value })}
-											/>
+											<div className="col-span-1">
+												<PhoneInput
+													value={newClient.phone || ''}
+													onChange={(value) => setNewClient({ ...newClient, phone: value })}
+													placeholder="Phone"
+													className="px-2 py-1 rounded border border-[var(--border)] bg-[var(--input-bg)] text-[var(--text)] text-xs"
+												/>
+											</div>
 											<input
 												className="col-span-2 px-2 py-1 rounded border border-[var(--border)] bg-[var(--input-bg)] text-[var(--text)] text-xs"
 												placeholder="Company (optional)"
@@ -354,7 +357,7 @@ export default function NewDashboardProjectPage() {
 	const [formData, setFormData] = useState<CreateProjectData>({
 		title: '',
 		description: '',
-		status: 'planning',
+		status: 'lead',
 		priority: 'medium',
 		tags: [],
 		clientId: preselectedClientId
@@ -409,8 +412,11 @@ export default function NewDashboardProjectPage() {
 			}
 
 			const submitData = { ...formData } as any;
+			// Remove fields that are not in the backend DTO
+			delete submitData.tags;
+			delete submitData.estimatedHours;
+			
 			if (!submitData.budget) delete submitData.budget;
-			if (!submitData.estimatedHours) delete submitData.estimatedHours;
 			if (!submitData.startDate) delete submitData.startDate;
 			if (!submitData.endDate) delete submitData.endDate;
 			if (!submitData.clientId) delete submitData.clientId;
@@ -561,8 +567,10 @@ export default function NewDashboardProjectPage() {
 									onChange={handleInputChange}
 									className="input"
 								>
-									<option value="planning">Planning</option>
-									<option value="active">Active</option>
+									<option value="lead">Lead</option>
+									<option value="proposal">Proposal</option>
+									<option value="approved">Approved</option>
+									<option value="in_progress">In Progress</option>
 									<option value="on_hold">On Hold</option>
 									<option value="completed">Completed</option>
 									<option value="cancelled">Cancelled</option>
