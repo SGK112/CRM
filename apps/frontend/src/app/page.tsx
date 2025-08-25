@@ -1,5 +1,9 @@
+'use client';
+
 import { Metadata } from 'next'
 import { RevealInit } from '@/components/RevealInit'
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import {
   SparklesIcon,
   ShieldCheckIcon,
@@ -8,55 +12,502 @@ import {
   UserGroupIcon,
   DocumentDuplicateIcon,
   PhotoIcon,
-  ShareIcon
+  ShareIcon,
+  PhoneIcon,
+  ChatBubbleLeftRightIcon,
+  CalendarIcon,
+  BuildingOfficeIcon,
+  WrenchScrewdriverIcon,
+  CloudArrowUpIcon,
+  CogIcon,
+  ArrowRightIcon,
+  PlayIcon,
+  CheckIcon,
+  StarIcon,
+  ClockIcon,
+  BanknotesIcon,
+  UserPlusIcon,
+  DocumentTextIcon,
+  PresentationChartLineIcon,
+  SpeakerWaveIcon,
+  BoltIcon,
+  LightBulbIcon,
+  RocketLaunchIcon
 } from '@heroicons/react/24/outline'
 
-export const metadata: Metadata = {
-  title: 'Remodely Ai | Run, Grow & Automate Your Construction Business',
-  description: 'All‑in‑one construction CRM: clients, estimates → invoices, HR & teams, AI assistant, secure media sharing, flexible usage-based AI tokens.'
-}
-
-const features = [
-  { icon: DocumentDuplicateIcon, title: 'Estimates → Invoices', blurb: 'Quote. Convert. Get paid.' },
-  { icon: CurrencyDollarIcon, title: 'AI Tokens', blurb: 'Only pay when you use AI.' },
-  { icon: UserGroupIcon, title: 'Teams & Roles', blurb: 'Seats & permissions.' },
-  { icon: PhotoIcon, title: 'Media', blurb: 'Secure project files.' },
-  { icon: ShareIcon, title: 'Share Links', blurb: 'Controlled external access.' },
-  { icon: SparklesIcon, title: 'AI Assist', blurb: 'Context aware help.' },
-  { icon: ChartBarIcon, title: 'Insights', blurb: 'Margins & pipeline.' },
-  { icon: ShieldCheckIcon, title: 'Security', blurb: 'Tenant isolation.' }
+// Features data
+const coreFeatures = [
+  { 
+    icon: UserGroupIcon, 
+    title: 'Client Management', 
+    description: 'Complete client profiles with contact history, project timeline, and communication logs.',
+    benefits: ['360° client view', 'Communication tracking', 'Project history']
+  },
+  { 
+    icon: DocumentTextIcon, 
+    title: 'Estimates → Invoices', 
+    description: 'Transform estimates into invoices with one click. Track approvals and payments seamlessly.',
+    benefits: ['One-click conversion', 'Payment tracking', 'Professional templates']
+  },
+  { 
+    icon: WrenchScrewdriverIcon, 
+    title: 'Project Management', 
+    description: 'Manage multiple projects with timeline tracking, resource allocation, and team coordination.',
+    benefits: ['Timeline tracking', 'Resource planning', 'Team collaboration']
+  },
+  { 
+    icon: CalendarIcon, 
+    title: 'Smart Scheduling', 
+    description: 'AI-powered scheduling prevents conflicts and optimizes your team\'s time automatically.',
+    benefits: ['Conflict prevention', 'Auto-optimization', 'Team coordination']
+  },
+  { 
+    icon: SpeakerWaveIcon, 
+    title: 'AI Voice Agent', 
+    description: 'Sarah, your AI sales specialist, makes calls to prospects and schedules appointments 24/7.',
+    benefits: ['24/7 availability', 'Natural conversations', 'Automatic scheduling']
+  },
+  { 
+    icon: PhotoIcon, 
+    title: 'Secure Media Sharing', 
+    description: 'Share project photos, blueprints, and documents with clients through secure, controlled links.',
+    benefits: ['Secure sharing', 'Version control', 'Client access control']
+  },
+  { 
+    icon: ChartBarIcon, 
+    title: 'Business Analytics', 
+    description: 'Real-time insights into margins, pipeline, and performance metrics to grow your business.',
+    benefits: ['Real-time metrics', 'Profit tracking', 'Growth insights']
+  },
+  { 
+    icon: CurrencyDollarIcon, 
+    title: 'Usage-Based AI', 
+    description: 'Pay only for the AI features you use. No monthly AI fees - complete transparency.',
+    benefits: ['Pay per use', 'Cost control', 'Full transparency']
+  }
 ]
 
-const pillars = [
-  { label: 'Run', points: ['Centralize jobs & docs', 'Real-time margins', 'Fast estimating'] },
-  { label: 'Grow', points: ['Sharable links', 'Faster approvals', 'Insight dashboards'] },
-  { label: 'Automate', points: ['AI drafting', 'One-click conversion', 'Usage-based AI spend'] }
+const businessPillars = [
+  { 
+    label: 'Run', 
+    icon: CogIcon,
+    color: 'blue',
+    points: ['Centralize jobs & docs', 'Real-time margins', 'Fast estimating', 'Team coordination']
+  },
+  { 
+    label: 'Grow', 
+    icon: RocketLaunchIcon,
+    color: 'amber', 
+    points: ['Sharable links', 'Faster approvals', 'Insight dashboards', 'Lead conversion']
+  },
+  { 
+    label: 'Automate', 
+    icon: BoltIcon,
+    color: 'emerald',
+    points: ['AI drafting', 'One-click conversion', 'Voice agent calls', 'Smart scheduling']
+  }
+]
+
+const testimonials = [
+  {
+    name: "Mike Rodriguez",
+    role: "Owner, Elite Remodeling",
+    content: "Remodely transformed our business. We've increased our close rate by 40% and our team is more organized than ever.",
+    rating: 5
+  },
+  {
+    name: "Sarah Chen", 
+    role: "Project Manager, Coastal Construction",
+    content: "The AI voice agent is incredible. It books appointments while I sleep and the voice quality is so natural clients think it's human.",
+    rating: 5
+  },
+  {
+    name: "David Thompson",
+    role: "CEO, Premium Granite Solutions", 
+    content: "From estimates to invoices in seconds. The pricing integration alone has saved us 10 hours per week.",
+    rating: 5
+  }
+]
+
+const stats = [
+  { label: 'Construction Companies', value: '500+' },
+  { label: 'Revenue Managed', value: '$2.4M+' },
+  { label: 'Average Rating', value: '4.9/5' },
+  { label: 'Time Saved Per Week', value: '15hrs' }
+]
+
+const pricingPlans = [
+  {
+    name: 'Starter',
+    price: 29,
+    yearlyPrice: 24,
+    description: 'Perfect for small crews getting organized',
+    features: ['5 team members', '10 active projects', '50 clients', '5 GB storage', 'Email support'],
+    popular: false
+  },
+  {
+    name: 'Professional', 
+    price: 59,
+    yearlyPrice: 49,
+    description: 'Ideal for growing operations & multi-trade companies',
+    features: ['15 team members', '50 active projects', '500 clients', '50 GB storage', 'Priority support', 'Advanced analytics'],
+    popular: true
+  },
+  {
+    name: 'Enterprise',
+    price: 99,
+    yearlyPrice: 79,
+    description: 'For large companies with complex needs',
+    features: ['Unlimited team members', 'Unlimited projects', 'Unlimited clients', '500 GB storage', '24/7 phone support', 'Custom integrations'],
+    popular: false
+  }
 ]
 
 export default function HomePage() {
+  const [isYearly, setIsYearly] = useState(true)
+  const [activeTestimonial, setActiveTestimonial] = useState(0)
+
+  // Auto-rotate testimonials
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveTestimonial((prev) => (prev + 1) % testimonials.length)
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [])
+
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center px-4 bg-[var(--bg)] text-[var(--text)] relative overflow-hidden">
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] relative overflow-hidden">
       <RevealInit />
-      {/* Background gradients for visual appeal */}
+      
+      {/* Background elements */}
       <div className="pointer-events-none select-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-amber-600/10 blur-3xl" />
       <div className="pointer-events-none select-none absolute top-1/3 -right-40 h-[28rem] w-[28rem] rounded-full bg-amber-500/5 blur-3xl" />
       
-      <section className="w-full max-w-3xl text-center py-24 relative z-10">
-        <h1 className="heading-primary gradient-amber mb-4">Remodely Ai</h1>
-        <p className="text-2xl font-semibold mb-6 text-[var(--text)]">Turn Every Project Into Profit</p>
-        <p className="mb-8 text-[var(--text-dim)] text-base sm:text-lg">Stop chasing paperwork and losing track of costs. Our construction CRM streamlines client management, automates estimates to invoices, and keeps your team organized — so you can focus on building great projects.</p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-          <a href="/auth/register" className="btn btn-amber shadow-soft shine">Start Free</a>
-          <a href="/auth/login" className="btn btn-outline hover:border-amber-500/60 hover:text-amber-300 transition">Sign In</a>
-          <a href="/dashboard" className="btn btn-outline hover:border-amber-500/60 hover:text-amber-300 transition">Live Demo →</a>
+      {/* Hero Section */}
+      <section className="relative z-10 px-4 py-20 sm:py-32">
+        <div className="max-w-7xl mx-auto text-center">
+          <div className="mb-8">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600/10 border border-amber-500/30 rounded-full mb-6">
+              <SparklesIcon className="h-4 w-4 text-amber-600" />
+              <span className="text-sm font-semibold text-amber-600 dark:text-amber-400">AI-Powered Construction CRM</span>
+            </div>
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+              Turn Every Project Into <span className="gradient-amber">Profit</span>
+            </h1>
+            <p className="text-xl sm:text-2xl text-[var(--text-dim)] mb-8 max-w-4xl mx-auto leading-relaxed">
+              Stop chasing paperwork and losing track of costs. Our construction CRM streamlines client management, automates estimates to invoices, and keeps your team organized — so you can focus on building great projects.
+            </p>
+          </div>
+
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+            <Link href="/auth/register" className="btn btn-amber shadow-soft shine text-lg px-8 py-4">
+              Start Free Trial
+            </Link>
+            <Link href="/dashboard" className="btn btn-outline text-lg px-8 py-4 hover:border-amber-500/60 hover:text-amber-300 transition">
+              Live Demo →
+            </Link>
+            <Link href="/voice-agent-demo" className="btn btn-outline text-lg px-8 py-4 hover:border-amber-500/60 hover:text-amber-300 transition">
+              Try AI Voice Agent
+            </Link>
+          </div>
+
+          {/* Trust indicators */}
+          <div className="flex flex-wrap gap-6 justify-center text-sm text-[var(--text-dim)] mb-8">
+            <div className="flex items-center gap-2">
+              <ShieldCheckIcon className="h-5 w-5 text-amber-500" />
+              <span>No Credit Card Required</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <ClockIcon className="h-5 w-5 text-amber-500" />
+              <span>14 Days Full Access</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <UserGroupIcon className="h-5 w-5 text-amber-500" />
+              <span>500+ Companies Trust Us</span>
+            </div>
+          </div>
+
+          {/* Industry tags */}
+          <div className="flex flex-wrap gap-3 justify-center">
+            {['General Contracting', 'Kitchen Remodeling', 'Bathroom Renovation', 'Granite & Countertops', 'HVAC Services', 'Electrical Work'].map(tag => (
+              <span key={tag} className="px-4 py-2 rounded-full border border-[var(--border)] bg-[var(--surface-2)] text-sm font-medium">
+                {tag}
+              </span>
+            ))}
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2 justify-center text-xs font-medium text-[var(--text-dim)] mb-8">
-          {['Construction','Remodeling','Trades','IT / Field','Consulting'].map(tag => (
-            <span key={tag} className="px-3 py-1 rounded-full border border-[var(--border)] bg-[var(--surface-2)] tracking-wide">{tag}</span>
-          ))}
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-16 border-y border-[var(--border)] bg-[var(--surface-1)]">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            {stats.map((stat, index) => (
+              <div key={index} className="space-y-2">
+                <div className="text-3xl md:text-4xl font-bold text-amber-600">{stat.value}</div>
+                <div className="text-sm font-medium text-[var(--text-dim)]">{stat.label}</div>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="inline-flex items-center justify-center px-4 py-2 bg-amber-600/10 border border-amber-500/30 rounded-full mb-4">
-          <p className="text-xs font-semibold tracking-wide text-amber-600 dark:text-amber-400 uppercase">No credit card • Seats controlled • Usage-based AI</p>
+      </section>
+
+      {/* Business Pillars */}
+      <section className="py-20">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <span className="gradient-amber">Run, Grow & Automate</span> Your Construction Business
+            </h2>
+            <p className="text-xl text-[var(--text-dim)] max-w-3xl mx-auto">
+              Three core pillars that transform how construction companies operate and scale their businesses.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {businessPillars.map((pillar, index) => (
+              <div key={index} className="text-center p-8 rounded-2xl bg-[var(--surface-1)] border border-[var(--border)] hover:shadow-lg transition-shadow">
+                <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6 bg-${pillar.color}-600/15 ring-1 ring-${pillar.color}-500/30`}>
+                  <pillar.icon className={`h-8 w-8 text-${pillar.color}-600`} />
+                </div>
+                <h3 className="text-2xl font-bold mb-4">{pillar.label}</h3>
+                <ul className="space-y-2">
+                  {pillar.points.map((point, pointIndex) => (
+                    <li key={pointIndex} className="flex items-start gap-2 text-[var(--text-dim)]">
+                      <CheckIcon className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Core Features Grid */}
+      <section className="py-20 bg-[var(--surface-1)]">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Everything You Need to <span className="gradient-amber">Scale Your Business</span>
+            </h2>
+            <p className="text-xl text-[var(--text-dim)] max-w-3xl mx-auto">
+              From client management to AI-powered automation, we've built the complete solution for modern construction companies.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {coreFeatures.map((feature, index) => (
+              <div key={index} className="p-6 rounded-xl bg-[var(--bg)] border border-[var(--border)] hover:border-amber-500/50 transition-colors group">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-600/15 ring-1 ring-amber-500/30 mb-4 group-hover:scale-110 transition-transform">
+                  <feature.icon className="h-6 w-6 text-amber-600" />
+                </div>
+                <h3 className="font-bold text-lg mb-2">{feature.title}</h3>
+                <p className="text-[var(--text-dim)] text-sm mb-4 leading-relaxed">{feature.description}</p>
+                <ul className="space-y-1">
+                  {feature.benefits.map((benefit, benefitIndex) => (
+                    <li key={benefitIndex} className="flex items-center gap-2 text-xs text-[var(--text-dim)]">
+                      <div className="w-1.5 h-1.5 rounded-full bg-amber-600" />
+                      <span>{benefit}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="py-20">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Trusted by <span className="gradient-amber">Construction Leaders</span>
+            </h2>
+            <p className="text-xl text-[var(--text-dim)]">
+              See what our customers say about transforming their businesses
+            </p>
+          </div>
+
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-[var(--surface-1)] rounded-2xl p-8 md:p-12 border border-[var(--border)] text-center">
+              <div className="flex justify-center mb-6">
+                {[...Array(5)].map((_, i) => (
+                  <StarIcon key={i} className="h-6 w-6 text-amber-400 fill-current" />
+                ))}
+              </div>
+              <blockquote className="text-xl md:text-2xl font-medium mb-8 leading-relaxed">
+                "{testimonials[activeTestimonial].content}"
+              </blockquote>
+              <div className="text-center">
+                <div className="font-semibold text-lg">{testimonials[activeTestimonial].name}</div>
+                <div className="text-[var(--text-dim)]">{testimonials[activeTestimonial].role}</div>
+              </div>
+            </div>
+
+            {/* Testimonial dots */}
+            <div className="flex justify-center mt-8 gap-2">
+              {testimonials.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setActiveTestimonial(index)}
+                  className={`w-3 h-3 rounded-full transition-colors ${
+                    index === activeTestimonial ? 'bg-amber-600' : 'bg-[var(--border)]'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section className="py-20 bg-[var(--surface-1)]">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <span className="gradient-amber">Simple, Transparent</span> Pricing
+            </h2>
+            <p className="text-xl text-[var(--text-dim)] mb-8">
+              Start free and upgrade only when your operation demands more
+            </p>
+            
+            {/* Billing toggle */}
+            <div className="inline-flex items-center gap-4 p-1 bg-[var(--surface-2)] rounded-lg border border-[var(--border)]">
+              <button
+                onClick={() => setIsYearly(false)}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  !isYearly ? 'bg-[var(--bg)] text-[var(--text)] shadow-sm' : 'text-[var(--text-dim)]'
+                }`}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setIsYearly(true)}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  isYearly ? 'bg-[var(--bg)] text-[var(--text)] shadow-sm' : 'text-[var(--text-dim)]'
+                }`}
+              >
+                Yearly <span className="text-emerald-600 text-xs ml-1">(Save 20%)</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {pricingPlans.map((plan, index) => (
+              <div key={index} className={`relative p-8 rounded-2xl border transition-all hover:scale-105 ${
+                plan.popular 
+                  ? 'bg-amber-600/5 border-amber-500/50 ring-2 ring-amber-500/20' 
+                  : 'bg-[var(--bg)] border-[var(--border)]'
+              }`}>
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <span className="bg-amber-600 text-white px-4 py-1 rounded-full text-sm font-medium">
+                      Most Popular
+                    </span>
+                  </div>
+                )}
+                
+                <div className="text-center mb-8">
+                  <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
+                  <p className="text-[var(--text-dim)] mb-4">{plan.description}</p>
+                  <div className="mb-2">
+                    <span className="text-4xl font-bold">
+                      ${isYearly ? plan.yearlyPrice : plan.price}
+                    </span>
+                    <span className="text-[var(--text-dim)]">/month</span>
+                  </div>
+                  {isYearly && (
+                    <div className="text-sm text-emerald-600">
+                      Save ${((plan.price - plan.yearlyPrice) * 12)} annually
+                    </div>
+                  )}
+                </div>
+
+                <ul className="space-y-4 mb-8">
+                  {plan.features.map((feature, featureIndex) => (
+                    <li key={featureIndex} className="flex items-start gap-3">
+                      <CheckIcon className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-[var(--text-dim)]">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <Link
+                  href="/auth/register"
+                  className={`block w-full text-center py-3 px-6 rounded-lg font-medium transition-colors ${
+                    plan.popular
+                      ? 'bg-amber-600 hover:bg-amber-700 text-white'
+                      : 'border border-[var(--border)] hover:border-amber-500/50 hover:text-amber-600'
+                  }`}
+                >
+                  Start Free Trial
+                </Link>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <div className="inline-flex items-center gap-4 text-sm text-[var(--text-dim)]">
+              <div className="flex items-center gap-2">
+                <CurrencyDollarIcon className="h-4 w-4 text-amber-500" />
+                <span>Usage-based AI pricing</span>
+              </div>
+              <span>•</span>
+              <div className="flex items-center gap-2">
+                <ShieldCheckIcon className="h-4 w-4 text-amber-500" />
+                <span>No setup fees</span>
+              </div>
+              <span>•</span>
+              <div className="flex items-center gap-2">
+                <ClockIcon className="h-4 w-4 text-amber-500" />
+                <span>Cancel anytime</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="py-20">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <div className="bg-gradient-to-r from-amber-600/10 to-amber-500/5 rounded-3xl p-12 border border-amber-500/20">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">
+              Ready to Transform Your <span className="gradient-amber">Construction Business?</span>
+            </h2>
+            <p className="text-xl text-[var(--text-dim)] mb-8 max-w-2xl mx-auto">
+              Join hundreds of construction companies that have streamlined their operations and increased profits with Remodely CRM.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+              <Link href="/auth/register" className="btn btn-amber text-lg px-8 py-4 shadow-soft shine">
+                Start Your Free Trial
+                <ArrowRightIcon className="ml-2 h-5 w-5" />
+              </Link>
+              <Link href="/demo" className="btn btn-outline text-lg px-8 py-4 hover:border-amber-500/60 hover:text-amber-300 transition">
+                <PlayIcon className="mr-2 h-5 w-5" />
+                Watch Demo
+              </Link>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-sm text-[var(--text-dim)]">
+              <div className="flex items-center gap-2">
+                <ShieldCheckIcon className="h-4 w-4 text-amber-500" />
+                <span>No credit card required</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <ClockIcon className="h-4 w-4 text-amber-500" />
+                <span>Setup in under 5 minutes</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <UserGroupIcon className="h-4 w-4 text-amber-500" />
+                <span>Free onboarding support</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </div>
