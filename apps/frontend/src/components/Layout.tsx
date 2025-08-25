@@ -35,6 +35,7 @@ import {
 import Logo from './Logo';
 import { ThemeProvider, useTheme } from './ThemeProvider';
 import ThemeToggle from './ThemeToggle';
+import { mobileOptimized, mobile } from '@/lib/mobile';
 
 interface User {
   id: string;
@@ -229,25 +230,46 @@ export default function Layout({ children }: LayoutProps) {
       )}
 
       {/* Mobile sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 surface-1 elevated shadow-lg transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out lg:hidden`}>
-        <div className="flex items-center justify-between h-16 px-4 border-b border-token">
+      <div className={mobileOptimized(
+        'fixed inset-y-0 left-0 z-50 w-64 surface-1 elevated shadow-lg transform transition-transform duration-300 ease-in-out lg:hidden',
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full',
+        mobile.scrollContainer,
+        mobile.willChange
+      )}>
+        <div className={mobileOptimized(
+          'flex items-center justify-between h-16 px-4 border-b border-token',
+          mobile.touchTarget
+        )}>
           <Logo />
-          <button onClick={() => setSidebarOpen(false)} className="p-2 rounded-md text-secondary hover:text-primary">
+          <button 
+            onClick={() => setSidebarOpen(false)} 
+            className={mobileOptimized(
+              'p-2 rounded-md text-secondary hover:text-primary transition-colors',
+              mobile.touchTarget
+            )}
+            aria-label="Close sidebar"
+          >
             <XMarkIcon className="h-6 w-6" />
           </button>
         </div>
-        <nav className="mt-6 px-3">
+        <nav className={mobileOptimized(
+          'mt-6 px-3 pb-6',
+          mobile.scrollContainer,
+          'overscroll-contain'
+        )}>
           <div className="space-y-1">
             {updatedNavigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
                 onClick={() => setSidebarOpen(false)}
-                className={`group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                className={mobileOptimized(
+                  'group flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200',
+                  mobile.touchTarget,
                   item.current
                     ? 'surface-2 text-primary border-l-4 border-primary shadow-sm'
                     : 'text-secondary hover:surface-2 hover:text-primary'
-                }`}
+                )}
               >
                 <item.icon
                   className={`mr-3 h-5 w-5 transition-colors ${
@@ -382,32 +404,42 @@ export default function Layout({ children }: LayoutProps) {
       {/* Main content */}
   <div className="lg:pl-64 flex flex-col min-h-screen" style={{ background: 'var(--bg)' }}>
         {/* Top navigation */}
-  <div className="sticky top-0 z-50 flex h-16 flex-shrink-0 surface-1 elevated border-b border-token backdrop-blur-md bg-opacity-95">
+  <div className={mobileOptimized(
+    'sticky top-0 z-50 flex h-16 flex-shrink-0 surface-1 elevated border-b border-token backdrop-blur-md bg-opacity-95',
+    mobile.safeTop
+  )}>
           <button
             type="button"
-            className="border-r border-token px-4 text-secondary focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 lg:hidden transition-colors hover:surface-2"
+            className={mobileOptimized(
+              'border-r border-token px-4 text-secondary focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 lg:hidden transition-colors hover:surface-2',
+              mobile.touchTarget
+            )}
             onClick={() => setSidebarOpen(true)}
+            aria-label="Open sidebar"
           >
-            <span className="sr-only">Open sidebar</span>
             <Bars3Icon className="h-6 w-6" />
           </button>
 
-          <div className="flex flex-1 items-center justify-between px-4 sm:px-6 lg:px-8">
-            {/* Search (logo only appears in sidebar to avoid duplication) */}
+          <div className="flex flex-1 items-center justify-between px-4 sm:px-6 lg:px-8 min-w-0">
+            {/* Search */}
             <div className="flex items-center flex-1 min-w-0">
-              <div className="flex-1 min-w-0">
-                <SearchBar className="w-full md:max-w-lg" />
+              <div className="flex-1 min-w-0 max-w-lg">
+                <SearchBar className="w-full" />
               </div>
             </div>
 
-      <div className="ml-4 flex items-center md:ml-6 shrink-0 space-x-3">
+      <div className="ml-4 flex items-center md:ml-6 shrink-0 space-x-2 sm:space-x-3">
               {/* Theme Toggle */}
               <ThemeToggle variant="button" />
               {/* Notifications */}
               <button
                 type="button"
                 onClick={() => router.push('/dashboard/notifications')}
-                className="relative rounded-full surface-2 p-2 text-secondary hover:text-primary focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-surface-1 transition-all duration-200 hover:scale-105"
+                className={mobileOptimized(
+                  'relative rounded-full surface-2 p-2 text-secondary hover:text-primary focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-surface-1 transition-all duration-200 hover:scale-105',
+                  mobile.touchTarget
+                )}
+                aria-label="View notifications"
               >
                 <span className="sr-only">View notifications</span>
                 <BellIcon className="h-6 w-6" />
