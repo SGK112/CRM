@@ -110,9 +110,8 @@ const ElevenLabsWidgetComponent: React.FC<ElevenLabsWidgetComponentProps> = ({
       setWidgetConfig(config);
       setShowWidget(true);
       
-      if (onCallInitiated) {
-        onCallInitiated(config);
-      }
+      // Only call onCallInitiated if it exists
+      onCallInitiated?.(config);
 
     } catch (error) {
       console.error('❌ Widget call setup failed:', error);

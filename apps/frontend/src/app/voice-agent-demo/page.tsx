@@ -1,4 +1,6 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import ElevenLabsCallComponent from '@/components/voice/ElevenLabsCallComponent-Fixed';
 import ElevenLabsWidgetComponent from '@/components/voice/ElevenLabsWidgetComponent';
 
@@ -15,6 +17,8 @@ const sampleClient = {
 const workspaceId = 'surprise_granite_workspace';
 
 export default function VoiceAgentDemo() {
+  const [activeTab, setActiveTab] = useState<'widget' | 'phone'>('widget');
+  
   const handleCallInitiated = (callInfo: any) => {
     console.log('Call setup completed:', callInfo);
     // In a real CRM, you would log this to the client's activity feed
@@ -93,44 +97,62 @@ export default function VoiceAgentDemo() {
           {/* Tab Navigation */}
           <div className="border-b border-gray-200 mb-6">
             <nav className="-mb-px flex space-x-8">
-              <button className="border-b-2 border-blue-500 py-2 px-1 text-sm font-medium text-blue-600">
+              <button 
+                onClick={() => setActiveTab('widget')}
+                className={`border-b-2 py-2 px-1 text-sm font-medium transition-colors ${
+                  activeTab === 'widget' 
+                    ? 'border-blue-500 text-blue-600' 
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
+              >
                 Widget Conversation
               </button>
-              <button className="border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700">
+              <button 
+                onClick={() => setActiveTab('phone')}
+                className={`border-b-2 py-2 px-1 text-sm font-medium transition-colors ${
+                  activeTab === 'phone' 
+                    ? 'border-blue-500 text-blue-600' 
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
+              >
                 Phone Call
               </button>
             </nav>
           </div>
 
           {/* Widget Demo */}
-          <div className="mb-8">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-              <h3 className="font-medium text-blue-800 mb-2">🎯 NEW: Widget Approach (Recommended)</h3>
-              <p className="text-sm text-blue-700">
-                Direct browser-to-agent conversation. No phone calls needed. Instant connection with natural ElevenLabs voice.
-              </p>
+          {activeTab === 'widget' && (
+            <div className="mb-8">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <h3 className="font-medium text-blue-800 mb-2">🎯 NEW: Widget Approach (Recommended)</h3>
+                <p className="text-sm text-blue-700">
+                  Direct browser-to-agent conversation. No phone calls needed. Instant connection with natural ElevenLabs voice.
+                </p>
+              </div>
+              <ElevenLabsWidgetComponent 
+                client={sampleClient}
+                workspaceId={workspaceId}
+                onCallInitiated={handleCallInitiated}
+              />
             </div>
-            <ElevenLabsWidgetComponent 
-              client={sampleClient}
-              workspaceId={workspaceId}
-              onCallInitiated={handleCallInitiated}
-            />
-          </div>
+          )}
 
           {/* Traditional Call Demo */}
-          <div>
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-              <h3 className="font-medium text-yellow-800 mb-2">📞 Traditional Phone Call</h3>
-              <p className="text-sm text-yellow-700">
-                Calls the customer's phone number. Requires phone system setup and may have connectivity issues.
-              </p>
+          {activeTab === 'phone' && (
+            <div>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                <h3 className="font-medium text-yellow-800 mb-2">📞 Traditional Phone Call</h3>
+                <p className="text-sm text-yellow-700">
+                  Calls the customer's phone number. Requires phone system setup and may have connectivity issues.
+                </p>
+              </div>
+              <ElevenLabsCallComponent 
+                client={sampleClient}
+                workspaceId={workspaceId}
+                onCallInitiated={handleCallInitiated}
+              />
             </div>
-            <ElevenLabsCallComponent 
-              client={sampleClient}
-              workspaceId={workspaceId}
-              onCallInitiated={handleCallInitiated}
-            />
-          </div>
+          )}
         </div>
 
         {/* Integration Instructions */}
