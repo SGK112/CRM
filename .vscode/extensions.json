@@ -1,0 +1,26 @@
+{
+  "recommendations": [
+    "ms-vscode.vscode-typescript-next",
+    "bradlc.vscode-tailwindcss",
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "ms-vscode.vscode-json",
+    "github.copilot",
+    "github.copilot-chat",
+    "ms-vscode.vscode-docker",
+    "ms-vscode-remote.remote-containers",
+    "formulahendry.auto-rename-tag",
+    "christian-kohler.path-intellisense",
+    "ms-vscode.vscode-typescript-next",
+    "yoavbls.pretty-ts-errors",
+    "usernamehw.errorlens",
+    "ms-vscode.vscode-github-pullrequest",
+    "eamodio.gitlens",
+    "ms-vscode.vscode-json",
+    "bierner.markdown-preview-github-styles",
+    "ms-vscode.vscode-css-peek",
+    "bradlc.vscode-tailwindcss",
+    "mongodb.mongodb-vscode",
+    "ms-vscode.vscode-jest"
+  ]
+}

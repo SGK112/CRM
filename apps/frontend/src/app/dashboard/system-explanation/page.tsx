@@ -39,10 +39,10 @@ const SystemExplanation: React.FC = () => {
     <div className="max-w-4xl mx-auto p-6 space-y-8">
       {/* Main Explanation */}
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+        <h1 className="text-3xl font-bold text-black dark:text-white mb-4">
           How Communication Works in Your CRM
         </h1>
-        <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+        <p className="text-lg text-gray-800 dark:text-gray-200 max-w-2xl mx-auto">
           {systemStatus.explanation}
         </p>
       </div>
@@ -105,10 +105,10 @@ const SystemExplanation: React.FC = () => {
           </div>
           
           <div className="space-y-3">
-            <div className="text-sm text-gray-600 dark:text-gray-300">
+            <div className="text-sm text-gray-800 dark:text-gray-200">
               <strong>Ideal Experience:</strong>
             </div>
-            <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+            <ul className="text-sm text-gray-800 dark:text-gray-200 space-y-1">
               <li>• Click "Connect Gmail" button</li>
               <li>• Grant permission (OAuth)</li>
               <li>• Send emails as yourself</li>
@@ -136,10 +136,10 @@ const SystemExplanation: React.FC = () => {
           </div>
           
           <div className="space-y-3">
-            <div className="text-sm text-gray-600 dark:text-gray-300">
+            <div className="text-sm text-gray-800 dark:text-gray-200">
               <strong>Ideal Experience:</strong>
             </div>
-            <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+            <ul className="text-sm text-gray-800 dark:text-gray-200 space-y-1">
               <li>• No setup required</li>
               <li>• CRM provides SMS service</li>
               <li>• Pay per message sent</li>
@@ -168,10 +168,10 @@ const SystemExplanation: React.FC = () => {
           </div>
           
           <div className="space-y-3">
-            <div className="text-sm text-gray-600 dark:text-gray-300">
+            <div className="text-sm text-gray-800 dark:text-gray-200">
               <strong>Ideal Experience:</strong>
             </div>
-            <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+            <ul className="text-sm text-gray-800 dark:text-gray-200 space-y-1">
               <li>• Connect your bank account</li>
               <li>• Accept credit cards instantly</li>
               <li>• Get paid faster</li>
@@ -201,7 +201,7 @@ const SystemExplanation: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <h3 className="font-medium text-gray-900 dark:text-white mb-3">Current Implementation:</h3>
-            <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+            <ul className="text-sm text-gray-800 dark:text-gray-200 space-y-1">
               <li>• Users configure their own SMTP/Twilio</li>
               <li>• Requires technical knowledge</li>
               <li>• Demo mode simulates everything</li>
@@ -211,7 +211,7 @@ const SystemExplanation: React.FC = () => {
           
           <div>
             <h3 className="font-medium text-gray-900 dark:text-white mb-3">Production Vision:</h3>
-            <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+            <ul className="text-sm text-gray-800 dark:text-gray-200 space-y-1">
               <li>• CRM handles all API integrations</li>
               <li>• Users only connect OAuth accounts</li>
               <li>• Seamless contractor experience</li>

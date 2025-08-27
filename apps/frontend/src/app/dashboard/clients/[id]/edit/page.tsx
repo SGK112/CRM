@@ -117,10 +117,10 @@ export default function EditClientPage() {
       <form onSubmit={save} className="max-w-5xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href={`/dashboard/clients/${id}`} className="text-gray-500 hover:text-gray-700"><ArrowLeftIcon className="h-6 w-6"/></Link>
+            <Link href={`/dashboard/clients/${id}`} className="text-gray-700 hover:text-gray-700"><ArrowLeftIcon className="h-6 w-6"/></Link>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Edit Client</h1>
-              <p className="text-sm text-gray-500 mt-1">Update client details and preferences</p>
+              <h1 className="text-3xl font-bold text-brand-700 dark:text-brand-400">Edit Client</h1>
+              <p className="text-sm text-gray-700 mt-1">Update client details and preferences</p>
             </div>
           </div>
           <div className="flex gap-3">
@@ -210,7 +210,7 @@ export default function EditClientPage() {
                 <button type="button" onClick={()=>removeTag(t)} className="ml-2 text-blue-600 hover:text-blue-900">×</button>
               </span>
             ))}
-            {(!form.tags || form.tags.length===0) && <span className="text-xs text-gray-500">No tags yet.</span>}
+            {(!form.tags || form.tags.length===0) && <span className="text-xs text-gray-700 >No tags yet.</span>}
           </div>
         </section>
       </form>

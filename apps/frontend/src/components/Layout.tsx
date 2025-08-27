@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import SearchBar from './SearchBar';
 import CopilotWidget from './CopilotWidget';
+import AIAssistant from './AIAssistant';
 import RouteMemoryTracker from './RouteMemoryTracker';
 import {
   HomeIcon,
@@ -31,6 +32,8 @@ import {
   SparklesIcon,
   PlusCircleIcon,
   QuestionMarkCircleIcon,
+  ChevronUpIcon,
+  ArrowsPointingOutIcon,
 } from '@heroicons/react/24/outline';
 import Logo from './Logo';
 import { ThemeProvider, useTheme } from './ThemeProvider';
@@ -129,48 +132,28 @@ export default function Layout({ children }: LayoutProps) {
 
   const navigationGroups: { label: string; items: NavigationItem[] }[] = [
     {
-      label: 'Core',
+      label: 'Core Operations',
       items: [
-  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-  { name: 'Projects', href: '/dashboard/projects', icon: ClipboardDocumentListIcon, badge: counts?.projects },
-  { name: 'Clients', href: '/dashboard/clients', icon: UserGroupIcon, badge: counts?.clients },
-  { name: 'Calendar', href: '/dashboard/calendar', icon: CalendarDaysIcon },
+        { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+        { name: 'Projects', href: '/dashboard/projects', icon: ClipboardDocumentListIcon, badge: counts?.projects },
+        { name: 'Clients', href: '/dashboard/clients', icon: UserGroupIcon, badge: counts?.clients },
+        { name: 'Calendar', href: '/dashboard/calendar', icon: CalendarDaysIcon },
       ]
     },
     {
-      label: 'Content & Files',
+      label: 'Design & Sales',
       items: [
-        { name: 'Documents', href: '/dashboard/documents', icon: DocumentTextIcon },
-        { name: 'Designer', href: '/dashboard/designer', icon: PencilSquareIcon },
-        { name: 'File Storage', href: '/dashboard/storage', icon: CloudArrowUpIcon },
+        { name: 'Design Studio', href: '/dashboard/designer', icon: PencilSquareIcon },
+        { name: 'Estimates & Pricing', href: '/dashboard/estimates', icon: DocumentTextIcon },
+        { name: 'Material Catalog', href: '/dashboard/catalog', icon: WrenchScrewdriverIcon },
       ]
     },
     {
-      label: 'Pricing & Sales',
+      label: 'Business Management', 
       items: [
-        { name: 'Catalog', href: '/dashboard/catalog', icon: WrenchScrewdriverIcon },
-        { name: 'Vendors', href: '/dashboard/vendors', icon: BuildingOfficeIcon },
-        { name: 'Price List', href: '/dashboard/pricing', icon: WrenchScrewdriverIcon },
-        { name: 'Estimates', href: '/dashboard/estimates', icon: DocumentTextIcon },
-        { name: 'Sales', href: '/dashboard/sales', icon: ShoppingBagIcon },
-        { name: 'Online Store', href: '/dashboard/ecommerce', icon: BuildingStorefrontIcon, badge: 7 },
-      ]
-    },
-    {
-      label: 'Communication',
-      items: [
-        { name: 'Voice Agent', href: '/dashboard/voice-agent', icon: SparklesIcon },
-        { name: 'Messages', href: '/dashboard/chat', icon: ChatBubbleLeftRightIcon, badge: 5 },
-        { name: 'Business Cards', href: '/dashboard/rolladex', icon: UserGroupIcon },
-        { name: 'Marketing', href: '/dashboard/marketing', icon: MegaphoneIcon },
-        { name: 'Integrations', href: '/dashboard/integrations', icon: CogIcon },
-        { name: 'How It Works', href: '/dashboard/system-explanation', icon: QuestionMarkCircleIcon },
-      ]
-    },
-    {
-      label: 'Insights & Admin',
-      items: [
-        { name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon },
+        { name: 'Communications', href: '/dashboard/chat', icon: ChatBubbleLeftRightIcon, badge: 5 },
+        { name: 'Documents & Files', href: '/dashboard/documents', icon: DocumentTextIcon },
+        { name: 'Reports & Analytics', href: '/dashboard/analytics', icon: ChartBarIcon },
         { name: 'Settings', href: '/dashboard/settings', icon: CogIcon }
       ]
     }
@@ -231,29 +214,36 @@ export default function Layout({ children }: LayoutProps) {
 
       {/* Mobile sidebar */}
       <div className={mobileOptimized(
-        'fixed inset-y-0 left-0 z-50 w-64 surface-1 elevated shadow-lg transform transition-transform duration-300 ease-in-out lg:hidden',
+        'fixed inset-y-0 left-0 z-50 w-64 shadow-lg transform transition-transform duration-300 ease-in-out lg:hidden',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full',
         mobile.scrollContainer,
         mobile.willChange
-      )}>
+      )} style={{ backgroundColor: 'var(--surface-1)' }}>
         <div className={mobileOptimized(
-          'flex items-center justify-between h-16 px-4 border-b border-token',
+          'flex items-center justify-between h-16 px-4',
           mobile.touchTarget
-        )}>
+        )} style={{ borderBottom: '1px solid var(--border)' }}>
           <Logo />
           <button 
             onClick={() => setSidebarOpen(false)} 
             className={mobileOptimized(
-              'p-2 rounded-md text-secondary hover:text-primary transition-colors',
+              'p-2 rounded-md transition-colors',
               mobile.touchTarget
             )}
+            style={{ color: 'var(--text-muted)' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = 'var(--text)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = 'var(--text-muted)';
+            }}
             aria-label="Close sidebar"
           >
             <XMarkIcon className="h-6 w-6" />
           </button>
         </div>
         <nav className={mobileOptimized(
-          'mt-6 px-3 pb-6',
+          'mt-6 px-2 pb-6',
           mobile.scrollContainer,
           'overscroll-contain'
         )}>
@@ -264,25 +254,22 @@ export default function Layout({ children }: LayoutProps) {
                 href={item.href}
                 onClick={() => setSidebarOpen(false)}
                 className={mobileOptimized(
-                  'group flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200',
-                  mobile.touchTarget,
-                  item.current
-                    ? 'surface-2 text-primary border-l-4 border-primary shadow-sm'
-                    : 'text-secondary hover:surface-2 hover:text-primary'
+                  classNames(
+                    'sidebar-nav-item',
+                    item.current ? 'active' : ''
+                  ),
+                  mobile.touchTarget
                 )}
               >
-                <item.icon
-                  className={`mr-3 h-5 w-5 transition-colors ${
-                    item.current ? 'text-primary' : 'text-secondary group-hover:text-primary'
-                  }`}
-                />
-                <span className={item.current ? 'font-semibold' : ''}>{item.name}</span>
+                <item.icon className="icon" />
+                <span>{item.name}</span>
                 {item.badge && item.badge > 0 && (
-                  <span className={`ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                  <span className={classNames(
+                    'ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
                     item.current 
-                      ? 'surface-3 text-primary' 
-                      : 'surface-2 text-secondary'
-                  }`}>
+                      ? 'bg-amber-600 text-white shadow-sm' 
+                      : 'badge badge-info'
+                  )}>
                     {item.badge}
                   </span>
                 )}
@@ -293,41 +280,37 @@ export default function Layout({ children }: LayoutProps) {
       </div>
 
       {/* Desktop sidebar */}
-    <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-  <div className="flex min-h-0 flex-1 flex-col surface-1 elevated border-r border-token">
-      <div className="flex h-16 flex-shrink-0 items-center px-4 border-b border-token">
+      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
+        <div className="flex min-h-0 flex-1 flex-col" style={{ backgroundColor: 'var(--surface-1)', borderRight: '1px solid var(--border)' }}>
+          <div className="flex h-16 flex-shrink-0 items-center px-4" style={{ borderBottom: '1px solid var(--border)' }}>
             <Logo />
           </div>
-          <div className="flex flex-1 flex-col overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 dark:hover:scrollbar-thumb-gray-500">
-            <nav className="flex-1 px-3 py-6">
+          <div className="flex flex-1 flex-col overflow-y-auto">
+            <nav className="flex-1 px-2 py-4">
               <div className="space-y-1">
                 {navigationGroups.map(group => {
                   const groupItems = updatedNavigation.filter(i=> group.items.some(gItem=> gItem.href === i.href));
                   return (
-                    <div key={group.label} className="mb-6">
-                      <div className="px-3 pb-1 text-[10px] uppercase tracking-wide font-semibold text-tertiary">{group.label}</div>
+                    <div key={group.label} className="mb-4">
+                      <div className="sidebar-nav-group">{group.label}</div>
                       {groupItems.map(item => (
                         <Link
                           key={item.name}
                           href={item.href}
-                          className={`group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 transform hover:scale-[1.02] ${
-                            item.current
-                              ? 'surface-2 text-primary border-l-4 border-primary shadow-sm'
-                              : 'text-secondary hover:surface-2 hover:text-primary'
-                          }`}
+                          className={classNames(
+                            'sidebar-nav-item',
+                            item.current ? 'active' : ''
+                          )}
                         >
-                          <item.icon
-                            className={`mr-3 h-5 w-5 transition-colors ${
-                              item.current ? 'text-primary' : 'text-secondary group-hover:text-primary'
-                            }`}
-                          />
-                          <span className={item.current ? 'font-semibold' : ''}>{item.name}</span>
+                          <item.icon className="icon" />
+                          <span>{item.name}</span>
                           {item.badge && item.badge > 0 && (
-                                <span className={`ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium tracking-wide transition-all duration-200 ${
-                                  item.current 
-                                    ? 'bg-amber-600 text-white shadow-sm ring-1 ring-amber-400/60 scale-110' 
-                                    : 'surface-2 text-secondary ring-1 ring-border/60 group-hover:scale-105'
-                                }`}>
+                            <span className={classNames(
+                              'ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
+                              item.current 
+                                ? 'bg-amber-600 text-white shadow-sm' 
+                                : 'badge badge-info'
+                            )}>
                               {item.badge}
                             </span>
                           )}
@@ -340,31 +323,57 @@ export default function Layout({ children }: LayoutProps) {
             </nav>
 
             {/* User profile section */}
-            <div className="flex-shrink-0 border-t border-token p-4">
+            <div className="flex-shrink-0 p-4" style={{ borderTop: '1px solid var(--border)' }}>
               <div className="relative">
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="group block w-full rounded-lg p-2 text-left text-sm font-medium text-secondary hover:surface-2 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-surface-1"
+                  className="group block w-full rounded-lg p-2 text-left text-sm font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
+                  style={{ 
+                    color: 'var(--text-muted)',
+                    backgroundColor: 'transparent'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'var(--surface-2)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
                 >
                   <div className="flex items-center">
                     <div className="flex-shrink-0">
-                      <div className="h-8 w-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
-                        <span className="text-sm font-medium text-amber-700 dark:text-amber-300">
+                      <div 
+                        className="h-8 w-8 rounded-full flex items-center justify-center"
+                        style={{ backgroundColor: 'var(--accent-light)' }}
+                      >
+                        <span 
+                          className="text-sm font-medium"
+                          style={{ color: 'var(--accent)' }}
+                        >
                           {user.firstName?.[0]}{user.lastName?.[0]}
                         </span>
                       </div>
                     </div>
                     <div className="ml-3 flex-1">
-                      <p className="text-sm font-medium text-primary">{user.firstName} {user.lastName}</p>
-                      <p className="text-xs text-secondary">{user.email}</p>
+                      <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>
+                        {user.firstName} {user.lastName}
+                      </p>
+                      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                        {user.email}
+                      </p>
                     </div>
-                    <ChevronDownIcon className="h-4 w-4 text-secondary" />
+                    <ChevronDownIcon className="h-4 w-4" style={{ color: 'var(--text-muted)' }} />
                   </div>
                 </button>
 
                 {showUserMenu && (
-                  <div className="absolute bottom-full left-0 right-0 mb-2 rounded-md surface-2 py-1 shadow-lg ring-1 ring-black/10 border border-token">
-                    <div className="px-4 py-2 border-b border-token mb-1">
+                  <div 
+                    className="absolute bottom-full left-0 right-0 mb-2 rounded-md py-1 shadow-lg ring-1 ring-black/10"
+                    style={{ 
+                      backgroundColor: 'var(--surface-2)', 
+                      border: '1px solid var(--border)' 
+                    }}
+                  >
+                    <div className="px-4 py-2 mb-1" style={{ borderBottom: '1px solid var(--border)' }}>
                       <div className="flex items-center justify-between">
                         <span className="text-xs uppercase tracking-wide text-tertiary">Appearance</span>
                         <ThemeToggle variant="compact" />
@@ -402,18 +411,31 @@ export default function Layout({ children }: LayoutProps) {
       </div>
 
       {/* Main content */}
-  <div className="lg:pl-64 flex flex-col min-h-screen" style={{ background: 'var(--bg)' }}>
+      <div className="lg:pl-64 flex flex-col min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
         {/* Top navigation */}
-  <div className={mobileOptimized(
-    'sticky top-0 z-50 flex h-16 flex-shrink-0 surface-1 elevated border-b border-token backdrop-blur-md bg-opacity-95',
-    mobile.safeTop
-  )}>
+        <div className={mobileOptimized(
+          'sticky top-0 z-50 flex h-16 flex-shrink-0 backdrop-blur-md bg-opacity-95',
+          mobile.safeTop
+        )} style={{ 
+          backgroundColor: 'var(--surface-1)', 
+          borderBottom: '1px solid var(--border)' 
+        }}>
           <button
             type="button"
             className={mobileOptimized(
-              'border-r border-token px-4 text-secondary focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 lg:hidden transition-colors hover:surface-2',
+              'px-4 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 lg:hidden transition-colors',
               mobile.touchTarget
             )}
+            style={{ 
+              color: 'var(--text-muted)',
+              borderRight: '1px solid var(--border)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--surface-2)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
             onClick={() => setSidebarOpen(true)}
             aria-label="Open sidebar"
           >
@@ -475,11 +497,166 @@ export default function Layout({ children }: LayoutProps) {
           </div>
         </main>
 
-  {/* Copilot Widget */}
-  <CopilotWidget />
+        {/* Footer with Copilot Tab */}
+        <FooterCopilot />
       </div>
     </div>
   </ThemeProvider>
+  );
+}
+
+// Footer-based Copilot component
+function FooterCopilot() {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [showFullCopilot, setShowFullCopilot] = useState(false);
+  const [inputValue, setInputValue] = useState('');
+
+  // Listen for global Help button event to open Copilot
+  useEffect(() => {
+    const handler = () => {
+      setIsExpanded(true);
+      setShowFullCopilot(true);
+    };
+    window.addEventListener('copilot:open', handler as EventListener);
+    return () => window.removeEventListener('copilot:open', handler as EventListener);
+  }, []);
+
+  const handleQuickAction = (action: string) => {
+    setInputValue(action);
+    // Pass the action to the AI assistant and clear the input
+    setShowFullCopilot(true);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      e.stopPropagation();
+      handleSendMessage(e);
+    }
+  };
+
+  const handleSendMessage = (e?: React.KeyboardEvent | React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (inputValue.trim()) {
+      // Open the AI assistant with the input value
+      setShowFullCopilot(true);
+    }
+  };
+
+  const handleCloseCopilot = () => {
+    setShowFullCopilot(false);
+    // Clear the input after closing if it was sent
+    if (inputValue.trim()) {
+      setInputValue('');
+    }
+  };
+
+  return (
+    <>
+      {/* Inline Footer Copilot */}
+      <div className="sticky bottom-0 z-30 relative overflow-hidden">
+        {/* Enhanced professional background */}
+        <div className="absolute inset-0 bg-gradient-to-t from-white via-slate-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700 backdrop-blur-xl shadow-2xl"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-50/30 via-white/20 to-indigo-50/30 dark:from-blue-900/20 dark:via-slate-800/30 dark:to-indigo-900/20"></div>
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-300/50 dark:via-slate-500 to-transparent shadow-sm"></div>
+        
+        {/* Content */}
+        <div className="relative z-10 border-t border-blue-200/50 dark:border-slate-600 shadow-2xl">
+          {/* Main Footer Bar */}
+          <div className="flex flex-col">
+          {/* Quick Actions Row - Always visible on larger screens, toggle on mobile */}
+          <div className={`px-3 py-2 transition-all duration-200 border-b border-blue-200/50 dark:border-slate-600 ${
+            isExpanded ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0 md:max-h-20 md:opacity-100 overflow-hidden'
+          }`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2 overflow-x-auto">
+                <span className="text-xs font-semibold whitespace-nowrap mr-2 text-slate-700 dark:text-slate-300">Quick:</span>
+                {[
+                  { label: 'Projects', action: 'Show my remodeling projects' },
+                  { label: 'Clients', action: 'Show my clients' },
+                  { label: 'New Kitchen', action: 'Create a new kitchen remodel project' },
+                  { label: 'New Bathroom', action: 'Create a new bathroom remodel project' },
+                  { label: 'Design Ideas', action: 'Show me design inspiration for my current project' },
+                  { label: 'Permits', action: 'Help me with permit requirements' }
+                ].map(item => (
+                  <button
+                    key={item.label}
+                    onClick={() => handleQuickAction(item.action)}
+                    className="flex-shrink-0 px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 hover:scale-105 bg-white dark:bg-slate-700 border border-blue-200 dark:border-slate-500 text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-600 hover:text-blue-700 dark:hover:text-white shadow-sm hover:shadow-md hover:border-blue-300 dark:hover:border-slate-400"
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => setShowFullCopilot(true)}
+                className="ml-2 p-2 rounded-lg bg-white dark:bg-slate-700 hover:bg-blue-50 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 hover:text-blue-700 dark:hover:text-white transition-all duration-200 border border-blue-200 dark:border-slate-500 shadow-sm hover:shadow-md hover:border-blue-300 dark:hover:border-slate-400"
+                title="Open full assistant"
+              >
+                <ArrowsPointingOutIcon className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Main Input Row */}
+          <div className="flex items-center space-x-3 px-3 py-3">
+            {/* Copyright */}
+            <div className="hidden sm:flex items-center space-x-2 text-xs font-medium text-slate-600 dark:text-slate-400">
+              <span>© 2025 Remodely CRM</span>
+            </div>
+
+            {/* AI Input */}
+            <div className="flex-1 flex items-center space-x-2">
+              <div className="flex items-center space-x-2 bg-white dark:bg-slate-700 rounded-xl border-2 border-blue-200 dark:border-slate-500 px-4 py-2 flex-1 shadow-lg hover:shadow-xl transition-all duration-200 focus-within:border-blue-400 dark:focus-within:border-blue-400 focus-within:shadow-xl">
+                <div className="h-4 w-4 rounded-sm bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+                  <SparklesIcon className="h-2.5 w-2.5 text-white" />
+                </div>
+                <input
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  placeholder="Ask AI anything..."
+                  className="flex-1 bg-transparent text-sm placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:outline-none min-w-0 text-slate-900 dark:text-slate-100 font-medium"
+                  onKeyDown={handleKeyDown}
+                  onFocus={() => setIsExpanded(true)}
+                />
+                <button
+                  onClick={(e) => handleSendMessage(e)}
+                  disabled={!inputValue.trim()}
+                  className="p-1.5 rounded-lg bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg disabled:hover:shadow-md transform hover:scale-105 disabled:hover:scale-100"
+                >
+                  <svg className="h-3 w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Toggle Quick Actions (Mobile) */}
+              <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="md:hidden p-2 rounded-lg bg-white dark:bg-slate-700 hover:bg-blue-50 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 hover:text-blue-700 dark:hover:text-white transition-all duration-200 border border-blue-200 dark:border-slate-500 shadow-sm hover:shadow-md hover:border-blue-300 dark:hover:border-slate-400"
+                title="Toggle quick actions"
+              >
+                <div className={`transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
+                  <ChevronUpIcon className="h-3 w-3" />
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+
+      {/* Full AI Assistant Modal */}
+      <AIAssistant 
+        isOpen={showFullCopilot} 
+        onClose={handleCloseCopilot}
+        initialMessage={inputValue}
+      />
+    </>
   );
 }
 

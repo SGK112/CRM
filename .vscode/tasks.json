@@ -106,6 +106,56 @@
         "panel": "new"
       },
       "isBackground": true
+    },
+    {
+      "label": "🧹 Clean & Restart",
+      "type": "shell",
+      "command": "pkill -f 'npm run dev' 2>/dev/null || true && rm -rf apps/frontend/.next/cache && echo '✅ Cleaned cache' && ./start-dev-robust.sh",
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new"
+      },
+      "isBackground": true
+    },
+    {
+      "label": "📦 Fresh Install",
+      "type": "shell",
+      "command": "rm -rf node_modules apps/*/node_modules packages/*/node_modules && npm install",
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "new"
+      }
+    },
+    {
+      "label": "🔍 Lint All",
+      "type": "shell",
+      "command": "npm run lint",
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": ["$eslint-stylish"]
+    },
+    {
+      "label": "🎯 Format Code",
+      "type": "shell",
+      "command": "npx prettier --write 'apps/**/*.{js,jsx,ts,tsx,json,css,md}' 'packages/**/*.{js,jsx,ts,tsx,json}'",
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "silent",
+        "focus": false,
+        "panel": "shared"
+      }
     }
   ]
 }

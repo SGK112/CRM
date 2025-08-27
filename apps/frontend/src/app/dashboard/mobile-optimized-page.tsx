@@ -1,6 +1,6 @@
 /**
  * Mobile-Optimized Dashboard Enhancement
- * 
+ *
  * This component provides mobile-friendly enhancements to the dashboard
  * while maintaining backward compatibility with the existing version.
  */
@@ -88,7 +88,7 @@ export default function MobileOptimizedDashboard() {
     const loadDashboardData = async () => {
       try {
         setLoading(true);
-        
+
         // Mock data - replace with actual API calls
         setStats({
           totalRevenue: 125000,
@@ -168,12 +168,12 @@ export default function MobileOptimizedDashboard() {
   }, []);
 
   // Mobile-optimized stats card component
-  const StatsCard = ({ 
-    title, 
-    value, 
-    change, 
-    icon: Icon, 
-    color = 'blue' 
+  const StatsCard = ({
+    title,
+    value,
+    change,
+    icon: Icon,
+    color = 'blue'
   }: {
     title: string;
     value: string | number;
@@ -279,7 +279,7 @@ export default function MobileOptimizedDashboard() {
             </span>
           </div>
           <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-            <div 
+            <div
               className="bg-blue-600 h-2 rounded-full transition-all duration-300"
               style={{ width: `${project.progress}%` }}
             />
@@ -405,7 +405,7 @@ export default function MobileOptimizedDashboard() {
                     <ListBulletIcon className="h-4 w-4" />
                   </button>
                 </div>
-                
+
                 <button
                   onClick={() => router.push('/dashboard/projects/new')}
                   className={mobileOptimized(
@@ -484,7 +484,7 @@ export default function MobileOptimizedDashboard() {
                 View All
               </button>
             </div>
-            
+
             <div className={viewMode === 'grid' ? mobileClasses.grid.list : 'space-y-4'}>
               {projects.map((project) => (
                 <ProjectCard key={project.id} project={project} />
@@ -500,7 +500,7 @@ export default function MobileOptimizedDashboard() {
             )}>
               Recent Activity
             </h2>
-            
+
             <div className={mobileOptimized(
               mobileClasses.card.container,
               'divide-y divide-gray-200 dark:divide-gray-700'
@@ -508,7 +508,7 @@ export default function MobileOptimizedDashboard() {
               {recentActivity.map((activity) => (
                 <ActivityItem key={activity.id} activity={activity} />
               ))}
-              
+
               <div className="p-3">
                 <button
                   onClick={() => router.push('/dashboard/activity')}

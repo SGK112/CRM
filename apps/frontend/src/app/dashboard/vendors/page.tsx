@@ -1,5 +1,4 @@
 'use client';
-import Layout from '../../../components/Layout';
 import { useEffect, useMemo, useState } from 'react';
 import { API_BASE } from '../../../lib/api';
 import { PageHeader } from '../../../components/ui/PageHeader';
@@ -61,8 +60,7 @@ export default function VendorsPage(){
   ];
 
   return (
-    <Layout>
-      <div className="space-y-8">
+    <div className="space-y-8 p-6">
         <PageHeader
           title="Vendors"
           subtitle="Central directory of suppliers & trade partners feeding your catalog and pricing intelligence."
@@ -163,7 +161,6 @@ export default function VendorsPage(){
             </div>
           )}
         </div>
-      </div>
-    </Layout>
+    </div>
   );
 }

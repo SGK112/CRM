@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Layout from '../../../components/Layout';
+import { useRouter } from 'next/navigation';
 import { useTheme } from '../../../components/ThemeProvider';
 import CommunicationSettings from '../../../components/CommunicationSettings';
 import {
@@ -18,7 +18,8 @@ import {
   EyeIcon,
   EyeSlashIcon,
   CheckCircleIcon,
-  ExclamationTriangleIcon
+  ExclamationTriangleIcon,
+  SwatchIcon
 } from '@heroicons/react/24/outline';
 
 interface IntegrationSetting {
@@ -39,6 +40,7 @@ interface IntegrationSetting {
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('general');
+  const router = useRouter();
   const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -264,6 +266,7 @@ export default function SettingsPage() {
 
   const tabs = [
     { id: 'general', name: 'General', icon: UserIcon },
+    { id: 'colors', name: 'Colors', icon: SwatchIcon },
     { id: 'notifications', name: 'Notifications', icon: BellIcon },
     { id: 'security', name: 'Security', icon: ShieldCheckIcon },
     { id: 'communications', name: 'Communications', icon: EnvelopeIcon },
@@ -336,10 +339,10 @@ export default function SettingsPage() {
   const renderGeneralTab = () => (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Profile Information</h3>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-[var(--text)] mb-4">Profile Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-[var(--text)] mb-2">First Name</label>
             <input
               type="text"
               value={formData.firstName}
@@ -348,7 +351,7 @@ export default function SettingsPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-[var(--text)] mb-2">Last Name</label>
             <input
               type="text"
               value={formData.lastName}
@@ -357,7 +360,7 @@ export default function SettingsPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-[var(--text)] mb-2">Email</label>
             <input
               type="email"
               value={formData.email}
@@ -366,7 +369,7 @@ export default function SettingsPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-[var(--text)] mb-2">Phone</label>
             <input
               type="tel"
               value={formData.phone}
@@ -375,7 +378,7 @@ export default function SettingsPage() {
             />
           </div>
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Company</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-[var(--text)] mb-2">Company</label>
             <input
               type="text"
               value={formData.company}
@@ -387,10 +390,10 @@ export default function SettingsPage() {
       </div>
 
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Preferences</h3>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-[var(--text)] mb-4">Preferences</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Timezone</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-[var(--text)] mb-2">Timezone</label>
             <select
               value={formData.timezone}
               onChange={(e) => handleInputChange('timezone', e.target.value)}
@@ -403,7 +406,7 @@ export default function SettingsPage() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Language</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-[var(--text)] mb-2">Language</label>
             <select
               value={formData.language}
               onChange={(e) => handleInputChange('language', e.target.value)}
@@ -418,8 +421,27 @@ export default function SettingsPage() {
       </div>
 
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Appearance</h3>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-[var(--text)] mb-4">Appearance</h3>
         <ThemeSettingsSection />
+        
+        {/* Colors Link */}
+        <div className="mt-4 p-4 border border-gray-200 dark:border-token rounded-lg bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20">
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="font-medium text-gray-900 dark:text-[var(--text)] mb-1">Customize Colors</h4>
+              <p className="text-sm text-gray-600 dark:text-[var(--text-dim)]">
+                Personalize your CRM with custom brand colors and themes
+              </p>
+            </div>
+            <button
+              onClick={() => router.push('/dashboard/settings/colors')}
+              className="flex items-center space-x-2 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-lg transition-colors"
+            >
+              <SwatchIcon className="h-4 w-4" />
+              <span>Customize</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -427,15 +449,15 @@ export default function SettingsPage() {
   const renderNotificationsTab = () => (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Notification Preferences</h3>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-[var(--text)] mb-4">Notification Preferences</h3>
         <div className="space-y-4">
           {Object.entries(formData.notifications).map(([key, value]) => (
             <div key={key} className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-900 capitalize">
+                <p className="text-sm font-medium text-gray-900 dark:text-[var(--text)] capitalize">
                   {key === 'sms' ? 'SMS' : key} Notifications
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-800 dark:text-[var(--text-dim)]">
                   Receive notifications via {key === 'sms' ? 'SMS' : key}
                 </p>
               </div>
@@ -461,12 +483,12 @@ export default function SettingsPage() {
   const renderSecurityTab = () => (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Security Settings</h3>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-[var(--text)] mb-4">Security Settings</h3>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-900">Two-Factor Authentication</p>
-              <p className="text-sm text-gray-600">Add an extra layer of security to your account</p>
+              <p className="text-sm font-medium text-gray-900 dark:text-[var(--text)]">Two-Factor Authentication</p>
+              <p className="text-sm text-gray-800 dark:text-[var(--text-dim)]">Add an extra layer of security to your account</p>
             </div>
             <button
               onClick={() => handleNestedInputChange('security', 'twoFactor', !formData.security.twoFactor)}
@@ -484,8 +506,8 @@ export default function SettingsPage() {
 
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-900">Login Alerts</p>
-              <p className="text-sm text-gray-600">Get notified when someone logs into your account</p>
+              <p className="text-sm font-medium text-gray-900 dark:text-[var(--text)]">Login Alerts</p>
+              <p className="text-sm text-gray-800 dark:text-[var(--text-dim)]">Get notified when someone logs into your account</p>
             </div>
             <button
               onClick={() => handleNestedInputChange('security', 'loginAlerts', !formData.security.loginAlerts)}
@@ -502,7 +524,7 @@ export default function SettingsPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Session Timeout (minutes)</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-[var(--text)] mb-2">Session Timeout (minutes)</label>
             <select
               value={formData.security.sessionTimeout}
               onChange={(e) => handleNestedInputChange('security', 'sessionTimeout', parseInt(e.target.value))}
@@ -523,8 +545,8 @@ export default function SettingsPage() {
   const renderIntegrationsTab = () => (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Third-Party Integrations</h3>
-        <p className="text-sm text-gray-600 mb-6">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-[var(--text)] mb-4">Third-Party Integrations</h3>
+        <p className="text-sm text-gray-800 dark:text-[var(--text-dim)] mb-6">
           Connect your CRM with external services to enhance functionality.
         </p>
         
@@ -533,15 +555,15 @@ export default function SettingsPage() {
             const IconComponent = integration.icon;
             
             return (
-              <div key={integration.id} className="border border-gray-200 rounded-lg p-6">
+              <div key={integration.id} className="border border-gray-200 dark:border-token rounded-lg p-6 bg-white dark:bg-[var(--surface-2)]">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-gray-100 rounded-lg">
-                      <IconComponent className="h-6 w-6 text-gray-600" />
+                    <div className="p-2 bg-gray-100 dark:bg-[var(--surface-3)] rounded-lg">
+                      <IconComponent className="h-6 w-6 text-gray-800 dark:text-[var(--text-dim)]" />
                     </div>
                     <div>
-                      <h4 className="text-lg font-medium text-gray-900">{integration.name}</h4>
-                      <p className="text-sm text-gray-600">{integration.description}</p>
+                      <h4 className="text-lg font-medium text-gray-900 dark:text-[var(--text)]">{integration.name}</h4>
+                      <p className="text-sm text-gray-800 dark:text-[var(--text-dim)]">{integration.description}</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -566,14 +588,14 @@ export default function SettingsPage() {
                 </div>
 
                 {integration.enabled && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-gray-200">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-gray-200 dark:border-token">
                     {integration.configFields.map((field) => {
                       const fieldId = `${integration.id}-${field.name}`;
                       const showPassword = showPasswords[fieldId];
                       
                       return (
                         <div key={field.name}>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <label className="block text-sm font-medium text-gray-700 dark:text-[var(--text)] mb-2">
                             {field.label} {field.required && <span className="text-red-500">*</span>}
                           </label>
                           <div className="relative">
@@ -591,9 +613,9 @@ export default function SettingsPage() {
                                 className="absolute inset-y-0 right-0 pr-3 flex items-center"
                               >
                                 {showPassword ? (
-                                  <EyeSlashIcon className="h-5 w-5 text-gray-400" />
+                                  <EyeSlashIcon className="h-5 w-5 text-gray-400 dark:text-[var(--text-dim)]" />
                                 ) : (
-                                  <EyeIcon className="h-5 w-5 text-gray-400" />
+                                  <EyeIcon className="h-5 w-5 text-gray-400 dark:text-[var(--text-dim)]" />
                                 )}
                               </button>
                             )}
@@ -614,16 +636,16 @@ export default function SettingsPage() {
   const renderBillingTab = () => (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Billing Information</h3>
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-[var(--text)] mb-4">Billing Information</h3>
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-600/30 rounded-lg p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="text-lg font-medium text-gray-900">Professional Plan</h4>
-              <p className="text-sm text-gray-600">$99/month • Billed monthly</p>
+              <h4 className="text-lg font-medium text-gray-900 dark:text-[var(--text)]">Professional Plan</h4>
+              <p className="text-sm text-gray-800 dark:text-[var(--text-dim)]">$99/month • Billed monthly</p>
             </div>
             <div className="text-right">
-              <p className="text-2xl font-bold text-gray-900">$99.00</p>
-              <p className="text-sm text-gray-600">Next billing: Sep 14, 2025</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-[var(--text)]">$99.00</p>
+              <p className="text-sm text-gray-800 dark:text-[var(--text-dim)]">Next billing: Sep 14, 2025</p>
             </div>
           </div>
           <div className="mt-4 flex space-x-3">
@@ -638,16 +660,16 @@ export default function SettingsPage() {
       </div>
 
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Payment Method</h3>
-        <div className="border border-gray-200 rounded-lg p-4">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-[var(--text)] mb-4">Payment Method</h3>
+        <div className="border border-gray-200 dark:border-token rounded-lg p-4 bg-white dark:bg-[var(--surface-2)]">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-12 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded flex items-center justify-center">
                 <span className="text-white text-xs font-bold">VISA</span>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900">•••• •••• •••• 4242</p>
-                <p className="text-sm text-gray-600">Expires 12/26</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-[var(--text)]">•••• •••• •••• 4242</p>
+                <p className="text-sm text-gray-800 dark:text-[var(--text-dim)]">Expires 12/26</p>
               </div>
             </div>
             <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
@@ -663,6 +685,9 @@ export default function SettingsPage() {
     switch (activeTab) {
       case 'general':
         return renderGeneralTab();
+      case 'colors':
+        router.push('/dashboard/settings/colors');
+        return null;
       case 'notifications':
         return renderNotificationsTab();
       case 'security':
@@ -679,12 +704,11 @@ export default function SettingsPage() {
   };
 
   return (
-    <Layout>
       <div>
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Settings</h1>
-          <p className="text-gray-600">Manage your account settings and preferences</p>
+          <h1 className="text-3xl font-bold text-brand-700 dark:text-brand-400 mb-2">Settings</h1>
+          <p className="text-gray-800 dark:text-[var(--text-dim)]">Manage your account settings and preferences</p>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
@@ -700,7 +724,7 @@ export default function SettingsPage() {
                     className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors border ${
                       activeTab === tab.id
                         ? 'bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-600/20 dark:text-blue-300 dark:border-blue-500'
-                        : 'text-gray-600 hover:bg-gray-100 dark:text-[var(--text-dim)] dark:hover:bg-[var(--surface-2)] dark:border-token'
+                        : 'text-gray-800 hover:bg-gray-100 dark:text-[var(--text-dim)] dark:hover:bg-[var(--surface-2)] dark:border-token'
                     }`}
                   >
                     <IconComponent className="h-5 w-5 mr-3" />
@@ -717,7 +741,7 @@ export default function SettingsPage() {
               {loading ? (
                 <div className="flex items-center justify-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  <span className="ml-2 text-gray-600">Loading...</span>
+                  <span className="ml-2 text-gray-800 dark:text-[var(--text-dim)]">Loading...</span>
                 </div>
               ) : (
                 renderTabContent()
@@ -726,14 +750,14 @@ export default function SettingsPage() {
               {message && (
                 <div className={`mt-4 p-4 rounded-lg ${
                   message.type === 'success' 
-                    ? 'bg-green-50 text-green-800 border border-green-200' 
-                    : 'bg-red-50 text-red-800 border border-red-200'
+                    ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-700' 
+                    : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-700'
                 }`}>
                   {message.text}
                 </div>
               )}
               
-              <div className="mt-8 pt-6 border-t border-gray-200 flex justify-end space-x-3">
+              <div className="mt-8 pt-6 border-t border-gray-200 dark:border-token flex justify-end space-x-3">
                 <button 
                   type="button"
                   className="px-4 py-2 border border-gray-300 dark:border-token text-gray-700 dark:text-[var(--text)] rounded-lg hover:bg-gray-50 dark:hover:bg-[var(--surface-2)] transition-colors"
@@ -762,7 +786,6 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
-    </Layout>
   );
 }
 
@@ -771,7 +794,7 @@ function ThemeSettingsSection() {
   const { theme, setTheme, toggleTheme, system } = useTheme();
   return (
     <div className="border border-gray-200 dark:border-token rounded-lg p-4 bg-white dark:bg-[var(--surface-2)]">
-      <p className="text-sm text-gray-600 mb-4">Choose between light and dark mode. Your preference is saved to this device.</p>
+      <p className="text-sm text-gray-800 mb-4">Choose between light and dark mode. Your preference is saved to this device.</p>
       <div className="flex gap-4">
         {(['light','dark'] as const).map(t => (
           <button
@@ -787,14 +810,14 @@ function ThemeSettingsSection() {
               <span className="font-medium capitalize">{t}</span>
               {theme === t && <span className="text-xs text-blue-600 font-medium">Active</span>}
             </div>
-            <div className="h-6 rounded bg-gradient-to-r from-gray-100 to-gray-200 dark:from-[var(--surface-2)] dark:to-[var(--surface-3)] flex items-center justify-center text-[10px] text-gray-500 dark:text-[var(--text-dim)]">
+            <div className="h-6 rounded bg-gradient-to-r from-gray-100 to-gray-200 dark:from-[var(--surface-2)] dark:to-[var(--surface-3)] flex items-center justify-center text-[10px] text-gray-700 dark:text-[var(--text-dim)]">
               {t === 'dark' ? 'Dark palette preview' : 'Light palette preview'}
             </div>
           </button>
         ))}
       </div>
       <div className="mt-4 flex items-center justify-between">
-        <p className="text-xs text-gray-500 dark:text-[var(--text-dim)]">System preference: {system}</p>
+        <p className="text-xs text-gray-700 dark:text-[var(--text-dim)]">System preference: {system}</p>
         <button onClick={toggleTheme} className="text-xs px-3 py-1.5 rounded-md border border-gray-300 dark:border-token hover:bg-gray-50 dark:hover:bg-[var(--surface-2)] font-medium">Toggle</button>
       </div>
     </div>

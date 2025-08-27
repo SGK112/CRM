@@ -195,14 +195,14 @@ export default function ClientsImportPage() {
             <div className="flex items-center gap-3 mb-2">
               <Link 
                 href="/dashboard/clients" 
-                className="inline-flex items-center text-gray-500 hover:text-gray-700 transition-colors"
+                className="inline-flex items-center text-gray-700 hover:text-gray-700 transition-colors"
               >
                 <ArrowLeftIcon className="h-5 w-5 mr-1" />
                 Back to Clients
               </Link>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">Import Clients</h1>
-            <p className="text-gray-600 mt-1">Upload a CSV file to add multiple clients at once</p>
+            <h1 className="text-3xl font-bold text-brand-700 dark:text-brand-400">Import Clients</h1>
+            <p className="text-gray-800 mt-1">Upload a CSV file to add multiple clients at once</p>
           </div>
         </div>
 
@@ -252,7 +252,7 @@ export default function ClientsImportPage() {
               <h3 className="text-lg font-medium text-gray-900 dark:text-[var(--text)] mb-2">
                 {uploading ? 'Processing...' : 'Drop your CSV file here'}
               </h3>
-              <p className="text-sm text-gray-500 dark:text-[var(--text-dim)] mb-4">
+              <p className="text-sm text-gray-700 dark:text-[var(--text-dim)] mb-4">
                 or click to browse files
               </p>
               <button
@@ -279,7 +279,7 @@ export default function ClientsImportPage() {
                   <DocumentArrowUpIcon className="h-4 w-4 mr-1" />
                   Download Sample CSV Template
                 </a>
-                <p className="text-xs text-gray-500">Columns recognized automatically: firstName, lastName, email, phone, company, tags, status, source</p>
+                <p className="text-xs text-gray-700 >Columns recognized automatically: firstName, lastName, email, phone, company, tags, status, source</p>
               </div>
             </div>
 
@@ -301,14 +301,14 @@ export default function ClientsImportPage() {
             {step==='map' && (
               <div className="mt-6 space-y-4">
                 <h3 className="text-sm font-medium text-gray-900 dark:text-[var(--text)]">Map Columns</h3>
-                <p className="text-xs text-gray-600 dark:text-[var(--text-dim)]">Match your CSV headers to system fields. Unmapped required fields will block import.</p>
+                <p className="text-xs text-gray-800 dark:text-[var(--text-dim)]">Match your CSV headers to system fields. Unmapped required fields will block import.</p>
                 <div className="overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-lg">
                   <table className="min-w-full text-sm">
                     <thead className="bg-gray-50 dark:bg-[var(--surface-2)]">
                       <tr>
-                        <th className="px-3 py-2 text-left font-medium text-gray-600">CSV Header</th>
-                        <th className="px-3 py-2 text-left font-medium text-gray-600">Map To</th>
-                        <th className="px-3 py-2 text-left font-medium text-gray-600">Sample Value</th>
+                        <th className="px-3 py-2 text-left font-medium text-gray-800">CSV Header</th>
+                        <th className="px-3 py-2 text-left font-medium text-gray-800">Map To</th>
+                        <th className="px-3 py-2 text-left font-medium text-gray-800">Sample Value</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -325,7 +325,7 @@ export default function ClientsImportPage() {
                               {[...requiredFields, ...optionalFields].map(f=> <option key={f} value={f}>{f}{requiredFields.includes(f)?' *':''}</option>)}
                             </select>
                           </td>
-                          <td className="px-3 py-2 text-xs text-gray-500 truncate max-w-[180px]">{rawRows[0]?.[h] || '—'}</td>
+                          <td className="px-3 py-2 text-xs text-gray-700 truncate max-w-[180px]">{rawRows[0]?.[h] || '—'}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -348,7 +348,7 @@ export default function ClientsImportPage() {
             {step==='preview' && (
               <div className="mt-6 space-y-4">
                 <h3 className="text-sm font-medium text-gray-900 dark:text-[var(--text)]">Preview & Validation</h3>
-                <p className="text-xs text-gray-600 dark:text-[var(--text-dim)]">Showing first {parsedPreview.length} rows. Errors must be fixed or those rows will be skipped.</p>
+                <p className="text-xs text-gray-800 dark:text-[var(--text-dim)]">Showing first {parsedPreview.length} rows. Errors must be fixed or those rows will be skipped.</p>
                 <div className="overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-lg max-h-96 overflow-y-auto">
                   <table className="min-w-full text-xs">
                     <thead className="bg-gray-50 dark:bg-[var(--surface-2)]">
@@ -371,7 +371,7 @@ export default function ClientsImportPage() {
                     </tbody>
                   </table>
                 </div>
-                <div className="flex flex-wrap gap-3 items-center text-xs text-gray-600 dark:text-[var(--text-dim)]">
+                <div className="flex flex-wrap gap-3 items-center text-xs text-gray-800 dark:text-[var(--text-dim)]">
                   <span>Total rows: {rawRows.length}</span>
                   <span>Errors: {Object.keys(validationErrors).length}</span>
                   <span>Will import: {rawRows.length - Object.keys(validationErrors).length}</span>
@@ -433,7 +433,7 @@ export default function ClientsImportPage() {
                 {result.skipReasons && Object.keys(result.skipReasons).length > 0 && (
                   <div className="bg-gray-50 dark:bg-[var(--surface-2)] rounded-lg p-4 border border-gray-200 dark:border-gray-700">
                     <h5 className="text-sm font-medium text-gray-900 dark:text-[var(--text)] mb-2">Skipped Rows</h5>
-                    <div className="text-sm text-gray-600 dark:text-[var(--text-dim)]">
+                    <div className="text-sm text-gray-800 dark:text-[var(--text-dim)]">
                       {Object.entries(result.skipReasons).map(([reason, count]: any) => (
                         <div key={reason} className="flex justify-between">
                           <span>{reason}:</span>
@@ -469,7 +469,7 @@ export default function ClientsImportPage() {
                         <thead className="bg-gray-50 dark:bg-[var(--surface-2)]">
                           <tr>
                             {['Name', 'Email', 'Phone', 'Company', 'Status', 'Source'].map(header => (
-                              <th key={header} className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                              <th key={header} className="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                                 {header}
                               </th>
                             ))}
@@ -481,13 +481,13 @@ export default function ClientsImportPage() {
                               <td className="px-4 py-3 text-sm text-gray-900 dark:text-[var(--text)]">
                                 {row.firstName} {row.lastName}
                               </td>
-                              <td className="px-4 py-3 text-sm text-gray-600 dark:text-[var(--text-dim)]">
+                              <td className="px-4 py-3 text-sm text-gray-800 dark:text-[var(--text-dim)]">
                                 {row.email || '—'}
                               </td>
-                              <td className="px-4 py-3 text-sm text-gray-600 dark:text-[var(--text-dim)]">
+                              <td className="px-4 py-3 text-sm text-gray-800 dark:text-[var(--text-dim)]">
                                 {row.phone || '—'}
                               </td>
-                              <td className="px-4 py-3 text-sm text-gray-600 dark:text-[var(--text-dim)]">
+                              <td className="px-4 py-3 text-sm text-gray-800 dark:text-[var(--text-dim)]">
                                 {row.company || '—'}
                               </td>
                               <td className="px-4 py-3 text-sm">
@@ -495,7 +495,7 @@ export default function ClientsImportPage() {
                                   {row.status || 'lead'}
                                 </span>
                               </td>
-                              <td className="px-4 py-3 text-sm text-gray-600 dark:text-[var(--text-dim)]">
+                              <td className="px-4 py-3 text-sm text-gray-800 dark:text-[var(--text-dim)]">
                                 {row.source || 'other'}
                               </td>
                             </tr>
@@ -552,7 +552,7 @@ export default function ClientsImportPage() {
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <h4 className="text-sm font-medium text-gray-700 dark:text-[var(--text-dim)] mb-2">Required Columns</h4>
-              <ul className="text-sm text-gray-600 dark:text-[var(--text-dim)] space-y-1">
+              <ul className="text-sm text-gray-800 dark:text-[var(--text-dim)] space-y-1">
                 <li>• <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">firstName</code> - Client's first name</li>
                 <li>• <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">lastName</code> - Client's last name</li>
                 <li>• <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">email</code> - Valid email address</li>
@@ -560,7 +560,7 @@ export default function ClientsImportPage() {
             </div>
             <div>
               <h4 className="text-sm font-medium text-gray-700 dark:text-[var(--text-dim)] mb-2">Optional Columns</h4>
-              <ul className="text-sm text-gray-600 dark:text-[var(--text-dim)] space-y-1">
+              <ul className="text-sm text-gray-800 dark:text-[var(--text-dim)] space-y-1">
                 <li>• <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">phone</code> - Phone number</li>
                 <li>• <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">company</code> - Company name</li>
                 <li>• <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">tags</code> - Comma-separated tags</li>

@@ -41,9 +41,10 @@ interface AIAction {
 interface AIAssistantProps {
   isOpen: boolean;
   onClose: () => void;
+  initialMessage?: string;
 }
 
-export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
+export default function AIAssistant({ isOpen, onClose, initialMessage }: AIAssistantProps) {
   // Robust unique id generator to avoid duplicate React keys when multiple messages are added within the same millisecond
   const genId = () => (typeof crypto !== 'undefined' && (crypto as any).randomUUID ? (crypto as any).randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2,8)}`);
   const [messages, setMessages] = useState<AIMessage[]>([]);
@@ -79,6 +80,13 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Handle initial message from FooterCopilot
+  useEffect(() => {
+    if (isOpen && initialMessage && initialMessage.trim()) {
+      setInput(initialMessage);
+    }
+  }, [isOpen, initialMessage]);
 
   // Load memory on open with lazy loading
   useEffect(() => {
@@ -1054,15 +1062,15 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
             <div>
               <h2 className="text-sm font-semibold text-[var(--text)]">Remodely Ai Assistant</h2>
               <div className="flex flex-wrap gap-1 mt-0.5">
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-100 text-amber-700 dark:bg-amber-600/25 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30">/ for commands</span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-100 text-blue-700 dark:bg-blue-600/25 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30">{contextSummary.projects ?? '–'} projects</span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-700 dark:bg-green-600/25 dark:text-green-300 border border-green-200 dark:border-green-500/30">{contextSummary.clients ?? '–'} clients</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-200 text-amber-800 dark:bg-amber-600/25 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30">/ for commands</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-200 text-blue-800 dark:bg-blue-600/25 dark:text-blue-300 border border-blue-300 dark:border-blue-500/30">{contextSummary.projects ?? '–'} projects</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-200 text-green-800 dark:bg-green-600/25 dark:text-green-300 border border-green-300 dark:border-green-500/30">{contextSummary.clients ?? '–'} clients</span>
               </div>
             </div>
           </div>
           <div className="flex items-center space-x-1">
-            <button onClick={() => setShowCommands(!showCommands)} className="px-2 py-1 text-[11px] rounded-md border border-gray-300 dark:border-[var(--border)] text-gray-600 dark:text-[var(--text-dim)] bg-white dark:bg-[var(--surface-2)] hover:bg-gray-100 dark:hover:bg-[var(--surface-2)] transition-colors" title="Toggle command palette">/{showCommands ? 'hide' : 'cmds'}</button>
-            <button onClick={() => { localStorage.removeItem(MEMORY_KEY); setMessages([]); setHasMoreHistory(false); setShowCreateProject(false); }} className="px-2 py-1 text-[11px] rounded-md border border-gray-300 dark:border-[var(--border)] text-gray-600 dark:text-[var(--text-dim)] bg-white dark:bg-[var(--surface-2)] hover:bg-gray-100 dark:hover:bg-[var(--surface-2)] transition-colors" title="Clear chat history">Clear</button>
+            <button onClick={() => setShowCommands(!showCommands)} className="px-2 py-1 text-[11px] rounded-md border border-gray-400 dark:border-[var(--border)] text-black dark:text-white bg-gray-200 dark:bg-[var(--surface-2)] hover:bg-gray-300 dark:hover:bg-[var(--surface-2)] transition-colors shadow-sm" title="Toggle command palette">/{showCommands ? 'hide' : 'cmds'}</button>
+            <button onClick={() => { localStorage.removeItem(MEMORY_KEY); setMessages([]); setHasMoreHistory(false); setShowCreateProject(false); }} className="px-2 py-1 text-[11px] rounded-md border border-gray-400 dark:border-[var(--border)] text-black dark:text-white bg-gray-200 dark:bg-[var(--surface-2)] hover:bg-gray-300 dark:hover:bg-[var(--surface-2)] transition-colors shadow-sm" title="Clear chat history">Clear</button>
             <span className="hidden sm:inline-flex px-2 py-1 text-[10px] rounded-md bg-[var(--surface-2)] text-[var(--text-dim)] border border-[var(--border)]">⌘K</span>
             <button
               onClick={onClose}
@@ -1076,7 +1084,7 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
 
         {/* Optional command palette */}
         {showCommands && (
-          <div className="border-b border-token bg-white/90 dark:bg-[var(--surface-1)]/95 backdrop-blur px-4 py-2 text-xs text-gray-600 dark:text-[var(--text-dim)] grid grid-cols-2 gap-2">
+          <div className="border-b border-token bg-white/90 dark:bg-[var(--surface-1)]/95 backdrop-blur px-4 py-2 text-xs text-black dark:text-white grid grid-cols-2 gap-2">
             {[
               { cmd: '/projects', tooltip: 'List all projects in workspace' },
               { cmd: '/clients', tooltip: 'Show all clients' },
@@ -1088,7 +1096,7 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
               <button 
                 key={cmd} 
                 onClick={() => { setInput(cmd); setShowCommands(false); }} 
-                className="text-left px-2 py-1 rounded bg-gray-100 dark:bg-[var(--surface-2)] hover:bg-gray-200 dark:hover:bg-[var(--surface-3)] border border-gray-300 dark:border-[var(--border)] transition text-[11px] font-medium text-gray-700 dark:text-[var(--text)]"
+                className="text-left px-2 py-1 rounded bg-gray-200 dark:bg-[var(--surface-2)] hover:bg-gray-300 dark:hover:bg-[var(--surface-3)] border border-gray-400 dark:border-[var(--border)] transition text-[11px] font-medium text-black dark:text-white shadow-sm"
                 title={tooltip}
               >
                 {cmd}
@@ -1130,8 +1138,8 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
                   message.type === 'user'
                     ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white border-amber-600/50 shadow'
                     : message.type === 'system'
-                      ? 'bg-gray-100 dark:bg-[var(--surface-2)] text-gray-600 dark:text-[var(--text-dim)] border border-gray-200 dark:border-[var(--border)] text-xs'
-                      : 'bg-white dark:bg-[var(--surface-2)] text-gray-800 dark:text-[var(--text)] border border-gray-200 dark:border-[var(--border)] hover:border-gray-300 dark:hover:border-[var(--text-dim)]/30'
+                      ? 'bg-gray-100 dark:bg-[var(--surface-2)] text-black dark:text-white border border-gray-200 dark:border-[var(--border)] text-xs'
+                      : 'bg-white dark:bg-[var(--surface-2)] text-black dark:text-white border border-gray-200 dark:border-[var(--border)] hover:border-gray-300 dark:hover:border-[var(--text-dim)]/30'
                 }`}
               >
                 <p className={`whitespace-pre-wrap leading-relaxed ${message.type==='system' ? 'font-mono' : ''}`}>{message.content}</p>
@@ -1152,7 +1160,7 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
                           className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left border text-xs font-medium transition group/action ${
                                 message.type === 'user'
                                   ? 'bg-white/10 hover:bg-white/15 border-white/30 text-white'
-                                  : 'bg-gray-50 dark:bg-[var(--surface-2)] hover:bg-gray-100 dark:hover:bg-[var(--surface-3)] border border-gray-200 dark:border-[var(--border)] text-gray-700 dark:text-[var(--text)]'
+                                  : 'bg-gray-50 dark:bg-[var(--surface-2)] hover:bg-gray-100 dark:hover:bg-[var(--surface-3)] border border-gray-200 dark:border-[var(--border)] text-black dark:text-white'
                               } ${action.danger ? 'hover:bg-red-50 dark:hover:bg-red-600/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-600/40' : ''}`}
                         >
                           <IconComp className={`h-4 w-4 ${message.type==='user' ? 'text-white' : 'text-[var(--text-dim)] group-hover/action:text-[var(--text)]'}`} />
@@ -1178,7 +1186,7 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
                         className={`text-[11px] px-2 py-1 rounded border transition ${
                           message.type === 'user'
                             ? 'bg-white/10 hover:bg-white/20 border-white/30 text-white'
-                            : 'bg-gray-100 dark:bg-[var(--surface-2)] hover:bg-gray-200 dark:hover:bg-[var(--surface-3)] border border-gray-300 dark:border-[var(--border)] text-gray-700 dark:text-[var(--text)]'
+                            : 'bg-gray-100 dark:bg-[var(--surface-2)] hover:bg-gray-200 dark:hover:bg-[var(--surface-3)] border border-gray-300 dark:border-[var(--border)] text-black dark:text-white'
                         }`}
                       >
                         {suggestion}
@@ -1192,7 +1200,7 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
 
           {isLoading && (
             <div className="flex justify-start">
-              <div className="bg-white dark:bg-[var(--surface-2)] border border-gray-200 dark:border-token rounded-xl px-4 py-3 shadow-sm text-sm text-gray-600 dark:text-[var(--text-dim)] flex items-center gap-3">
+              <div className="bg-white dark:bg-[var(--surface-2)] border border-gray-200 dark:border-token rounded-xl px-4 py-3 shadow-sm text-sm text-black dark:text-white flex items-center gap-3">
                 <div className="relative h-4 w-4">
                   <div className="absolute inset-0 animate-spin rounded-full border-2 border-amber-500 border-t-transparent" />
                 </div>
@@ -1304,7 +1312,7 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
                 <button 
                   key={s.text} 
                   onClick={()=> setInput(s.text)} 
-                  className="text-[11px] px-2 py-1 rounded-md bg-gray-100 dark:bg-[var(--surface-2)] hover:bg-gray-200 dark:hover:bg-[var(--surface-3)] text-gray-700 dark:text-[var(--text)] border border-gray-300 dark:border-[var(--border)] transition"
+                  className="text-[11px] px-2 py-1 rounded-md bg-gray-200 dark:bg-[var(--surface-2)] hover:bg-gray-300 dark:hover:bg-[var(--surface-3)] text-black dark:text-white border border-gray-400 dark:border-[var(--border)] transition shadow-sm"
                   title={s.tooltip}
                 >
                   {s.text}
@@ -1313,7 +1321,7 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
             </div>
           )}
           <div className="mt-1 group">
-            <div className="flex rounded-xl border border-gray-200 dark:border-gray-700 bg-[var(--surface-2)] dark:bg-[var(--surface-2)] focus-within:border-amber-500/60 focus-within:ring-1 focus-within:ring-amber-500/20 transition">
+            <div className="flex rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-[var(--surface-2)] focus-within:border-amber-500/60 focus-within:ring-1 focus-within:ring-amber-500/20 transition shadow-sm">
               <div className="flex-1 relative px-3 py-2">
                 <textarea
                   ref={textareaRef}
@@ -1332,7 +1340,7 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
                     }
                   }}
                   placeholder="Ask or type / for commands..."
-                  className="w-full bg-transparent outline-none resize-none text-sm leading-relaxed min-h-[42px] max-h-[160px] pr-2 text-gray-800 dark:text-gray-200 placeholder:text-gray-500"
+                  className="w-full bg-transparent outline-none resize-none text-sm leading-relaxed min-h-[42px] max-h-[160px] pr-2 text-black dark:text-white placeholder:text-gray-600 dark:placeholder:text-gray-500"
                   disabled={isLoading}
                 />
                 <div className="absolute bottom-3 right-4 flex items-center gap-1.5 text-[10px] text-gray-400 dark:text-gray-400 select-none pointer-events-none opacity-0 group-hover:opacity-90 transition-opacity bg-white/80 dark:bg-gray-800/80 px-1.5 py-0.5 rounded backdrop-blur-sm">
@@ -1346,9 +1354,9 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
                   disabled={!input.trim() || isLoading}
                   aria-label="Send message"
                   title="Send message (Enter)"
-                  className="m-1 ml-0 px-4 rounded-lg bg-gradient-to-r from-amber-600 to-orange-600 text-white text-sm font-medium flex items-center gap-1 shadow-sm hover:from-amber-700 hover:to-orange-700 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[var(--surface-2)] transition-all duration-150"
+                  className="m-1 ml-0 px-4 rounded-lg bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-medium flex items-center gap-1 shadow-sm hover:from-red-700 hover:to-red-800 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[var(--surface-2)] transition-all duration-150"
                 >
-                  <PaperAirplaneIcon className="h-4 w-4" />
+                  <PaperAirplaneIcon className="h-4 w-4 text-white" />
                   <span className="hidden sm:inline">Send</span>
                 </button>
               </div>

@@ -34,12 +34,14 @@ export function PageHeader({
   title,
   subtitle,
   actions,
-  stats
+  stats,
+  titleClassName
 }:{
   title:string;
   subtitle?:string;
   actions?:React.ReactNode;
   stats?:StatItem[];
+  titleClassName?:string;
 }) {
   return (
     <div className={mobileOptimized(
@@ -50,7 +52,7 @@ export function PageHeader({
       <div className={responsive.spacing.sm}>
         <h1 className={mobileOptimized(
           mobileClasses.text.heading,
-          'font-bold text-gray-900 dark:text-gray-100 mb-0'
+          titleClassName || 'font-bold text-gray-900 dark:text-gray-100 mb-0'
         )}>
           {title}
         </h1>

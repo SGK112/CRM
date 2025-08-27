@@ -1,0 +1,651 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Layout from '../../components/Layout';
+import { PageHeader } from '../../components/ui/PageHeader';
+// Legacy ChatBot removed; CopilotWidget supersedes it.
+import {
+  ChartBarIcon,
+  CurrencyDollarIcon,
+  UserGroupIcon,
+  ClipboardDocumentListIcon,
+  CalendarDaysIcon,
+  ChatBubbleLeftRightIcon,
+  BellIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
+  EyeIcon,
+  PlusIcon,
+  XMarkIcon,
+  CheckIcon,
+  StarIcon,
+  SparklesIcon
+} from '@heroicons/react/24/outline';
+
+interface DashboardStats {
+  totalRevenue: number;
+  activeProjects: number;
+  totalClients: number;
+  pendingTasks: number;
+  revenueChange?: number;
+  projectsChange?: number;
+  clientsChange?: number;
+  tasksChange?: number;
+}
+
+interface RecentActivity {
+  id: string;
+  type: 'project' | 'client' | 'payment' | 'message' | 'appointment';
+  title: string;
+  description: string;
+  timestamp: string;
+  status?: 'completed' | 'pending' | 'cancelled';
+}
+
+interface Project {
+  id: string;
+  title: string;
+  client?: string;
+  status: 'lead' | 'proposal' | 'approved' | 'in_progress' | 'on_hold' | 'completed' | 'cancelled' | 'planning' | 'review';
+  progress: number;
+  budget: number;
+  dueDate: string;
+}
+
+interface QuickAction {
+  title: string;
+  description: string;
+  action: () => void;
+  color: string;
+  priority: number;
+}
+
+export default function DashboardPage() {
+  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [stats, setStats] = useState<DashboardStats>({
+    totalRevenue: 0,
+    activeProjects: 0,
+    totalClients: 0,
+    pendingTasks: 0,
+  });
+
+  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
+  const [activeProjects, setActiveProjects] = useState<Project[]>([]);
+
+  // Fetch live data for stats and lists
+  useEffect(() => {
+    // Load user data and check for welcome flag
+    const userData = localStorage.getItem('user');
+    const urlParams = new URLSearchParams(window.location.search);
+    const welcomeFlag = urlParams.get('welcome');
+    
+    if (userData) {
+      const parsedUser = JSON.parse(userData);
+      setUser(parsedUser);
+      
+      // Show welcome message for new users or when coming from onboarding
+      if (welcomeFlag === 'true' || !parsedUser.onboardingCompleted) {
+        setShowWelcome(true);
+        // Clear the welcome flag from URL
+        window.history.replaceState({}, '', '/dashboard');
+      }
+    }
+
+    let aborted = false;
+    async function load() {
+      try {
+        const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+        if (!token) { router.push('/auth/login'); return; }
+        const headers: HeadersInit = { Authorization: `Bearer ${token}` };
+
+        // Fetch in parallel
+        const [projRes, clientsRes, clientsCountRes, estRes, invRes] = await Promise.all([
+          fetch('/api/projects', { headers }).catch(() => null),
+          fetch('/api/clients?limit=1000', { headers }).catch(() => null),
+          fetch('/api/clients/count', { headers }).catch(() => null),
+          fetch('/api/estimates', { headers }).catch(() => null),
+          fetch('/api/invoices', { headers }).catch(() => null),
+        ]);
+      return "Let's get you started with your first client and project.";
+    }
+    if (stats.activeProjects === 0) {
+      return "You have clients but no active projects. Ready to start a new project?";
+    }
+    if (stats.totalClients === 0) {
+      return "Great start on projects! Consider adding more clients to grow your business.";
+    }
+    return `You're managing ${stats.activeProjects} active project${stats.activeProjects !== 1 ? 's' : ''} across ${stats.totalClients} client${stats.totalClients !== 1 ? 's' : ''}.`;
+  };
+
+  const getQuickActions = () => {
+    const actions = [];
+    
+    if (stats.totalClients === 0) {
+      actions.push({
+        title: 'Add Your First Client',
+        description: 'Start building your client database',
+        action: () => router.push('/dashboard/clients/new'),
+        color: 'blue',
+        priority: 1
+      });
+    }
+    
+    if (stats.activeProjects === 0) {
+      actions.push({
+        title: 'Create Your First Project',
+        description: 'Organize your work with projects',
+        action: () => router.push('/dashboard/projects/new'),
+        color: 'green',
+        priority: stats.totalClients > 0 ? 1 : 2
+      });
+    }
+    
+    if (stats.totalClients > 0 && stats.activeProjects > 0) {
+      actions.push({
+        title: 'Send an Estimate',
+        description: 'Create professional estimates',
+        action: () => router.push('/dashboard/estimates/new'),
+        color: 'amber',
+        priority: 3
+      });
+    }
+
+    // Always show team setup if not already done
+    if (!user?.teamSetup) {
+      actions.push({
+        title: 'Invite Team Members',
+        description: 'Collaborate with your team',
+        action: () => router.push('/dashboard/settings?tab=team'),
+        color: 'purple',
+        priority: 4
+      });
+    }
+
+    return actions.sort((a, b) => a.priority - b.priority).slice(0, 3);
+  };eHeader';
+// Legacy ChatBot removed; CopilotWidget supersedes it.
+import {
+  ChartBarIcon,
+  CurrencyDollarIcon,
+  UserGroupIcon,
+  ClipboardDocumentListIcon,
+  CalendarDaysIcon,
+  ChatBubbleLeftRightIcon,
+  BellIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
+  EyeIcon,
+  PlusIcon
+} from '@heroicons/react/24/outline';
+
+interface DashboardStats {
+  totalRevenue: number;
+  activeProjects: number;
+  totalClients: number;
+  pendingTasks: number;
+  revenueChange?: number;
+  projectsChange?: number;
+  clientsChange?: number;
+  tasksChange?: number;
+}
+
+interface RecentActivity {
+  id: string;
+  type: 'project' | 'client' | 'payment' | 'message' | 'appointment';
+  title: string;
+  description: string;
+  timestamp: string;
+  status?: 'completed' | 'pending' | 'cancelled';
+}
+
+interface Project {
+  id: string;
+  title: string;
+  client?: string;
+  status: 'lead' | 'proposal' | 'approved' | 'in_progress' | 'on_hold' | 'completed' | 'cancelled' | 'planning' | 'review';
+  progress: number;
+  budget: number;
+  dueDate: string;
+}
+
+export default function DashboardPage() {
+  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [stats, setStats] = useState<DashboardStats>({
+    totalRevenue: 0,
+    activeProjects: 0,
+    totalClients: 0,
+    pendingTasks: 0,
+  });
+
+  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
+
+  const [activeProjects, setActiveProjects] = useState<Project[]>([]);
+
+  // Fetch live data for stats and lists
+  useEffect(() => {
+    // Load user data and check for welcome flag
+    const userData = localStorage.getItem('user');
+    const urlParams = new URLSearchParams(window.location.search);
+    const welcomeFlag = urlParams.get('welcome');
+    
+    if (userData) {
+      const parsedUser = JSON.parse(userData);
+      setUser(parsedUser);
+      
+      // Show welcome message for new users or when coming from onboarding
+      if (welcomeFlag === 'true' || !parsedUser.onboardingCompleted) {
+        setShowWelcome(true);
+        // Clear the welcome flag from URL
+        window.history.replaceState({}, '', '/dashboard');
+      }
+    }
+
+    let aborted = false;
+    async function load() {
+      try {
+  const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+        if (!token) { router.push('/auth/login'); return; }
+        const headers: HeadersInit = { Authorization: `Bearer ${token}` };
+
+        // Fetch in parallel
+        const [projRes, clientsRes, clientsCountRes, estRes, invRes] = await Promise.all([
+          fetch('/api/projects', { headers }).catch(() => null),
+          fetch('/api/clients?limit=1000', { headers }).catch(() => null),
+          fetch('/api/clients/count', { headers }).catch(() => null),
+          fetch('/api/estimates', { headers }).catch(() => null),
+          fetch('/api/invoices', { headers }).catch(() => null),
+        ]);
+
+        if (aborted) return;
+
+        // Handle auth failures
+        const unauthorized = (r: Response | null) => !!r && r.status === 401;
+        if (unauthorized(projRes) || unauthorized(clientsRes) || unauthorized(clientsCountRes) || unauthorized(estRes) || unauthorized(invRes)) {
+          router.push('/auth/login');
+          return;
+        }
+
+        const projects = projRes && projRes.ok ? await projRes.json() : [];
+        const clients = clientsRes && clientsRes.ok ? await clientsRes.json() : [];
+        const clientsCount = clientsCountRes && clientsCountRes.ok ? await clientsCountRes.json() : { count: clients?.length || 0 };
+        const estimates = estRes && estRes.ok ? await estRes.json() : [];
+        const invoices = invRes && invRes.ok ? await invRes.json() : [];
+
+        // Compute stats
+        const active = (projects || []).filter((p: any) => !['completed','cancelled'].includes(p.status));
+        const totalRevenue = (invoices || []).reduce((sum: number, inv: any) => sum + (inv.amountPaid || 0), 0);
+        const pendingFromEst = (estimates || []).filter((e: any) => ['sent','accepted'].includes(e.status)).length;
+        const pendingFromInv = (invoices || []).filter((i: any) => ['sent','partial'].includes(i.status)).length;
+        const pendingTasks = pendingFromEst + pendingFromInv;
+
+        // Build client map for display
+        const clientName = (c: any) => (c?.company ? c.company : [c?.firstName, c?.lastName].filter(Boolean).join(' ')).trim();
+        const clientMap = new Map<string, string>();
+        (clients || []).forEach((c: any) => clientMap.set(c._id || c.id, clientName(c)));
+
+        // Prepare active projects list (top 4 by updatedAt desc)
+        const statusProgress: Record<string, number> = {
+          lead: 5, proposal: 20, approved: 40, in_progress: 65, on_hold: 65, completed: 100, cancelled: 0, planning: 20, review: 85,
+        };
+        const ap: Project[] = (active || [])
+          .sort((a: any, b: any) => new Date(b.updatedAt || b.createdAt || 0).getTime() - new Date(a.updatedAt || a.createdAt || 0).getTime())
+          .slice(0, 4)
+          .map((p: any) => ({
+            id: p._id || p.id,
+            title: p.title || 'Untitled Project',
+            client: clientMap.get(p.clientId) || '—',
+            status: p.status,
+            progress: statusProgress[p.status] ?? 0,
+            budget: Number(p.budget || 0),
+            dueDate: (p.endDate ? new Date(p.endDate) : new Date((p.createdAt ? new Date(p.createdAt) : new Date()).getTime() + 1000*60*60*24*30)).toISOString(),
+          }));
+
+        // Recent activity: mix of latest projects/estimates/invoices
+        type AnyItem = { _id?: string; id?: string; createdAt?: string; updatedAt?: string } & Record<string, any>;
+        const stamp = (x: AnyItem) => new Date(x.updatedAt || x.createdAt || Date.now()).getTime();
+        const acts: RecentActivity[] = (
+          [
+            ...(projects || []).slice(0, 5).map((p: AnyItem) => ({
+              id: p._id || p.id,
+              type: 'project' as const,
+              title: p.title || 'New Project',
+              description: `Status: ${(p as any).status}`,
+              t: new Date(p.updatedAt || p.createdAt || Date.now()).getTime(),
+            })),
+            ...(estimates || []).slice(0, 5).map((e: AnyItem) => ({
+              id: e._id || e.id,
+              type: 'client' as const,
+              title: `Estimate ${(e as any).number || ''}`.trim(),
+              description: `Status: ${(e as any).status}`,
+              t: new Date(e.updatedAt || e.createdAt || Date.now()).getTime(),
+            })),
+            ...(invoices || []).slice(0, 5).map((i: AnyItem) => ({
+              id: i._id || i.id,
+              type: 'payment' as const,
+              title: `Invoice ${(i as any).number || ''}`.trim(),
+              description: `${(i as any).status === 'paid' ? 'Payment received' : 'Awaiting payment'} — ${(i as any).amountPaid || 0} / ${(i as any).total || 0}`,
+              status: (i as any).status === 'paid' ? 'completed' : (['sent','partial'].includes((i as any).status) ? 'pending' : undefined),
+              t: new Date(i.updatedAt || i.createdAt || Date.now()).getTime(),
+            })),
+          ] as any
+        )
+        .sort((a: any, b: any) => b.t - a.t)
+        .slice(0, 5)
+        .map((x: any) => ({ ...x, timestamp: new Date(x.t).toLocaleString() }));
+
+        setStats({
+          totalRevenue,
+          activeProjects: active.length,
+          totalClients: clientsCount?.count ?? (clients?.length || 0),
+          pendingTasks,
+        });
+        setActiveProjects(ap);
+        setRecentActivity(acts);
+      } catch (e) {
+        // Swallow errors for now; page will show zeros/empty states
+      }
+    }
+    load();
+    return () => { aborted = true };
+  }, [router]);
+
+  // QuickActions removed; Copilot handles smart actions now.
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'planning':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300';
+      case 'in_progress':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300';
+      case 'review':
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300';
+      case 'completed':
+        return 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300';
+      case 'on_hold':
+        return 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300';
+      case 'lead':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300';
+      case 'proposal':
+        return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300';
+      case 'approved':
+        return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300';
+      case 'cancelled':
+        return 'bg-gray-200 text-gray-700 dark:bg-gray-700/40 dark:text-gray-300';
+      default:
+        return 'surface-2 text-secondary';
+    }
+  };
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case 'project':
+        return ClipboardDocumentListIcon;
+      case 'client':
+        return UserGroupIcon;
+      case 'payment':
+        return CurrencyDollarIcon;
+      case 'message':
+        return ChatBubbleLeftRightIcon;
+      case 'appointment':
+        return CalendarDaysIcon;
+      default:
+        return BellIcon;
+    }
+  };
+
+  return (
+    <Layout>
+      <div className="space-y-8">
+        {/* Header */}
+        <PageHeader
+          title="Dashboard"
+          subtitle="Overview of your business at a glance."
+          actions={(
+            <button
+              onClick={() => router.push('/dashboard/analytics')}
+              className="pill pill-tint-amber sm inline-flex items-center gap-2"
+            >
+              <EyeIcon className="h-4 w-4" />
+              View Reports
+            </button>
+          )}
+        />
+
+        {/* Stats Grid: auto-fit cards with a sensible min width so large numbers don’t wrap */}
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-6">
+          {/* Total Revenue */}
+          <div className="surface-1 rounded-xl shadow-sm border border-token p-6 overflow-hidden">
+            <div className="flex items-center justify-between">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-secondary">Total Revenue</p>
+                <p className="text-3xl font-bold text-primary whitespace-nowrap tabular-nums tracking-tight">{formatCurrency(stats.totalRevenue)}</p>
+              </div>
+              <div className="p-3 bg-green-100 dark:bg-green-600/20 rounded-full flex-shrink-0 hidden sm:block">
+                <CurrencyDollarIcon className="h-8 w-8 text-green-600 dark:text-green-400" />
+              </div>
+            </div>
+            {typeof stats.revenueChange === 'number' && (
+              <div className="mt-4 flex items-center">
+                {stats.revenueChange >= 0 ? (
+                  <ArrowTrendingUpIcon className="h-4 w-4 text-green-500 mr-1" />
+                ) : (
+                  <ArrowTrendingDownIcon className="h-4 w-4 text-red-500 mr-1" />
+                )}
+                <span className={`text-sm font-medium ${stats.revenueChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {Math.abs(stats.revenueChange)}%
+                </span>
+                <span className="text-sm text-secondary ml-1">vs last month</span>
+              </div>
+            )}
+          </div>
+
+          {/* Active Projects */}
+          <div className="surface-1 rounded-xl shadow-sm border border-token p-6 overflow-hidden">
+            <div className="flex items-center justify-between">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-secondary">Active Projects</p>
+                <p className="text-3xl font-bold text-primary whitespace-nowrap tabular-nums tracking-tight">{stats.activeProjects}</p>
+              </div>
+              <div className="p-3 bg-blue-100 dark:bg-blue-600/20 rounded-full flex-shrink-0 hidden sm:block">
+                <ClipboardDocumentListIcon className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+              </div>
+            </div>
+            {typeof stats.projectsChange === 'number' && (
+              <div className="mt-4 flex items-center">
+                {stats.projectsChange >= 0 ? (
+                  <ArrowTrendingUpIcon className="h-4 w-4 text-green-500 mr-1" />
+                ) : (
+                  <ArrowTrendingDownIcon className="h-4 w-4 text-red-500 mr-1" />
+                )}
+                <span className={`text-sm font-medium ${stats.projectsChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {Math.abs(stats.projectsChange)}%
+                </span>
+                <span className="text-sm text-secondary ml-1">vs last month</span>
+              </div>
+            )}
+          </div>
+
+          {/* Total Clients */}
+          <div className="surface-1 rounded-xl shadow-sm border border-token p-6 overflow-hidden">
+            <div className="flex items-center justify-between">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-secondary">Total Clients</p>
+                <p className="text-3xl font-bold text-primary whitespace-nowrap tabular-nums tracking-tight">{stats.totalClients}</p>
+              </div>
+              <div className="p-3 bg-purple-100 dark:bg-purple-600/20 rounded-full flex-shrink-0 hidden sm:block">
+                <UserGroupIcon className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+              </div>
+            </div>
+            {typeof stats.clientsChange === 'number' && (
+              <div className="mt-4 flex items-center">
+                {stats.clientsChange >= 0 ? (
+                  <ArrowTrendingUpIcon className="h-4 w-4 text-green-500 mr-1" />
+                ) : (
+                  <ArrowTrendingDownIcon className="h-4 w-4 text-red-500 mr-1" />
+                )}
+                <span className={`text-sm font-medium ${stats.clientsChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {Math.abs(stats.clientsChange)}%
+                </span>
+                <span className="text-sm text-secondary ml-1">vs last month</span>
+              </div>
+            )}
+          </div>
+
+          {/* Pending Tasks */}
+          <div className="surface-1 rounded-xl shadow-sm border border-token p-6 overflow-hidden">
+            <div className="flex items-center justify-between">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-secondary">Pending Tasks</p>
+                <p className="text-3xl font-bold text-primary whitespace-nowrap tabular-nums tracking-tight">{stats.pendingTasks}</p>
+              </div>
+              <div className="p-3 bg-orange-100 dark:bg-orange-600/20 rounded-full flex-shrink-0 hidden sm:block">
+                <BellIcon className="h-8 w-8 text-orange-600 dark:text-orange-400" />
+              </div>
+            </div>
+            {typeof stats.tasksChange === 'number' && (
+              <div className="mt-4 flex items-center">
+                {stats.tasksChange >= 0 ? (
+                  <ArrowTrendingUpIcon className="h-4 w-4 text-green-500 mr-1" />
+                ) : (
+                  <ArrowTrendingDownIcon className="h-4 w-4 text-red-500 mr-1" />
+                )}
+                <span className={`text-sm font-medium ${stats.tasksChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {Math.abs(stats.tasksChange)}%
+                </span>
+                <span className="text-sm text-secondary ml-1">vs last month</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Active Projects */}
+          <div className="lg:col-span-2">
+            <div className="surface-1 rounded-xl shadow-sm border border-token">
+              <div className="p-6 border-b border-token">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold text-primary">Active Projects</h2>
+                  <button onClick={() => router.push('/dashboard/projects')} className="text-amber-600 hover:text-amber-700 text-sm font-medium">
+                    View All
+                  </button>
+                </div>
+              </div>
+              <div className="p-6">
+                <div className="space-y-4">
+                  {activeProjects.map((project) => (
+                    <div key={project.id} className="border border-token rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <h3 className="font-semibold text-primary">{project.title}</h3>
+                          <p className="text-sm text-secondary">{project.client}</p>
+                        </div>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(project.status)}`}>
+                          {project.status.replace('_', ' ')}
+                        </span>
+                      </div>
+                      
+                      <div className="mb-3">
+                        <div className="flex items-center justify-between text-sm text-gray-600 mb-1">
+                          <span>Progress</span>
+                          <span>{project.progress}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                            style={{ width: `${project.progress}%` }}
+                          ></div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Budget: {formatCurrency(project.budget)}</span>
+                        <span className="text-gray-600">Due: {new Date(project.dueDate).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Recent Activity */}
+          <div className="lg:col-span-1">
+            <div className="surface-1 rounded-xl shadow-sm border border-token">
+              <div className="p-6 border-b border-token">
+                <h2 className="text-xl font-semibold text-primary">Recent Activity</h2>
+              </div>
+              <div className="p-6">
+                <div className="space-y-4">
+                  {recentActivity.map((activity) => {
+                    const IconComponent = getActivityIcon(activity.type);
+                    return (
+                      <div key={activity.id} className="flex items-start space-x-3">
+                        <div className="flex-shrink-0">
+                          <div className="p-2 bg-gray-100 dark:bg-[var(--surface-2)] rounded-full">
+                            <IconComponent className="h-4 w-4 text-gray-600 dark:text-[var(--text-dim)]" />
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-primary">{activity.title}</p>
+                          <p className="text-sm text-secondary">{activity.description}</p>
+                          <p className="text-xs text-secondary mt-1">{activity.timestamp}</p>
+                        </div>
+                        {activity.status && (
+                          <div className="flex-shrink-0">
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                              activity.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300' :
+                              activity.status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300' :
+                              'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300'
+                            }`}>
+                              {activity.status}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                  {recentActivity.length === 0 && (
+                    <p className="text-sm text-secondary">No recent activity yet.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Revenue Chart */}
+        <div className="surface-1 rounded-xl shadow-sm border border-token p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-[var(--text)]">Revenue Overview</h2>
+            <div className="flex space-x-2">
+              <button className="px-3 py-1 text-sm bg-blue-100 text-blue-700 dark:bg-blue-600/20 dark:text-blue-300 rounded-md">30 Days</button>
+              <button className="px-3 py-1 text-sm text-gray-600 dark:text-[var(--text-dim)] hover:bg-gray-100 dark:hover:bg-[var(--surface-2)] rounded-md">90 Days</button>
+              <button className="px-3 py-1 text-sm text-gray-600 dark:text-[var(--text-dim)] hover:bg-gray-100 dark:hover:bg-[var(--surface-2)] rounded-md">1 Year</button>
+            </div>
+          </div>
+          <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-[var(--surface-2)] rounded-lg">
+            <p className="text-gray-500 dark:text-[var(--text-dim)]">Revenue chart will be displayed here</p>
+          </div>
+        </div>
+
+        {/* Quick Actions FAB */}
+  {/* QuickActions removed */}
+
+  {/* Legacy ChatBot removed */}
+      </div>
+    </Layout>
+  );
+}

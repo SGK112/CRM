@@ -2,469 +2,422 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Layout from '../../components/Layout';
-import { PageHeader } from '../../components/ui/PageHeader';
-// Legacy ChatBot removed; CopilotWidget supersedes it.
+import Link from 'next/link';
 import {
-  ChartBarIcon,
+  HomeIcon,
   CurrencyDollarIcon,
-  UserGroupIcon,
   ClipboardDocumentListIcon,
+  UserGroupIcon,
   CalendarDaysIcon,
-  ChatBubbleLeftRightIcon,
-  BellIcon,
+  WrenchScrewdriverIcon,
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
+  PlusIcon,
   EyeIcon,
-  PlusIcon
+  ChartBarIcon,
+  CameraIcon,
+  Squares2X2Icon
 } from '@heroicons/react/24/outline';
 
 interface DashboardStats {
   totalRevenue: number;
+  revenueChange: number;
   activeProjects: number;
+  projectsChange: number;
   totalClients: number;
-  pendingTasks: number;
-  revenueChange?: number;
-  projectsChange?: number;
-  clientsChange?: number;
-  tasksChange?: number;
+  clientsChange: number;
+  avgProjectValue: number;
+  avgProjectChange: number;
 }
 
-interface RecentActivity {
-  id: string;
-  type: 'project' | 'client' | 'payment' | 'message' | 'appointment';
-  title: string;
-  description: string;
-  timestamp: string;
-  status?: 'completed' | 'pending' | 'cancelled';
-}
-
-interface Project {
+interface RecentProject {
   id: string;
   title: string;
-  client?: string;
-  status: 'lead' | 'proposal' | 'approved' | 'in_progress' | 'on_hold' | 'completed' | 'cancelled' | 'planning' | 'review';
-  progress: number;
+  client: string;
+  type: 'kitchen' | 'bathroom' | 'whole_home' | 'addition' | 'exterior';
+  status: 'design' | 'permits' | 'demolition' | 'construction' | 'finishing';
   budget: number;
-  dueDate: string;
+  progress: number;
+  startDate: string;
+  nextMilestone: string;
 }
 
-export default function DashboardPage() {
+interface QuickStat {
+  label: string;
+  value: string;
+  change?: number;
+  trend?: 'up' | 'down';
+  color: string;
+}
+
+const remodelingTypes = {
+  kitchen: { label: 'Kitchen Remodel', color: 'bg-amber-500', icon: '🍳' },
+  bathroom: { label: 'Bathroom Remodel', color: 'bg-blue-500', icon: '🚿' },
+  whole_home: { label: 'Whole Home', color: 'bg-purple-500', icon: '🏠' },
+  addition: { label: 'Home Addition', color: 'bg-green-500', icon: '🔨' },
+  exterior: { label: 'Exterior/Siding', color: 'bg-orange-500', icon: '🏡' }
+};
+
+const statusSteps = {
+  design: { label: 'Design Phase', color: 'bg-blue-500', step: 1 },
+  permits: { label: 'Permits', color: 'bg-yellow-500', step: 2 },
+  demolition: { label: 'Demo', color: 'bg-red-500', step: 3 },
+  construction: { label: 'Construction', color: 'bg-orange-500', step: 4 },
+  finishing: { label: 'Finishing', color: 'bg-green-500', step: 5 }
+};
+
+export default function RemodelingDashboard() {
   const router = useRouter();
+  const [user, setUser] = useState<any>(null);
   const [stats, setStats] = useState<DashboardStats>({
     totalRevenue: 0,
+    revenueChange: 0,
     activeProjects: 0,
+    projectsChange: 0,
     totalClients: 0,
-    pendingTasks: 0,
+    clientsChange: 0,
+    avgProjectValue: 0,
+    avgProjectChange: 0
   });
+  const [recentProjects, setRecentProjects] = useState<RecentProject[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
-
-  const [activeProjects, setActiveProjects] = useState<Project[]>([]);
-
-  // Fetch live data for stats and lists
   useEffect(() => {
-    let aborted = false;
-    async function load() {
-      try {
-  const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
-        if (!token) { router.push('/auth/login'); return; }
-        const headers: HeadersInit = { Authorization: `Bearer ${token}` };
+    // Load user and dashboard data
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
 
-        // Fetch in parallel
-        const [projRes, clientsRes, clientsCountRes, estRes, invRes] = await Promise.all([
-          fetch('/api/projects', { headers }).catch(() => null),
-          fetch('/api/clients?limit=1000', { headers }).catch(() => null),
-          fetch('/api/clients/count', { headers }).catch(() => null),
-          fetch('/api/estimates', { headers }).catch(() => null),
-          fetch('/api/invoices', { headers }).catch(() => null),
-        ]);
+    // Mock remodeling-specific data - replace with actual API calls
+    setTimeout(() => {
+      setStats({
+        totalRevenue: 485000,
+        revenueChange: 18.5,
+        activeProjects: 12,
+        projectsChange: 3,
+        totalClients: 28,
+        clientsChange: 5,
+        avgProjectValue: 87500,
+        avgProjectChange: 12.3
+      });
 
-        if (aborted) return;
-
-        // Handle auth failures
-        const unauthorized = (r: Response | null) => !!r && r.status === 401;
-        if (unauthorized(projRes) || unauthorized(clientsRes) || unauthorized(clientsCountRes) || unauthorized(estRes) || unauthorized(invRes)) {
-          router.push('/auth/login');
-          return;
+      setRecentProjects([
+        {
+          id: '1',
+          title: 'Modern Kitchen Renovation',
+          client: 'Johnson Family',
+          type: 'kitchen',
+          status: 'construction',
+          budget: 95000,
+          progress: 75,
+          startDate: '2025-01-15',
+          nextMilestone: 'Cabinet installation - Feb 10'
+        },
+        {
+          id: '2', 
+          title: 'Master Bathroom Remodel',
+          client: 'Davis Residence',
+          type: 'bathroom',
+          status: 'finishing',
+          budget: 42000,
+          progress: 90,
+          startDate: '2024-12-01',
+          nextMilestone: 'Final inspection - Feb 5'
+        },
+        {
+          id: '3',
+          title: 'Victorian Home Restoration',
+          client: 'Miller Estate',
+          type: 'whole_home',
+          status: 'permits',
+          budget: 350000,
+          progress: 15,
+          startDate: '2025-02-01',
+          nextMilestone: 'Permit approval - Feb 15'
+        },
+        {
+          id: '4',
+          title: 'Two-Story Addition',
+          client: 'Rodriguez Family',
+          type: 'addition',
+          status: 'design',
+          budget: 180000,
+          progress: 35,
+          startDate: '2025-01-20',
+          nextMilestone: 'Design approval - Feb 8'
         }
+      ]);
 
-        const projects = projRes && projRes.ok ? await projRes.json() : [];
-        const clients = clientsRes && clientsRes.ok ? await clientsRes.json() : [];
-        const clientsCount = clientsCountRes && clientsCountRes.ok ? await clientsCountRes.json() : { count: clients?.length || 0 };
-        const estimates = estRes && estRes.ok ? await estRes.json() : [];
-        const invoices = invRes && invRes.ok ? await invRes.json() : [];
+      setLoading(false);
+    }, 1000);
+  }, []);
 
-        // Compute stats
-        const active = (projects || []).filter((p: any) => !['completed','cancelled'].includes(p.status));
-        const totalRevenue = (invoices || []).reduce((sum: number, inv: any) => sum + (inv.amountPaid || 0), 0);
-        const pendingFromEst = (estimates || []).filter((e: any) => ['sent','accepted'].includes(e.status)).length;
-        const pendingFromInv = (invoices || []).filter((i: any) => ['sent','partial'].includes(i.status)).length;
-        const pendingTasks = pendingFromEst + pendingFromInv;
-
-        // Build client map for display
-        const clientName = (c: any) => (c?.company ? c.company : [c?.firstName, c?.lastName].filter(Boolean).join(' ')).trim();
-        const clientMap = new Map<string, string>();
-        (clients || []).forEach((c: any) => clientMap.set(c._id || c.id, clientName(c)));
-
-        // Prepare active projects list (top 4 by updatedAt desc)
-        const statusProgress: Record<string, number> = {
-          lead: 5, proposal: 20, approved: 40, in_progress: 65, on_hold: 65, completed: 100, cancelled: 0, planning: 20, review: 85,
-        };
-        const ap: Project[] = (active || [])
-          .sort((a: any, b: any) => new Date(b.updatedAt || b.createdAt || 0).getTime() - new Date(a.updatedAt || a.createdAt || 0).getTime())
-          .slice(0, 4)
-          .map((p: any) => ({
-            id: p._id || p.id,
-            title: p.title || 'Untitled Project',
-            client: clientMap.get(p.clientId) || '—',
-            status: p.status,
-            progress: statusProgress[p.status] ?? 0,
-            budget: Number(p.budget || 0),
-            dueDate: (p.endDate ? new Date(p.endDate) : new Date((p.createdAt ? new Date(p.createdAt) : new Date()).getTime() + 1000*60*60*24*30)).toISOString(),
-          }));
-
-        // Recent activity: mix of latest projects/estimates/invoices
-        type AnyItem = { _id?: string; id?: string; createdAt?: string; updatedAt?: string } & Record<string, any>;
-        const stamp = (x: AnyItem) => new Date(x.updatedAt || x.createdAt || Date.now()).getTime();
-        const acts: RecentActivity[] = (
-          [
-            ...(projects || []).slice(0, 5).map((p: AnyItem) => ({
-              id: p._id || p.id,
-              type: 'project' as const,
-              title: p.title || 'New Project',
-              description: `Status: ${(p as any).status}`,
-              t: new Date(p.updatedAt || p.createdAt || Date.now()).getTime(),
-            })),
-            ...(estimates || []).slice(0, 5).map((e: AnyItem) => ({
-              id: e._id || e.id,
-              type: 'client' as const,
-              title: `Estimate ${(e as any).number || ''}`.trim(),
-              description: `Status: ${(e as any).status}`,
-              t: new Date(e.updatedAt || e.createdAt || Date.now()).getTime(),
-            })),
-            ...(invoices || []).slice(0, 5).map((i: AnyItem) => ({
-              id: i._id || i.id,
-              type: 'payment' as const,
-              title: `Invoice ${(i as any).number || ''}`.trim(),
-              description: `${(i as any).status === 'paid' ? 'Payment received' : 'Awaiting payment'} — ${(i as any).amountPaid || 0} / ${(i as any).total || 0}`,
-              status: (i as any).status === 'paid' ? 'completed' : (['sent','partial'].includes((i as any).status) ? 'pending' : undefined),
-              t: new Date(i.updatedAt || i.createdAt || Date.now()).getTime(),
-            })),
-          ] as any
-        )
-        .sort((a: any, b: any) => b.t - a.t)
-        .slice(0, 5)
-        .map((x: any) => ({ ...x, timestamp: new Date(x.t).toLocaleString() }));
-
-        setStats({
-          totalRevenue,
-          activeProjects: active.length,
-          totalClients: clientsCount?.count ?? (clients?.length || 0),
-          pendingTasks,
-        });
-        setActiveProjects(ap);
-        setRecentActivity(acts);
-      } catch (e) {
-        // Swallow errors for now; page will show zeros/empty states
-      }
-    }
-    load();
-    return () => { aborted = true };
-  }, [router]);
-
-  // QuickActions removed; Copilot handles smart actions now.
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
+  const getPersonalizedGreeting = () => {
+    const hour = new Date().getHours();
+    const firstName = user?.firstName || 'there';
+    
+    if (hour < 12) return `Good morning, ${firstName}!`;
+    if (hour < 17) return `Good afternoon, ${firstName}!`;
+    return `Good evening, ${firstName}!`;
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'planning':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300';
-      case 'in_progress':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300';
-      case 'review':
-        return 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300';
-      case 'completed':
-        return 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300';
-      case 'on_hold':
-        return 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300';
-      case 'lead':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300';
-      case 'proposal':
-        return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300';
-      case 'approved':
-        return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300';
-      case 'cancelled':
-        return 'bg-gray-200 text-gray-700 dark:bg-gray-700/40 dark:text-gray-300';
-      default:
-        return 'surface-2 text-secondary';
-    }
+  const getMotivationalMessage = () => {
+    const messages = [
+      "Your projects are looking great! Keep up the excellent work.",
+      "Turning houses into dream homes, one project at a time.",
+      "Every renovation tells a story. What's yours today?",
+      "Building relationships through quality craftsmanship.",
+      "Creating beautiful spaces that families will love for years."
+    ];
+    return messages[Math.floor(Math.random() * messages.length)];
   };
 
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case 'project':
-        return ClipboardDocumentListIcon;
-      case 'client':
-        return UserGroupIcon;
-      case 'payment':
-        return CurrencyDollarIcon;
-      case 'message':
-        return ChatBubbleLeftRightIcon;
-      case 'appointment':
-        return CalendarDaysIcon;
-      default:
-        return BellIcon;
+  const quickStats: QuickStat[] = [
+    {
+      label: 'Total Revenue',
+      value: `$${stats.totalRevenue.toLocaleString()}`,
+      change: stats.revenueChange,
+      trend: stats.revenueChange > 0 ? 'up' : 'down',
+      color: 'border-green-200 bg-green-50'
+    },
+    {
+      label: 'Active Projects', 
+      value: stats.activeProjects.toString(),
+      change: stats.projectsChange,
+      trend: stats.projectsChange > 0 ? 'up' : 'down',
+      color: 'border-blue-200 bg-blue-50'
+    },
+    {
+      label: 'Total Clients',
+      value: stats.totalClients.toString(),
+      change: stats.clientsChange,
+      trend: stats.clientsChange > 0 ? 'up' : 'down',
+      color: 'border-purple-200 bg-purple-50'
+    },
+    {
+      label: 'Avg Project Value',
+      value: `$${stats.avgProjectValue.toLocaleString()}`,
+      change: stats.avgProjectChange,
+      trend: stats.avgProjectChange > 0 ? 'up' : 'down',
+      color: 'border-orange-200 bg-orange-50'
     }
-  };
+  ];
+
+  if (loading) {
+    return (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600"></div>
+        </div>
+    );
+  }
 
   return (
-    <Layout>
-      <div className="space-y-8">
-        {/* Header */}
-        <PageHeader
-          title="Dashboard"
-          subtitle="Overview of your business at a glance."
-          actions={(
-            <button
-              onClick={() => router.push('/dashboard/analytics')}
-              className="pill pill-tint-amber sm inline-flex items-center gap-2"
-            >
-              <EyeIcon className="h-4 w-4" />
-              View Reports
-            </button>
-          )}
-        />
-
-        {/* Stats Grid: auto-fit cards with a sensible min width so large numbers don’t wrap */}
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-6">
-          {/* Total Revenue */}
-          <div className="surface-1 rounded-xl shadow-sm border border-token p-6 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Personalized Header */}
+        <div className="mb-8 relative overflow-hidden rounded-2xl shadow-2xl border-2 theme-border">
+          {/* Background with animated gradient */}
+          <div className="absolute inset-0 bg-gradient-to-br from-red-500 via-orange-500 to-amber-500 opacity-90"></div>
+          <div className="absolute inset-0 bg-gradient-to-tr from-purple-600/20 via-transparent to-blue-600/20"></div>
+          
+          {/* Content */}
+          <div className="relative z-10 p-8">
             <div className="flex items-center justify-between">
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-secondary">Total Revenue</p>
-                <p className="text-3xl font-bold text-primary whitespace-nowrap tabular-nums tracking-tight">{formatCurrency(stats.totalRevenue)}</p>
+              <div className="flex-1">
+                <h1 className="text-4xl md:text-5xl font-bold text-white mb-3 drop-shadow-lg">
+                  {getPersonalizedGreeting()}
+                </h1>
+                <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 border border-white/30">
+                  <p className="text-xl text-white font-medium leading-relaxed drop-shadow-md">
+                    {getMotivationalMessage()}
+                  </p>
+                </div>
               </div>
-              <div className="p-3 bg-green-100 dark:bg-green-600/20 rounded-full flex-shrink-0 hidden sm:block">
-                <CurrencyDollarIcon className="h-8 w-8 text-green-600 dark:text-green-400" />
+              
+              {/* Decorative elements */}
+              <div className="hidden md:flex items-center space-x-4 ml-8">
+                <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                  <HomeIcon className="h-10 w-10 text-white" />
+                </div>
+                <div className="text-right">
+                  <div className="text-white/90 text-sm font-medium">Remodely CRM</div>
+                  <div className="text-white text-lg font-bold">Dashboard</div>
+                </div>
               </div>
             </div>
-            {typeof stats.revenueChange === 'number' && (
-              <div className="mt-4 flex items-center">
-                {stats.revenueChange >= 0 ? (
-                  <ArrowTrendingUpIcon className="h-4 w-4 text-green-500 mr-1" />
-                ) : (
-                  <ArrowTrendingDownIcon className="h-4 w-4 text-red-500 mr-1" />
-                )}
-                <span className={`text-sm font-medium ${stats.revenueChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {Math.abs(stats.revenueChange)}%
-                </span>
-                <span className="text-sm text-secondary ml-1">vs last month</span>
-              </div>
-            )}
           </div>
-
-          {/* Active Projects */}
-          <div className="surface-1 rounded-xl shadow-sm border border-token p-6 overflow-hidden">
-            <div className="flex items-center justify-between">
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-secondary">Active Projects</p>
-                <p className="text-3xl font-bold text-primary whitespace-nowrap tabular-nums tracking-tight">{stats.activeProjects}</p>
-              </div>
-              <div className="p-3 bg-blue-100 dark:bg-blue-600/20 rounded-full flex-shrink-0 hidden sm:block">
-                <ClipboardDocumentListIcon className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-              </div>
-            </div>
-            {typeof stats.projectsChange === 'number' && (
-              <div className="mt-4 flex items-center">
-                {stats.projectsChange >= 0 ? (
-                  <ArrowTrendingUpIcon className="h-4 w-4 text-green-500 mr-1" />
-                ) : (
-                  <ArrowTrendingDownIcon className="h-4 w-4 text-red-500 mr-1" />
-                )}
-                <span className={`text-sm font-medium ${stats.projectsChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {Math.abs(stats.projectsChange)}%
-                </span>
-                <span className="text-sm text-secondary ml-1">vs last month</span>
-              </div>
-            )}
-          </div>
-
-          {/* Total Clients */}
-          <div className="surface-1 rounded-xl shadow-sm border border-token p-6 overflow-hidden">
-            <div className="flex items-center justify-between">
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-secondary">Total Clients</p>
-                <p className="text-3xl font-bold text-primary whitespace-nowrap tabular-nums tracking-tight">{stats.totalClients}</p>
-              </div>
-              <div className="p-3 bg-purple-100 dark:bg-purple-600/20 rounded-full flex-shrink-0 hidden sm:block">
-                <UserGroupIcon className="h-8 w-8 text-purple-600 dark:text-purple-400" />
-              </div>
-            </div>
-            {typeof stats.clientsChange === 'number' && (
-              <div className="mt-4 flex items-center">
-                {stats.clientsChange >= 0 ? (
-                  <ArrowTrendingUpIcon className="h-4 w-4 text-green-500 mr-1" />
-                ) : (
-                  <ArrowTrendingDownIcon className="h-4 w-4 text-red-500 mr-1" />
-                )}
-                <span className={`text-sm font-medium ${stats.clientsChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {Math.abs(stats.clientsChange)}%
-                </span>
-                <span className="text-sm text-secondary ml-1">vs last month</span>
-              </div>
-            )}
-          </div>
-
-          {/* Pending Tasks */}
-          <div className="surface-1 rounded-xl shadow-sm border border-token p-6 overflow-hidden">
-            <div className="flex items-center justify-between">
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-secondary">Pending Tasks</p>
-                <p className="text-3xl font-bold text-primary whitespace-nowrap tabular-nums tracking-tight">{stats.pendingTasks}</p>
-              </div>
-              <div className="p-3 bg-orange-100 dark:bg-orange-600/20 rounded-full flex-shrink-0 hidden sm:block">
-                <BellIcon className="h-8 w-8 text-orange-600 dark:text-orange-400" />
-              </div>
-            </div>
-            {typeof stats.tasksChange === 'number' && (
-              <div className="mt-4 flex items-center">
-                {stats.tasksChange >= 0 ? (
-                  <ArrowTrendingUpIcon className="h-4 w-4 text-green-500 mr-1" />
-                ) : (
-                  <ArrowTrendingDownIcon className="h-4 w-4 text-red-500 mr-1" />
-                )}
-                <span className={`text-sm font-medium ${stats.tasksChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {Math.abs(stats.tasksChange)}%
-                </span>
-                <span className="text-sm text-secondary ml-1">vs last month</span>
-              </div>
-            )}
-          </div>
+          
+          {/* Animated background elements */}
+          <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
+          <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-white/5 rounded-full blur-2xl"></div>
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Active Projects */}
-          <div className="lg:col-span-2">
-            <div className="surface-1 rounded-xl shadow-sm border border-token">
-              <div className="p-6 border-b border-token">
+        {/* Quick Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {quickStats.map((stat, index) => (
+            <div
+              key={index}
+              className="rounded-xl border-2 theme-border p-6 transition-all duration-300 hover:shadow-xl hover:scale-105 hover:border-red-400 dark:hover:border-red-500 relative overflow-hidden"
+              style={{ backgroundColor: 'var(--surface-1)' }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-red-50 via-transparent to-orange-50 dark:from-gray-700 dark:via-transparent dark:to-gray-600 opacity-50"></div>
+              <div className="relative z-10">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold text-primary">Active Projects</h2>
-                  <button onClick={() => router.push('/dashboard/projects')} className="text-amber-600 hover:text-amber-700 text-sm font-medium">
-                    View All
-                  </button>
-                </div>
-              </div>
-              <div className="p-6">
-                <div className="space-y-4">
-                  {activeProjects.map((project) => (
-                    <div key={project.id} className="border border-token rounded-lg p-4 hover:shadow-md transition-shadow">
-                      <div className="flex items-center justify-between mb-3">
-                        <div>
-                          <h3 className="font-semibold text-primary">{project.title}</h3>
-                          <p className="text-sm text-secondary">{project.client}</p>
-                        </div>
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(project.status)}`}>
-                          {project.status.replace('_', ' ')}
-                        </span>
-                      </div>
-                      
-                      <div className="mb-3">
-                        <div className="flex items-center justify-between text-sm text-gray-600 mb-1">
-                          <span>Progress</span>
-                          <span>{project.progress}%</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
-                            style={{ width: `${project.progress}%` }}
-                          ></div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">Budget: {formatCurrency(project.budget)}</span>
-                        <span className="text-gray-600">Due: {new Date(project.dueDate).toLocaleDateString()}</span>
-                      </div>
+                  <div>
+                    <p className="text-sm font-semibold uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>{stat.label}</p>
+                    <p className="text-3xl font-bold mt-2 mb-1" style={{ color: 'var(--text)' }}>{stat.value}</p>
+                  </div>
+                  {stat.change && (
+                    <div className={`flex items-center px-3 py-1 rounded-full ${stat.trend === 'up' ? 'bg-green-500 dark:bg-green-600 text-white' : 'bg-red-500 dark:bg-red-600 text-white'}`}>
+                      {stat.trend === 'up' ? (
+                        <ArrowTrendingUpIcon className="h-4 w-4 mr-1" />
+                      ) : (
+                        <ArrowTrendingDownIcon className="h-4 w-4 mr-1" />
+                      )}
+                      <span className="text-sm font-bold text-white">{Math.abs(stat.change)}%</span>
                     </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Recent Activity */}
-          <div className="lg:col-span-1">
-            <div className="surface-1 rounded-xl shadow-sm border border-token">
-              <div className="p-6 border-b border-token">
-                <h2 className="text-xl font-semibold text-primary">Recent Activity</h2>
-              </div>
-              <div className="p-6">
-                <div className="space-y-4">
-                  {recentActivity.map((activity) => {
-                    const IconComponent = getActivityIcon(activity.type);
-                    return (
-                      <div key={activity.id} className="flex items-start space-x-3">
-                        <div className="flex-shrink-0">
-                          <div className="p-2 bg-gray-100 dark:bg-[var(--surface-2)] rounded-full">
-                            <IconComponent className="h-4 w-4 text-gray-600 dark:text-[var(--text-dim)]" />
-                          </div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-primary">{activity.title}</p>
-                          <p className="text-sm text-secondary">{activity.description}</p>
-                          <p className="text-xs text-secondary mt-1">{activity.timestamp}</p>
-                        </div>
-                        {activity.status && (
-                          <div className="flex-shrink-0">
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                              activity.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300' :
-                              activity.status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300' :
-                              'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300'
-                            }`}>
-                              {activity.status}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                  {recentActivity.length === 0 && (
-                    <p className="text-sm text-secondary">No recent activity yet.</p>
                   )}
                 </div>
               </div>
             </div>
-          </div>
+          ))}
         </div>
 
-        {/* Quick Revenue Chart */}
-        <div className="surface-1 rounded-xl shadow-sm border border-token p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-[var(--text)]">Revenue Overview</h2>
-            <div className="flex space-x-2">
-              <button className="px-3 py-1 text-sm bg-blue-100 text-blue-700 dark:bg-blue-600/20 dark:text-blue-300 rounded-md">30 Days</button>
-              <button className="px-3 py-1 text-sm text-gray-600 dark:text-[var(--text-dim)] hover:bg-gray-100 dark:hover:bg-[var(--surface-2)] rounded-md">90 Days</button>
-              <button className="px-3 py-1 text-sm text-gray-600 dark:text-[var(--text-dim)] hover:bg-gray-100 dark:hover:bg-[var(--surface-2)] rounded-md">1 Year</button>
+        {/* Recent Projects */}
+        <div className="rounded-2xl border-2 theme-border mb-8 shadow-2xl overflow-hidden" style={{ backgroundColor: 'var(--surface-1)' }}>
+          {/* Professional header with modern gradient */}
+          <div className="px-8 py-6 border-b theme-border relative overflow-hidden">
+            {/* Enhanced dark background for white text visibility */}
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-700 via-slate-800 to-slate-700 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-600/40 via-transparent to-slate-900/40 dark:from-blue-900/20 dark:via-transparent dark:to-indigo-900/20"></div>
+            
+            {/* Content */}
+            <div className="relative z-10 flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-slate-600 to-slate-800 dark:from-slate-400 dark:to-slate-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <ClipboardDocumentListIcon className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-white">
+                    Active Projects
+                  </h2>
+                  <p className="text-sm opacity-90 text-white">
+                    Your ongoing remodeling projects
+                  </p>
+                </div>
+              </div>
+              
+              <Link
+                href="/dashboard/projects"
+                className="group flex items-center space-x-2 text-sm font-semibold text-white hover:text-gray-200 transition-all duration-200 px-4 py-2 rounded-xl bg-white/20 hover:bg-white/30 border border-white/30 hover:shadow-lg transform hover:scale-105"
+              >
+                <span>View All Projects</span>
+                <ArrowTrendingUpIcon className="h-4 w-4 text-white group-hover:translate-x-1 transition-transform duration-200" />
+              </Link>
+            </div>
+            
+            {/* Subtle decorative elements */}
+            <div className="absolute top-4 right-24 w-12 h-12 bg-slate-500/20 dark:bg-slate-600/20 rounded-full blur-xl"></div>
+            <div className="absolute -bottom-2 -left-2 w-16 h-16 bg-slate-600/30 dark:bg-slate-700/30 rounded-full blur-2xl"></div>
+          </div>
+          <div className="p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {recentProjects.map((project) => {
+                const projectType = remodelingTypes[project.type];
+                const projectStatus = statusSteps[project.status];
+                
+                return (
+                  <div
+                    key={project.id}
+                    className="border theme-border rounded-lg p-4 hover:shadow-md transition-all duration-200 cursor-pointer group"
+                    onClick={() => router.push(`/dashboard/projects/${project.id}`)}
+                  >
+                    {/* Project Header */}
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-10 h-10 ${projectType.color} rounded-lg flex items-center justify-center text-white text-lg`}>
+                          {projectType.icon}
+                        </div>
+                        <div>
+                          <h3 className="font-semibold group-hover:text-orange-600 transition-colors" style={{ color: 'var(--text)' }}>
+                            {project.title}
+                          </h3>
+                          <p className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>{project.client}</p>
+                        </div>
+                      </div>
+                      <span className="text-lg font-bold" style={{ color: 'var(--text)' }}>
+                        ${project.budget.toLocaleString()}
+                      </span>
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div className="mb-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${projectStatus.color} text-white`}>
+                          {projectStatus.label}
+                        </span>
+                        <span className="text-sm font-semibold" style={{ color: 'var(--text-muted)' }}>{project.progress}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div
+                          className="bg-orange-600 dark:bg-orange-500 h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${project.progress}%` }}
+                        ></div>
+                      </div>
+                    </div>
+
+                    {/* Next Milestone */}
+                    <div className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>
+                      <span className="font-semibold">Next: </span>{project.nextMilestone}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
-          <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-[var(--surface-2)] rounded-lg">
-            <p className="text-gray-500 dark:text-[var(--text-dim)]">Revenue chart will be displayed here</p>
-          </div>
         </div>
 
-        {/* Quick Actions FAB */}
-  {/* QuickActions removed */}
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Link
+            href="/dashboard/projects/new"
+            className="bg-gradient-to-r from-orange-500 to-red-500 rounded-lg p-6 text-white hover:from-orange-600 hover:to-red-600 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+          >
+            <div className="flex items-center space-x-3">
+              <PlusIcon className="h-8 w-8" />
+              <div>
+                <h3 className="text-lg font-semibold">New Project</h3>
+                <p className="text-sm opacity-90">Start a new remodeling project</p>
+              </div>
+            </div>
+          </Link>
 
-  {/* Legacy ChatBot removed */}
+          <Link
+            href="/dashboard/designer"
+            className="bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg p-6 text-white hover:from-blue-600 hover:to-purple-600 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+          >
+            <div className="flex items-center space-x-3">
+              <Squares2X2Icon className="h-8 w-8" />
+              <div>
+                <h3 className="text-lg font-semibold">Design Studio</h3>
+                <p className="text-sm opacity-90">Create project mockups</p>
+              </div>
+            </div>
+          </Link>
+
+          <Link
+            href="/dashboard/analytics"
+            className="bg-gradient-to-r from-green-500 to-teal-500 rounded-lg p-6 text-white hover:from-green-600 hover:to-teal-600 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+          >
+            <div className="flex items-center space-x-3">
+              <ChartBarIcon className="h-8 w-8" />
+              <div>
+                <h3 className="text-lg font-semibold">View Reports</h3>
+                <p className="text-sm opacity-90">Analyze performance</p>
+              </div>
+            </div>
+          </Link>
+        </div>
       </div>
-    </Layout>
-  );
+    );
 }

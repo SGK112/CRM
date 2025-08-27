@@ -1,5 +1,4 @@
 'use client';
-import Layout from '../../../components/Layout';
 import { useEffect, useState, useMemo } from 'react';
 import { API_BASE } from '../../../lib/api';
 import { PageHeader } from '../../../components/ui/PageHeader';
@@ -23,11 +22,11 @@ export default function InvoicesPage(){
   },[list]);
 
   return (
-    <Layout>
-      <div className='space-y-6'>
+    <div className='space-y-6'>
         <PageHeader
           title='Invoices'
           subtitle='Billing documents & payment tracking'
+          titleClassName="font-bold text-brand-700 dark:text-brand-400 mb-0"
           actions={<button className='pill pill-tint-green sm' onClick={()=>{
             const params = new URLSearchParams(typeof window!=='undefined' ? window.location.search : '');
             const clientId = params.get('clientId');
@@ -44,7 +43,7 @@ export default function InvoicesPage(){
         />
         <div className='surface-solid border border-token rounded-xl overflow-hidden'>
           <table className='w-full text-sm'>
-            <thead className='text-left text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-400 bg-[var(--surface-1)]'>
+            <thead className='text-left text-[11px] uppercase tracking-wide text-gray-700 dark:text-gray-300 bg-[var(--surface-1)]'>
               <tr className='border-b border-token'>
                 <th className='py-2 px-3'>Number</th>
                 <th className='py-2 px-3'>Status</th>
@@ -68,11 +67,10 @@ export default function InvoicesPage(){
                   <td className='py-2 px-3 text-[11px]'>{new Date(inv.createdAt).toLocaleDateString()}</td>
                 </tr>
               ))}
-              {!loading && list.length===0 && <tr><td colSpan={7} className='py-6 text-center text-xs text-gray-500'>No invoices yet.</td></tr>}
+              {!loading && list.length===0 && <tr><td colSpan={7} className='py-6 text-center text-xs text-gray-700'>No invoices yet.</td></tr>}
             </tbody>
           </table>
         </div>
-      </div>
-    </Layout>
+    </div>
   );
 }

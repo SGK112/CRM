@@ -128,7 +128,7 @@ export default function ClientDetailPage() {
     const map:Record<string,string>={lead:'bg-blue-100 text-blue-800',prospect:'bg-yellow-100 text-yellow-800',active:'bg-green-100 text-green-800',inactive:'bg-gray-100 text-gray-800',churned:'bg-red-100 text-red-800',completed:'bg-purple-100 text-purple-800',paid:'bg-green-100 text-green-800',sent:'bg-blue-100 text-blue-800',overdue:'bg-red-100 text-red-800',scheduled:'bg-blue-100 text-blue-800',cancelled:'bg-red-100 text-red-800'}; return map[status] || 'bg-gray-100 text-gray-800'; };
 
   if (loading) return <Layout><div className="flex items-center justify-center py-32"><div className="animate-spin h-12 w-12 rounded-full border-b-2 border-blue-600"/></div></Layout>;
-  if (error || !client) return <Layout><div className="py-32 text-center"><h2 className="text-2xl font-bold mb-2">{error||'Client Not Found'}</h2><p className="text-gray-500">The requested client could not be located.</p><div className="mt-6"><Link href="/dashboard/clients" className="text-blue-600 hover:underline">Back to Clients</Link></div></div></Layout>;
+  if (error || !client) return <Layout><div className="py-32 text-center"><h2 className="text-2xl font-bold mb-2">{error||'Client Not Found'}</h2><p className="text-gray-700">The requested client could not be located.</p><div className="mt-6"><Link href="/dashboard/clients" className="text-blue-600 hover:underline">Back to Clients</Link></div></div></Layout>;
 
   return (
     <Layout>
@@ -136,15 +136,15 @@ export default function ClientDetailPage() {
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div className="flex items-start gap-4">
-            <Link href="/dashboard/clients" className="text-gray-500 hover:text-gray-700">
+            <Link href="/dashboard/clients" className="text-gray-700 hover:text-gray-700">
               <ArrowLeftIcon className="h-6 w-6" />
             </Link>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+              <h1 className="text-3xl font-bold text-brand-700 dark:text-brand-400 flex items-center gap-3">
                 <span>{client.firstName} {client.lastName}</span>
                 <span className={`px-2 py-1 text-xs font-medium rounded-full ${badge(client.status)}`}>{client.status}</span>
               </h1>
-              <p className="text-sm text-gray-500 mt-1">Client since {formatDate(client.createdAt)}</p>
+              <p className="text-sm text-gray-700 mt-1">Client since {formatDate(client.createdAt)}</p>
             </div>
           </div>
           <div className="flex gap-3">
@@ -171,16 +171,16 @@ export default function ClientDetailPage() {
 
         {/* Contact bar */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white border border-gray-200 rounded-lg p-4">
-          <div className="flex items-center text-sm text-gray-600"><EnvelopeIcon className="h-4 w-4 mr-2"/><a href={`mailto:${client.email}`} className="hover:text-blue-600">{client.email}</a></div>
-          {client.phone && <div className="flex items-center text-sm text-gray-600"><PhoneIcon className="h-4 w-4 mr-2"/><a href={`tel:${client.phone}`} className="hover:text-blue-600">{client.phone}</a></div>}
-          {client.address?.city && <div className="flex items-center text-sm text-gray-600 md:col-span-2"><MapPinIcon className="h-4 w-4 mr-2"/>{[client.address.street, client.address.city, client.address.state].filter(Boolean).join(', ')} {client.address.zipCode}</div>}
+          <div className="flex items-center text-sm text-gray-800"><EnvelopeIcon className="h-4 w-4 mr-2"/><a href={`mailto:${client.email}`} className="hover:text-blue-600">{client.email}</a></div>
+          {client.phone && <div className="flex items-center text-sm text-gray-800"><PhoneIcon className="h-4 w-4 mr-2"/><a href={`tel:${client.phone}`} className="hover:text-blue-600">{client.phone}</a></div>}
+          {client.address?.city && <div className="flex items-center text-sm text-gray-800 md:col-span-2"><MapPinIcon className="h-4 w-4 mr-2"/>{[client.address.street, client.address.city, client.address.state].filter(Boolean).join(', ')} {client.address.zipCode}</div>}
         </div>
 
         {/* Tabs */}
         <div className="border-b border-gray-200">
           <nav className="flex gap-6 -mb-px" aria-label="Tabs">
             {['overview','projects','billing','scheduling','communications','voice-agent'].map(tab => (
-              <button key={tab} onClick={()=>setActiveTab(tab)} className={`py-3 px-1 border-b-2 text-sm font-medium capitalize ${activeTab===tab? 'border-blue-600 text-blue-600':'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>{tab.replace('-', ' ')}</button>
+              <button key={tab} onClick={()=>setActiveTab(tab)} className={`py-3 px-1 border-b-2 text-sm font-medium capitalize ${activeTab===tab? 'border-blue-600 text-blue-600':'border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300'}`}>{tab.replace('-', ' ')}</button>
             ))}
           </nav>
         </div>
@@ -192,30 +192,30 @@ export default function ClientDetailPage() {
               <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <h3 className="text-lg font-semibold mb-4">Client Details</h3>
                 <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                  <div><dt className="text-gray-500">Status</dt><dd className="mt-1 font-medium capitalize">{client.status}</dd></div>
-                  <div><dt className="text-gray-500">Source</dt><dd className="mt-1 font-medium">{client.source || '—'}</dd></div>
-                  <div><dt className="text-gray-500">Email</dt><dd className="mt-1">{client.email}</dd></div>
-                  <div><dt className="text-gray-500">Phone</dt><dd className="mt-1">{client.phone || '—'}</dd></div>
-                  <div className="sm:col-span-2"><dt className="text-gray-500">Address</dt><dd className="mt-1">{client.address?.city ? [client.address.street, client.address.city, client.address.state, client.address.zipCode].filter(Boolean).join(', ') : '—'}</dd></div>
+                  <div><dt className="text-gray-700">Status</dt><dd className="mt-1 font-medium capitalize">{client.status}</dd></div>
+                  <div><dt className="text-gray-700">Source</dt><dd className="mt-1 font-medium">{client.source || '—'}</dd></div>
+                  <div><dt className="text-gray-700">Email</dt><dd className="mt-1">{client.email}</dd></div>
+                  <div><dt className="text-gray-700">Phone</dt><dd className="mt-1">{client.phone || '—'}</dd></div>
+                  <div className="sm:col-span-2"><dt className="text-gray-700">Address</dt><dd className="mt-1">{client.address?.city ? [client.address.street, client.address.city, client.address.state, client.address.zipCode].filter(Boolean).join(', ') : '—'}</dd></div>
                 </dl>
-                {client.notes && <div className="mt-6"><dt className="text-gray-500 text-sm mb-1">Notes</dt><p className="text-sm whitespace-pre-line">{client.notes}</p></div>}
+                {client.notes && <div className="mt-6"><dt className="text-gray-700 text-sm mb-1">Notes</dt><p className="text-sm whitespace-pre-line">{client.notes}</p></div>}
               </div>
             </div>
             <div className="space-y-6">
               <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <h3 className="text-lg font-semibold mb-4">Quick Stats</h3>
                 <div className="space-y-3 text-sm">
-                  <div className="flex justify-between"><span className="text-gray-500">Projects</span><span className="font-medium">{projects.length}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-500">Invoices</span><span className="font-medium">{invoices.length}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-500">Appointments</span><span className="font-medium">{appointments.length}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-500">Last Contact</span><span className="font-medium">{communications[0] ? formatDate(communications[0].timestamp) : '—'}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-700 >Projects</span><span className="font-medium">{projects.length}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-700 >Invoices</span><span className="font-medium">{invoices.length}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-700 >Appointments</span><span className="font-medium">{appointments.length}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-700 >Last Contact</span><span className="font-medium">{communications[0] ? formatDate(communications[0].timestamp) : '—'}</span></div>
                 </div>
               </div>
               <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
                 <ul className="space-y-3 text-sm">
-                  {communications.slice(0,4).map(c=> <li key={c._id} className="flex items-start gap-2"><span className="mt-1 h-2 w-2 rounded-full bg-blue-500"/><div><p className="font-medium capitalize">{c.type}</p><p className="text-gray-500 text-xs">{formatDate(c.timestamp)}</p></div></li>)}
-                  {communications.length===0 && <li className="text-gray-500">No activity yet.</li>}
+                  {communications.slice(0,4).map(c=> <li key={c._id} className="flex items-start gap-2"><span className="mt-1 h-2 w-2 rounded-full bg-blue-500"/><div><p className="font-medium capitalize">{c.type}</p><p className="text-gray-700 text-xs">{formatDate(c.timestamp)}</p></div></li>)}
+                  {communications.length===0 && <li className="text-gray-700 >No activity yet.</li>}
                 </ul>
               </div>
             </div>
@@ -234,8 +234,8 @@ export default function ClientDetailPage() {
               </button>
             </div>
             <div className="grid gap-4">
-              {projects.map(p=> <div key={p._id} className="bg-white border border-gray-200 rounded-lg p-5"><div className="flex justify-between items-start"><div><h3 className="font-medium text-gray-900">{p.title}</h3><p className="text-sm text-gray-500 mt-1 line-clamp-2">{p.description}</p><div className="flex gap-3 mt-3 text-xs items-center"><span className={`px-2 py-1 rounded-full font-medium ${badge(p.status)}`}>{p.status}</span><span className="text-gray-500">Budget {formatMoney(p.budget)}</span><span className="text-gray-500">Progress {p.progress}%</span></div></div><div className="flex gap-2"><button className="p-2 text-gray-400 hover:text-gray-600"><PencilIcon className="h-4 w-4"/></button><button className="p-2 text-gray-400 hover:text-red-600"><TrashIcon className="h-4 w-4"/></button></div></div><div className="mt-4 h-2 bg-gray-200 rounded"><div className="h-2 bg-blue-600 rounded" style={{width:`${p.progress}%`}}/></div></div>)}
-              {projects.length===0 && <div className="text-center py-12 border border-dashed border-gray-300 rounded-lg text-sm text-gray-500">No projects yet.</div>}
+              {projects.map(p=> <div key={p._id} className="bg-white border border-gray-200 rounded-lg p-5"><div className="flex justify-between items-start"><div><h3 className="font-medium text-gray-900">{p.title}</h3><p className="text-sm text-gray-700 mt-1 line-clamp-2">{p.description}</p><div className="flex gap-3 mt-3 text-xs items-center"><span className={`px-2 py-1 rounded-full font-medium ${badge(p.status)}`}>{p.status}</span><span className="text-gray-700 >Budget {formatMoney(p.budget)}</span><span className="text-gray-700 >Progress {p.progress}%</span></div></div><div className="flex gap-2"><button className="p-2 text-gray-400 hover:text-gray-800"><PencilIcon className="h-4 w-4"/></button><button className="p-2 text-gray-400 hover:text-red-600"><TrashIcon className="h-4 w-4"/></button></div></div><div className="mt-4 h-2 bg-gray-200 rounded"><div className="h-2 bg-blue-600 rounded" style={{width:`${p.progress}%`}}/></div></div>)}
+              {projects.length===0 && <div className="text-center py-12 border border-dashed border-gray-300 rounded-lg text-sm text-gray-700 >No projects yet.</div>}
             </div>
           </div>
         )}
@@ -253,10 +253,10 @@ export default function ClientDetailPage() {
             </div>
             <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
               <table className="min-w-full divide-y divide-gray-200 text-sm">
-                <thead className="bg-gray-50"><tr><th className="px-4 py-2 text-left font-medium text-gray-500">Invoice</th><th className="px-4 py-2 text-left font-medium text-gray-500">Amount</th><th className="px-4 py-2 text-left font-medium text-gray-500">Status</th><th className="px-4 py-2 text-left font-medium text-gray-500">Due</th></tr></thead>
+                <thead className="bg-gray-50"><tr><th className="px-4 py-2 text-left font-medium text-gray-700 >Invoice</th><th className="px-4 py-2 text-left font-medium text-gray-700 >Amount</th><th className="px-4 py-2 text-left font-medium text-gray-700 >Status</th><th className="px-4 py-2 text-left font-medium text-gray-700 >Due</th></tr></thead>
                 <tbody className="divide-y divide-gray-100">
                   {invoices.map(inv=> <tr key={inv._id} className="hover:bg-gray-50"><td className="px-4 py-2 font-medium">{inv.invoiceNumber}</td><td className="px-4 py-2">{formatMoney(inv.amount)}</td><td className="px-4 py-2"><span className={`px-2 py-1 rounded-full text-xs font-medium ${badge(inv.status)}`}>{inv.status}</span></td><td className="px-4 py-2">{formatDate(inv.dueDate)}</td></tr>)}
-                  {invoices.length===0 && <tr><td colSpan={4} className="px-4 py-6 text-center text-gray-500">No invoices</td></tr>}
+                  {invoices.length===0 && <tr><td colSpan={4} className="px-4 py-6 text-center text-gray-700 >No invoices</td></tr>}
                 </tbody>
               </table>
             </div>
@@ -275,8 +275,8 @@ export default function ClientDetailPage() {
               </button>
             </div>
             <div className="grid gap-4">
-              {appointments.map(a=> <div key={a._id} className="bg-white border border-gray-200 rounded-lg p-5 flex justify-between items-start"><div><h3 className="font-medium text-gray-900">{a.title}</h3><div className="mt-1 text-sm text-gray-500">{formatDate(a.date)} at {a.time}</div><div className="mt-2 flex gap-2 text-xs items-center"><span className={`px-2 py-1 rounded-full font-medium ${badge(a.status)}`}>{a.status}</span><span className="text-gray-500">{a.type}</span></div>{a.notes && <p className="mt-2 text-sm text-gray-600">{a.notes}</p>}</div><div className="flex gap-2"><button className="p-2 text-gray-400 hover:text-gray-600"><PencilIcon className="h-4 w-4"/></button><button className="p-2 text-gray-400 hover:text-red-600"><XMarkIcon className="h-4 w-4"/></button></div></div>)}
-              {appointments.length===0 && <div className="text-center py-12 border border-dashed border-gray-300 rounded-lg text-sm text-gray-500">No appointments</div>}
+              {appointments.map(a=> <div key={a._id} className="bg-white border border-gray-200 rounded-lg p-5 flex justify-between items-start"><div><h3 className="font-medium text-gray-900">{a.title}</h3><div className="mt-1 text-sm text-gray-700 >{formatDate(a.date)} at {a.time}</div><div className="mt-2 flex gap-2 text-xs items-center"><span className={`px-2 py-1 rounded-full font-medium ${badge(a.status)}`}>{a.status}</span><span className="text-gray-700 >{a.type}</span></div>{a.notes && <p className="mt-2 text-sm text-gray-800">{a.notes}</p>}</div><div className="flex gap-2"><button className="p-2 text-gray-400 hover:text-gray-800"><PencilIcon className="h-4 w-4"/></button><button className="p-2 text-gray-400 hover:text-red-600"><XMarkIcon className="h-4 w-4"/></button></div></div>)}
+              {appointments.length===0 && <div className="text-center py-12 border border-dashed border-gray-300 rounded-lg text-sm text-gray-700 >No appointments</div>}
             </div>
           </div>
         )}
@@ -302,8 +302,8 @@ export default function ClientDetailPage() {
             </div>
             <div className="bg-white border border-gray-200 rounded-lg p-6">
               <ul className="space-y-4">
-                {communications.map((c,i)=> <li key={c._id} className="relative pl-6"><span className="absolute left-0 top-2 h-2 w-2 rounded-full bg-blue-500"/><div className="text-xs text-gray-500 mb-1">{formatDate(c.timestamp)} • {c.direction}</div><p className="text-sm font-medium">{c.subject || c.type}</p><p className="text-sm text-gray-600 mt-1">{c.content}</p>{c.status && <span className={`mt-2 inline-flex px-2 py-1 text-xs font-medium rounded-full ${badge(c.status)}`}>{c.status}</span>}</li>)}
-                {communications.length===0 && <li className="text-sm text-gray-500">No communications yet.</li>}
+                {communications.map((c,i)=> <li key={c._id} className="relative pl-6"><span className="absolute left-0 top-2 h-2 w-2 rounded-full bg-blue-500"/><div className="text-xs text-gray-700 mb-1">{formatDate(c.timestamp)} • {c.direction}</div><p className="text-sm font-medium">{c.subject || c.type}</p><p className="text-sm text-gray-800 mt-1">{c.content}</p>{c.status && <span className={`mt-2 inline-flex px-2 py-1 text-xs font-medium rounded-full ${badge(c.status)}`}>{c.status}</span>}</li>)}
+                {communications.length===0 && <li className="text-sm text-gray-700 >No communications yet.</li>}
               </ul>
             </div>
           </div>
@@ -330,8 +330,8 @@ export default function ClientDetailPage() {
               <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
                 <h3 className="text-sm font-semibold text-gray-900">Recent Calls</h3>
                 <ul className="space-y-3 text-sm">
-                  <li className="flex justify-between"><span>Follow-up Call</span><span className="text-gray-500">3:45</span></li>
-                  <li className="flex justify-between"><span>Appointment Reminder</span><span className="text-gray-500">1:20</span></li>
+                  <li className="flex justify-between"><span>Follow-up Call</span><span className="text-gray-700 >3:45</span></li>
+                  <li className="flex justify-between"><span>Appointment Reminder</span><span className="text-gray-700 >1:20</span></li>
                 </ul>
               </div>
             </div>

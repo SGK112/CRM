@@ -1,6 +1,6 @@
 /**
  * Mobile-Optimized Clients Page
- * 
+ *
  * This component demonstrates mobile optimization patterns that can be applied
  * across the CRM without breaking existing functionality.
  */
@@ -12,8 +12,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Layout from '../../../components/Layout';
 import { PageHeader } from '../../../components/ui/PageHeader';
-import { 
-  PlusIcon, 
+import {
+  PlusIcon,
   MagnifyingGlassIcon,
   UserIcon,
   BuildingOfficeIcon,
@@ -83,7 +83,7 @@ export default function MobileOptimizedClientsPage() {
   const [communicationModal, setCommunicationModal] = useState<{ isOpen: boolean; client?: Client; type?: 'email' | 'sms' }>({
     isOpen: false
   });
-  
+
   // Mobile-specific state
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
@@ -118,21 +118,21 @@ export default function MobileOptimizedClientsPage() {
 
   const filteredClients = useMemo(() => {
     return clients.filter(client => {
-      const matchesSearch = !searchTerm || 
+      const matchesSearch = !searchTerm ||
         `${client.firstName} ${client.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
         client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
         client.company?.toLowerCase().includes(searchTerm.toLowerCase());
-      
+
       const matchesStatus = statusFilter === 'all' || client.status === statusFilter;
       const matchesSource = sourceFilter === 'all' || client.source === sourceFilter;
-      
+
       return matchesSearch && matchesStatus && matchesSource;
     });
   }, [clients, searchTerm, statusFilter, sourceFilter]);
 
   const handleDeleteClient = async (clientId: string) => {
     if (!confirm('Are you sure you want to delete this client?')) return;
-    
+
     try {
       const token = localStorage.getItem('accessToken');
       const response = await fetch(`${API_BASE}/api/clients/${clientId}`, {
@@ -215,7 +215,7 @@ export default function MobileOptimizedClientsPage() {
               {client.source.replace('_', ' ')}
             </span>
           </div>
-          
+
           <div className="flex items-center space-x-1">
             <button
               onClick={() => router.push(`/dashboard/clients/${client._id}`)}
@@ -379,7 +379,7 @@ export default function MobileOptimizedClientsPage() {
                   <ListBulletIcon className="h-4 w-4" />
                 </button>
               </div>
-              
+
               <Link
                 href="/dashboard/clients/new"
                 className={mobileOptimized(
@@ -499,7 +499,7 @@ export default function MobileOptimizedClientsPage() {
                 No clients found
               </h3>
               <p className={mobileOptimized(mobileClasses.text.body, 'mt-2 text-gray-600 dark:text-gray-400')}>
-                {searchTerm || statusFilter !== 'all' || sourceFilter !== 'all' 
+                {searchTerm || statusFilter !== 'all' || sourceFilter !== 'all'
                   ? 'Try adjusting your search or filters'
                   : 'Get started by adding your first client'
                 }

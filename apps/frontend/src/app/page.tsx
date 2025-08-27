@@ -314,7 +314,7 @@ export default function HomePage() {
 
           {/* Industry tags */}
           <div className="flex flex-wrap gap-3 justify-center">
-            {['General Contracting', 'Kitchen Remodeling', 'Bathroom Renovation', 'Granite & Countertops', 'HVAC Services', 'Electrical Work'].map(tag => (
+            {['Kitchen Remodeling', 'Bathroom Renovation', 'Whole Home Remodels', 'Home Additions', 'Exterior Renovations', 'Custom Cabinetry'].map(tag => (
               <span key={tag} className="px-4 py-2 rounded-full border border-[var(--border)] bg-[var(--surface-2)] text-sm font-medium">
                 {tag}
               </span>

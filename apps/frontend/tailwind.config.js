@@ -90,6 +90,24 @@ module.exports = {
           800: '#991b1b',
           900: '#7f1d1d',
         },
+        // Branded orange for Remodely CRM
+        brand: {
+          50: '#fff7ed',
+          100: '#ffedd5',
+          200: '#fed7aa',
+          300: '#fdba74',
+          400: '#fb923c',
+          500: '#f97316', // Main brand orange
+          600: '#ea580c',
+          700: '#d97706', // Primary orange from CSS vars
+          800: '#b45309',
+          900: '#9a3412',
+        },
+      },
+      textColor: {
+        'theme': 'var(--text)',
+        'theme-muted': 'var(--text-muted)', 
+        'theme-faint': 'var(--text-faint)',
       },
       backgroundColor: {
         'primary': 'var(--bg)',

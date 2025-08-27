@@ -172,10 +172,10 @@ const IntegrationsPage: React.FC = () => {
     <div className="max-w-6xl mx-auto p-6 space-y-8">
       {/* Header */}
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+        <h1 className="text-3xl font-bold text-brand-700 dark:text-brand-400">
           Connect Your Tools
         </h1>
-        <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
+        <p className="mt-4 text-lg text-gray-800 dark:text-gray-200">
           Connect your existing accounts to unlock powerful features. No technical setup required!
         </p>
       </div>
@@ -217,7 +217,7 @@ const IntegrationsPage: React.FC = () => {
                     'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                   }`}>
                     <h4 className="font-medium text-gray-900 dark:text-white">{rec.title}</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{rec.description}</p>
+                    <p className="text-sm text-gray-800 dark:text-gray-200 mt-1">{rec.description}</p>
                     <button
                       onClick={() => window.location.href = rec.actionUrl}
                       className="mt-2 text-sm font-medium text-blue-600 hover:text-blue-500"
@@ -243,7 +243,7 @@ const IntegrationsPage: React.FC = () => {
                   <h3 className="font-semibold text-gray-900 dark:text-white">
                     {integration.name}
                   </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 capitalize">
+                  <p className="text-sm text-gray-700 dark:text-gray-300 capitalize">
                     {integration.type}
                   </p>
                 </div>
@@ -251,7 +251,7 @@ const IntegrationsPage: React.FC = () => {
               {getStatusBadge(integration)}
             </div>
 
-            <p className="mt-4 text-sm text-gray-600 dark:text-gray-300">
+            <p className="mt-4 text-sm text-gray-800 dark:text-gray-200">
               {integration.setupInstructions}
             </p>
 
@@ -293,7 +293,7 @@ const IntegrationsPage: React.FC = () => {
             <h3 className="font-medium text-gray-900 dark:text-white mb-2">
               Why connect these tools?
             </h3>
-            <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+            <ul className="text-sm text-gray-800 dark:text-gray-200 space-y-1">
               <li>• Send professional emails directly from the CRM</li>
               <li>• Text appointment reminders to clients</li>
               <li>• Accept payments without leaving the platform</li>
@@ -304,7 +304,7 @@ const IntegrationsPage: React.FC = () => {
             <h3 className="font-medium text-gray-900 dark:text-white mb-2">
               Is my data secure?
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-300">
+            <p className="text-sm text-gray-800 dark:text-gray-200">
               Yes! We use industry-standard OAuth connections that never store your passwords. 
               You can disconnect any integration at any time.
             </p>

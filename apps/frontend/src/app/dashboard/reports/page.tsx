@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Layout from '../../../components/Layout';
 import {
   DocumentArrowDownIcon,
   DocumentTextIcon,
@@ -170,33 +169,33 @@ export default function ReportsPage() {
           </div>
           <div>
             <h3 className="text-lg font-semibold text-gray-900">{report.name}</h3>
-            <p className="text-sm text-gray-600 mt-1">{report.description}</p>
+            <p className="text-sm text-gray-800 mt-1">{report.description}</p>
           </div>
         </div>
         {getStatusBadge(report.status)}
       </div>
       
       <div className="flex items-center justify-between">
-        <div className="text-sm text-gray-500">
+        <div className="text-sm text-gray-700 >
           Last generated: {formatDate(report.lastGenerated)}
         </div>
         <div className="flex items-center space-x-2">
           <button 
-            className="inline-flex items-center px-3 py-2 text-sm text-gray-600 hover:text-blue-600 transition-colors"
+            className="inline-flex items-center px-3 py-2 text-sm text-gray-800 hover:text-blue-600 transition-colors"
             disabled={report.status === 'generating'}
           >
             <EyeIcon className="h-4 w-4 mr-1" />
             View
           </button>
           <button 
-            className="inline-flex items-center px-3 py-2 text-sm text-gray-600 hover:text-green-600 transition-colors"
+            className="inline-flex items-center px-3 py-2 text-sm text-gray-800 hover:text-green-600 transition-colors"
             disabled={report.status === 'generating'}
           >
             <DocumentArrowDownIcon className="h-4 w-4 mr-1" />
             Download
           </button>
           <button 
-            className="inline-flex items-center px-3 py-2 text-sm text-gray-600 hover:text-purple-600 transition-colors"
+            className="inline-flex items-center px-3 py-2 text-sm text-gray-800 hover:text-purple-600 transition-colors"
             disabled={report.status === 'generating'}
           >
             <ShareIcon className="h-4 w-4 mr-1" />
@@ -215,7 +214,7 @@ export default function ReportsPage() {
         </div>
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-gray-900">{report.name}</h3>
-          <p className="text-sm text-gray-600 mt-1">{report.description}</p>
+          <p className="text-sm text-gray-800 mt-1">{report.description}</p>
         </div>
         <button className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
           Generate
@@ -294,13 +293,12 @@ export default function ReportsPage() {
   );
 
   return (
-    <Layout>
       <div className="space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Reports & Analytics</h1>
-            <p className="text-gray-600 mt-1">
+            <h1 className="text-3xl font-bold text-brand-700 dark:text-brand-400">Reports & Analytics</h1>
+            <p className="text-gray-800 mt-1">
               Generate and manage business reports and analytics
             </p>
           </div>
@@ -333,7 +331,7 @@ export default function ReportsPage() {
                     className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                       selectedFilter === type.id
                         ? 'bg-blue-100 text-blue-700'
-                        : 'text-gray-600 hover:bg-gray-100'
+                        : 'text-gray-800 hover:bg-gray-100'
                     }`}
                   >
                     {type.name}
@@ -352,7 +350,7 @@ export default function ReportsPage() {
                   className="input pl-10"
                 />
               </div>
-              <button className="inline-flex items-center px-3 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+              <button className="inline-flex items-center px-3 py-2 text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                 <FunnelIcon className="h-5 w-5 mr-2" />
                 Filter
               </button>
@@ -364,7 +362,7 @@ export default function ReportsPage() {
         <div>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-900">All Reports</h2>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-700 >
               {filteredReports.length} report{filteredReports.length !== 1 ? 's' : ''}
             </div>
           </div>
@@ -377,7 +375,7 @@ export default function ReportsPage() {
             <div className="text-center py-12">
               <DocumentTextIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No reports found</h3>
-              <p className="text-gray-600 mb-6">
+              <p className="text-gray-800 mb-6">
                 {searchTerm ? 'Try adjusting your search terms' : 'Create your first report to get started'}
               </p>
               <button
@@ -405,7 +403,7 @@ export default function ReportsPage() {
             ].map((template, index) => (
               <div key={index} className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-sm transition-shadow cursor-pointer">
                 <h3 className="font-medium text-gray-900">{template.name}</h3>
-                <p className="text-sm text-gray-600 mt-1">{template.description}</p>
+                <p className="text-sm text-gray-800 mt-1">{template.description}</p>
                 <button className="mt-3 text-sm text-blue-600 hover:text-blue-700 font-medium">
                   Use Template
                 </button>
@@ -417,6 +415,5 @@ export default function ReportsPage() {
         {/* Create Report Modal */}
         <CreateReportModal />
       </div>
-    </Layout>
   );
 }

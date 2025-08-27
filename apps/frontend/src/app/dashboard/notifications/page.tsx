@@ -1,5 +1,4 @@
 'use client';
-import Layout from '../../../components/Layout';
 import { BellIcon } from '@heroicons/react/24/outline';
 
 export default function NotificationsPage() {
@@ -10,10 +9,9 @@ export default function NotificationsPage() {
     { id: '3', title: 'Client Message', detail: 'Johnson: Can we move our meeting?', time: '3h ago' },
   ];
   return (
-    <Layout>
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold flex items-center gap-2 text-primary"><BellIcon className="h-7 w-7 text-amber-600"/> Notifications</h1>
+          <h1 className="text-2xl font-bold flex items-center gap-2 text-brand-700 dark:text-brand-400"><BellIcon className="h-7 w-7 text-brand-600 dark:text-brand-500"/> Notifications</h1>
         </div>
         <div className="space-y-4">
           {notifications.map(n => (
@@ -29,7 +27,6 @@ export default function NotificationsPage() {
             </div>
           ))}
         </div>
-      </div>
-    </Layout>
-  )
+    </div>
+  );
 }

@@ -429,7 +429,7 @@ function DesignEditorPageInner() {
               <div className="surface-1 rounded-xl border border-token p-4">
                 <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Layers</h3>
                 <div className="space-y-1 max-h-40 overflow-auto pr-1 custom-scroll">
-                  {Object.values(nodes).length === 0 && <div className="text-xs text-gray-400 dark:text-gray-500">No elements yet.</div>}
+                  {Object.values(nodes).length === 0 && <div className="text-xs text-gray-400 dark:text-gray-700 >No elements yet.</div>}
                   {Object.values(nodes).map((n:any) => (
                     <button key={n.id} onClick={() => setSelection(n.id)} className={`w-full text-left px-2 py-1 rounded-md text-xs border transition-colors ${(selection===n.id) ? 'bg-blue-50 dark:bg-blue-500/20 border-blue-400 dark:border-blue-400 text-blue-700 dark:text-blue-300' : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>{n.label || n.type}</button>
                   ))}
@@ -441,17 +441,17 @@ function DesignEditorPageInner() {
                   {CABINET_CATALOG.map(c => (
                     <button key={c.id} onClick={()=> placeCatalogCabinet(c.id)} className="text-[10px] px-2 py-2 rounded-md border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-left">
                       <div className="font-medium text-gray-800 dark:text-gray-200 truncate">{c.label}</div>
-                      <div className="text-[9px] text-gray-500 dark:text-gray-400">{c.widthIn}" x {c.heightIn}"</div>
+                      <div className="text-[9px] text-gray-700 dark:text-gray-300">{c.widthIn}" x {c.heightIn}"</div>
                     </button>
                   ))}
                 </div>
-                {Object.values(designState.cabinets).length === 0 && <div className="mt-2 text-[11px] text-gray-500 dark:text-gray-400">Click to place on canvas.</div>}
+                {Object.values(designState.cabinets).length === 0 && <div className="mt-2 text-[11px] text-gray-700 dark:text-gray-300">Click to place on canvas.</div>}
               </div>
               <div className="surface-1 rounded-xl border border-token p-4">
                 <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Properties</h3>
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-xs text-gray-600 dark:text-gray-400">Design Title</label>
+                    <label className="block text-xs text-gray-800 dark:text-gray-300">Design Title</label>
                     <input className="input text-sm" value={design?.title || ''} onChange={e => { setDesign({ ...design, title: e.target.value }); setIsDirty(true); }} />
                   </div>
                   {selection && nodes[selection] && (() => {
@@ -459,7 +459,7 @@ function DesignEditorPageInner() {
                     const config: NodeTypeConfig = nodeTypes[(node.type as string) || 'room'] || nodeTypes.room;
                     return (
                       <div className="space-y-2">
-                        <div className="flex items-center justify-between text-[10px] uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                        <div className="flex items-center justify-between text-[10px] uppercase tracking-wide text-gray-700 dark:text-gray-300">
                           <span>{config.label} Properties</span>
                           <span className="pill sm pill-tint-neutral">{node.type || 'room'}</span>
                         </div>
@@ -477,7 +477,7 @@ function DesignEditorPageInner() {
                           };
                           return (
                             <div key={field} className="space-y-1">
-                              <label className="block text-[10px] font-medium text-gray-600 dark:text-gray-400">{meta.label || field}</label>
+                              <label className="block text-[10px] font-medium text-gray-800 dark:text-gray-300">{meta.label || field}</label>
                               {meta.type === 'select' ? (
                                 <select {...commonProps}>
                                   {meta.options.map((opt: string) => <option key={opt} value={opt}>{opt}</option>)}
@@ -523,7 +523,7 @@ function DesignEditorPageInner() {
 
 export default function DesignEditorPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-sm text-gray-500">Loading editor...</div>}>
+    <Suspense fallback={<div className="p-8 text-sm text-gray-700 >Loading editor...</div>}>
       <DesignEditorPageInner />
     </Suspense>
   );

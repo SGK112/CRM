@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Layout from '../../../../components/Layout';
 import Link from 'next/link';
 import PhoneInput from '../../../../components/forms/PhoneInput';
 import AddressInput from '../../../../components/forms/AddressInput';
@@ -71,66 +70,113 @@ export default function NewClientPage() {
   }
 
   return (
-    <Layout>
-      <form onSubmit={save} className="max-w-5xl mx-auto space-y-8">
+    <div className="max-w-5xl mx-auto space-y-8 p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href={returnTo} className="text-gray-500 hover:text-gray-700"><ArrowLeftIcon className="h-6 w-6"/></Link>
+            <Link href={returnTo} className="text-gray-700 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors">
+              <ArrowLeftIcon className="h-6 w-6"/>
+            </Link>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">New Client</h1>
-              <p className="text-sm text-gray-500 mt-1">Add a new client to your CRM</p>
+              <h1 className="text-3xl font-bold text-black dark:text-white">New Client</h1>
+              <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">Add a new client to your CRM</p>
             </div>
           </div>
           <div className="flex gap-3">
-            <Link href={returnTo} className="px-4 py-2 text-sm rounded-md border border-gray-300 bg-white hover:bg-gray-50">Cancel</Link>
-            <button disabled={saving} type="submit" className="inline-flex items-center px-5 py-2 rounded-md text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"><CheckIcon className="h-5 w-5 mr-1"/>{saving? 'Creating...':'Create'}</button>
+            <Link href={returnTo} className="px-4 py-2 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-colors">
+              Cancel
+            </Link>
+            <button 
+              disabled={saving} 
+              type="submit" 
+              className="inline-flex items-center px-5 py-2 rounded-md text-sm font-medium bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <CheckIcon className="h-5 w-5 mr-1"/>
+              {saving ? 'Creating...' : 'Create'}
+            </button>
           </div>
         </div>
 
-        {error && <div className="rounded-md bg-red-50 border border-red-200 p-4 text-sm text-red-700">{error}</div>}
+        {error && (
+          <div className="rounded-md bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 text-sm text-red-700 dark:text-red-400">
+            {error}
+          </div>
+        )}
 
-        {/* Basic Info */}
-        <section className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
-          <h2 className="text-lg font-semibold">Basic Information</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
-              <input required value={form.firstName} onChange={e=>updateField('firstName', e.target.value)} className="input" />
+        <form onSubmit={save} className="space-y-8">
+          {/* Basic Info */}
+          <section className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Basic Information</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">First Name *</label>
+              <input 
+                required 
+                value={form.firstName} 
+                onChange={e=>updateField('firstName', e.target.value)} 
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" 
+              />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
-              <input required value={form.lastName} onChange={e=>updateField('lastName', e.target.value)} className="input" />
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Last Name *</label>
+              <input 
+                required 
+                value={form.lastName} 
+                onChange={e=>updateField('lastName', e.target.value)} 
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" 
+              />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-              <input type="email" required value={form.email} onChange={e=>updateField('email', e.target.value)} className="input" />
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email *</label>
+              <input 
+                type="email" 
+                required 
+                value={form.email} 
+                onChange={e=>updateField('email', e.target.value)} 
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" 
+              />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone</label>
               <PhoneInput
                 value={form.phone || ''}
                 onChange={(value) => updateField('phone', value)}
                 placeholder="Phone number"
-                className="input"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
-              <input value={form.company||''} onChange={e=>updateField('company', e.target.value)} className="input" />
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Company</label>
+              <input 
+                value={form.company||''} 
+                onChange={e=>updateField('company', e.target.value)} 
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" 
+              />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Job Title</label>
-              <input value={form.jobTitle||''} onChange={e=>updateField('jobTitle', e.target.value)} className="input" />
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Job Title</label>
+              <input 
+                value={form.jobTitle||''} 
+                onChange={e=>updateField('jobTitle', e.target.value)} 
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" 
+              />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-              <select value={form.status} onChange={e=>updateField('status', e.target.value)} className="input">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+              <select 
+                value={form.status} 
+                onChange={e=>updateField('status', e.target.value)} 
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
                 {['lead','prospect','active','inactive','churned','completed'].map(s=> <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Source</label>
-              <select value={form.source||'other'} onChange={e=>updateField('source', e.target.value)} className="input">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Source</label>
+              <select 
+                value={form.source||'other'} 
+                onChange={e=>updateField('source', e.target.value)} 
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
                 {['referral','website','social_media','advertisement','cold_outreach','other'].map(s=> <option key={s} value={s}>{s.replace('_',' ')}</option>)}
               </select>
             </div>
@@ -138,8 +184,8 @@ export default function NewClientPage() {
         </section>
 
         {/* Address */}
-        <section className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
-          <h2 className="text-lg font-semibold">Address</h2>
+        <section className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Address</h2>
           <AddressInput
             address={form.address || {}}
             onChange={(address) => setForm(f => ({ ...f, address }))}
@@ -149,9 +195,15 @@ export default function NewClientPage() {
         </section>
 
         {/* Notes */}
-        <section className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
-          <h2 className="text-lg font-semibold">Notes</h2>
-          <textarea rows={4} value={form.notes||''} onChange={e=>updateField('notes', e.target.value)} className="input" placeholder="Internal notes about this client..." />
+        <section className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-4 shadow-sm">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Notes</h2>
+          <textarea 
+            rows={4} 
+            value={form.notes||''} 
+            onChange={e=>updateField('notes', e.target.value)} 
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-vertical" 
+            placeholder="Internal notes about this client..." 
+          />
         </section>
 
         {/* Tags */}
@@ -168,10 +220,10 @@ export default function NewClientPage() {
                 <button type="button" onClick={()=>removeTag(t)} className="ml-2 text-blue-600 hover:text-blue-900">×</button>
               </span>
             ))}
-            {(!form.tags || form.tags.length===0) && <span className="text-xs text-gray-500">No tags yet.</span>}
+            {(!form.tags || form.tags.length===0) && <span className="text-xs text-gray-700 >No tags yet.</span>}
           </div>
         </section>
       </form>
-    </Layout>
+    </div>
   );
 }

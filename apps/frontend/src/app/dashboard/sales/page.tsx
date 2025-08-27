@@ -1,13 +1,56 @@
-/* eslint-disable no-extra-semi */
 'use client';
 
 import { useState, useMemo } from 'react';
-import Layout from '../../../components/Layout';
-import { BanknotesIcon, DocumentTextIcon, ClockIcon, ArrowTrendingUpIcon, CreditCardIcon, CurrencyDollarIcon, FunnelIcon, PlusCircleIcon } from '@heroicons/react/24/outline';
+import { 
+  BanknotesIcon, 
+  DocumentTextIcon, 
+  ClockIcon, 
+  ArrowTrendingUpIcon, 
+  CreditCardIcon, 
+  CurrencyDollarIcon, 
+  FunnelIcon, 
+  PlusCircleIcon,
+  EyeIcon,
+  PencilIcon,
+  TrashIcon,
+  MagnifyingGlassIcon,
+  CalendarIcon,
+  UserIcon
+} from '@heroicons/react/24/outline';
+import Link from 'next/link';
+import { StandardPageWrapper, StandardCard, StandardSection, StandardGrid, StandardButton, StandardStat } from '../../../components/ui/StandardPageWrapper';
 
-interface Estimate { id: string; client: string; project?: string; total: number; status: 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired'; createdAt: string; validUntil: string; }
-interface Invoice { id: string; client: string; project?: string; total: number; balance: number; status: 'draft' | 'sent' | 'partial' | 'paid' | 'overdue'; issuedAt: string; dueAt: string; }
-interface Payment { id: string; invoiceId?: string; source: string; client: string; amount: number; method: 'card' | 'ach' | 'cash' | 'check' | 'wire'; status: 'pending' | 'completed' | 'failed'; createdAt: string; }
+interface Estimate { 
+  id: string; 
+  client: string; 
+  project?: string; 
+  total: number; 
+  status: 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired'; 
+  createdAt: string; 
+  validUntil: string; 
+}
+
+interface Invoice { 
+  id: string; 
+  client: string; 
+  project?: string; 
+  total: number; 
+  balance: number; 
+  status: 'draft' | 'sent' | 'partial' | 'paid' | 'overdue'; 
+  issuedAt: string; 
+  dueAt: string; 
+}
+
+interface Payment { 
+  id: string; 
+  invoiceId?: string; 
+  source: string; 
+  client: string; 
+  amount: number; 
+  method: 'card' | 'ach' | 'cash' | 'check' | 'wire'; 
+  status: 'pending' | 'completed' | 'failed'; 
+  createdAt: string; 
+}
 
 const currency = (n: number) => n.toLocaleString(undefined, { style: 'currency', currency: 'USD' });
 
@@ -16,6 +59,7 @@ export default function SalesPage() {
   const [methodFilter, setMethodFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [range, setRange] = useState<'30d' | '60d' | '90d' | 'ytd'>('30d');
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Sample in-memory data (replace with API later)
   const estimates: Estimate[] = [
@@ -23,19 +67,23 @@ export default function SalesPage() {
     { id: 'EST-1002', client: 'Johnson LLC', project: 'Bathroom Remodel', total: 9200, status: 'accepted', createdAt: '2025-08-02', validUntil: '2025-08-18' },
     { id: 'EST-1003', client: 'Taylor Homes', total: 44250, status: 'draft', createdAt: '2025-08-10', validUntil: '2025-09-05' },
   ];
+  
   const invoices: Invoice[] = [
     { id: 'INV-24001', client: 'Smith Family', project: 'Kitchen Renovation', total: 18500, balance: 9250, status: 'partial', issuedAt: '2025-08-05', dueAt: '2025-09-05' },
     { id: 'INV-24002', client: 'Johnson LLC', project: 'Bathroom Remodel', total: 9200, balance: 0, status: 'paid', issuedAt: '2025-08-07', dueAt: '2025-09-07' },
     { id: 'INV-24003', client: 'Taylor Homes', total: 44250, balance: 44250, status: 'sent', issuedAt: '2025-08-12', dueAt: '2025-09-11' },
   ];
+  
   const payments: Payment[] = [
     { id: 'PAY-5001', client: 'Johnson LLC', source: 'INV-24002', invoiceId: 'INV-24002', amount: 9200, method: 'ach', status: 'completed', createdAt: '2025-08-08' },
     { id: 'PAY-5002', client: 'Smith Family', source: 'INV-24001', invoiceId: 'INV-24001', amount: 9250, method: 'card', status: 'completed', createdAt: '2025-08-09' },
     { id: 'PAY-5003', client: 'Taylor Homes', source: 'Deposit', amount: 10000, method: 'wire', status: 'pending', createdAt: '2025-08-13' },
   ];
 
-  // Derived filtered payments for overview visualizations
-  const filteredPayments = payments.filter(p => (methodFilter === 'all' || p.method === methodFilter) && (statusFilter === 'all' || p.status === statusFilter));
+  const filteredPayments = payments.filter(p => 
+    (methodFilter === 'all' || p.method === methodFilter) && 
+    (statusFilter === 'all' || p.status === statusFilter)
+  );
 
   const totals = useMemo(() => {
     const estPending = estimates.filter(e => ['sent', 'draft'].includes(e.status)).length;
@@ -47,298 +95,544 @@ export default function SalesPage() {
     return { estPending, estValueOpen, invOpen, aR, paidThisMonth, pendingPayments };
   }, [estimates, invoices, payments]);
 
-  // Aggregate per-client financial snapshot for pill list
-  const clientSummaries = useMemo(() => {
-    interface Summary { client: string; openEstimates: number; openEstimateValue: number; invoiceTotal: number; balance: number; paid: number; pendingPayments: number; lastMethod?: string; };
-    const map = new Map<string, Summary>();
-    const ensure = (c: string) => { if (!map.has(c)) map.set(c, { client: c, openEstimates: 0, openEstimateValue: 0, invoiceTotal: 0, balance: 0, paid: 0, pendingPayments: 0 }); return map.get(c)!; };
-    estimates.forEach(e => { const s = ensure(e.client); if (['sent', 'draft'].includes(e.status)) { s.openEstimates++; s.openEstimateValue += e.total; } });
-    invoices.forEach(i => { const s = ensure(i.client); s.invoiceTotal += i.total; s.balance += i.balance; if (i.status === 'paid') s.paid += i.total; });
-    payments.forEach(p => { const s = ensure(p.client); if (p.status === 'completed') { s.paid += p.amount; s.lastMethod = p.method; } else if (p.status === 'pending') { s.pendingPayments += p.amount; s.lastMethod = p.method; } });
-    return Array.from(map.values()).sort((a, b) => (b.balance + b.openEstimateValue) - (a.balance + a.openEstimateValue));
-  }, [estimates, invoices, payments]);
-
-  const statusPill = (status: string) => {
-    const map: Record<string, string> = {
-      draft: 'pill pill-tint-neutral sm',
-      sent: 'pill pill-tint-blue sm',
-      accepted: 'pill pill-tint-green sm',
-      rejected: 'pill pill-tint-red sm',
-      expired: 'pill pill-tint-yellow sm',
-      partial: 'pill pill-tint-yellow sm',
-      paid: 'pill pill-tint-green sm',
-      overdue: 'pill pill-tint-red sm',
-      pending: 'pill pill-tint-yellow sm',
-      completed: 'pill pill-tint-green sm',
-      failed: 'pill pill-tint-red sm'
-    };
-    return <span className={map[status] || 'pill pill-tint-neutral sm'}>{status}</span>;
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'draft': return 'default';
+      case 'sent': return 'blue';
+      case 'accepted': return 'green';
+      case 'rejected': return 'red';
+      case 'expired': return 'orange';
+      case 'partial': return 'orange';
+      case 'paid': return 'green';
+      case 'overdue': return 'red';
+      case 'pending': return 'orange';
+      case 'completed': return 'green';
+      case 'failed': return 'red';
+      default: return 'default';
+    }
   };
 
-  const methodPill = (m: Payment['method']) => {
-    const map: Record<string, string> = { card: 'purple', ach: 'blue', cash: 'green', check: 'yellow', wire: 'indigo' };
-    return <span className={`pill pill-tint-${map[m]} sm`}>{m}</span>;
+  const getMethodColor = (method: Payment['method']) => {
+    switch (method) {
+      case 'card': return 'purple';
+      case 'ach': return 'blue';
+      case 'cash': return 'green';
+      case 'check': return 'orange';
+      case 'wire': return 'blue';
+      default: return 'default';
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString();
   };
 
   return (
-    <Layout>
+    <StandardPageWrapper>
       <div className="space-y-8">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        {/* Header */}
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Sales</h1>
-            <p className="text-sm text-gray-600 dark:text-[var(--text-dim)]">Estimates, invoices & payment performance</p>
+            <h1 className="text-3xl font-bold theme-text">Sales Dashboard</h1>
+            <p className="theme-text-muted mt-2">
+              Manage estimates, invoices, and track payment performance across all client interactions.
+            </p>
           </div>
           <div className="flex gap-2 flex-wrap">
             {['overview', 'estimates', 'invoices', 'payments'].map(t => (
-              <button key={t} onClick={() => setTab(t as any)} className={`pill ${tab === t ? 'pill-tint-blue' : 'pill-tint-neutral'} sm`} data-active={tab === t}>
+              <StandardButton
+                key={t}
+                variant={tab === t ? 'primary' : 'secondary'}
+                size="sm"
+                onClick={() => setTab(t as any)}
+              >
                 {t.charAt(0).toUpperCase() + t.slice(1)}
-              </button>
+              </StandardButton>
             ))}
           </div>
         </div>
 
         {tab === 'overview' && (
           <>
-            {/* Actions & Filters Row */}
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
-              <div className="flex items-center gap-2 flex-wrap">
-                <button className="pill pill-tint-green sm" title="New Estimate">+ Estimate</button>
-                <button className="pill pill-tint-indigo sm" title="New Invoice">+ Invoice</button>
-                <button className="pill pill-tint-purple sm" title="Record Payment">+ Payment</button>
-              </div>
-              <div className="flex items-center flex-wrap gap-2">
-                <div className="pill sm pill-tint-neutral flex items-center gap-2">
-                  <FunnelIcon className="h-4 w-4" />
-                  <select value={range} onChange={e => setRange(e.target.value as any)} className="bg-transparent focus:outline-none text-[11px]">
-                    <option value="30d">30d</option>
-                    <option value="60d">60d</option>
-                    <option value="90d">90d</option>
-                    <option value="ytd">YTD</option>
+            {/* Actions & Filters */}
+            <StandardCard>
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <StandardButton 
+                    as={Link} 
+                    href="/dashboard/estimates/new"
+                    icon={<PlusCircleIcon className="h-4 w-4" />}
+                  >
+                    New Estimate
+                  </StandardButton>
+                  <StandardButton 
+                    as={Link} 
+                    href="/dashboard/invoices/new"
+                    variant="secondary"
+                    icon={<PlusCircleIcon className="h-4 w-4" />}
+                  >
+                    New Invoice
+                  </StandardButton>
+                  <StandardButton 
+                    as={Link} 
+                    href="/dashboard/payments/new"
+                    variant="secondary"
+                    icon={<PlusCircleIcon className="h-4 w-4" />}
+                  >
+                    Record Payment
+                  </StandardButton>
+                </div>
+                <div className="flex items-center flex-wrap gap-3">
+                  <select 
+                    value={range} 
+                    onChange={e => setRange(e.target.value as any)} 
+                    className="px-3 py-2 border theme-border rounded-lg theme-surface-1 theme-text focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  >
+                    <option value="30d">Last 30 Days</option>
+                    <option value="60d">Last 60 Days</option>
+                    <option value="90d">Last 90 Days</option>
+                    <option value="ytd">Year to Date</option>
+                  </select>
+                  <select 
+                    value={methodFilter} 
+                    onChange={e => setMethodFilter(e.target.value)} 
+                    className="px-3 py-2 border theme-border rounded-lg theme-surface-1 theme-text focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  >
+                    <option value="all">All Payment Methods</option>
+                    <option value="card">Credit Card</option>
+                    <option value="ach">ACH Transfer</option>
+                    <option value="cash">Cash</option>
+                    <option value="check">Check</option>
+                    <option value="wire">Wire Transfer</option>
+                  </select>
+                  <select 
+                    value={statusFilter} 
+                    onChange={e => setStatusFilter(e.target.value)} 
+                    className="px-3 py-2 border theme-border rounded-lg theme-surface-1 theme-text focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  >
+                    <option value="all">All Statuses</option>
+                    <option value="completed">Completed</option>
+                    <option value="pending">Pending</option>
+                    <option value="failed">Failed</option>
                   </select>
                 </div>
-                <select value={methodFilter} onChange={e => setMethodFilter(e.target.value)} className="pill sm pill-tint-neutral bg-transparent focus:outline-none pr-6">
-                  <option value="all">All Methods</option>
-                  <option value="card">Card</option>
-                  <option value="ach">ACH</option>
-                  <option value="cash">Cash</option>
-                  <option value="check">Check</option>
-                  <option value="wire">Wire</option>
-                </select>
-                <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="pill sm pill-tint-neutral bg-transparent focus:outline-none pr-6">
-                  <option value="all">All Status</option>
-                  <option value="completed">Completed</option>
-                  <option value="pending">Pending</option>
-                  <option value="failed">Failed</option>
-                </select>
               </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-              <StatCard icon={DocumentTextIcon} label="Open Estimates" value={totals.estPending} sub={currency(totals.estValueOpen)} tint="blue" />
-              <StatCard icon={ClockIcon} label="Open Invoices" value={totals.invOpen} sub={currency(totals.aR)} tint="yellow" />
-              <StatCard icon={BanknotesIcon} label="A/R Balance" value={currency(totals.aR)} tint="purple" />
-              <StatCard icon={ArrowTrendingUpIcon} label="Paid (Month)" value={currency(totals.paidThisMonth)} tint="green" />
-              <StatCard icon={CreditCardIcon} label="Pending Payments" value={currency(totals.pendingPayments)} tint="indigo" />
-              <StatCard icon={CurrencyDollarIcon} label="Estimates Value" value={currency(totals.estValueOpen)} tint="neutral" />
-            </div>
-            {/* Revenue Sparkline */}
-            <div className="surface-1 rounded-xl border border-token p-4 mb-6">
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="text-sm font-medium text-gray-800 dark:text-gray-100">Revenue Trend</h2>
-                <span className="pill sm pill-tint-neutral">{filteredPayments.length} payments</span>
-              </div>
-              {(() => {
-                // Build simple sparkline from payments amounts by day index for demo
-                const points = filteredPayments.map(p => ({ date: new Date(p.createdAt), amount: p.amount }));
-                const sorted = [...points].sort((a, b) => +a.date - +b.date);
-                const max = Math.max(1, ...sorted.map(p => p.amount));
-                const w = 260; const h = 60; const pad = 4;
-                const path = sorted.map((p, i) => {
-                  const x = pad + (i / (Math.max(sorted.length - 1, 1))) * (w - pad * 2);
-                  const y = h - pad - (p.amount / max) * (h - pad * 2);
-                  return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
-                }).join(' ');
-                return (
-                  <div className="flex items-center gap-6 flex-wrap">
-                    <svg width={w} height={h} className="rounded-md bg-[var(--surface-2)] border border-token">
-                      <path d={path} fill="none" stroke="#4ade80" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
-                      {sorted.map((p, i) => {
-                        const x = pad + (i / (Math.max(sorted.length - 1, 1))) * (w - pad * 2);
-                        const y = h - pad - (p.amount / max) * (h - pad * 2);
-                        return <circle key={i} cx={x} cy={y} r={3} className="fill-emerald-400" />;
-                      })}
-                    </svg>
-                    <div className="text-xs space-y-1 text-gray-600 dark:text-gray-400 min-w-[160px]">
-                      <div className="flex justify-between"><span>Total</span><span className="font-medium text-gray-900 dark:text-gray-100">{currency(filteredPayments.reduce((s, p) => s + p.amount, 0))}</span></div>
-                      <div className="flex justify-between"><span>Avg</span><span>{currency(filteredPayments.reduce((s, p) => s + p.amount, 0) / (filteredPayments.length || 1))}</span></div>
-                      <div className="flex justify-between"><span>Methods</span><span>{Array.from(new Set(filteredPayments.map(p => p.method))).length}</span></div>
-                    </div>
-                  </div>
-                );
-              })()}
-            </div>
-            {/* Client summary pills */}
-            <div className="surface-1 rounded-xl border border-token p-3">
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="text-sm font-medium text-gray-800 dark:text-gray-100">Client Financial Snapshot</h2>
-                <span className="pill sm pill-tint-neutral">{clientSummaries.length} clients</span>
-              </div>
-              <div className="flex gap-2 overflow-x-auto pb-1 custom-scroll">
-                {clientSummaries.map(s => {
-                  const risk = s.balance > 0 || s.openEstimateValue > 0 || s.pendingPayments > 0;
-                  const tint = s.balance > 0 ? 'red' : (s.pendingPayments > 0 ? 'yellow' : (s.openEstimateValue > 0 ? 'blue' : 'green'));
-                  return (
-                    <div key={s.client} className={`pill lg pill-tint-${tint} min-w-[240px] flex flex-col items-start !gap-1`}>
-                      <div className="w-full flex items-center justify-between">
-                        <span className="font-semibold truncate max-w-[140px]">{s.client}</span>
-                        {s.lastMethod && <span className="text-[10px] uppercase tracking-wide opacity-80">{s.lastMethod}</span>}
-                      </div>
-                      <div className="w-full flex flex-wrap gap-x-3 gap-y-1 text-[10px] leading-tight">
-                        <span>{s.openEstimates > 0 && `Est ${currency(s.openEstimateValue)}`}</span>
-                        <span>{s.balance > 0 && `AR ${currency(s.balance)}`}</span>
-                        <span>{s.pendingPayments > 0 && `Pend ${currency(s.pendingPayments)}`}</span>
-                        <span className="text-green-300/90">Paid {currency(s.paid)}</span>
-                      </div>
-                      {risk && s.balance === 0 && s.pendingPayments === 0 && s.openEstimateValue === 0 && <span className="text-[10px] opacity-70">Clear</span>}
-                    </div>
-                  );
-                })}
-                {clientSummaries.length === 0 && <div className="pill pill-tint-neutral">No client data</div>}
-              </div>
-            </div>
+            </StandardCard>
+
+            {/* Stats Overview */}
+            <StandardGrid cols={6} className="grid-cols-1 md:grid-cols-3 lg:grid-cols-6">
+              <StandardStat
+                label="Open Estimates"
+                value={`${totals.estPending} (${currency(totals.estValueOpen)})`}
+                color="blue"
+                icon={<DocumentTextIcon className="h-6 w-6" />}
+              />
+              <StandardStat
+                label="Open Invoices"
+                value={`${totals.invOpen} (${currency(totals.aR)})`}
+                color="orange"
+                icon={<ClockIcon className="h-6 w-6" />}
+              />
+              <StandardStat
+                label="A/R Balance"
+                value={currency(totals.aR)}
+                color="purple"
+                icon={<BanknotesIcon className="h-6 w-6" />}
+              />
+              <StandardStat
+                label="Paid This Month"
+                value={currency(totals.paidThisMonth)}
+                color="green"
+                icon={<ArrowTrendingUpIcon className="h-6 w-6" />}
+              />
+              <StandardStat
+                label="Pending Payments"
+                value={currency(totals.pendingPayments)}
+                color="blue"
+                icon={<CreditCardIcon className="h-6 w-6" />}
+              />
+              <StandardStat
+                label="Estimate Value"
+                value={currency(totals.estValueOpen)}
+                color="default"
+                icon={<CurrencyDollarIcon className="h-6 w-6" />}
+              />
+            </StandardGrid>
+
             {/* Recent Activity */}
-            <div className="surface-1 rounded-xl border border-token p-4 mt-6">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-sm font-medium text-gray-800 dark:text-gray-100">Recent Activity</h2>
-                <span className="pill sm pill-tint-neutral">Last {filteredPayments.length} payments</span>
-              </div>
-              <div className="space-y-2">
-                {filteredPayments.slice(0, 6).map(p => (
-                  <div key={p.id} className="flex items-center justify-between text-[11px] border border-token rounded-md px-3 py-1.5 hover:bg-[var(--surface-2)]/60">
-                    <div className="flex items-center gap-2">
-                      <span className="pill sm pill-tint-green">{currency(p.amount)}</span>
-                      <span className="font-medium text-gray-800 dark:text-gray-200">{p.client}</span>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Recent Estimates */}
+              <StandardCard>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-semibold theme-text">Recent Estimates</h3>
+                  <StandardButton size="sm" as={Link} href="/dashboard/estimates">
+                    View All
+                  </StandardButton>
+                </div>
+                <div className="space-y-4">
+                  {estimates.slice(0, 3).map((estimate) => (
+                    <div key={estimate.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border theme-border hover:shadow-md transition-shadow">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className="font-medium theme-text">{estimate.id}</span>
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                            estimate.status === 'draft' ? 'theme-surface-2 theme-text-muted' :
+                            estimate.status === 'sent' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' :
+                            estimate.status === 'accepted' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' :
+                            estimate.status === 'rejected' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' :
+                            'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300'
+                          }`}>
+                            {estimate.status}
+                          </span>
+                        </div>
+                        <p className="text-sm theme-text-muted">{estimate.client}</p>
+                        {estimate.project && (
+                          <p className="text-xs text-gray-500 dark:text-gray-500">{estimate.project}</p>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold theme-text">{currency(estimate.total)}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-500">
+                          Valid until {formatDate(estimate.validUntil)}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3 text-gray-500 dark:text-gray-400">
-                      <span className="hidden sm:inline">{p.source}</span>
-                      <span className={`pill sm ${p.status === 'completed' ? 'pill-tint-green' : p.status === 'pending' ? 'pill-tint-yellow' : 'pill-tint-red'}`}>{p.status}</span>
-                      <span>{p.createdAt}</span>
+                  ))}
+                </div>
+              </StandardCard>
+
+              {/* Recent Invoices */}
+              <StandardCard>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-semibold theme-text">Recent Invoices</h3>
+                  <StandardButton size="sm" as={Link} href="/dashboard/invoices">
+                    View All
+                  </StandardButton>
+                </div>
+                <div className="space-y-4">
+                  {invoices.slice(0, 3).map((invoice) => (
+                    <div key={invoice.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border theme-border hover:shadow-md transition-shadow">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className="font-medium theme-text">{invoice.id}</span>
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                            invoice.status === 'draft' ? 'theme-surface-2 theme-text-muted' :
+                            invoice.status === 'sent' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' :
+                            invoice.status === 'paid' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' :
+                            invoice.status === 'overdue' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' :
+                            'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300'
+                          }`}>
+                            {invoice.status}
+                          </span>
+                        </div>
+                        <p className="text-sm theme-text-muted">{invoice.client}</p>
+                        {invoice.project && (
+                          <p className="text-xs text-gray-500 dark:text-gray-500">{invoice.project}</p>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold theme-text">{currency(invoice.total)}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-500">
+                          Balance: {currency(invoice.balance)}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-500">
+                          Due {formatDate(invoice.dueAt)}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
-                {filteredPayments.length === 0 && <div className="text-xs text-gray-500 dark:text-gray-400">No payments in selection.</div>}
-              </div>
+                  ))}
+                </div>
+              </StandardCard>
             </div>
+
+            {/* Recent Payments */}
+            <StandardCard>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold theme-text">Recent Payments</h3>
+                <StandardButton size="sm" as={Link} href="/dashboard/payments">
+                  View All
+                </StandardButton>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b theme-border">
+                      <th className="text-left py-3 px-4 font-medium theme-text">Payment ID</th>
+                      <th className="text-left py-3 px-4 font-medium theme-text">Client</th>
+                      <th className="text-left py-3 px-4 font-medium theme-text">Amount</th>
+                      <th className="text-left py-3 px-4 font-medium theme-text">Method</th>
+                      <th className="text-left py-3 px-4 font-medium theme-text">Status</th>
+                      <th className="text-left py-3 px-4 font-medium theme-text">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {payments.slice(0, 5).map((payment) => (
+                      <tr key={payment.id} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <td className="py-3 px-4 font-medium theme-text">{payment.id}</td>
+                        <td className="py-3 px-4 theme-text-muted">{payment.client}</td>
+                        <td className="py-3 px-4 font-semibold theme-text">{currency(payment.amount)}</td>
+                        <td className="py-3 px-4">
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                            payment.method === 'card' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300' :
+                            payment.method === 'ach' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' :
+                            payment.method === 'cash' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' :
+                            payment.method === 'check' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300' :
+                            'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
+                          }`}>
+                            {payment.method.toUpperCase()}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                            payment.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' :
+                            payment.status === 'pending' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300' :
+                            'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+                          }`}>
+                            {payment.status}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 theme-text-muted">{formatDate(payment.createdAt)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </StandardCard>
           </>
         )}
 
+        {/* Estimates Tab */}
         {tab === 'estimates' && (
-          <div className="surface-1 rounded-xl border border-token overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="text-left text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                <tr className="border-b border-token">
-                  <th className="py-2 px-3">Estimate</th>
-                  <th className="py-2 px-3">Client</th>
-                  <th className="py-2 px-3">Project</th>
-                  <th className="py-2 px-3">Total</th>
-                  <th className="py-2 px-3">Status</th>
-                  <th className="py-2 px-3">Created</th>
-                  <th className="py-2 px-3">Valid Until</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--border)]/60">
-                {estimates.map(e => (
-                  <tr key={e.id} className="hover:bg-[var(--surface-2)]/60">
-                    <td className="py-2 px-3 font-medium">{e.id}</td>
-                    <td className="py-2 px-3">{e.client}</td>
-                    <td className="py-2 px-3 text-[11px] text-gray-500 dark:text-gray-400">{e.project || '-'}</td>
-                    <td className="py-2 px-3">{currency(e.total)}</td>
-                    <td className="py-2 px-3">{statusPill(e.status)}</td>
-                    <td className="py-2 px-3 text-[11px]">{e.createdAt}</td>
-                    <td className="py-2 px-3 text-[11px]">{e.validUntil}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <StandardCard>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold theme-text">All Estimates</h3>
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search estimates..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 pr-4 py-2 border theme-border rounded-lg theme-surface-1 theme-text focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  />
+                </div>
+                <StandardButton as={Link} href="/dashboard/estimates/new" icon={<PlusCircleIcon className="h-4 w-4" />}>
+                  New Estimate
+                </StandardButton>
+              </div>
+            </div>
+            <StandardGrid cols={1}>
+              {estimates.map((estimate) => (
+                <StandardCard key={estimate.id} hover className="group">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-3">
+                        <h4 className="font-semibold theme-text">{estimate.id}</h4>
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                          estimate.status === 'draft' ? 'theme-surface-2 theme-text-muted' :
+                          estimate.status === 'sent' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' :
+                          estimate.status === 'accepted' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' :
+                          estimate.status === 'rejected' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' :
+                          'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300'
+                        }`}>
+                          {estimate.status}
+                        </span>
+                      </div>
+                      <p className="theme-text-muted mb-1">{estimate.client}</p>
+                      {estimate.project && (
+                        <p className="text-sm text-gray-500 dark:text-gray-500 mb-2">{estimate.project}</p>
+                      )}
+                      <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <CalendarIcon className="h-4 w-4" />
+                          Created {formatDate(estimate.createdAt)}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <ClockIcon className="h-4 w-4" />
+                          Valid until {formatDate(estimate.validUntil)}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold theme-text mb-2">{currency(estimate.total)}</p>
+                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <StandardButton size="sm" variant="ghost" as={Link} href={`/dashboard/estimates/${estimate.id}`} icon={<EyeIcon className="h-4 w-4" />}>
+                          View
+                        </StandardButton>
+                        <StandardButton size="sm" variant="ghost" as={Link} href={`/dashboard/estimates/${estimate.id}/edit`} icon={<PencilIcon className="h-4 w-4" />}>
+                          Edit
+                        </StandardButton>
+                        <StandardButton size="sm" variant="ghost" icon={<TrashIcon className="h-4 w-4" />}>
+                          Delete
+                        </StandardButton>
+                      </div>
+                    </div>
+                  </div>
+                </StandardCard>
+              ))}
+            </StandardGrid>
+          </StandardCard>
         )}
 
+        {/* Invoices Tab */}
         {tab === 'invoices' && (
-          <div className="surface-1 rounded-xl border border-token overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="text-left text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                <tr className="border-b border-token">
-                  <th className="py-2 px-3">Invoice</th>
-                  <th className="py-2 px-3">Client</th>
-                  <th className="py-2 px-3">Project</th>
-                  <th className="py-2 px-3">Total</th>
-                  <th className="py-2 px-3">Balance</th>
-                  <th className="py-2 px-3">Status</th>
-                  <th className="py-2 px-3">Issued</th>
-                  <th className="py-2 px-3">Due</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--border)]/60">
-                {invoices.map(i => (
-                  <tr key={i.id} className="hover:bg-[var(--surface-2)]/60">
-                    <td className="py-2 px-3 font-medium">{i.id}</td>
-                    <td className="py-2 px-3">{i.client}</td>
-                    <td className="py-2 px-3 text-[11px] text-gray-500 dark:text-gray-400">{i.project || '-'}</td>
-                    <td className="py-2 px-3">{currency(i.total)}</td>
-                    <td className="py-2 px-3">{currency(i.balance)}</td>
-                    <td className="py-2 px-3">{statusPill(i.status)}</td>
-                    <td className="py-2 px-3 text-[11px]">{i.issuedAt}</td>
-                    <td className="py-2 px-3 text-[11px]">{i.dueAt}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <StandardCard>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold theme-text">All Invoices</h3>
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search invoices..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 pr-4 py-2 border theme-border rounded-lg theme-surface-1 theme-text focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  />
+                </div>
+                <StandardButton as={Link} href="/dashboard/invoices/new" icon={<PlusCircleIcon className="h-4 w-4" />}>
+                  New Invoice
+                </StandardButton>
+              </div>
+            </div>
+            <StandardGrid cols={1}>
+              {invoices.map((invoice) => (
+                <StandardCard key={invoice.id} hover className="group">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-3">
+                        <h4 className="font-semibold theme-text">{invoice.id}</h4>
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                          invoice.status === 'draft' ? 'theme-surface-2 theme-text-muted' :
+                          invoice.status === 'sent' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' :
+                          invoice.status === 'paid' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' :
+                          invoice.status === 'overdue' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' :
+                          'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300'
+                        }`}>
+                          {invoice.status}
+                        </span>
+                      </div>
+                      <p className="theme-text-muted mb-1">{invoice.client}</p>
+                      {invoice.project && (
+                        <p className="text-sm text-gray-500 dark:text-gray-500 mb-2">{invoice.project}</p>
+                      )}
+                      <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <CalendarIcon className="h-4 w-4" />
+                          Issued {formatDate(invoice.issuedAt)}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <ClockIcon className="h-4 w-4" />
+                          Due {formatDate(invoice.dueAt)}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold theme-text">{currency(invoice.total)}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-500 mb-2">
+                        Balance: {currency(invoice.balance)}
+                      </p>
+                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <StandardButton size="sm" variant="ghost" as={Link} href={`/dashboard/invoices/${invoice.id}`} icon={<EyeIcon className="h-4 w-4" />}>
+                          View
+                        </StandardButton>
+                        <StandardButton size="sm" variant="ghost" as={Link} href={`/dashboard/invoices/${invoice.id}/edit`} icon={<PencilIcon className="h-4 w-4" />}>
+                          Edit
+                        </StandardButton>
+                        <StandardButton size="sm" variant="ghost" icon={<TrashIcon className="h-4 w-4" />}>
+                          Delete
+                        </StandardButton>
+                      </div>
+                    </div>
+                  </div>
+                </StandardCard>
+              ))}
+            </StandardGrid>
+          </StandardCard>
         )}
 
+        {/* Payments Tab */}
         {tab === 'payments' && (
-          <div className="surface-1 rounded-xl border border-token overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="text-left text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                <tr className="border-b border-token">
-                  <th className="py-2 px-3">Payment</th>
-                  <th className="py-2 px-3">Client</th>
-                  <th className="py-2 px-3">Source</th>
-                  <th className="py-2 px-3">Amount</th>
-                  <th className="py-2 px-3">Method</th>
-                  <th className="py-2 px-3">Status</th>
-                  <th className="py-2 px-3">Date</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--border)]/60">
-                {payments.map(p => (
-                  <tr key={p.id} className="hover:bg-[var(--surface-2)]/60">
-                    <td className="py-2 px-3 font-medium">{p.id}</td>
-                    <td className="py-2 px-3">{p.client}</td>
-                    <td className="py-2 px-3 text-[11px] text-gray-500 dark:text-gray-400">{p.source}</td>
-                    <td className="py-2 px-3">{currency(p.amount)}</td>
-                    <td className="py-2 px-3">{methodPill(p.method)}</td>
-                    <td className="py-2 px-3">{statusPill(p.status)}</td>
-                    <td className="py-2 px-3 text-[11px]">{p.createdAt}</td>
+          <StandardCard>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold theme-text">All Payments</h3>
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search payments..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 pr-4 py-2 border theme-border rounded-lg theme-surface-1 theme-text focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  />
+                </div>
+                <StandardButton as={Link} href="/dashboard/payments/new" icon={<PlusCircleIcon className="h-4 w-4" />}>
+                  Record Payment
+                </StandardButton>
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b theme-border">
+                    <th className="text-left py-3 px-4 font-medium theme-text">Payment ID</th>
+                    <th className="text-left py-3 px-4 font-medium theme-text">Client</th>
+                    <th className="text-left py-3 px-4 font-medium theme-text">Source</th>
+                    <th className="text-left py-3 px-4 font-medium theme-text">Amount</th>
+                    <th className="text-left py-3 px-4 font-medium theme-text">Method</th>
+                    <th className="text-left py-3 px-4 font-medium theme-text">Status</th>
+                    <th className="text-left py-3 px-4 font-medium theme-text">Date</th>
+                    <th className="text-left py-3 px-4 font-medium theme-text">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {payments.map((payment) => (
+                    <tr key={payment.id} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
+                      <td className="py-3 px-4 font-medium theme-text">{payment.id}</td>
+                      <td className="py-3 px-4 theme-text-muted">{payment.client}</td>
+                      <td className="py-3 px-4 theme-text-muted">{payment.source}</td>
+                      <td className="py-3 px-4 font-semibold theme-text">{currency(payment.amount)}</td>
+                      <td className="py-3 px-4">
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                          payment.method === 'card' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300' :
+                          payment.method === 'ach' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' :
+                          payment.method === 'cash' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' :
+                          payment.method === 'check' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300' :
+                          'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
+                        }`}>
+                          {payment.method.toUpperCase()}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                          payment.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' :
+                          payment.status === 'pending' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300' :
+                          'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+                        }`}>
+                          {payment.status}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 theme-text-muted">{formatDate(payment.createdAt)}</td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-2">
+                          <StandardButton size="sm" variant="ghost" as={Link} href={`/dashboard/payments/${payment.id}`} icon={<EyeIcon className="h-4 w-4" />}>
+                            View
+                          </StandardButton>
+                          <StandardButton size="sm" variant="ghost" as={Link} href={`/dashboard/payments/${payment.id}/edit`} icon={<PencilIcon className="h-4 w-4" />}>
+                            Edit
+                          </StandardButton>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </StandardCard>
         )}
       </div>
-    </Layout>
-  );
-}
-
-interface StatCardProps { icon: any; label: string; value: any; sub?: string; tint?: 'blue' | 'green' | 'yellow' | 'purple' | 'indigo' | 'neutral' | 'red'; }
-function StatCard({ icon: Icon, label, value, sub, tint = 'blue' }: StatCardProps) {
-  const tintClass = `pill-tint-${tint}`;
-  return (
-    <div className="surface-1 rounded-xl border border-token p-4 flex flex-col gap-3">
-      <div className={`inline-flex ${tintClass} pill sm`}> <Icon className="h-4 w-4" /> </div>
-      <div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 font-medium">{label}</div>
-      <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">{value}</div>
-      {sub && <div className="text-[11px] text-gray-500 dark:text-gray-400">{sub}</div>}
-    </div>
+    </StandardPageWrapper>
   );
 }

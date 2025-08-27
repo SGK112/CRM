@@ -246,7 +246,7 @@ export default function StoragePage() {
       case 'document':
         return 'text-yellow-600';
       default:
-        return 'text-gray-600';
+        return 'text-gray-800';
     }
   };
 
@@ -309,7 +309,7 @@ export default function StoragePage() {
             {file.name}
           </h3>
           
-          <div className="space-y-1 text-xs text-gray-500">
+          <div className="space-y-1 text-xs text-gray-700 >
             {file.size && <p>{formatFileSize(file.size)}</p>}
             <p>{file.lastModified}</p>
             <p>By {file.owner}</p>
@@ -360,23 +360,23 @@ export default function StoragePage() {
               {file.project && (
                 <div className="flex items-center space-x-1 mt-1">
                   <ClipboardDocumentListIcon className="h-3 w-3 text-gray-400" />
-                  <span className="text-xs text-gray-500">{file.project}</span>
+                  <span className="text-xs text-gray-700 >{file.project}</span>
                 </div>
               )}
             </div>
           </div>
         </td>
-        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 >
           {file.size ? formatFileSize(file.size) : '—'}
         </td>
-        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 >
           {file.lastModified}
         </td>
-        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 >
           {file.owner}
         </td>
         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-          <button className="text-gray-400 hover:text-gray-600">
+          <button className="text-gray-400 hover:text-gray-800">
             <EllipsisVerticalIcon className="h-5 w-5" />
           </button>
         </td>
@@ -395,7 +395,7 @@ export default function StoragePage() {
               <h3 className="text-lg font-medium text-gray-900">Upload Files</h3>
               <button
                 onClick={() => setShowUploadModal(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-800"
               >
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -405,7 +405,7 @@ export default function StoragePage() {
             
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
               <CloudArrowUpIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <p className="text-sm text-gray-600 mb-2">
+              <p className="text-sm text-gray-800 mb-2">
                 Drag and drop files here, or click to select
               </p>
               <input
@@ -458,8 +458,8 @@ export default function StoragePage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">File Storage</h1>
-            <p className="text-gray-600 mt-1">
+            <h1 className="text-3xl font-bold text-brand-700 dark:text-brand-400">File Storage</h1>
+            <p className="text-gray-800 mt-1">
               Manage your project files, blueprints, and documents
             </p>
           </div>
@@ -496,7 +496,7 @@ export default function StoragePage() {
                 <ArchiveBoxIcon className="h-6 w-6 text-blue-600" />
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">Storage Used</p>
+                <p className="text-sm font-medium text-gray-700 >Storage Used</p>
                 <p className="text-lg font-semibold text-gray-900">
                   {storageStats.used} GB / {storageStats.total} GB
                 </p>
@@ -518,7 +518,7 @@ export default function StoragePage() {
                 <DocumentIcon className="h-6 w-6 text-green-600" />
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">Total Files</p>
+                <p className="text-sm font-medium text-gray-700 >Total Files</p>
                 <p className="text-lg font-semibold text-gray-900">{storageStats.files.toLocaleString()}</p>
               </div>
             </div>
@@ -530,7 +530,7 @@ export default function StoragePage() {
                 <FolderIcon className="h-6 w-6 text-yellow-600" />
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">Folders</p>
+                <p className="text-sm font-medium text-gray-700 >Folders</p>
                 <p className="text-lg font-semibold text-gray-900">{storageStats.folders}</p>
               </div>
             </div>
@@ -542,7 +542,7 @@ export default function StoragePage() {
                 <ShareIcon className="h-6 w-6 text-purple-600" />
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">Shared</p>
+                <p className="text-sm font-medium text-gray-700 >Shared</p>
                 <p className="text-lg font-semibold text-gray-900">{storageStats.shared}</p>
               </div>
             </div>
@@ -580,7 +580,7 @@ export default function StoragePage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            <div className="flex items-center space-x-1 text-sm text-gray-600">
+            <div className="flex items-center space-x-1 text-sm text-gray-800">
               <span>Home</span>
               {currentPath.map((folder, index) => (
                 <div key={index} className="flex items-center space-x-1">
@@ -639,16 +639,16 @@ export default function StoragePage() {
               <table className="min-w-full divide-y divide-gray-200 dark:divide-[color-mix(in_oklab,var(--border),transparent_40%)]">
                 <thead className="bg-gray-50 dark:bg-[var(--surface-2)]">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                       Name
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                       Size
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                       Modified
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                       Owner
                     </th>
                     <th className="relative px-6 py-3">
@@ -667,7 +667,7 @@ export default function StoragePage() {
             <div className="text-center py-12">
               <FolderIcon className="mx-auto h-12 w-12 text-gray-400" />
               <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-[var(--text)]">No files found</h3>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-700 >
                 {searchQuery ? 'Try adjusting your search terms.' : 'Get started by uploading files.'}
               </p>
               {!searchQuery && (

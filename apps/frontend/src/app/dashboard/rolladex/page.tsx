@@ -184,7 +184,7 @@ export default function RolladexPage() {
           <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
             Business Card Rolladex
           </h2>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-700 >
             Manage your professional contacts and business cards in one organized place
           </p>
         </div>
@@ -216,7 +216,7 @@ export default function RolladexPage() {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Total Contacts</dt>
+                  <dt className="text-sm font-medium text-gray-700 truncate">Total Contacts</dt>
                   <dd className="text-lg font-medium text-gray-900">{contacts.length}</dd>
                 </dl>
               </div>
@@ -232,7 +232,7 @@ export default function RolladexPage() {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Favorites</dt>
+                  <dt className="text-sm font-medium text-gray-700 truncate">Favorites</dt>
                   <dd className="text-lg font-medium text-gray-900">
                     {contacts.filter(c => c.isFavorite).length}
                   </dd>
@@ -250,7 +250,7 @@ export default function RolladexPage() {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Scanned Cards</dt>
+                  <dt className="text-sm font-medium text-gray-700 truncate">Scanned Cards</dt>
                   <dd className="text-lg font-medium text-gray-900">
                     {contacts.filter(c => c.source === 'scanned').length}
                   </dd>
@@ -268,7 +268,7 @@ export default function RolladexPage() {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Companies</dt>
+                  <dt className="text-sm font-medium text-gray-700 truncate">Companies</dt>
                   <dd className="text-lg font-medium text-gray-900">
                     {new Set(contacts.map(c => c.company)).size}
                   </dd>
@@ -360,7 +360,7 @@ export default function RolladexPage() {
                   </span>
                 </div>
                 <div className="flex items-center space-x-1">
-                  <button className="text-gray-400 hover:text-gray-600">
+                  <button className="text-gray-400 hover:text-gray-800">
                     <PencilSquareIcon className="h-4 w-4" />
                   </button>
                   <button 
@@ -375,29 +375,29 @@ export default function RolladexPage() {
               {/* Contact Info */}
               <div className="text-center mb-4">
                 <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-3 flex items-center justify-center">
-                  <span className="text-lg font-semibold text-gray-600">
+                  <span className="text-lg font-semibold text-gray-800">
                     {contact.firstName[0]}{contact.lastName[0]}
                   </span>
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900">
                   {contact.firstName} {contact.lastName}
                 </h3>
-                <p className="text-sm text-gray-600">{contact.title}</p>
+                <p className="text-sm text-gray-800">{contact.title}</p>
                 <p className="text-sm font-medium text-blue-600">{contact.company}</p>
               </div>
 
               {/* Contact Details */}
               <div className="space-y-2 text-sm">
-                <div className="flex items-center text-gray-600">
+                <div className="flex items-center text-gray-800">
                   <EnvelopeIcon className="h-4 w-4 mr-2 flex-shrink-0" />
                   <span className="truncate">{contact.email}</span>
                 </div>
-                <div className="flex items-center text-gray-600">
+                <div className="flex items-center text-gray-800">
                   <PhoneIcon className="h-4 w-4 mr-2 flex-shrink-0" />
                   <span>{contact.phone}</span>
                 </div>
                 {contact.address && (
-                  <div className="flex items-start text-gray-600">
+                  <div className="flex items-start text-gray-800">
                     <MapPinIcon className="h-4 w-4 mr-2 flex-shrink-0 mt-0.5" />
                     <span className="text-xs">{contact.address}</span>
                   </div>
@@ -427,7 +427,7 @@ export default function RolladexPage() {
 
               {/* Last contacted */}
               {contact.lastContacted && (
-                <div className="mt-3 text-xs text-gray-500">
+                <div className="mt-3 text-xs text-gray-700 >
                   Last contacted: {contact.lastContacted}
                 </div>
               )}
@@ -441,7 +441,7 @@ export default function RolladexPage() {
         <div className="text-center py-12">
           <UserGroupIcon className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-semibold text-gray-900">No contacts found</h3>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-700 >
             {searchQuery || selectedIndustry !== 'All' || selectedSource !== 'All'
               ? 'Try adjusting your search or filters.'
               : 'Get started by adding your first business card.'}
@@ -467,7 +467,7 @@ export default function RolladexPage() {
               <div className="space-y-4">
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
                   <CameraIcon className="mx-auto h-12 w-12 text-gray-400" />
-                  <p className="mt-2 text-sm text-gray-600">
+                  <p className="mt-2 text-sm text-gray-800">
                     Position the business card in the camera frame
                   </p>
                   <button className="mt-4 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
@@ -476,7 +476,7 @@ export default function RolladexPage() {
                   </button>
                 </div>
                 <div className="text-center">
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-700 >
                     Or scan QR code for digital business cards
                   </p>
                   <button className="mt-2 inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">

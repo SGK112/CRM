@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Layout from '../../../components/Layout';
 import { PageHeader } from '../../../components/ui/PageHeader';
 import { 
   PlusIcon, 
@@ -289,10 +288,9 @@ export default function ClientsPage() {
   }, [clients, filteredClients, totalCount, useServerSearch, debouncedSearch, statusFilter, sourceFilter]);
 
   return (
-    <Layout>
       <div className="h-[calc(100vh-140px)] flex flex-col gap-4">{/* viewport height adjust under global header */}
         {process.env.NODE_ENV === 'development' && (
-          <div className="mb-2 text-xs text-gray-500 font-mono flex flex-wrap gap-4">
+          <div className="mb-2 text-xs text-gray-700 font-mono flex flex-wrap gap-4">
             <span>Total fetched: {clients.length}</span>
             <span>Filtered: {filteredClients.length}</span>
             <span>Status filter: {statusFilter}</span>
@@ -310,6 +308,7 @@ export default function ClientsPage() {
         <PageHeader
           title="Clients"
           subtitle="Manage relationships, contact info and lifecycle across your pipeline."
+          titleClassName="font-bold text-brand-700 dark:text-brand-400 mb-0"
           stats={stats}
           actions={(
             <>
@@ -428,7 +427,7 @@ export default function ClientsPage() {
         <div className="text-center py-12 flex-shrink-0">
           <UserIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">No clients found</h3>
-          <p className="text-gray-600 mb-4">Get started by adding your first client.</p>
+          <p className="text-gray-800 mb-4">Get started by adding your first client.</p>
           <Link
             href="/dashboard/clients/new"
             className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -572,7 +571,6 @@ export default function ClientsPage() {
           </div>
         </div>
       )}
-      </div>
 
       {/* Communication Modal */}
       {selectedClient && (
@@ -582,6 +580,6 @@ export default function ClientsPage() {
           client={selectedClient}
         />
       )}
-    </Layout>
+      </div>
   );
 }

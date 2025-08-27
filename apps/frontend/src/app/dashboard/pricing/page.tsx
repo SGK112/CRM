@@ -1,5 +1,4 @@
 'use client';
-import Layout from '../../../components/Layout';
 import { useEffect, useState, useRef } from 'react';
 import { API_BASE } from '../../../lib/api';
 import { 
@@ -85,22 +84,18 @@ export default function PricingPage(){
 
   if (loading) {
     return (
-      <Layout>
-        <div className="flex justify-center items-center min-h-96">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-        </div>
-      </Layout>
+      <div className="flex justify-center items-center min-h-96">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
     );
   }
 
   return (
-    <Layout>
-      <div className="space-y-6">
-        {/* Header */}
+    <div className="space-y-6">{/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Price Lists & Catalog</h1>
-            <p className="text-gray-600 dark:text-gray-400">Manage vendor price lists and product catalog for estimates and invoices</p>
+            <h1 className="text-3xl font-bold text-brand-700 dark:text-brand-400 mb-2">Price Lists & Catalog</h1>
+            <p className="text-gray-800 dark:text-gray-200">Manage vendor price lists and product catalog for estimates and invoices</p>
           </div>
           <div className="flex items-center space-x-4 mt-4 md:mt-0">
             <button
@@ -121,7 +116,7 @@ export default function PricingPage(){
                 <DocumentTextIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Items</p>
+                <p className="text-sm font-medium text-gray-800 dark:text-gray-300">Total Items</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">{items.length}</p>
               </div>
             </div>
@@ -133,7 +128,7 @@ export default function PricingPage(){
                 <BuildingOfficeIcon className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Vendors</p>
+                <p className="text-sm font-medium text-gray-800 dark:text-gray-300">Vendors</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">{vendors.length}</p>
               </div>
             </div>
@@ -145,7 +140,7 @@ export default function PricingPage(){
                 <CurrencyDollarIcon className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Avg Margin</p>
+                <p className="text-sm font-medium text-gray-800 dark:text-gray-300">Avg Margin</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {items.length > 0 ? Math.round(items.reduce((sum, item) => sum + item.defaultMarginPct, 0) / items.length) : 0}%
                 </p>
@@ -159,7 +154,7 @@ export default function PricingPage(){
                 <TagIcon className="h-6 w-6 text-purple-600 dark:text-purple-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Categories</p>
+                <p className="text-sm font-medium text-gray-800 dark:text-gray-300">Categories</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {Array.from(new Set(items.flatMap(item => item.tags || []))).length}
                 </p>
@@ -208,7 +203,7 @@ export default function PricingPage(){
             <div className="p-12 text-center">
               <DocumentTextIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No items found</h3>
-              <p className="text-gray-500 dark:text-gray-400 mb-6">
+              <p className="text-gray-700 dark:text-gray-300 mb-6">
                 {searchTerm || selectedVendor !== 'all' 
                   ? 'Try adjusting your search or filter criteria.'
                   : 'Get started by importing a price list from a vendor.'}
@@ -226,25 +221,25 @@ export default function PricingPage(){
               <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead className="bg-gray-50 dark:bg-gray-900">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       Item
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       SKU
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       Cost
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       Margin
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       Sell Price
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       Vendor
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       Tags
                     </th>
                   </tr>
@@ -258,7 +253,7 @@ export default function PricingPage(){
                           <div>
                             <div className="text-sm font-medium text-gray-900 dark:text-white">{item.name}</div>
                             {item.description && (
-                              <div className="text-sm text-gray-500 dark:text-gray-400">{item.description}</div>
+                              <div className="text-sm text-gray-700 dark:text-gray-300">{item.description}</div>
                             )}
                           </div>
                         </td>
@@ -288,7 +283,7 @@ export default function PricingPage(){
                               </span>
                             ))}
                             {(item.tags || []).length > 3 && (
-                              <span className="text-xs text-gray-500 dark:text-gray-400">+{(item.tags || []).length - 3} more</span>
+                              <span className="text-xs text-gray-700 dark:text-gray-300">+{(item.tags || []).length - 3} more</span>
                             )}
                           </div>
                         </td>
@@ -312,8 +307,7 @@ export default function PricingPage(){
             }}
           />
         )}
-      </div>
-    </Layout>
+    </div>
   );
 }
 
@@ -375,7 +369,7 @@ function PriceListUploadModal({ vendors, onClose, onSuccess }: {
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Import Price List</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-800 dark:hover:text-gray-300">
             <XMarkIcon className="h-6 w-6" />
           </button>
         </div>
@@ -423,7 +417,7 @@ function PriceListUploadModal({ vendors, onClose, onSuccess }: {
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
               onChange={(e) => setFile(e.target.files?.[0] || null)}
             />
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            <p className="text-xs text-gray-700 dark:text-gray-300 mt-1">
               Expected columns: sku, name, description, price, unit
             </p>
           </div>

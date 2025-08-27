@@ -24,7 +24,17 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const data = await response.json();
+    let data;
+    try {
+      const text = await response.text();
+      data = text ? JSON.parse(text) : {};
+    } catch (parseError) {
+      console.error('Failed to parse response:', parseError);
+      return NextResponse.json(
+        { success: false, message: 'Invalid response from server' },
+        { status: 500 }
+      );
+    }
 
     if (!response.ok) {
       return NextResponse.json(
@@ -73,7 +83,17 @@ export async function PATCH(request: NextRequest) {
       body: JSON.stringify(body),
     });
 
-    const data = await response.json();
+    let data;
+    try {
+      const text = await response.text();
+      data = text ? JSON.parse(text) : {};
+    } catch (parseError) {
+      console.error('Failed to parse response:', parseError);
+      return NextResponse.json(
+        { success: false, message: 'Invalid response from server' },
+        { status: 500 }
+      );
+    }
 
     if (!response.ok) {
       return NextResponse.json(

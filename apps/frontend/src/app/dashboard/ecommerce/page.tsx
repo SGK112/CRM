@@ -191,7 +191,7 @@ export default function EcommercePage() {
           <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
             Online Store Management
           </h2>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-700 >
             Manage your e-commerce stores, products, and orders from one central location
           </p>
         </div>
@@ -216,7 +216,7 @@ export default function EcommercePage() {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Total Revenue</dt>
+                  <dt className="text-sm font-medium text-gray-700 truncate">Total Revenue</dt>
                   <dd className="text-lg font-medium text-gray-900">${totalRevenue.toLocaleString()}</dd>
                 </dl>
               </div>
@@ -228,7 +228,7 @@ export default function EcommercePage() {
                 <ArrowUpIcon className="h-4 w-4 mr-1" />
                 12%
               </span>
-              <span className="text-gray-500"> from last month</span>
+              <span className="text-gray-700 > from last month</span>
             </div>
           </div>
         </div>
@@ -241,7 +241,7 @@ export default function EcommercePage() {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Total Orders</dt>
+                  <dt className="text-sm font-medium text-gray-700 truncate">Total Orders</dt>
                   <dd className="text-lg font-medium text-gray-900">{totalOrders}</dd>
                 </dl>
               </div>
@@ -253,7 +253,7 @@ export default function EcommercePage() {
                 <ArrowUpIcon className="h-4 w-4 mr-1" />
                 8%
               </span>
-              <span className="text-gray-500"> from last week</span>
+              <span className="text-gray-700 > from last week</span>
             </div>
           </div>
         </div>
@@ -266,7 +266,7 @@ export default function EcommercePage() {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Total Products</dt>
+                  <dt className="text-sm font-medium text-gray-700 truncate">Total Products</dt>
                   <dd className="text-lg font-medium text-gray-900">{totalProducts}</dd>
                 </dl>
               </div>
@@ -278,7 +278,7 @@ export default function EcommercePage() {
                 <ArrowDownIcon className="h-4 w-4 mr-1" />
                 3%
               </span>
-              <span className="text-gray-500"> from last month</span>
+              <span className="text-gray-700 > from last month</span>
             </div>
           </div>
         </div>
@@ -291,7 +291,7 @@ export default function EcommercePage() {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Connected Stores</dt>
+                  <dt className="text-sm font-medium text-gray-700 truncate">Connected Stores</dt>
                   <dd className="text-lg font-medium text-gray-900">{mockStores.length}</dd>
                 </dl>
               </div>
@@ -299,7 +299,7 @@ export default function EcommercePage() {
           </div>
           <div className="bg-gray-50 px-5 py-3">
             <div className="text-sm">
-              <span className="text-gray-600">
+              <span className="text-gray-800">
                 {mockStores.filter(s => s.status === 'connected').length} active
               </span>
             </div>
@@ -333,10 +333,10 @@ export default function EcommercePage() {
                     </div>
                   </div>
                   <div className="flex space-x-2">
-                    <button className="text-gray-400 hover:text-gray-600">
+                    <button className="text-gray-400 hover:text-gray-800">
                       <EyeIcon className="h-5 w-5" />
                     </button>
-                    <button className="text-gray-400 hover:text-gray-600">
+                    <button className="text-gray-400 hover:text-gray-800">
                       <CogIcon className="h-5 w-5" />
                     </button>
                   </div>
@@ -345,15 +345,15 @@ export default function EcommercePage() {
                 <div className="grid grid-cols-3 gap-3 text-center mb-4">
                   <div>
                     <p className="text-sm font-semibold text-gray-900">{store.products}</p>
-                    <p className="text-xs text-gray-500">Products</p>
+                    <p className="text-xs text-gray-700 >Products</p>
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-gray-900">{store.orders}</p>
-                    <p className="text-xs text-gray-500">Orders</p>
+                    <p className="text-xs text-gray-700 >Orders</p>
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-green-600">${store.revenue.toLocaleString()}</p>
-                    <p className="text-xs text-gray-500">Revenue</p>
+                    <p className="text-xs text-gray-700 >Revenue</p>
                   </div>
                 </div>
                 <p className="text-xs text-gray-400 mt-auto">Last sync: {store.lastSync}</p>
@@ -379,7 +379,7 @@ export default function EcommercePage() {
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-gray-900 line-clamp-2">{product.name}</p>
-                      <p className="text-xs text-gray-500">{product.sku}</p>
+                      <p className="text-xs text-gray-700 >{product.sku}</p>
                     </div>
                   </div>
                   <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${statusColors[product.status]}`}>{product.status}</span>
@@ -387,14 +387,14 @@ export default function EcommercePage() {
                 <div className="grid grid-cols-3 gap-3 text-center mb-4">
                   <div>
                     <p className="text-sm font-semibold text-gray-900">${product.price}</p>
-                    <p className="text-xs text-gray-500">Price</p>
+                    <p className="text-xs text-gray-700 >Price</p>
                   </div>
                   <div>
                     <p className={`text-sm font-semibold ${product.stock === 0 ? 'text-red-600' : 'text-gray-900'}`}>{product.stock === 0 ? '0' : product.stock}</p>
-                    <p className="text-xs text-gray-500">Stock</p>
+                    <p className="text-xs text-gray-700 >Stock</p>
                   </div>
                   <div>
-                    <p className="text-xs font-medium text-gray-600 text-center line-clamp-1">{product.store}</p>
+                    <p className="text-xs font-medium text-gray-800 text-center line-clamp-1">{product.store}</p>
                     <p className="text-xs text-gray-400">Store</p>
                   </div>
                 </div>
@@ -424,14 +424,14 @@ export default function EcommercePage() {
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <p className="text-sm font-semibold text-gray-900">{order.orderNumber}</p>
-                    <p className="text-xs text-gray-500">{order.items} items • {order.date}</p>
+                    <p className="text-xs text-gray-700 >{order.items} items • {order.date}</p>
                   </div>
                   <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${statusColors[order.status]}`}>{order.status}</span>
                 </div>
-                <p className="text-xs text-gray-600 mb-2">Customer: <span className="font-medium">{order.customer}</span></p>
+                <p className="text-xs text-gray-800 mb-2">Customer: <span className="font-medium">{order.customer}</span></p>
                 <div className="flex items-center justify-between mt-auto">
                   <p className="text-sm font-semibold text-gray-900">${order.total}</p>
-                  <p className="text-xs text-gray-500 truncate max-w-[120px] text-right">{order.store}</p>
+                  <p className="text-xs text-gray-700 truncate max-w-[120px] text-right">{order.store}</p>
                 </div>
               </div>
             ))}
@@ -450,7 +450,7 @@ export default function EcommercePage() {
                   <CheckCircleIcon className="h-5 w-5 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600"><span className="font-medium text-gray-900">Order #ORD-1001</span> was processed</p>
+                  <p className="text-sm text-gray-800"><span className="font-medium text-gray-900">Order #ORD-1001</span> was processed</p>
                   <p className="text-xs text-gray-400 mt-0.5">2 minutes ago</p>
                 </div>
               </li>
@@ -459,7 +459,7 @@ export default function EcommercePage() {
                   <ShoppingBagIcon className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600"><span className="font-medium text-gray-900">5 new products</span> synced from Shopify</p>
+                  <p className="text-sm text-gray-800"><span className="font-medium text-gray-900">5 new products</span> synced from Shopify</p>
                   <p className="text-xs text-gray-400 mt-0.5">15 minutes ago</p>
                 </div>
               </li>
@@ -468,7 +468,7 @@ export default function EcommercePage() {
                   <ExclamationTriangleIcon className="h-5 w-5 text-red-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600"><span className="font-medium text-gray-900">Pro Tools & Equipment</span> connection error</p>
+                  <p className="text-sm text-gray-800"><span className="font-medium text-gray-900">Pro Tools & Equipment</span> connection error</p>
                   <p className="text-xs text-gray-400 mt-0.5">2 hours ago</p>
                 </div>
               </li>

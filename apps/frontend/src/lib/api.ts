@@ -1,7 +1,7 @@
 // Centralized API base configuration and helper fetch wrapper
 // Prefer using this instead of hard-coding http://localhost:3001 in components.
 
-export const API_BASE: string = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+export const API_BASE: string = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001') + '/api';
 
 export function withAuthHeaders(init: RequestInit = {}): RequestInit {
   if (typeof window === 'undefined') return init;

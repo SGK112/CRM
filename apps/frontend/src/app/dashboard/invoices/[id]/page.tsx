@@ -22,13 +22,13 @@ export default function InvoiceDetail(){
   return (
     <Layout>
       <div className='space-y-6'>
-        {loading && <div className='text-sm text-gray-500'>Loading...</div>}
+        {loading && <div className='text-sm text-gray-700 >Loading...</div>}
         {!loading && inv && (
           <>
             <div className='flex items-center justify-between flex-wrap gap-4'>
               <div>
                 <h1 className='text-2xl font-semibold'>Invoice {inv.number}</h1>
-                <p className='text-sm text-gray-600 dark:text-[var(--text-dim)]'>Status: {inv.status}</p>
+                <p className='text-sm text-gray-800 dark:text-[var(--text-dim)]'>Status: {inv.status}</p>
               </div>
               <div className='flex gap-2'>
                 <button className='pill pill-tint-blue sm'>Record Payment</button>
@@ -39,7 +39,7 @@ export default function InvoiceDetail(){
               <div className='md:col-span-2 space-y-4'>
                 <div className='surface-1 border border-token rounded-xl overflow-hidden'>
                   <table className='w-full text-sm'>
-                    <thead className='text-left text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-400'>
+                    <thead className='text-left text-[11px] uppercase tracking-wide text-gray-700 dark:text-gray-300'>
                       <tr className='border-b border-token'>
                         <th className='py-2 px-3'>Item</th>
                         <th className='py-2 px-3'>Qty</th>
@@ -56,7 +56,7 @@ export default function InvoiceDetail(){
                           <td className='py-2 px-3'>{li.total.toFixed(2)}</td>
                         </tr>
                       ))}
-                      {inv.items.length===0 && <tr><td colSpan={4} className='py-4 text-center text-xs text-gray-500'>No line items.</td></tr>}
+                      {inv.items.length===0 && <tr><td colSpan={4} className='py-4 text-center text-xs text-gray-700 >No line items.</td></tr>}
                     </tbody>
                   </table>
                 </div>
@@ -70,7 +70,7 @@ export default function InvoiceDetail(){
               <div className='space-y-4'>
                 <div className='surface-1 border border-token rounded-xl p-4'>
                   <h3 className='font-semibold mb-2 text-sm'>Actions</h3>
-                  <ul className='space-y-1 text-xs text-gray-600 dark:text-[var(--text-dim)]'>
+                  <ul className='space-y-1 text-xs text-gray-800 dark:text-[var(--text-dim)]'>
                     <li>Record payment updates amount paid.</li>
                     <li>Send will email invoice (pending integration).</li>
                   </ul>

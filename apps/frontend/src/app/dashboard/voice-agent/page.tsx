@@ -60,6 +60,7 @@ export default function VoiceAgentPage() {
         <PageHeader 
           title="Voice Agent" 
           subtitle="AI-powered conversational agent for inbound and outbound calls." 
+          titleClassName="font-bold text-brand-700 dark:text-brand-400 mb-0"
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -68,7 +69,7 @@ export default function VoiceAgentPage() {
               {inboundOnly ? (
                 <>
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-[var(--text)] mb-2 flex items-center gap-2"><PhoneIcon className="h-5 w-5" /> Inbound Only Mode</h2>
-                  <p className="text-sm text-gray-600 dark:text-[var(--text-dim)] mb-3">Outbound calling is disabled. Configure a Twilio number to point to your inbound webhook and receive calls handled by the agent.</p>
+                  <p className="text-sm text-gray-800 dark:text-[var(--text-dim)] mb-3">Outbound calling is disabled. Configure a Twilio number to point to your inbound webhook and receive calls handled by the agent.</p>
                   <div className="text-xs bg-gray-50 dark:bg-[var(--surface-2)] border border-gray-200 dark:border-token rounded p-3">
                     <p className="font-medium mb-1">Voice Webhook URL:</p>
                     <code className="block break-all">{status?.inbound?.webhookUrl || '/api/voice-agent/webhook'}</code>
@@ -85,13 +86,13 @@ export default function VoiceAgentPage() {
                   <CapabilityGate need="ai.voice" fallback={<div className="text-sm"><a href="/billing/cart" className="text-amber-400 underline">Upgrade your plan</a> to enable Voice Agent calling.</div>}>
                     <div className="flex gap-3">
                       <input value={toNumber} onChange={e=>setToNumber(e.target.value)} placeholder="Destination phone e.g. +15551234567" className="input flex-1" />
-                      <button onClick={startCall} disabled={!toNumber || loading} className="px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-[var(--surface-2)] disabled:text-gray-600 dark:disabled:text-[var(--text-dim)] disabled:cursor-not-allowed flex items-center gap-2">
+                      <button onClick={startCall} disabled={!toNumber || loading} className="px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-[var(--surface-2)] disabled:text-gray-800 dark:disabled:text-[var(--text-dim)] disabled:cursor-not-allowed flex items-center gap-2">
                         {loading && <ArrowPathIcon className="h-4 w-4 animate-spin" />} Call
                       </button>
                     </div>
                   </CapabilityGate>
                   {status && (
-                    <div className="mt-3 text-xs text-gray-600 dark:text-[var(--text-dim)]">
+                    <div className="mt-3 text-xs text-gray-800 dark:text-[var(--text-dim)]">
                       {status.twilio.configured ? (
                         <p>Twilio is connected. Calls will originate from <span className="font-medium">{status.twilio.from}</span>.</p>
                       ) : (
@@ -102,7 +103,7 @@ export default function VoiceAgentPage() {
                   {error && <p className="text-sm text-red-600 dark:text-red-400 mt-3">{error}</p>}
                   {call && (
                     <div className="mt-4 text-sm bg-gray-50 dark:bg-[var(--surface-2)] border border-gray-200 dark:border-token rounded-lg p-3 text-gray-700 dark:text-[var(--text)]">
-                      <p><span className="font-medium">Status:</span> {call.status} {call.simulated && <span className="text-xs text-gray-500 dark:text-[var(--text-dim)]">(simulated)</span>}</p>
+                      <p><span className="font-medium">Status:</span> {call.status} {call.simulated && <span className="text-xs text-gray-700 dark:text-[var(--text-dim)]">(simulated)</span>}</p>
                       <p><span className="font-medium">Call SID:</span> {call.sid}</p>
                       <p><span className="font-medium">To:</span> {call.to}</p>
                     </div>
@@ -113,10 +114,10 @@ export default function VoiceAgentPage() {
 
             <div className="surface-1 border border-token rounded-xl p-6 shadow-sm">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-[var(--text)] mb-4 flex items-center gap-2"><SpeakerWaveIcon className="h-5 w-5" /> Real-Time Audio (Coming Soon)</h2>
-              <p className="text-sm text-gray-600 dark:text-[var(--text-dim)]">This section will enable browser microphone streaming to the ElevenLabs conversational session via WebRTC/WebSocket. For now calls are simulated unless Twilio credentials are configured.</p>
+              <p className="text-sm text-gray-800 dark:text-[var(--text-dim)]">This section will enable browser microphone streaming to the ElevenLabs conversational session via WebRTC/WebSocket. For now calls are simulated unless Twilio credentials are configured.</p>
               <div className="mt-4 flex gap-3">
-                <button disabled className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-[var(--surface-2)] text-gray-600 dark:text-[var(--text-dim)] text-sm flex items-center gap-2 border border-transparent dark:border-token"><MicrophoneIcon className="h-4 w-4" /> Start Mic</button>
-                <button disabled className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-[var(--surface-2)] text-gray-600 dark:text-[var(--text-dim)] text-sm border border-transparent dark:border-token">Connect Stream</button>
+                <button disabled className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-[var(--surface-2)] text-gray-800 dark:text-[var(--text-dim)] text-sm flex items-center gap-2 border border-transparent dark:border-token"><MicrophoneIcon className="h-4 w-4" /> Start Mic</button>
+                <button disabled className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-[var(--surface-2)] text-gray-800 dark:text-[var(--text-dim)] text-sm border border-transparent dark:border-token">Connect Stream</button>
               </div>
             </div>
           </div>
@@ -124,13 +125,13 @@ export default function VoiceAgentPage() {
           <div className="space-y-6">
             <div className="surface-1 border border-token rounded-xl p-6 shadow-sm">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-[var(--text)] mb-3">Inbound Calls</h2>
-              <p className="text-sm text-gray-600 dark:text-[var(--text-dim)] mb-3">Point your Twilio Voice phone number webhook to:</p>
+              <p className="text-sm text-gray-800 dark:text-[var(--text-dim)] mb-3">Point your Twilio Voice phone number webhook to:</p>
               <code className="block text-xs bg-gray-100 dark:bg-[var(--surface-2)] p-2 rounded text-gray-800 dark:text-[var(--text)]">POST /api/voice-agent/webhook</code>
-              <p className="text-xs text-gray-500 dark:text-[var(--text-faint)] mt-2">Inbound calls will receive an AI greeting and (future) streaming connection.</p>
+              <p className="text-xs text-gray-700 dark:text-[var(--text-faint)] mt-2">Inbound calls will receive an AI greeting and (future) streaming connection.</p>
             </div>
             <div className="surface-1 border border-token rounded-xl p-6 shadow-sm">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-[var(--text)] mb-3">Configuration</h2>
-              <div className="text-xs text-gray-600 dark:text-[var(--text-dim)] space-y-2">
+              <div className="text-xs text-gray-800 dark:text-[var(--text-dim)] space-y-2">
                 <ol className="list-decimal ml-4 space-y-1">
                   <li>Enter your phone number above and press Call. If Twilio isn’t connected, we’ll simulate the call.</li>
                   <li>To enable real calls, add these environment variables to the backend and restart:

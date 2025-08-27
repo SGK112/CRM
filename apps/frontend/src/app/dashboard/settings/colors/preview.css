@@ -1,0 +1,36 @@
+/* Color Preview Styles */
+.color-preview-active {
+  --brand: var(--preview-primary, #d97706);
+  --brand-hover: var(--preview-secondary, #f59e0b);
+  --brand-light: var(--preview-accent, #fb923c);
+  --surface-1: var(--preview-background, #ffffff);
+  --surface-2: var(--preview-surface, #f9fafb);
+  --text: var(--preview-text, #111827);
+  --text-dim: var(--preview-textSecondary, #6b7280);
+  --border: var(--preview-border, #e5e7eb);
+}
+
+/* Override brand colors when in preview mode */
+.color-preview-active .text-brand-700 {
+  color: var(--preview-primary) !important;
+}
+
+.color-preview-active .text-brand-400 {
+  color: var(--preview-secondary) !important;
+}
+
+.color-preview-active .bg-brand-600 {
+  background-color: var(--preview-primary) !important;
+}
+
+.color-preview-active .bg-brand-700 {
+  background-color: var(--preview-secondary) !important;
+}
+
+.color-preview-active .border-brand-500 {
+  border-color: var(--preview-primary) !important;
+}
+
+.color-preview-active .ring-brand-500 {
+  --tw-ring-color: var(--preview-primary) !important;
+}

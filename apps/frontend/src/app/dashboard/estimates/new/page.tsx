@@ -1,6 +1,7 @@
 'use client';
-import Layout from '../../../../components/Layout';
 import PricingSelector from '../../../../components/PricingSelector';
+import ImageUpload from '../../../../components/forms/ImageUpload';
+import Notes from '../../../../components/forms/Notes';
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
@@ -76,6 +77,8 @@ export default function NewEstimatePage() {
   const [discountValue, setDiscountValue] = useState<number>(0);
   const [taxRate, setTaxRate] = useState<number>(8.5);
   const [notes, setNotes] = useState<string>('');
+  const [images, setImages] = useState<any[]>([]);
+  const [estimateNotes, setEstimateNotes] = useState<any[]>([]);
 
   const token = (typeof window !== 'undefined') ? 
     (localStorage.getItem('accessToken') || localStorage.getItem('token')) : '';
@@ -272,8 +275,7 @@ export default function NewEstimatePage() {
   };
 
   return (
-    <Layout>
-      <div className="space-y-6">
+    <div className="space-y-6 p-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -614,15 +616,33 @@ export default function NewEstimatePage() {
             </div>
           </div>
 
-          {/* Notes */}
+          {/* Images & Project Documentation */}
           <div className="surface-solid p-6">
-            <h2 className="text-lg font-medium mb-4">Notes</h2>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="w-full p-3 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm"
-              rows={4}
-              placeholder="Optional notes for this estimate..."
+            <h2 className="text-lg font-medium mb-4">Project Images</h2>
+            <p className="text-sm text-[var(--text-dim)] mb-4">
+              Add reference images, progress photos, or before/after shots to support your estimate
+            </p>
+            <ImageUpload
+              images={images}
+              onImagesChange={setImages}
+              maxImages={10}
+              allowedTypes={['image/jpeg', 'image/png', 'image/webp']}
+              categories={true}
+            />
+          </div>
+
+          {/* Project Notes & Documentation */}
+          <div className="surface-solid p-6">
+            <h2 className="text-lg font-medium mb-4">Project Notes</h2>
+            <p className="text-sm text-[var(--text-dim)] mb-4">
+              Document project details, client requirements, or special considerations
+            </p>
+            <Notes
+              notes={estimateNotes}
+              onNotesChange={setEstimateNotes}
+              allowPrivate={true}
+              categories={true}
+              currentUser={{ id: 'current-user', name: 'Current User' }}
             />
           </div>
 
@@ -644,7 +664,6 @@ export default function NewEstimatePage() {
             </button>
           </div>
         </form>
-      </div>
-    </Layout>
+    </div>
   );
 }

@@ -222,8 +222,8 @@ export default function MarketingPage() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Marketing Campaigns</h1>
-            <p className="text-gray-600">Manage your marketing campaigns and track performance</p>
+            <h1 className="text-3xl font-bold text-brand-700 dark:text-brand-400 mb-2">Marketing Campaigns</h1>
+            <p className="text-gray-800">Manage your marketing campaigns and track performance</p>
           </div>
           <button className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mt-4 md:mt-0">
             <PlusIcon className="h-5 w-5 mr-2" />
@@ -239,7 +239,7 @@ export default function MarketingPage() {
                 <MegaphoneIcon className="h-6 w-6 text-blue-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Active Campaigns</p>
+                <p className="text-sm font-medium text-gray-800">Active Campaigns</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {campaigns.filter(c => c.status === 'active').length}
                 </p>
@@ -253,7 +253,7 @@ export default function MarketingPage() {
                 <EnvelopeIcon className="h-6 w-6 text-green-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Messages Sent</p>
+                <p className="text-sm font-medium text-gray-800">Messages Sent</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {totalMetrics.sent.toLocaleString()}
                 </p>
@@ -267,7 +267,7 @@ export default function MarketingPage() {
                 <ChartBarIcon className="h-6 w-6 text-purple-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Conversion Rate</p>
+                <p className="text-sm font-medium text-gray-800">Conversion Rate</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {formatPercentage(totalMetrics.converted, totalMetrics.sent)}
                 </p>
@@ -281,7 +281,7 @@ export default function MarketingPage() {
                 <CurrencyDollarIcon className="h-6 w-6 text-yellow-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Revenue Generated</p>
+                <p className="text-sm font-medium text-gray-800">Revenue Generated</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {formatCurrency(totalMetrics.revenue)}
                 </p>
@@ -296,7 +296,7 @@ export default function MarketingPage() {
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Campaign Performance</h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Open Rate</span>
+                <span className="text-sm text-gray-800">Open Rate</span>
                 <span className="text-sm font-medium text-gray-900">
                   {formatPercentage(totalMetrics.opened, totalMetrics.sent)}
                 </span>
@@ -309,7 +309,7 @@ export default function MarketingPage() {
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Click Rate</span>
+                <span className="text-sm text-gray-800">Click Rate</span>
                 <span className="text-sm font-medium text-gray-900">
                   {formatPercentage(totalMetrics.clicked, totalMetrics.sent)}
                 </span>
@@ -322,7 +322,7 @@ export default function MarketingPage() {
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Conversion Rate</span>
+                <span className="text-sm text-gray-800">Conversion Rate</span>
                 <span className="text-sm font-medium text-gray-900">
                   {formatPercentage(totalMetrics.converted, totalMetrics.sent)}
                 </span>
@@ -340,14 +340,14 @@ export default function MarketingPage() {
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Budget Overview</h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Total Budget</span>
+                <span className="text-sm text-gray-800">Total Budget</span>
                 <span className="text-sm font-medium text-gray-900">
                   {formatCurrency(totalMetrics.budget)}
                 </span>
               </div>
               
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Amount Spent</span>
+                <span className="text-sm text-gray-800">Amount Spent</span>
                 <span className="text-sm font-medium text-gray-900">
                   {formatCurrency(totalMetrics.spent)}
                 </span>
@@ -361,14 +361,14 @@ export default function MarketingPage() {
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Remaining</span>
+                <span className="text-sm text-gray-800">Remaining</span>
                 <span className="text-sm font-medium text-green-600">
                   {formatCurrency(totalMetrics.budget - totalMetrics.spent)}
                 </span>
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">ROI</span>
+                <span className="text-sm text-gray-800">ROI</span>
                 <div className="flex items-center">
                   {totalMetrics.revenue > totalMetrics.spent ? (
                     <ArrowTrendingUpIcon className="h-4 w-4 text-green-500 mr-1" />
@@ -434,7 +434,7 @@ export default function MarketingPage() {
             <div className="text-center py-12">
               <MegaphoneIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No campaigns found</h3>
-              <p className="text-gray-600 mb-4">Create your first marketing campaign to get started.</p>
+              <p className="text-gray-800 mb-4">Create your first marketing campaign to get started.</p>
               <button className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                 <PlusIcon className="h-5 w-5 mr-2" />
                 Create Campaign
@@ -450,7 +450,7 @@ export default function MarketingPage() {
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
                         <div className="p-2 bg-gray-100 rounded-lg">
-                          <TypeIcon className="h-5 w-5 text-gray-600" />
+                          <TypeIcon className="h-5 w-5 text-gray-800" />
                         </div>
                         <div>
                           <h3 className="text-lg font-semibold text-gray-900">{campaign.name}</h3>
@@ -458,43 +458,43 @@ export default function MarketingPage() {
                             <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${statusColors[campaign.status]}`}>
                               {campaign.status}
                             </span>
-                            <span className="text-xs text-gray-500 capitalize">
+                            <span className="text-xs text-gray-700 capitalize">
                               {campaign.type.replace('_', ' ')}
                             </span>
                           </div>
                         </div>
                       </div>
                       
-                      <p className="text-gray-600 mb-4">{campaign.description}</p>
+                      <p className="text-gray-800 mb-4">{campaign.description}</p>
 
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                         <div>
-                          <p className="text-gray-500">Audience</p>
+                          <p className="text-gray-700 >Audience</p>
                           <p className="font-medium text-gray-900">
                             {campaign.targetAudience.totalContacts.toLocaleString()}
                           </p>
                         </div>
                         <div>
-                          <p className="text-gray-500">Sent</p>
+                          <p className="text-gray-700 >Sent</p>
                           <p className="font-medium text-gray-900">
                             {campaign.metrics.sent.toLocaleString()}
                           </p>
                         </div>
                         <div>
-                          <p className="text-gray-500">Conversions</p>
+                          <p className="text-gray-700 >Conversions</p>
                           <p className="font-medium text-gray-900">
                             {campaign.metrics.converted} ({formatPercentage(campaign.metrics.converted, campaign.metrics.sent)})
                           </p>
                         </div>
                         <div>
-                          <p className="text-gray-500">Revenue</p>
+                          <p className="text-gray-700 >Revenue</p>
                           <p className="font-medium text-green-600">
                             {formatCurrency(campaign.metrics.revenue)}
                           </p>
                         </div>
                       </div>
 
-                      <div className="mt-4 flex items-center space-x-4 text-xs text-gray-500">
+                      <div className="mt-4 flex items-center space-x-4 text-xs text-gray-700 >
                         <span>Budget: {formatCurrency(campaign.budget.spent)} / {formatCurrency(campaign.budget.allocated)}</span>
                         <span>•</span>
                         <span>
