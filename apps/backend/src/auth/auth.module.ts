@@ -5,11 +5,13 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
+import { EmailVerificationService } from './email-verification.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { User, UserSchema } from '../users/schemas/user.schema';
 import { TwilioService } from '../services/twilio.service';
+import { EmailService } from '../services/email.service';
 
 @Module({
   imports: [
@@ -24,8 +26,8 @@ import { TwilioService } from '../services/twilio.service';
       inject: [ConfigService],
     }),
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy, GoogleStrategy, TwilioService],
+  providers: [AuthService, EmailVerificationService, LocalStrategy, JwtStrategy, GoogleStrategy, TwilioService, EmailService],
   controllers: [AuthController],
-  exports: [AuthService],
+  exports: [AuthService, EmailVerificationService],
 })
 export class AuthModule {}

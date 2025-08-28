@@ -1,16 +1,20 @@
-import { Controller, Post, Body, UseGuards, Request, Get, Req, Res, Logger } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Request, Get, Req, Res, Logger, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto, RegisterDto, PasswordResetDto } from './dto/auth.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { AuthGuard } from '@nestjs/passport';
+import { EmailVerificationService } from './email-verification.service';
 
 @ApiTags('Authentication')
 // Controller base is '/auth'. With global prefix 'api', most routes are available under '/api/auth/*'.
 // We also expose '/auth/google' and '/auth/google/callback' without the prefix (configured in main.ts exclusions)
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private emailVerificationService: EmailVerificationService,
+  ) {}
   private readonly logger = new Logger('AuthController');
 
   @Post('register')
@@ -18,7 +22,24 @@ export class AuthController {
   @ApiResponse({ status: 201, description: 'User registered successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   async register(@Body() registerDto: RegisterDto) {
-    return this.authService.register(registerDto);
+    const result = await this.authService.register(registerDto);
+    
+    // Send verification email after successful registration
+    if (result.user && result.user.email) {
+      try {
+        await this.emailVerificationService.sendVerificationEmail({
+          id: result.user.id,
+          email: result.user.email,
+          firstName: result.user.firstName
+        });
+        console.log('📧 Verification email sent successfully for:', result.user.email);
+      } catch (emailError) {
+        console.error('📧 Failed to send verification email:', emailError);
+        // Don't fail registration if email fails
+      }
+    }
+    
+    return result;
   }
 
   @Post('login')
@@ -111,5 +132,31 @@ export class AuthController {
         return frontendUrl;
       })(),
     };
+  }
+
+  // Email Verification Endpoints
+  @Post('verify-email')
+  @ApiOperation({ summary: 'Verify email address with token' })
+  @ApiResponse({ status: 200, description: 'Email verified successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid or expired token' })
+  async verifyEmail(@Body() body: { token: string }) {
+    return this.emailVerificationService.verifyEmail(body.token);
+  }
+
+  @Post('resend-verification')
+  @ApiOperation({ summary: 'Resend email verification' })
+  @ApiResponse({ status: 200, description: 'Verification email sent' })
+  @ApiResponse({ status: 400, description: 'Email already verified or user not found' })
+  async resendVerification(@Body() body: { email: string }) {
+    return this.emailVerificationService.resendVerificationEmail(body.email);
+  }
+
+  @Get('verification-status')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Check email verification status' })
+  @ApiResponse({ status: 200, description: 'Verification status retrieved' })
+  async getVerificationStatus(@Request() req) {
+    return this.emailVerificationService.checkVerificationStatus(req.user.id);
   }
 }

@@ -1,6 +1,6 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { User, UserDocument } from '../users/schemas/user.schema';
@@ -67,75 +67,83 @@ export class AuthService {
     });
   }
 
-  async register(registerDto: RegisterDto): Promise<any> {
-    const { email, password, firstName, lastName, workspaceName } = registerDto;
-
-    // Check if user already exists in demo store
-    if (demoUsers.has(email)) {
-      throw new UnauthorizedException('User with this email already exists');
-    }
-
-    // Check if user already exists in database
-    const existingUser = await this.userModel.findOne({ email }).catch(() => null);
-    if (existingUser) {
-      throw new UnauthorizedException('User with this email already exists');
-    }
-
-    // Hash password & create persistent DB user first for stable ID
-    const hashedPassword = await bcrypt.hash(password, 12);
-    const workspaceId = `ws_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    let dbUser: any = null;
+  async register(createUserDto: RegisterDto): Promise<{ message: string; user: any; token?: string }> {
+    console.log('🔵 Registration attempt for:', createUserDto.email);
+    
     try {
-      dbUser = new this.userModel({
-        email,
-        password: hashedPassword,
-        firstName,
-        lastName,
-        role: 'owner',
-        workspaceId,
-        isEmailVerified: false,
-        isPhoneVerified: false,
-        twoFactorEnabled: false,
-        isActive: true,
-      });
-      await dbUser.save();
-    } catch (error) {
-      // fallback to in-memory only
-      console.log('Database save failed (register fallback):', error.message);
-    }
-    const stableId = dbUser?._id?.toString() || `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const newUser = {
-      id: stableId,
-      email,
-      password: hashedPassword,
-      firstName,
-      lastName,
-      role: 'owner',
-      workspaceId,
-      avatar: null,
-      isEmailVerified: false,
-      isPhoneVerified: false,
-      twoFactorEnabled: false,
-      isActive: true,
-      lastLoginAt: null,
-      createdAt: new Date(),
-    };
-    demoUsers.set(email, newUser);
-    const payload = { email: newUser.email, sub: stableId, workspaceId };
-    const accessToken = this.jwtService.sign(payload);
+      // Check if user already exists
+      const existingUser = await this.userModel.findOne({ email: createUserDto.email }).exec();
+      console.log('🔍 Existing user check:', existingUser ? 'Found' : 'Not found');
+      
+      if (existingUser) {
+        console.log('❌ User already exists:', createUserDto.email);
+        throw new BadRequestException('User with this email already exists');
+      }
 
-    return {
-      user: {
-        id: newUser.id,
-        email: newUser.email,
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
-        role: newUser.role,
-        workspaceId: newUser.workspaceId,
-      },
-      accessToken,
-      message: 'Registration successful',
-    };
+      // Generate workspace ID
+      const workspaceId = new Types.ObjectId().toString();
+      console.log('🏢 Generated workspace ID:', workspaceId);
+
+      // Hash password
+      const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+      console.log('🔐 Password hashed successfully');
+
+      // Create user object
+      const userDoc = new this.userModel({
+        email: createUserDto.email,
+        password: hashedPassword,
+        firstName: createUserDto.firstName,
+        lastName: createUserDto.lastName,
+        role: 'owner', // First user becomes workspace owner
+        workspaceId: workspaceId,
+        phone: createUserDto.phone,
+        isEmailVerified: false,
+        isActive: true,
+        subscriptionPlan: 'starter',
+        subscriptionStatus: 'trialing',
+        trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days trial
+      });
+
+      console.log('👤 Created user document');
+
+      // Save user
+      const savedUser = await userDoc.save();
+      console.log('💾 User saved to database:', savedUser._id);
+
+      // TODO: Send email verification - will be triggered by email verification service
+      console.log('📧 Email verification will be handled by separate service call');
+
+      // Return response
+      const responseUser = {
+        id: savedUser._id,
+        email: savedUser.email,
+        firstName: savedUser.firstName,
+        lastName: savedUser.lastName,
+        role: savedUser.role,
+        workspaceId: savedUser.workspaceId,
+        phone: savedUser.phone,
+        subscriptionPlan: savedUser.subscriptionPlan,
+        subscriptionStatus: savedUser.subscriptionStatus,
+        trialEndsAt: savedUser.trialEndsAt,
+        isEmailVerified: savedUser.isEmailVerified,
+        isActive: savedUser.isActive,
+        createdAt: (savedUser as any).createdAt
+      };
+
+      console.log('✅ Registration successful for:', createUserDto.email);
+
+      return {
+        message: 'User registered successfully. Please check your email to verify your account.',
+        user: responseUser
+      };
+
+    } catch (error) {
+      console.error('❌ Registration error:', error);
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new BadRequestException('Registration failed: ' + error.message);
+    }
   }
 
   async login(loginDto: LoginDto): Promise<any> {
