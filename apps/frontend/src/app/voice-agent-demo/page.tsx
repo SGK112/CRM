@@ -191,11 +191,10 @@ export default function VoiceAgentDemo() {
                 </p>
               </div>
         {status?.elevenlabs?.configured ? (
-                <ElevenLabsWidgetComponent 
+                              <ElevenLabsWidgetComponent 
                   client={sampleClient}
                   workspaceId={workspaceId}
           onCallInitiated={handleCallInitiated}
-          // @ts-expect-error: forward unknown prop to allow future support
           agentId={agentId || undefined}
                 />
               ) : (
@@ -220,7 +219,6 @@ export default function VoiceAgentDemo() {
                   client={sampleClient}
                   workspaceId={workspaceId}
           onCallInitiated={handleCallInitiated}
-          // @ts-expect-error: forward unknown prop to allow future support
           agentId={agentId || undefined}
                 />
               ) : (

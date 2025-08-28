@@ -8,7 +8,7 @@ export function StatBlock({label,value,hint}:{label:string; value:React.ReactNod
   return (
     <div className={mobileOptimized(
       'stat-block',
-      mobile.touchTarget,
+      mobile.touchTarget(),
       'min-w-[80px] sm:min-w-[90px]' // Larger touch targets on mobile
     )}>
       <small>{label}</small>
@@ -23,7 +23,7 @@ export function StatsBar({stats}:{stats:StatItem[]}) {
   return (
     <div className={mobileOptimized(
       'flex flex-wrap gap-2 sm:gap-3 pt-3',
-      mobile.scrollContainer
+      mobile.scrollContainer()
     )}>
       {stats.map(s=> <StatBlock key={s.label} label={s.label} value={s.value} hint={s.hint} />)}
     </div>
@@ -47,18 +47,18 @@ export function PageHeader({
     <div className={mobileOptimized(
       'flex flex-col gap-4 sm:gap-5',
       'md:flex-row md:items-end md:justify-between',
-      responsive.padding.sm
+      responsive.padding.sm()
     )}>
-      <div className={responsive.spacing.sm}>
+      <div className={responsive.spacing.sm()}>
         <h1 className={mobileOptimized(
-          mobileClasses.text.heading,
+          mobileClasses.text.heading(),
           titleClassName || 'font-bold text-gray-900 dark:text-gray-100 mb-0'
         )}>
           {title}
         </h1>
         {subtitle && (
           <p className={mobileOptimized(
-            mobileClasses.text.body,
+            mobileClasses.text.body(),
             'text-gray-600 dark:text-gray-400 max-w-2xl mt-1 sm:mt-2'
           )}>
             {subtitle}

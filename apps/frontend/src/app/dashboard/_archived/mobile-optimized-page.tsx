@@ -155,20 +155,20 @@ export default function MobileOptimizedClientsPage() {
   // Mobile-optimized client card component
   const ClientCard = ({ client }: { client: Client }) => (
     <div className={mobileOptimized(
-      mobileClasses.card.container,
+      mobileClasses.card.container(),
       'transition-all duration-200',
       'hover:shadow-md hover:scale-[1.02]',
-      mobile.touchTarget
+      mobile.touchTarget()
     )}>
-      <div className={mobileClasses.card.body}>
+      <div className={mobileClasses.card.body()}>
         {/* Header with name and status */}
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1 min-w-0">
-            <h3 className={mobileOptimized(mobileClasses.text.subheading, 'truncate')}>
+            <h3 className={mobileOptimized(mobileClasses.text.subheading(), 'truncate')}>
               {client.firstName} {client.lastName}
             </h3>
             {client.company && (
-              <p className={mobileOptimized(mobileClasses.text.small, 'text-gray-800 dark:text-gray-300 truncate')}>
+              <p className={mobileOptimized(mobileClasses.text.small(), 'text-gray-800 dark:text-gray-300 truncate')}>
                 {client.company}
               </p>
             )}
@@ -182,7 +182,7 @@ export default function MobileOptimizedClientsPage() {
         </div>
 
         {/* Contact info */}
-        <div className={responsive.spacing.xs}>
+        <div className={responsive.spacing.xs()}>
           {client.email && (
             <div className="flex items-center text-sm text-gray-800 dark:text-gray-300">
               <EnvelopeIcon className="h-4 w-4 mr-2 flex-shrink-0" />
@@ -220,7 +220,7 @@ export default function MobileOptimizedClientsPage() {
             <button
               onClick={() => router.push(`/dashboard/clients/${client._id}`)}
               className={mobileOptimized(
-                mobile.touchTarget,
+                mobile.touchTarget(),
                 'p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-md transition-colors'
               )}
               title="View client"
@@ -230,7 +230,7 @@ export default function MobileOptimizedClientsPage() {
             <button
               onClick={() => router.push(`/dashboard/clients/${client._id}/edit`)}
               className={mobileOptimized(
-                mobile.touchTarget,
+                mobile.touchTarget(),
                 'p-2 text-gray-400 hover:text-green-600 dark:hover:text-green-400 rounded-md transition-colors'
               )}
               title="Edit client"
@@ -240,7 +240,7 @@ export default function MobileOptimizedClientsPage() {
             <button
               onClick={() => setCommunicationModal({ isOpen: true, client, type: 'email' })}
               className={mobileOptimized(
-                mobile.touchTarget,
+                mobile.touchTarget(),
                 'p-2 text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 rounded-md transition-colors'
               )}
               title="Send email"
@@ -250,7 +250,7 @@ export default function MobileOptimizedClientsPage() {
             <button
               onClick={() => handleDeleteClient(client._id)}
               className={mobileOptimized(
-                mobile.touchTarget,
+                mobile.touchTarget(),
                 'p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded-md transition-colors'
               )}
               title="Delete client"
@@ -268,7 +268,7 @@ export default function MobileOptimizedClientsPage() {
     <div className={mobileOptimized(
       'bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700',
       'px-4 py-3 sm:px-6 sm:py-4',
-      mobile.touchTarget
+      mobile.touchTarget()
     )}>
       <div className="flex items-center justify-between">
         <div className="flex-1 min-w-0">
@@ -281,7 +281,7 @@ export default function MobileOptimizedClientsPage() {
               </div>
             </div>
             <div className="flex-1 min-w-0">
-              <p className={mobileOptimized(mobileClasses.text.body, 'font-medium text-gray-900 dark:text-gray-100 truncate')}>
+              <p className={mobileOptimized(mobileClasses.text.body(), 'font-medium text-gray-900 dark:text-gray-100 truncate')}>
                 {client.firstName} {client.lastName}
               </p>
               <div className="flex items-center space-x-2 mt-1">
@@ -292,7 +292,7 @@ export default function MobileOptimizedClientsPage() {
                   {client.status}
                 </span>
                 {client.company && (
-                  <span className={mobileOptimized(mobileClasses.text.small, 'text-gray-700 dark:text-gray-300 truncate')}>
+                  <span className={mobileOptimized(mobileClasses.text.small(), 'text-gray-700 dark:text-gray-300 truncate')}>
                     {client.company}
                   </span>
                 )}
@@ -304,7 +304,7 @@ export default function MobileOptimizedClientsPage() {
           <button
             onClick={() => router.push(`/dashboard/clients/${client._id}`)}
             className={mobileOptimized(
-              mobile.touchTarget,
+              mobile.touchTarget(),
               'p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-md transition-colors'
             )}
           >
@@ -313,7 +313,7 @@ export default function MobileOptimizedClientsPage() {
           <button
             onClick={() => router.push(`/dashboard/clients/${client._id}/edit`)}
             className={mobileOptimized(
-              mobile.touchTarget,
+              mobile.touchTarget(),
               'p-2 text-gray-400 hover:text-green-600 dark:hover:text-green-400 rounded-md transition-colors'
             )}
           >
@@ -327,7 +327,7 @@ export default function MobileOptimizedClientsPage() {
   if (loading) {
     return (
       <Layout>
-        <div className={mobileOptimized(mobileClasses.container.responsive, 'py-6')}>
+        <div className={mobileOptimized(mobileClasses.container.responsive(), 'py-6')}>
           <div className="animate-pulse space-y-4">
             <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -347,19 +347,19 @@ export default function MobileOptimizedClientsPage() {
 
   return (
     <Layout>
-      <div className={mobileClasses.container.responsive}>
+      <div className={mobileClasses.container.responsive()}>
         {/* Mobile-optimized page header */}
-        <div className={mobileOptimized(responsive.padding.md, 'border-b border-gray-200 dark:border-gray-700')}>
+        <div className={mobileOptimized(responsive.padding.md(), 'border-b border-gray-200 dark:border-gray-700')}>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
             <div>
-              <h1 className={mobileClasses.text.heading}>Clients</h1>
-              <p className={mobileOptimized(mobileClasses.text.body, 'text-gray-800 dark:text-gray-300 mt-1')}>
+              <h1 className={mobileClasses.text.heading()}>Clients</h1>
+              <p className={mobileOptimized(mobileClasses.text.body(), 'text-gray-800 dark:text-gray-300 mt-1')}>
                 Manage your client relationships and contacts
               </p>
             </div>
             <div className="flex items-center space-x-2">
               {/* View mode toggle - mobile only */}
-              <div className={mobileOptimized(responsive.showOnMobile, 'flex items-center border border-gray-300 dark:border-gray-600 rounded-lg p-1')}>
+              <div className={mobileOptimized(responsive.showOnMobile(), 'flex items-center border border-gray-300 dark:border-gray-600 rounded-lg p-1')}>
                 <button
                   onClick={() => setViewMode('grid')}
                   className={mobileOptimized(
@@ -383,22 +383,22 @@ export default function MobileOptimizedClientsPage() {
               <Link
                 href="/dashboard/clients/new"
                 className={mobileOptimized(
-                  mobileClasses.button.primary,
+                  mobileClasses.button.primary(),
                   'bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600',
                   'flex items-center space-x-2 transition-colors',
-                  mobile.touchTarget
+                  mobile.touchTarget()
                 )}
               >
                 <PlusIcon className="h-4 w-4" />
-                <span className={responsive.hideOnMobile}>Add Client</span>
-                <span className={responsive.showOnMobile}>Add</span>
+                <span className={responsive.hideOnMobile()}>Add Client</span>
+                <span className={responsive.showOnMobile()}>Add</span>
               </Link>
             </div>
           </div>
         </div>
 
         {/* Mobile-optimized filters and search */}
-        <div className={mobileOptimized(responsive.padding.sm, 'border-b border-gray-200 dark:border-gray-700')}>
+        <div className={mobileOptimized(responsive.padding.sm(), 'border-b border-gray-200 dark:border-gray-700')}>
           {/* Search bar */}
           <div className="mb-4">
             <div className="relative">
@@ -409,7 +409,7 @@ export default function MobileOptimizedClientsPage() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className={mobileOptimized(
-                  mobileClasses.form.input,
+                  mobileClasses.form.input(),
                   'pl-10 border border-gray-300 dark:border-gray-600 rounded-lg',
                   'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'
                 )}
@@ -418,13 +418,13 @@ export default function MobileOptimizedClientsPage() {
           </div>
 
           {/* Filter toggle for mobile */}
-          <div className={responsive.showOnMobile}>
+          <div className={responsive.showOnMobile()}>
             <button
               onClick={() => setShowFilters(!showFilters)}
               className={mobileOptimized(
                 'flex items-center space-x-2 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg',
                 'text-sm text-gray-800 dark:text-gray-300 transition-colors',
-                mobile.touchTarget
+                mobile.touchTarget()
               )}
             >
               <Bars3Icon className="h-4 w-4" />
@@ -434,18 +434,18 @@ export default function MobileOptimizedClientsPage() {
 
           {/* Filters */}
           <div className={mobileOptimized(
-            showFilters || responsive.hideOnMobile ? 'block' : 'hidden',
+            showFilters || responsive.hideOnMobile() ? 'block' : 'hidden',
             'mt-4 space-y-4 sm:space-y-0 sm:flex sm:items-center sm:space-x-4'
           )}>
             <div className="flex-1 sm:flex-none">
-              <label className={mobileOptimized(mobileClasses.form.label, 'text-gray-700 dark:text-gray-300')}>
+              <label className={mobileOptimized(mobileClasses.form.label(), 'text-gray-700 dark:text-gray-300')}>
                 Status
               </label>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className={mobileOptimized(
-                  mobileClasses.form.input,
+                  mobileClasses.form.input(),
                   'border border-gray-300 dark:border-gray-600 rounded-lg',
                   'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'
                 )}
@@ -460,14 +460,14 @@ export default function MobileOptimizedClientsPage() {
             </div>
 
             <div className="flex-1 sm:flex-none">
-              <label className={mobileOptimized(mobileClasses.form.label, 'text-gray-700 dark:text-gray-300')}>
+              <label className={mobileOptimized(mobileClasses.form.label(), 'text-gray-700 dark:text-gray-300')}>
                 Source
               </label>
               <select
                 value={sourceFilter}
                 onChange={(e) => setSourceFilter(e.target.value)}
                 className={mobileOptimized(
-                  mobileClasses.form.input,
+                  mobileClasses.form.input(),
                   'border border-gray-300 dark:border-gray-600 rounded-lg',
                   'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'
                 )}
@@ -485,7 +485,7 @@ export default function MobileOptimizedClientsPage() {
         </div>
 
         {/* Results */}
-        <div className={responsive.padding.md}>
+        <div className={responsive.padding.md()}>
           {error && (
             <div className="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
               <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
@@ -495,10 +495,10 @@ export default function MobileOptimizedClientsPage() {
           {filteredClients.length === 0 ? (
             <div className="text-center py-12">
               <UserIcon className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className={mobileOptimized(mobileClasses.text.subheading, 'mt-4 text-gray-900 dark:text-gray-100')}>
+              <h3 className={mobileOptimized(mobileClasses.text.subheading(), 'mt-4 text-gray-900 dark:text-gray-100')}>
                 No clients found
               </h3>
-              <p className={mobileOptimized(mobileClasses.text.body, 'mt-2 text-gray-800 dark:text-gray-300')}>
+              <p className={mobileOptimized(mobileClasses.text.body(), 'mt-2 text-gray-800 dark:text-gray-300')}>
                 {searchTerm || statusFilter !== 'all' || sourceFilter !== 'all' 
                   ? 'Try adjusting your search or filters'
                   : 'Get started by adding your first client'
@@ -511,7 +511,7 @@ export default function MobileOptimizedClientsPage() {
                     'mt-4 inline-flex items-center space-x-2 px-4 py-2 border border-transparent',
                     'text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700',
                     'dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors',
-                    mobile.touchTarget
+                    mobile.touchTarget()
                   )}
                 >
                   <PlusIcon className="h-4 w-4" />
@@ -523,14 +523,14 @@ export default function MobileOptimizedClientsPage() {
             <>
               {/* Results count */}
               <div className="mb-4">
-                <p className={mobileOptimized(mobileClasses.text.small, 'text-gray-800 dark:text-gray-300')}>
+                <p className={mobileOptimized(mobileClasses.text.small(), 'text-gray-800 dark:text-gray-300')}>
                   Showing {filteredClients.length} of {clients.length} clients
                 </p>
               </div>
 
               {/* Grid view */}
               {viewMode === 'grid' && (
-                <div className={mobileClasses.grid.cards}>
+                <div className={mobileClasses.grid.cards()}>
                   {filteredClients.map((client) => (
                     <ClientCard key={client._id} client={client} />
                   ))}
@@ -550,12 +550,13 @@ export default function MobileOptimizedClientsPage() {
         </div>
 
         {/* Communication Modal */}
-        <CommunicationModal
-          isOpen={communicationModal.isOpen}
-          onClose={() => setCommunicationModal({ isOpen: false })}
-          client={communicationModal.client}
-          type={communicationModal.type}
-        />
+        {communicationModal.isOpen && communicationModal.client && (
+          <CommunicationModal
+            isOpen={communicationModal.isOpen}
+            onClose={() => setCommunicationModal({ isOpen: false })}
+            client={communicationModal.client}
+          />
+        )}
       </div>
     </Layout>
   );

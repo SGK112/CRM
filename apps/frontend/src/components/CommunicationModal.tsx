@@ -347,7 +347,7 @@ export default function CommunicationModal({ isOpen, onClose, client }: Communic
         </Tabs>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={isLoading}>
+          <Button className="border border-gray-300 bg-white text-gray-700 hover:bg-gray-50" onClick={onClose} disabled={isLoading}>
             Cancel
           </Button>
           {activeTab === 'email' && (

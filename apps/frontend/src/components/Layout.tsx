@@ -249,19 +249,19 @@ export default function Layout({ children }: LayoutProps) {
       <div className={mobileOptimized(
         'fixed inset-y-0 left-0 z-50 w-64 shadow-lg transform transition-transform duration-300 ease-in-out lg:hidden sidebar-container',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full',
-        mobile.scrollContainer,
-        mobile.willChange
+        mobile.scrollContainer(),
+        mobile.willChange()
       )}>
         <div className={mobileOptimized(
           'flex items-center justify-between h-16 px-4',
-          mobile.touchTarget
+          mobile.touchTarget()
         )} style={{ borderBottom: '1px solid var(--border)' }}>
           <Logo />
           <button 
             onClick={() => setSidebarOpen(false)} 
             className={mobileOptimized(
               'p-2 rounded-md transition-colors',
-              mobile.touchTarget
+              mobile.touchTarget()
             )}
             style={{ color: 'var(--text-muted)' }}
             onMouseEnter={(e) => {
@@ -277,7 +277,7 @@ export default function Layout({ children }: LayoutProps) {
         </div>
         <nav className={mobileOptimized(
           'mt-6 px-2 pb-6',
-          mobile.scrollContainer,
+          mobile.scrollContainer(),
           'overscroll-contain'
         )}>
           <div className="space-y-1">
@@ -291,7 +291,7 @@ export default function Layout({ children }: LayoutProps) {
                     'sidebar-nav-item',
                     item.current ? 'active' : ''
                   ),
-                  mobile.touchTarget
+                  mobile.touchTarget()
                 )}
               >
                 <item.icon className="icon" />
@@ -460,7 +460,7 @@ export default function Layout({ children }: LayoutProps) {
         {/* Top navigation */}
         <div className={mobileOptimized(
           'sticky top-0 z-50 flex h-16 flex-shrink-0 backdrop-blur-md bg-opacity-95',
-          mobile.safeTop
+          mobile.safeTop()
         )} style={{ 
           backgroundColor: 'var(--surface-1)', 
           borderBottom: '1px solid var(--border)' 
@@ -469,7 +469,7 @@ export default function Layout({ children }: LayoutProps) {
             type="button"
             className={mobileOptimized(
               'px-4 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 lg:hidden transition-colors',
-              mobile.touchTarget
+              mobile.touchTarget()
             )}
             style={{ 
               color: 'var(--text-muted)',
@@ -506,7 +506,7 @@ export default function Layout({ children }: LayoutProps) {
                 onClick={() => router.push('/dashboard/notifications')}
                 className={mobileOptimized(
                   'relative rounded-full bg-gray-100 dark:bg-gray-800 p-2 text-gray-600 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition-all duration-200 hover:scale-105',
-                  mobile.touchTarget
+                  mobile.touchTarget()
                 )}
                 aria-label="View notifications"
               >
@@ -607,7 +607,7 @@ function FooterCopilot() {
       {/* Inline Footer Copilot */}
       <div className={mobileOptimized(
         'sticky z-30 relative overflow-hidden footer-copilot-safe',
-        mobile.safeBottom
+        mobile.safeBottom()
       )} style={{ bottom: 'var(--safe-area-inset-bottom, 0px)' }}>
         {/* Enhanced professional background */}
         <div className="absolute inset-0 bg-gradient-to-t from-white via-slate-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700 backdrop-blur-xl shadow-2xl"></div>
@@ -655,7 +655,7 @@ function FooterCopilot() {
           {/* Main Input Row */}
           <div className={mobileOptimized(
             'flex items-center space-x-3 px-3 py-3',
-            mobile.safeBottom
+            mobile.safeBottom()
           )} style={{ paddingBottom: 'max(0.75rem, var(--safe-area-inset-bottom))' }}>
             {/* Copyright */}
             <div className="hidden sm:flex items-center space-x-2 text-xs font-medium text-slate-600 dark:text-slate-400">

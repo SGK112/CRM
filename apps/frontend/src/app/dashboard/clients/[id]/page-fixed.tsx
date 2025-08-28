@@ -14,7 +14,7 @@ import {
   CalendarIcon,
   CurrencyDollarIcon
 } from '@heroicons/react/24/outline';
-import { StandardPageWrapper, StandardCard, StandardSection } from '../../../components/ui/StandardPageWrapper';
+import { StandardPageWrapper, StandardCard, StandardSection } from '../../../../components/ui/StandardPageWrapper';
 
 interface Client {
   _id: string;

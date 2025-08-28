@@ -162,14 +162,16 @@ export const createActionButtonClasses = (variant: 'primary' | 'secondary' = 'pr
   );
 };
 
-export default {
+const themeUtils = {
   standardColors,
   standardComponents,
+  cn,
   standardSpacing,
   standardLayout,
   standardAnimations,
-  cn,
   createStatBlockClasses,
   createPageHeaderClasses,
   createActionButtonClasses
 };
+
+export default themeUtils;

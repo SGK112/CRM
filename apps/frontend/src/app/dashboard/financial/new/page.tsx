@@ -12,8 +12,8 @@ import {
   Zap,
   ArrowLeft 
 } from 'lucide-react';
-import EstimateInvoiceToggle from '../../../components/EstimateInvoiceToggle';
-import AIWritingAssistant from '../../../components/AIWritingAssistant';
+import EstimateInvoiceToggle from '../../../../components/EstimateInvoiceToggle';
+// import AIWritingAssistant from '../../../components/AIWritingAssistant';
 // import { quickBooksAPI, QuickBooksService } from '../../../lib/quickbooks';
 
 interface LineItem {
@@ -438,13 +438,12 @@ export default function NewFinancialDocumentPage() {
                     <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Description
                     </label>
-                    <AIWritingAssistant
+                    <textarea
                       value={item.description}
-                      onChange={(value: string) => updateLineItem(item.id, 'description', value)}
-                      placeholder="AI will suggest descriptions..."
-                      itemName={item.description.split(' ')[0] || 'item'}
-                      category={item.category}
-                      className="text-xs"
+                      onChange={(e) => updateLineItem(item.id, 'description', e.target.value)}
+                      placeholder="Enter item description..."
+                      className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
+                      rows={2}
                     />
                   </div>
                   

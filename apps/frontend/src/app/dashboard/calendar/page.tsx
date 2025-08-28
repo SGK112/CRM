@@ -118,12 +118,14 @@ export default function CalendarPage() {
         switch (dateRange) {
           case 'today':
             return aptDate.toDateString() === today.toDateString();
-          case 'week':
+          case 'week': {
             const weekEnd = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
             return aptDate >= today && aptDate <= weekEnd;
-          case 'month':
+          }
+          case 'month': {
             const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
             return aptDate >= today && aptDate <= monthEnd;
+          }
           default:
             return true;
         }

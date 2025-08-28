@@ -10,6 +10,7 @@ export default function CopilotWidget() {
   // Three stages: closed (tiny tab), minimized (widget), open (full assistant)
   const [stage, setStage] = useState<Stage>('minimized');
   const [draft, setDraft] = useState("");
+  const [isExpanded, setIsExpanded] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 

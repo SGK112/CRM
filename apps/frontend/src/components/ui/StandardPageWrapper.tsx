@@ -109,6 +109,7 @@ interface StandardSectionProps {
   title?: string;
   subtitle?: string;
   actions?: React.ReactNode;
+  headerActions?: React.ReactNode;
 }
 
 export function StandardSection({
@@ -116,7 +117,8 @@ export function StandardSection({
   className = '',
   title,
   subtitle,
-  actions
+  actions,
+  headerActions
 }: StandardSectionProps) {
   return (
     <div 
@@ -130,7 +132,7 @@ export function StandardSection({
         minHeight: 'calc(100vh - 140px)'
       }}
     >
-      {(title || subtitle || actions) && (
+      {(title || subtitle || actions || headerActions) && (
         <div className="flex items-center justify-between mb-6">
           <div>
             {title && (
@@ -150,9 +152,10 @@ export function StandardSection({
               </p>
             )}
           </div>
-          {actions && (
+          {(actions || headerActions) && (
             <div className="flex items-center space-x-3">
               {actions}
+              {headerActions}
             </div>
           )}
         </div>

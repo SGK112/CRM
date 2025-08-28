@@ -190,15 +190,15 @@ export default function MobileOptimizedDashboard() {
 
     return (
       <div className={mobileOptimized(
-        mobileClasses.card.container,
+        mobileClasses.card.container(),
         'transition-all duration-200 hover:shadow-md hover:scale-[1.02]',
-        mobile.touchTarget
+        mobile.touchTarget()
       )}>
-        <div className={mobileClasses.card.body}>
+        <div className={mobileClasses.card.body()}>
           <div className="flex items-center justify-between">
             <div className="flex-1">
               <p className={mobileOptimized(
-                mobileClasses.text.small,
+                mobileClasses.text.small(),
                 'font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide'
               )}>
                 {title}
@@ -216,7 +216,7 @@ export default function MobileOptimizedDashboard() {
                     <ArrowTrendingDownIcon className="h-4 w-4 text-red-500 mr-1" />
                   )}
                   <span className={mobileOptimized(
-                    mobileClasses.text.small,
+                    mobileClasses.text.small(),
                     change >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                   )}>
                     {Math.abs(change)}%
@@ -239,11 +239,11 @@ export default function MobileOptimizedDashboard() {
   // Mobile-optimized project card
   const ProjectCard = ({ project }: { project: Project }) => (
     <div className={mobileOptimized(
-      mobileClasses.card.container,
+      mobileClasses.card.container(),
       'transition-all duration-200 hover:shadow-md hover:scale-[1.02]',
-      mobile.touchTarget
+      mobile.touchTarget()
     )}>
-      <div className={mobileClasses.card.body}>
+      <div className={mobileClasses.card.body()}>
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1 min-w-0">
             <h3 className={mobileOptimized(
@@ -253,7 +253,7 @@ export default function MobileOptimizedDashboard() {
             </h3>
             {project.client && (
               <p className={mobileOptimized(
-                mobileClasses.text.small,
+                mobileClasses.text.small(),
                 'text-gray-600 dark:text-gray-400 mt-1'
               )}>
                 {project.client}
@@ -271,10 +271,10 @@ export default function MobileOptimizedDashboard() {
         {/* Progress bar */}
         <div className="mb-3">
           <div className="flex items-center justify-between mb-1">
-            <span className={mobileOptimized(mobileClasses.text.small, 'text-gray-600 dark:text-gray-400')}>
+            <span className={mobileOptimized(mobileClasses.text.small(), 'text-gray-600 dark:text-gray-400')}>
               Progress
             </span>
-            <span className={mobileOptimized(mobileClasses.text.small, 'font-medium text-gray-900 dark:text-gray-100')}>
+            <span className={mobileOptimized(mobileClasses.text.small(), 'font-medium text-gray-900 dark:text-gray-100')}>
               {project.progress}%
             </span>
           </div>
@@ -295,7 +295,7 @@ export default function MobileOptimizedDashboard() {
             className={mobileOptimized(
               'text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300',
               'font-medium transition-colors',
-              mobile.touchTarget,
+              mobile.touchTarget(),
               'px-2 py-1 rounded'
             )}
           >
@@ -324,7 +324,7 @@ export default function MobileOptimizedDashboard() {
     return (
       <div className={mobileOptimized(
         'flex items-start space-x-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg transition-colors',
-        mobile.touchTarget
+        mobile.touchTarget()
       )}>
         <div className="flex-shrink-0">
           <div className="p-2 bg-blue-100 dark:bg-blue-900/40 rounded-lg">
@@ -333,13 +333,13 @@ export default function MobileOptimizedDashboard() {
         </div>
         <div className="flex-1 min-w-0">
           <p className={mobileOptimized(
-            mobileClasses.text.body,
+            mobileClasses.text.body(),
             'font-medium text-gray-900 dark:text-gray-100'
           )}>
             {activity.title}
           </p>
           <p className={mobileOptimized(
-            mobileClasses.text.small,
+            mobileClasses.text.small(),
             'text-gray-600 dark:text-gray-400 mt-1'
           )}>
             {activity.description}
@@ -357,7 +357,7 @@ export default function MobileOptimizedDashboard() {
   if (loading) {
     return (
       <Layout>
-        <div className={mobileOptimized(mobileClasses.container.responsive, 'py-6')}>
+        <div className={mobileOptimized(mobileClasses.container.responsive(), 'py-6')}>
           <div className="animate-pulse space-y-6">
             <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -376,16 +376,16 @@ export default function MobileOptimizedDashboard() {
 
   return (
     <Layout>
-      <div className={mobileClasses.container.responsive}>
+      <div className={mobileClasses.container.responsive()}>
         {/* Mobile-optimized page header */}
-        <div className={mobileOptimized(responsive.padding.md, 'border-b border-gray-200 dark:border-gray-700')}>
+        <div className={mobileOptimized(responsive.padding.md(), 'border-b border-gray-200 dark:border-gray-700')}>
           <PageHeader
             title="Dashboard"
             subtitle="Welcome back! Here's what's happening with your projects."
             actions={
               <div className="flex items-center space-x-2">
                 {/* View mode toggle - mobile only */}
-                <div className={mobileOptimized(responsive.showOnMobile, 'flex items-center border border-gray-300 dark:border-gray-600 rounded-lg p-1')}>
+                <div className={mobileOptimized(responsive.showOnMobile(), 'flex items-center border border-gray-300 dark:border-gray-600 rounded-lg p-1')}>
                   <button
                     onClick={() => setViewMode('grid')}
                     className={mobileOptimized(
@@ -409,15 +409,15 @@ export default function MobileOptimizedDashboard() {
                 <button
                   onClick={() => router.push('/dashboard/projects/new')}
                   className={mobileOptimized(
-                    mobileClasses.button.primary,
+                    mobileClasses.button.primary(),
                     'bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600',
                     'flex items-center space-x-2 transition-colors',
-                    mobile.touchTarget
+                    mobile.touchTarget()
                   )}
                 >
                   <PlusIcon className="h-4 w-4" />
-                  <span className={responsive.hideOnMobile}>New Project</span>
-                  <span className={responsive.showOnMobile}>New</span>
+                  <span className={responsive.hideOnMobile()}>New Project</span>
+                  <span className={responsive.showOnMobile()}>New</span>
                 </button>
               </div>
             }
@@ -425,7 +425,7 @@ export default function MobileOptimizedDashboard() {
         </div>
 
         {/* Stats Cards */}
-        <div className={responsive.padding.md}>
+        <div className={responsive.padding.md()}>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             <StatsCard
               title="Total Revenue"
@@ -461,13 +461,13 @@ export default function MobileOptimizedDashboard() {
         {/* Recent Projects & Activity */}
         <div className={mobileOptimized(
           'grid grid-cols-1 lg:grid-cols-3 gap-6',
-          responsive.padding.md
+          responsive.padding.md()
         )}>
           {/* Recent Projects */}
           <div className="lg:col-span-2">
             <div className="flex items-center justify-between mb-4">
               <h2 className={mobileOptimized(
-                mobileClasses.text.subheading,
+                mobileClasses.text.subheading(),
                 'text-gray-900 dark:text-gray-100'
               )}>
                 Recent Projects
@@ -477,7 +477,7 @@ export default function MobileOptimizedDashboard() {
                 className={mobileOptimized(
                   'text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300',
                   'text-sm font-medium transition-colors',
-                  mobile.touchTarget,
+                  mobile.touchTarget(),
                   'px-2 py-1 rounded'
                 )}
               >
@@ -485,7 +485,7 @@ export default function MobileOptimizedDashboard() {
               </button>
             </div>
 
-            <div className={viewMode === 'grid' ? mobileClasses.grid.list : 'space-y-4'}>
+            <div className={viewMode === 'grid' ? mobileClasses.grid.list() : 'space-y-4'}>
               {projects.map((project) => (
                 <ProjectCard key={project.id} project={project} />
               ))}
@@ -495,14 +495,14 @@ export default function MobileOptimizedDashboard() {
           {/* Recent Activity */}
           <div>
             <h2 className={mobileOptimized(
-              mobileClasses.text.subheading,
+              mobileClasses.text.subheading(),
               'text-gray-900 dark:text-gray-100 mb-4'
             )}>
               Recent Activity
             </h2>
 
             <div className={mobileOptimized(
-              mobileClasses.card.container,
+              mobileClasses.card.container(),
               'divide-y divide-gray-200 dark:divide-gray-700'
             )}>
               {recentActivity.map((activity) => (
@@ -515,7 +515,7 @@ export default function MobileOptimizedDashboard() {
                   className={mobileOptimized(
                     'w-full text-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300',
                     'text-sm font-medium transition-colors py-2',
-                    mobile.touchTarget
+                    mobile.touchTarget()
                   )}
                 >
                   View All Activity
