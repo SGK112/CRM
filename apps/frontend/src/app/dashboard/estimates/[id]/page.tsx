@@ -1,5 +1,4 @@
 'use client';
-import Layout from '../../../../components/Layout';
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { DocumentDuplicateIcon, PaperAirplaneIcon, CurrencyDollarIcon, PencilIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
@@ -164,8 +163,7 @@ export default function EstimateDetailPage(){
   const marginPercent = est && est.subtotalSell > 0 ? (totalMargin / est.subtotalSell) * 100 : 0;
 
   return (
-    <Layout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         {loading && (
           <div className="flex items-center justify-center h-64">
             <div className="text-[var(--text-dim)]">Loading estimate...</div>
@@ -418,6 +416,5 @@ export default function EstimateDetailPage(){
           </>
         )}
       </div>
-    </Layout>
   );
 }

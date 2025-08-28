@@ -347,9 +347,9 @@ export default function CatalogPage() {
 
   if (loading) {
     return (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-        </div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
     );
   }
 
@@ -563,7 +563,7 @@ export default function CatalogPage() {
                         <>
                           <Star className="w-4 h-4 text-yellow-500 fill-current" />
                           <span className="text-sm font-medium">{item.rating}</span>
-                          <span className="text-sm text-gray-700 >({item.reviews})</span>
+                          <span className="text-sm text-gray-700">({item.reviews})</span>
                         </>
                       )}
                     </div>
@@ -574,7 +574,7 @@ export default function CatalogPage() {
                       ) : (
                         <Clock className="w-4 h-4 text-yellow-500" />
                       )}
-                      <span className="text-xs text-gray-700 >
+                      <span className="text-xs text-gray-700">
                         {item.availability?.inStock ? 'In Stock' : `${item.availability?.leadTime} days`}
                       </span>
                     </div>
@@ -638,7 +638,7 @@ export default function CatalogPage() {
                       <div className="text-lg font-bold text-green-600">
                         ${item.sellPrice}
                       </div>
-                      <div className="text-sm text-gray-700 >per unit</div>
+                      <div className="text-sm text-gray-700">per unit</div>
                       {item.rating && (
                         <div className="flex items-center gap-1 mt-1">
                           <Star className="w-3 h-3 text-yellow-500 fill-current" />

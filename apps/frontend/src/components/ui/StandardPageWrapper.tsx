@@ -393,6 +393,7 @@ interface StandardStatProps {
   trend?: 'up' | 'down' | 'neutral';
   color?: string;
   className?: string;
+  icon?: React.ReactNode;
 }
 
 export function StandardStat({
@@ -401,6 +402,7 @@ export function StandardStat({
   change,
   trend = 'neutral',
   color,
+  icon,
   className = ''
 }: StandardStatProps) {
   const trendColors = {
@@ -410,29 +412,38 @@ export function StandardStat({
   };
 
   return (
-    <div 
-      className={`${className}`}
-      style={{
-        color: 'var(--text)'
-      }}
+    <div
+      className={`rounded-xl border-2 theme-border p-6 transition-all duration-300 hover:shadow-xl hover:scale-105 hover:border-red-400 dark:hover:border-red-500 relative overflow-hidden ${className}`}
+      style={{ backgroundColor: 'var(--surface-1)' }}
     >
-      <div className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>
-        {label}
-      </div>
-      <div 
-        className="text-lg font-bold mt-1"
-        style={{ color: color || 'var(--text)' }}
-      >
-        {value}
-      </div>
-      {change && (
-        <div 
-          className="text-xs mt-1"
-          style={{ color: trendColors[trend] }}
-        >
-          {change}
+      <div className="absolute inset-0 bg-gradient-to-br from-red-50 via-transparent to-orange-50 dark:from-gray-700 dark:via-transparent dark:to-gray-600 opacity-50"></div>
+      <div className="relative z-10">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>
+              {label}
+            </p>
+            <p className="text-3xl font-bold mt-2 mb-1" style={{ color: 'white' }}>
+              {value}
+            </p>
+            {change && (
+              <div 
+                className="text-xs mt-1"
+                style={{ color: trendColors[trend] }}
+              >
+                {change}
+              </div>
+            )}
+          </div>
+          {icon && (
+            <div className="w-12 h-12 bg-gradient-to-br from-slate-600 to-slate-800 dark:from-slate-400 dark:to-slate-600 rounded-xl flex items-center justify-center shadow-lg">
+              <div className="text-white" style={{ fontSize: '1.5rem' }}>
+                {icon}
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

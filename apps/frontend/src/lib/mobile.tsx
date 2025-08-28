@@ -128,6 +128,8 @@ export const mobile = {
   // Safe areas for notched devices
   safeTop: 'pt-safe-top',
   safeBottom: 'pb-safe-bottom',
+  safeLeft: 'pl-safe-left',
+  safeRight: 'pr-safe-right',
   
   // Scroll optimization
   scrollContainer: 'overflow-y-auto overscroll-contain',

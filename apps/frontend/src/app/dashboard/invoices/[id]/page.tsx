@@ -1,5 +1,4 @@
 'use client';
-import Layout from '../../../../components/Layout';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { API_BASE } from '../../../../lib/api';
@@ -20,12 +19,11 @@ export default function InvoiceDetail(){
   };
   useEffect(()=>{ if(id) fetchOne(); },[id]);
   return (
-    <Layout>
-      <div className='space-y-6'>
-        {loading && <div className='text-sm text-gray-700 >Loading...</div>}
-        {!loading && inv && (
-          <>
-            <div className='flex items-center justify-between flex-wrap gap-4'>
+    <div className='space-y-6'>
+      {loading && <div className='text-sm text-gray-700'>Loading...</div>}
+      {!loading && inv && (
+        <>
+          <div className='flex items-center justify-between flex-wrap gap-4'>
               <div>
                 <h1 className='text-2xl font-semibold'>Invoice {inv.number}</h1>
                 <p className='text-sm text-gray-800 dark:text-[var(--text-dim)]'>Status: {inv.status}</p>
@@ -56,7 +54,7 @@ export default function InvoiceDetail(){
                           <td className='py-2 px-3'>{li.total.toFixed(2)}</td>
                         </tr>
                       ))}
-                      {inv.items.length===0 && <tr><td colSpan={4} className='py-4 text-center text-xs text-gray-700 >No line items.</td></tr>}
+                      {inv.items.length===0 && <tr><td colSpan={4} className='py-4 text-center text-xs text-gray-700'>No line items.</td></tr>}
                     </tbody>
                   </table>
                 </div>
@@ -80,6 +78,5 @@ export default function InvoiceDetail(){
           </>
         )}
       </div>
-    </Layout>
   );
 }

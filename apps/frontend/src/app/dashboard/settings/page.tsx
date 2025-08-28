@@ -198,6 +198,21 @@ export default function SettingsPage() {
 
   const [integrations, setIntegrations] = useState<IntegrationSetting[]>([
     {
+      id: 'quickbooks',
+      name: 'QuickBooks Online',
+      description: 'Sync estimates, invoices, customers, and financial data with QuickBooks',
+      enabled: false,
+      configured: false,
+      icon: CreditCardIcon,
+      configFields: [
+        { name: 'companyId', label: 'Company ID', type: 'text', value: '', required: true },
+        { name: 'accessToken', label: 'Access Token', type: 'password', value: '', required: true },
+        { name: 'refreshToken', label: 'Refresh Token', type: 'password', value: '', required: true },
+        { name: 'realmId', label: 'Realm ID', type: 'text', value: '', required: true },
+        { name: 'autoSync', label: 'Auto Sync', type: 'text', value: 'true', required: false }
+      ]
+    },
+    {
       id: 'google',
       name: 'Google Workspace',
       description: 'Connect Google Calendar, Drive, and Gmail for seamless integration',

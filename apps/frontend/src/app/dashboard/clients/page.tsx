@@ -288,17 +288,7 @@ export default function ClientsPage() {
   }, [clients, filteredClients, totalCount, useServerSearch, debouncedSearch, statusFilter, sourceFilter]);
 
   return (
-      <div className="h-[calc(100vh-140px)] flex flex-col gap-4">{/* viewport height adjust under global header */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="mb-2 text-xs text-gray-700 font-mono flex flex-wrap gap-4">
-            <span>Total fetched: {clients.length}</span>
-            <span>Filtered: {filteredClients.length}</span>
-            <span>Status filter: {statusFilter}</span>
-            <span>Source filter: {sourceFilter}</span>
-            <span>Search: "{searchTerm}"</span>
-            <span>Server search: {useServerSearch ? 'enabled' : 'disabled'}</span>
-          </div>
-        )}
+      <div className="h-[calc(100vh-140px)] flex flex-col gap-4">
         
         {searchError && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">

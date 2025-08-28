@@ -83,7 +83,7 @@ export default function VoiceAgentPage() {
               ) : (
                 <>
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-[var(--text)] mb-4 flex items-center gap-2"><PhoneIcon className="h-5 w-5" /> Start Outbound Call</h2>
-                  <CapabilityGate need="ai.voice" fallback={<div className="text-sm"><a href="/billing/cart" className="text-amber-400 underline">Upgrade your plan</a> to enable Voice Agent calling.</div>}>
+                  <CapabilityGate need="voice.agents" fallback={<div className="text-sm"><a href="/dashboard/settings/billing?upgrade=ai-pro" className="text-amber-400 underline">Upgrade to AI Professional</a> to enable Voice Agent calling.</div>}>
                     <div className="flex gap-3">
                       <input value={toNumber} onChange={e=>setToNumber(e.target.value)} placeholder="Destination phone e.g. +15551234567" className="input flex-1" />
                       <button onClick={startCall} disabled={!toNumber || loading} className="px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-[var(--surface-2)] disabled:text-gray-800 dark:disabled:text-[var(--text-dim)] disabled:cursor-not-allowed flex items-center gap-2">

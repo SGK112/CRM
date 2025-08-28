@@ -32,6 +32,9 @@ import { AiTokensModule } from './ai-tokens/ai-tokens.module';
 import { CommunicationsModule } from './communications/communications.module';
 import { UserConfigModule } from './user-config/user-config.module';
 import { DevModule } from './dev/dev.module';
+import { QuickBooksModule } from './quickbooks/quickbooks.module';
+import { WalletModule } from './wallet/wallet.module';
+import { TwilioNumbersModule } from './twilio-numbers/twilio-numbers.module';
 
 @Module({
   imports: [
@@ -75,6 +78,9 @@ import { DevModule } from './dev/dev.module';
   CommunicationsModule,
   UserConfigModule,
   DevModule,
+  QuickBooksModule,
+  WalletModule,
+  TwilioNumbersModule,
   ],
   controllers: [RootController],
 })

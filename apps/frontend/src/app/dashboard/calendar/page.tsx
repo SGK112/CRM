@@ -325,7 +325,7 @@ export default function CalendarPage() {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-black dark:text-white mb-2">
+              <h1 className="text-3xl font-bold text-brand-700 dark:text-brand-400 mb-2">
                 Schedule & Calendar Management
               </h1>
               <p className="text-gray-800 dark:text-gray-200">

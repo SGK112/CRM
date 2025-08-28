@@ -19,6 +19,7 @@ import {
   Bars3Icon,
   XMarkIcon,
   BellIcon,
+  PhoneIcon,
   MagnifyingGlassIcon,
   UserCircleIcon,
   ChevronDownIcon,
@@ -29,16 +30,24 @@ import {
   ChartBarIcon,
   ShoppingBagIcon,
   BuildingStorefrontIcon,
+  CalculatorIcon,
   SparklesIcon,
   PlusCircleIcon,
   QuestionMarkCircleIcon,
   ChevronUpIcon,
   ArrowsPointingOutIcon,
+  MicrophoneIcon,
+  LockClosedIcon,
+  WalletIcon
 } from '@heroicons/react/24/outline';
 import Logo from './Logo';
 import { ThemeProvider, useTheme } from './ThemeProvider';
+import { AIProvider } from '../hooks/useAI';
 import ThemeToggle from './ThemeToggle';
+import AIEnable from './AIEnable';
 import { mobileOptimized, mobile } from '@/lib/mobile';
+import { PlanBadge } from './CapabilityGate';
+import { getUserPlan, hasCapability } from '@/lib/plans';
 
 interface User {
   id: string;
@@ -59,6 +68,7 @@ interface NavigationItem {
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   current?: boolean;
   badge?: number;
+  planRequired?: 'basic' | 'ai-pro' | 'enterprise';
 }
 
 export default function Layout({ children }: LayoutProps) {
@@ -66,6 +76,7 @@ export default function Layout({ children }: LayoutProps) {
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [userPlan, setUserPlan] = useState<'basic' | 'ai-pro' | 'enterprise'>('basic');
   const router = useRouter();
   const pathname = usePathname();
 
@@ -89,6 +100,7 @@ export default function Layout({ children }: LayoutProps) {
     try {
       const parsedUser = JSON.parse(userData);
       setUser(parsedUser);
+      setUserPlan(getUserPlan());
       setLoading(false);
       
       // If user is authenticated and on auth page, redirect to dashboard
@@ -143,15 +155,35 @@ export default function Layout({ children }: LayoutProps) {
     {
       label: 'Design & Sales',
       items: [
-        { name: 'Design Studio', href: '/dashboard/designer', icon: PencilSquareIcon },
+        { 
+          name: 'Design Studio', 
+          href: '/dashboard/designer', 
+          icon: PencilSquareIcon,
+          planRequired: 'ai-pro' as const
+        },
+        { name: 'Financial Hub', href: '/dashboard/financial', icon: CalculatorIcon },
         { name: 'Estimates & Pricing', href: '/dashboard/estimates', icon: DocumentTextIcon },
+        { name: 'Invoices & Billing', href: '/dashboard/invoices', icon: ShoppingBagIcon },
         { name: 'Material Catalog', href: '/dashboard/catalog', icon: WrenchScrewdriverIcon },
+      ]
+    },
+    {
+      label: 'AI & Voice', 
+      items: [
+        { 
+          name: 'Voice Agents', 
+          href: '/dashboard/voice-agent', 
+          icon: MicrophoneIcon,
+          planRequired: 'ai-pro' as const
+        },
+        { name: 'Communications', href: '/dashboard/chat', icon: ChatBubbleLeftRightIcon, badge: 5 },
+        { name: 'Phone Numbers', href: '/dashboard/phone-numbers', icon: PhoneIcon },
       ]
     },
     {
       label: 'Business Management', 
       items: [
-        { name: 'Communications', href: '/dashboard/chat', icon: ChatBubbleLeftRightIcon, badge: 5 },
+        { name: 'TON Wallet', href: '/dashboard/wallet', icon: WalletIcon },
         { name: 'Documents & Files', href: '/dashboard/documents', icon: DocumentTextIcon },
         { name: 'Reports & Analytics', href: '/dashboard/analytics', icon: ChartBarIcon },
         { name: 'Settings', href: '/dashboard/settings', icon: CogIcon }
@@ -203,6 +235,7 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <ThemeProvider>
+      <AIProvider>
   <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
   <RouteMemoryTracker />
       {/* Mobile sidebar backdrop */}
@@ -214,11 +247,11 @@ export default function Layout({ children }: LayoutProps) {
 
       {/* Mobile sidebar */}
       <div className={mobileOptimized(
-        'fixed inset-y-0 left-0 z-50 w-64 shadow-lg transform transition-transform duration-300 ease-in-out lg:hidden',
+        'fixed inset-y-0 left-0 z-50 w-64 shadow-lg transform transition-transform duration-300 ease-in-out lg:hidden sidebar-container',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full',
         mobile.scrollContainer,
         mobile.willChange
-      )} style={{ backgroundColor: 'var(--surface-1)' }}>
+      )}>
         <div className={mobileOptimized(
           'flex items-center justify-between h-16 px-4',
           mobile.touchTarget
@@ -281,7 +314,7 @@ export default function Layout({ children }: LayoutProps) {
 
       {/* Desktop sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-        <div className="flex min-h-0 flex-1 flex-col" style={{ backgroundColor: 'var(--surface-1)', borderRight: '1px solid var(--border)' }}>
+        <div className="flex min-h-0 flex-1 flex-col sidebar-container" style={{ borderRight: '1px solid var(--border)' }}>
           <div className="flex h-16 flex-shrink-0 items-center px-4" style={{ borderBottom: '1px solid var(--border)' }}>
             <Logo />
           </div>
@@ -293,29 +326,38 @@ export default function Layout({ children }: LayoutProps) {
                   return (
                     <div key={group.label} className="mb-4">
                       <div className="sidebar-nav-group">{group.label}</div>
-                      {groupItems.map(item => (
-                        <Link
-                          key={item.name}
-                          href={item.href}
-                          className={classNames(
-                            'sidebar-nav-item',
-                            item.current ? 'active' : ''
-                          )}
-                        >
-                          <item.icon className="icon" />
-                          <span>{item.name}</span>
-                          {item.badge && item.badge > 0 && (
-                            <span className={classNames(
-                              'ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
-                              item.current 
-                                ? 'bg-amber-600 text-white shadow-sm' 
-                                : 'badge badge-info'
-                            )}>
-                              {item.badge}
-                            </span>
-                          )}
-                        </Link>
-                      ))}
+                      {groupItems.map(item => {
+                        const originalItem = group.items.find(gi => gi.href === item.href);
+                        const isRestricted = originalItem?.planRequired && originalItem.planRequired !== 'basic' && userPlan === 'basic';
+                        
+                        return (
+                          <Link
+                            key={item.name}
+                            href={isRestricted ? `/dashboard/settings/billing?upgrade=${originalItem.planRequired}` : item.href}
+                            className={classNames(
+                              'sidebar-nav-item',
+                              item.current ? 'active' : '',
+                              isRestricted ? 'opacity-75' : ''
+                            )}
+                          >
+                            <item.icon className={`icon ${isRestricted ? 'text-gray-400' : ''}`} />
+                            <span className="flex-1">{item.name}</span>
+                            {isRestricted && (
+                              <LockClosedIcon className="w-4 h-4 text-amber-500 ml-2" />
+                            )}
+                            {item.badge && item.badge > 0 && !isRestricted && (
+                              <span className={classNames(
+                                'ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
+                                item.current 
+                                  ? 'bg-amber-600 text-white shadow-sm' 
+                                  : 'badge badge-info'
+                              )}>
+                                {item.badge}
+                              </span>
+                            )}
+                          </Link>
+                        );
+                      })}
                     </div>
                   );
                 })}
@@ -357,9 +399,12 @@ export default function Layout({ children }: LayoutProps) {
                       <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>
                         {user.firstName} {user.lastName}
                       </p>
-                      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                        {user.email}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                          {user.email}
+                        </p>
+                        <PlanBadge plan={userPlan} className="text-xs" />
+                      </div>
                     </div>
                     <ChevronDownIcon className="h-4 w-4" style={{ color: 'var(--text-muted)' }} />
                   </div>
@@ -451,6 +496,8 @@ export default function Layout({ children }: LayoutProps) {
             </div>
 
       <div className="ml-4 flex items-center md:ml-6 shrink-0 space-x-2 sm:space-x-3">
+              {/* AI Enable */}
+              <AIEnable />
               {/* Theme Toggle */}
               <ThemeToggle variant="button" />
               {/* Notifications */}
@@ -458,14 +505,14 @@ export default function Layout({ children }: LayoutProps) {
                 type="button"
                 onClick={() => router.push('/dashboard/notifications')}
                 className={mobileOptimized(
-                  'relative rounded-full surface-2 p-2 text-secondary hover:text-primary focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-surface-1 transition-all duration-200 hover:scale-105',
+                  'relative rounded-full bg-gray-100 dark:bg-gray-800 p-2 text-gray-600 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition-all duration-200 hover:scale-105',
                   mobile.touchTarget
                 )}
                 aria-label="View notifications"
               >
                 <span className="sr-only">View notifications</span>
                 <BellIcon className="h-6 w-6" />
-                <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-red-500 text-xs text-white flex items-center justify-center animate-pulse">
+                <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-xs text-white flex items-center justify-center font-medium shadow-sm">
                   3
                 </span>
               </button>
@@ -474,7 +521,7 @@ export default function Layout({ children }: LayoutProps) {
               {/* Help Button */}
               <button
                 type="button"
-                className="group hidden sm:inline-flex items-center px-3 py-2 rounded-md border border-token surface-1 text-xs font-medium text-secondary hover:surface-2 hover:border-token focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-200 hover:scale-105"
+                className="group hidden sm:inline-flex items-center px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-200 hover:scale-105"
                 onClick={() => {
                   // Focus Copilot widget if available
                   const evt = new CustomEvent('copilot:open');
@@ -501,6 +548,7 @@ export default function Layout({ children }: LayoutProps) {
         <FooterCopilot />
       </div>
     </div>
+  </AIProvider>
   </ThemeProvider>
   );
 }
@@ -557,7 +605,10 @@ function FooterCopilot() {
   return (
     <>
       {/* Inline Footer Copilot */}
-      <div className="sticky bottom-0 z-30 relative overflow-hidden">
+      <div className={mobileOptimized(
+        'sticky z-30 relative overflow-hidden footer-copilot-safe',
+        mobile.safeBottom
+      )} style={{ bottom: 'var(--safe-area-inset-bottom, 0px)' }}>
         {/* Enhanced professional background */}
         <div className="absolute inset-0 bg-gradient-to-t from-white via-slate-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700 backdrop-blur-xl shadow-2xl"></div>
         <div className="absolute inset-0 bg-gradient-to-r from-blue-50/30 via-white/20 to-indigo-50/30 dark:from-blue-900/20 dark:via-slate-800/30 dark:to-indigo-900/20"></div>
@@ -602,7 +653,10 @@ function FooterCopilot() {
           </div>
 
           {/* Main Input Row */}
-          <div className="flex items-center space-x-3 px-3 py-3">
+          <div className={mobileOptimized(
+            'flex items-center space-x-3 px-3 py-3',
+            mobile.safeBottom
+          )} style={{ paddingBottom: 'max(0.75rem, var(--safe-area-inset-bottom))' }}>
             {/* Copyright */}
             <div className="hidden sm:flex items-center space-x-2 text-xs font-medium text-slate-600 dark:text-slate-400">
               <span>© 2025 Remodely CRM</span>
@@ -678,7 +732,7 @@ function QuickCreate() {
             className="fixed inset-0 z-10" 
             onClick={() => setOpen(false)}
           />
-          <div className="absolute right-0 mt-2 w-44 rounded-md surface-1 elevated border border-token shadow-lg py-1 z-20 text-sm overflow-hidden animate-in slide-in-from-top-2 duration-200">
+          <div className="absolute right-0 mt-2 w-44 rounded-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg py-1 z-20 text-sm overflow-hidden transform transition-all duration-200 scale-100 opacity-100">
             {[
               { label: 'Project', href: '/dashboard/projects?new=1' },
               { label: 'Client', href: '/dashboard/clients?new=1' },
@@ -688,7 +742,7 @@ function QuickCreate() {
               <Link
                 key={item.label}
                 href={item.href}
-                className="block px-3 py-2 hover:surface-2 text-primary transition-colors duration-150 hover:scale-[1.02] transform"
+                className="block px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors duration-150"
                 onClick={() => setOpen(false)}
               >
                 {item.label}
@@ -696,7 +750,7 @@ function QuickCreate() {
             ))}
             <button
               onClick={()=>setOpen(false)}
-              className="w-full text-left px-3 py-2 text-xs text-tertiary hover:text-secondary hover:surface-2 transition-colors duration-150"
+              className="w-full text-left px-3 py-2 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150"
             >
               Close
             </button>

@@ -49,7 +49,7 @@ export default function ProjectsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'compact'>('grid');
   const router = useRouter();
 
   useEffect(() => {
@@ -226,8 +226,8 @@ export default function ProjectsPage() {
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Projects</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">
+            <h1 className="text-3xl font-bold text-brand-700 dark:text-brand-400">Projects</h1>
+            <p className="text-gray-800 dark:text-gray-200 mt-2">
               Manage client projects, track progress, budgets, and timelines.
             </p>
           </div>
@@ -322,6 +322,13 @@ export default function ProjectsPage() {
               >
                 List
               </StandardButton>
+              <StandardButton
+                variant={viewMode === 'compact' ? 'primary' : 'secondary'}
+                size="sm"
+                onClick={() => setViewMode('compact')}
+              >
+                Compact
+              </StandardButton>
             </div>
           </div>
         </StandardCard>
@@ -363,15 +370,124 @@ export default function ProjectsPage() {
             </StandardButton>
           </StandardCard>
         ) : (
-          <StandardGrid cols={viewMode === 'grid' ? 3 : 1}>
+          <>
+            {/* Compact Table View for Scale */}
+            {viewMode === 'compact' ? (
+              <StandardCard>
+                {/* Table Header */}
+                <div className="flex items-center justify-between mb-4 pb-3 border-b" style={{ borderColor: 'var(--border)' }}>
+                  <div className="flex items-center gap-2">
+                    <BuildingOfficeIcon className="h-5 w-5" style={{ color: 'var(--accent)' }} />
+                    <h2 className="text-base font-semibold" style={{ color: 'var(--text)' }}>
+                      Projects Overview
+                    </h2>
+                  </div>
+                  <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                    {filteredProjects.length} project{filteredProjects.length !== 1 ? 's' : ''}
+                  </span>
+                </div>
+                
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b" style={{ borderColor: 'var(--border)' }}>
+                        <th className="text-left py-3 px-4 font-semibold text-sm" style={{ color: 'var(--text-muted)' }}>Project</th>
+                        <th className="text-left py-3 px-4 font-semibold text-sm" style={{ color: 'var(--text-muted)' }}>Status</th>
+                        <th className="text-left py-3 px-4 font-semibold text-sm" style={{ color: 'var(--text-muted)' }}>Budget</th>
+                        <th className="text-left py-3 px-4 font-semibold text-sm" style={{ color: 'var(--text-muted)' }}>Priority</th>
+                        <th className="text-left py-3 px-4 font-semibold text-sm" style={{ color: 'var(--text-muted)' }}>Location</th>
+                        <th className="text-right py-3 px-4 font-semibold text-sm" style={{ color: 'var(--text-muted)' }}>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredProjects.map((project) => (
+                        <tr 
+                          key={project._id} 
+                          className="border-b hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors" 
+                          style={{ borderColor: 'var(--border)' }}
+                          onClick={() => router.push(`/dashboard/projects/${project._id}`)}
+                        >
+                          <td className="py-3 px-4">
+                            <div>
+                              <h3 className="font-semibold text-sm" style={{ color: 'var(--text)' }}>{project.title}</h3>
+                              <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>{project.description.slice(0, 50)}...</p>
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(project.status) === 'blue' ? 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100' : 
+                              getStatusColor(project.status) === 'green' ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100' :
+                              getStatusColor(project.status) === 'orange' ? 'bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-100' :
+                              getStatusColor(project.status) === 'red' ? 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100' :
+                              'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100'}`}>
+                              {project.status.replace('_', ' ')}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 font-medium text-sm" style={{ color: 'var(--text)' }}>
+                            {formatCurrency(project.budget)}
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${getPriorityColor(project.priority) === 'orange' ? 'bg-orange-100 text-orange-700 dark:bg-orange-800 dark:text-orange-100' :
+                              getPriorityColor(project.priority) === 'red' ? 'bg-red-100 text-red-700 dark:bg-red-800 dark:text-red-100' :
+                              getPriorityColor(project.priority) === 'blue' ? 'bg-blue-100 text-blue-700 dark:bg-blue-800 dark:text-blue-100' :
+                              'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-100'}`}>
+                              {project.priority}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-sm" style={{ color: 'var(--text-muted)' }}>
+                            {project.address ? `${project.address.city}, ${project.address.state}` : 'N/A'}
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex items-center justify-end gap-1">
+                              <StandardButton
+                                variant="ghost"
+                                size="sm"
+                                as={Link}
+                                href={`/dashboard/projects/${project._id}`}
+                                icon={<EyeIcon className="h-3 w-3" />}
+                              >
+                                View
+                              </StandardButton>
+                              <StandardButton
+                                variant="ghost"
+                                size="sm"
+                                as={Link}
+                                href={`/dashboard/projects/${project._id}/edit`}
+                                icon={<PencilIcon className="h-3 w-3" />}
+                              >
+                                Edit
+                              </StandardButton>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </StandardCard>
+            ) : (
+              /* Grid/List View */
+              <StandardGrid cols={viewMode === 'grid' ? 4 : 1}>
             {filteredProjects.map((project) => (
               <StandardCard key={project._id} hover className="group">
-                <div className="flex items-start justify-between mb-4">
+                {/* Card Header */}
+                <div className="flex items-center justify-between mb-4 pb-2 border-b" style={{ borderColor: 'var(--border)' }}>
+                  <div className="flex items-center gap-2">
+                    <BuildingOfficeIcon className="h-4 w-4" style={{ color: 'var(--accent)' }} />
+                    <h2 className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
+                      Project Details
+                    </h2>
+                  </div>
+                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                    ID: {project._id.slice(-6)}
+                  </span>
+                </div>
+
+                <div className="flex items-start justify-between mb-3">
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
+                    <h3 className="text-base font-medium text-gray-900 dark:text-white mb-1 line-clamp-1 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
                       {project.title}
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2">
+                    <p className="text-gray-600 dark:text-gray-400 text-xs line-clamp-2">
                       {project.description}
                     </p>
                   </div>
@@ -406,58 +522,61 @@ export default function ProjectsPage() {
                 </div>
 
                 {/* Status and Priority */}
-                <div className="flex items-center gap-3 mb-4">
-                  <StandardStat
-                    label="Status"
-                    value={project.status.replace('_', ' ')}
-                    color={getStatusColor(project.status)}
-                  />
-                  <StandardStat
-                    label="Priority"
-                    value={project.priority}
-                    color={getPriorityColor(project.priority)}
-                  />
+                <div className="flex items-center gap-2 mb-3">
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(project.status) === 'blue' ? 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100' : 
+                    getStatusColor(project.status) === 'green' ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100' :
+                    getStatusColor(project.status) === 'orange' ? 'bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-100' :
+                    getStatusColor(project.status) === 'red' ? 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100' :
+                    'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100'}`}>
+                    {project.status.replace('_', ' ')}
+                  </span>
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(project.priority) === 'orange' ? 'bg-orange-100 text-orange-700 dark:bg-orange-800 dark:text-orange-100' :
+                    getPriorityColor(project.priority) === 'red' ? 'bg-red-100 text-red-700 dark:bg-red-800 dark:text-red-100' :
+                    getPriorityColor(project.priority) === 'blue' ? 'bg-blue-100 text-blue-700 dark:bg-blue-800 dark:text-blue-100' :
+                    'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-100'}`}>
+                    {project.priority}
+                  </span>
                 </div>
 
                 {/* Details */}
-                <div className="space-y-3 text-sm">
+                <div className="space-y-2 text-xs">
                   {project.budget && (
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       <CurrencyDollarIcon 
-                        className="h-4 w-4" 
+                        className="h-3 w-3" 
                         style={{ color: 'var(--success)' }}
                       />
-                      <span className="font-medium">Budget: {formatCurrency(project.budget)}</span>
+                      <span className="font-medium">{formatCurrency(project.budget)}</span>
                     </div>
                   )}
                   
                   {project.startDate && (
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       <CalendarIcon 
-                        className="h-4 w-4" 
+                        className="h-3 w-3" 
                         style={{ color: 'var(--info)' }}
                       />
-                      <span>Start: {formatDate(project.startDate)}</span>
+                      <span>{formatDate(project.startDate)}</span>
                     </div>
                   )}
 
                   {project.assignedUsers && project.assignedUsers.length > 0 && (
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       <UserIcon 
-                        className="h-4 w-4" 
+                        className="h-3 w-3" 
                         style={{ color: 'var(--accent)' }}
                       />
-                      <span>{project.assignedUsers.length} team member{project.assignedUsers.length > 1 ? 's' : ''}</span>
+                      <span>{project.assignedUsers.length} member{project.assignedUsers.length > 1 ? 's' : ''}</span>
                     </div>
                   )}
 
                   {project.address && (project.address.city || project.address.state) && (
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       <MapPinIcon 
-                        className="h-4 w-4" 
+                        className="h-3 w-3" 
                         style={{ color: 'var(--error)' }}
                       />
-                      <span className="truncate">
+                      <span className="truncate text-xs">
                         {project.address.city}, {project.address.state}
                       </span>
                     </div>
@@ -466,11 +585,11 @@ export default function ProjectsPage() {
 
                 {/* Tags */}
                 {project.tags && project.tags.length > 0 && (
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {project.tags.slice(0, 3).map((tag, index) => (
+                  <div className="mt-3 flex flex-wrap gap-1">
+                    {project.tags.slice(0, 2).map((tag, index) => (
                       <span 
                         key={index} 
-                        className="px-2 py-1 rounded-full text-xs"
+                        className="px-1.5 py-0.5 rounded text-xs"
                         style={{
                           backgroundColor: 'var(--surface-2)',
                           color: 'var(--text)',
@@ -480,16 +599,16 @@ export default function ProjectsPage() {
                         {tag}
                       </span>
                     ))}
-                    {project.tags.length > 3 && (
+                    {project.tags.length > 2 && (
                       <span 
-                        className="px-2 py-1 rounded-full text-xs"
+                        className="px-1.5 py-0.5 rounded text-xs"
                         style={{
                           backgroundColor: 'var(--surface-2)',
                           color: 'var(--text)',
                           border: '1px solid var(--border)'
                         }}
                       >
-                        +{project.tags.length - 3} more
+                        +{project.tags.length - 2}
                       </span>
                     )}
                   </div>
@@ -497,7 +616,7 @@ export default function ProjectsPage() {
 
                 {/* Footer */}
                 <div 
-                  className="mt-6 pt-4 border-t flex items-center justify-between text-xs"
+                  className="mt-4 pt-3 border-t flex items-center justify-between text-xs"
                   style={{
                     borderColor: 'var(--border)',
                     color: 'var(--text-muted)'
@@ -509,12 +628,14 @@ export default function ProjectsPage() {
                     as={Link}
                     href={`/dashboard/projects/${project._id}`}
                   >
-                    View Details
+                    View
                   </StandardButton>
                 </div>
               </StandardCard>
             ))}
           </StandardGrid>
+            )}
+          </>
         )}
       </div>
     </StandardPageWrapper>

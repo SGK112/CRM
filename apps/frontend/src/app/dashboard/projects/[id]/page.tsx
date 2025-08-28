@@ -1,6 +1,5 @@
 "use client";
 
-import Layout from '@/components/Layout';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState, useMemo } from 'react';
@@ -73,8 +72,7 @@ export default function ProjectDetailPage(){
   const budget = useMemo(()=> project?.budget ? new Intl.NumberFormat('en-US',{ style:'currency', currency:'USD'}).format(project.budget) : '—', [project]);
 
   return (
-    <Layout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header Section */}
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-4">
@@ -251,7 +249,7 @@ export default function ProjectDetailPage(){
                 {estimates.length === 0 ? (
                   <div className="text-center py-8">
                     <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                      <DocumentTextIcon className="h-8 w-8 text-gray-400 dark:text-gray-700 />
+                      <DocumentTextIcon className="h-8 w-8 text-gray-400 dark:text-gray-700" />
                     </div>
                     <p className="text-gray-700 dark:text-gray-300 text-sm">No estimates created yet</p>
                     <p className="text-gray-400 dark:text-gray-700 text-xs mt-1">Create your first estimate to get started</p>
@@ -284,6 +282,5 @@ export default function ProjectDetailPage(){
           </div>
         )}
       </div>
-    </Layout>
   );
 }

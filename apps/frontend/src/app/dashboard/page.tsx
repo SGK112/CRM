@@ -16,8 +16,18 @@ import {
   EyeIcon,
   ChartBarIcon,
   CameraIcon,
-  Squares2X2Icon
+  Squares2X2Icon,
+  SparklesIcon,
+  LockClosedIcon,
+  InformationCircleIcon,
+  MicrophoneIcon,
+  ChatBubbleLeftRightIcon,
+  StarIcon
 } from '@heroicons/react/24/outline';
+import { getUserPlan, hasCapability, PLANS, type PlanTier, type PlanCapabilities, setUserPlan } from '@/lib/plans';
+import { CapabilityGate } from '@/components/CapabilityGate';
+import AiChatInterface from '@/components/AiChatInterface';
+import HelpTooltip from '@/components/ui/HelpTooltip';
 
 interface DashboardStats {
   totalRevenue: number;
@@ -69,6 +79,8 @@ const statusSteps = {
 export default function RemodelingDashboard() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
+  const [userPlan, setUserPlan] = useState<PlanTier>('basic');
+  const [showPlanSwitcher, setShowPlanSwitcher] = useState(false);
   const [stats, setStats] = useState<DashboardStats>({
     totalRevenue: 0,
     revenueChange: 0,
@@ -83,11 +95,22 @@ export default function RemodelingDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Load user and dashboard data
+    // Load user and plan data
     const userData = localStorage.getItem('user');
     if (userData) {
       setUser(JSON.parse(userData));
     }
+    
+    // Get current user plan
+    const currentPlan = getUserPlan();
+    setUserPlan(currentPlan);
+
+    // Listen for plan changes
+    const handlePlanChange = (event: CustomEvent) => {
+      setUserPlan(event.detail.plan);
+    };
+
+    window.addEventListener('plan-changed', handlePlanChange as EventListener);
 
     // Mock remodeling-specific data - replace with actual API calls
     setTimeout(() => {
@@ -151,7 +174,17 @@ export default function RemodelingDashboard() {
 
       setLoading(false);
     }, 1000);
+
+    return () => {
+      window.removeEventListener('plan-changed', handlePlanChange as EventListener);
+    };
   }, []);
+
+  const handlePlanSwitch = (newPlan: PlanTier) => {
+    setUserPlan(newPlan);
+    setUserPlan(newPlan); // Update both local state and localStorage
+    setShowPlanSwitcher(false);
+  };
 
   const getPersonalizedGreeting = () => {
     const hour = new Date().getHours();
@@ -214,45 +247,101 @@ export default function RemodelingDashboard() {
 
   return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Personalized Header */}
+        {/* Personalized Header with Plan Badge */}
         <div className="mb-8 relative overflow-hidden rounded-2xl shadow-2xl border-2 theme-border">
-          {/* Background with animated gradient */}
-          <div className="absolute inset-0 bg-gradient-to-br from-red-500 via-orange-500 to-amber-500 opacity-90"></div>
-          <div className="absolute inset-0 bg-gradient-to-tr from-purple-600/20 via-transparent to-blue-600/20"></div>
+          {/* Enhanced gradient for AI plans */}
+          <div className={`absolute inset-0 opacity-90 ${
+            userPlan === 'basic' 
+              ? 'bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800'
+              : userPlan === 'ai-pro'
+              ? 'bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-600'
+              : 'bg-gradient-to-br from-purple-600 via-pink-500 to-red-500'
+          }`}></div>
+          <div className="absolute inset-0 bg-gradient-to-tr from-black/20 via-transparent to-white/10"></div>
           
           {/* Content */}
           <div className="relative z-10 p-8">
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <h1 className="text-4xl md:text-5xl font-bold text-white mb-3 drop-shadow-lg">
-                  {getPersonalizedGreeting()}
-                </h1>
+                <div className="flex items-center space-x-4 mb-3">
+                  <h1 className="text-4xl md:text-5xl font-bold text-white drop-shadow-lg">
+                    {getPersonalizedGreeting()}
+                  </h1>
+                  
+                  {/* Plan Badge - Now Clickable */}
+                  <button 
+                    onClick={() => setShowPlanSwitcher(true)}
+                    className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-bold transition-all duration-200 hover:scale-105 ${
+                      userPlan === 'basic' 
+                        ? 'bg-white/20 text-white border border-white/30 hover:bg-white/30'
+                        : userPlan === 'ai-pro'
+                        ? 'bg-gradient-to-r from-blue-400 to-cyan-400 text-white shadow-lg hover:shadow-xl'
+                        : 'bg-gradient-to-r from-purple-400 to-pink-400 text-white shadow-lg hover:shadow-xl'
+                    }`}
+                  >
+                    {userPlan === 'basic' && <span>FREE PLAN ↗</span>}
+                    {userPlan === 'ai-pro' && (
+                      <>
+                        <SparklesIcon className="h-4 w-4 mr-1" />
+                        <span>AI PRO ↗</span>
+                      </>
+                    )}
+                    {userPlan === 'enterprise' && (
+                      <>
+                        <StarIcon className="h-4 w-4 mr-1" />
+                        <span>ENTERPRISE ↗</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+                
                 <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 border border-white/30">
                   <p className="text-xl text-white font-medium leading-relaxed drop-shadow-md">
-                    {getMotivationalMessage()}
+                    {userPlan === 'basic' 
+                      ? "Great work! Upgrade to unlock AI-powered insights and voice agents."
+                      : userPlan === 'ai-pro'
+                      ? "🤖 AI is working for you! Smart insights and voice agents available."
+                      : "🚀 Enterprise power activated! Full AI suite and premium support."
+                    }
                   </p>
                 </div>
               </div>
               
-              {/* Decorative elements */}
+              {/* Decorative elements with AI indicator */}
               <div className="hidden md:flex items-center space-x-4 ml-8">
-                <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                  <HomeIcon className="h-10 w-10 text-white" />
+                <div className={`w-20 h-20 rounded-full flex items-center justify-center backdrop-blur-sm ${
+                  userPlan === 'basic' 
+                    ? 'bg-white/20'
+                    : 'bg-white/30 shadow-lg'
+                }`}>
+                  {userPlan === 'basic' ? (
+                    <HomeIcon className="h-10 w-10 text-white" />
+                  ) : (
+                    <div className="relative">
+                      <HomeIcon className="h-10 w-10 text-white" />
+                      <SparklesIcon className="h-5 w-5 text-yellow-300 absolute -top-1 -right-1 animate-pulse" />
+                    </div>
+                  )}
                 </div>
                 <div className="text-right">
                   <div className="text-white/90 text-sm font-medium">Remodely CRM</div>
-                  <div className="text-white text-lg font-bold">Dashboard</div>
+                  <div className="text-white text-lg font-bold">
+                    {userPlan === 'basic' ? 'Dashboard' : 'AI Dashboard'}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
           
-          {/* Animated background elements */}
+          {/* Enhanced animated background elements */}
           <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
           <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-white/5 rounded-full blur-2xl"></div>
+          {userPlan !== 'basic' && (
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-gradient-to-r from-purple-400/10 to-blue-400/10 rounded-full blur-3xl animate-pulse"></div>
+          )}
         </div>
 
-        {/* Quick Stats */}
+        {/* Enhanced Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {quickStats.map((stat, index) => (
             <div
@@ -260,25 +349,79 @@ export default function RemodelingDashboard() {
               className="rounded-xl border-2 theme-border p-6 transition-all duration-300 hover:shadow-xl hover:scale-105 hover:border-red-400 dark:hover:border-red-500 relative overflow-hidden"
               style={{ backgroundColor: 'var(--surface-1)' }}
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-red-50 via-transparent to-orange-50 dark:from-gray-700 dark:via-transparent dark:to-gray-600 opacity-50"></div>
+              {/* Enhanced gradient backgrounds */}
+              <div className={`absolute inset-0 opacity-30 ${
+                index === 0 ? 'bg-gradient-to-br from-green-100 via-transparent to-green-50 dark:from-green-900/20 dark:via-transparent dark:to-green-800/10' :
+                index === 1 ? 'bg-gradient-to-br from-blue-100 via-transparent to-blue-50 dark:from-blue-900/20 dark:via-transparent dark:to-blue-800/10' :
+                index === 2 ? 'bg-gradient-to-br from-purple-100 via-transparent to-purple-50 dark:from-purple-900/20 dark:via-transparent dark:to-purple-800/10' :
+                'bg-gradient-to-br from-orange-100 via-transparent to-orange-50 dark:from-orange-900/20 dark:via-transparent dark:to-orange-800/10'
+              }`}></div>
+              
               <div className="relative z-10">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-semibold uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>{stat.label}</p>
-                    <p className="text-3xl font-bold mt-2 mb-1" style={{ color: 'var(--text)' }}>{stat.value}</p>
+                {/* Percentage Badge - Top Right Corner */}
+                {stat.change && (
+                  <div className={`absolute -top-2 -right-2 flex items-center px-2 py-1 rounded-full text-xs font-bold shadow-lg z-20 ${
+                    stat.trend === 'up' 
+                      ? 'bg-green-500 dark:bg-green-600 text-white' 
+                      : 'bg-red-500 dark:bg-red-600 text-white'
+                  }`}>
+                    {stat.trend === 'up' ? (
+                      <ArrowTrendingUpIcon className="h-2.5 w-2.5 mr-0.5" />
+                    ) : (
+                      <ArrowTrendingDownIcon className="h-2.5 w-2.5 mr-0.5" />
+                    )}
+                    <span className="text-[10px] font-bold">{Math.abs(stat.change)}%</span>
                   </div>
+                )}
+                
+                {/* Improved Grid Layout */}
+                <div className="grid grid-rows-[auto_1fr_auto] h-full min-h-[120px]">
+                  {/* Header Row - Simplified without percentage */}
+                  <div className="mb-3 flex items-center gap-2">
+                    <p className="text-sm font-semibold uppercase tracking-wide leading-tight pr-8" style={{ color: 'var(--text-muted)' }}>
+                      {stat.label}
+                    </p>
+                    <HelpTooltip 
+                      content={
+                        index === 0 ? "Total revenue generated from completed projects and invoices. This includes all paid estimates and project payments." :
+                        index === 1 ? "Number of active projects currently in progress. Projects are considered active from approval through completion." :
+                        index === 2 ? "Total number of clients in your CRM system, including leads, active clients, and past customers." :
+                        "Average project value based on completed projects over the last 12 months. Helps track business growth trends."
+                      }
+                      title={stat.label}
+                      size="sm"
+                    />
+                  </div>
+                  
+                  {/* Main Value Row */}
+                  <div className="flex items-center">
+                    <p className="text-3xl lg:text-4xl font-bold leading-none" style={{ color: 'var(--text)' }}>
+                      {stat.value}
+                    </p>
+                  </div>
+                  
+                  {/* Bottom Row - Change Description */}
                   {stat.change && (
-                    <div className={`flex items-center px-3 py-1 rounded-full ${stat.trend === 'up' ? 'bg-green-500 dark:bg-green-600 text-white' : 'bg-red-500 dark:bg-red-600 text-white'}`}>
-                      {stat.trend === 'up' ? (
-                        <ArrowTrendingUpIcon className="h-4 w-4 mr-1" />
-                      ) : (
-                        <ArrowTrendingDownIcon className="h-4 w-4 mr-1" />
-                      )}
-                      <span className="text-sm font-bold text-white">{Math.abs(stat.change)}%</span>
+                    <div className="flex items-center justify-start mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                      <span className={`text-xs font-medium ${
+                        stat.trend === 'up' 
+                          ? 'text-green-600 dark:text-green-400' 
+                          : 'text-red-600 dark:text-red-400'
+                      }`}>
+                        {stat.trend === 'up' ? '+' : '-'}{Math.abs(stat.change)}% from last month
+                      </span>
                     </div>
                   )}
                 </div>
               </div>
+              
+              {/* Enhanced Corner Accent */}
+              <div className={`absolute top-0 right-0 w-16 h-16 opacity-20 ${
+                index === 0 ? 'bg-gradient-to-bl from-green-400 to-transparent' :
+                index === 1 ? 'bg-gradient-to-bl from-blue-400 to-transparent' :
+                index === 2 ? 'bg-gradient-to-bl from-purple-400 to-transparent' :
+                'bg-gradient-to-bl from-orange-400 to-transparent'
+              }`}></div>
             </div>
           ))}
         </div>
@@ -377,47 +520,269 @@ export default function RemodelingDashboard() {
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* AI-Enhanced Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Link
             href="/dashboard/projects/new"
             className="bg-gradient-to-r from-orange-500 to-red-500 rounded-lg p-6 text-white hover:from-orange-600 hover:to-red-600 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
           >
-            <div className="flex items-center space-x-3">
-              <PlusIcon className="h-8 w-8" />
-              <div>
-                <h3 className="text-lg font-semibold">New Project</h3>
-                <p className="text-sm opacity-90">Start a new remodeling project</p>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <PlusIcon className="h-8 w-8" />
+                <div>
+                  <h3 className="text-lg font-semibold">New Project</h3>
+                  <p className="text-sm opacity-90">Start a new remodeling project</p>
+                </div>
               </div>
+              <HelpTooltip 
+                content="Create a new remodeling project with client information, scope, timeline, and budget. Track progress from initial consultation to completion."
+                title="New Project"
+                size="sm"
+              />
             </div>
           </Link>
 
-          <Link
-            href="/dashboard/designer"
-            className="bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg p-6 text-white hover:from-blue-600 hover:to-purple-600 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
-          >
-            <div className="flex items-center space-x-3">
-              <Squares2X2Icon className="h-8 w-8" />
-              <div>
-                <h3 className="text-lg font-semibold">Design Studio</h3>
-                <p className="text-sm opacity-90">Create project mockups</p>
+          <CapabilityGate 
+            need="design.studio"
+            fallback={
+              <div className="bg-gradient-to-r from-gray-400 to-gray-500 rounded-lg p-6 text-white relative overflow-hidden">
+                <div className="flex items-center space-x-3">
+                  <div className="relative">
+                    <Squares2X2Icon className="h-8 w-8" />
+                    <LockClosedIcon className="h-4 w-4 absolute -top-1 -right-1 bg-gray-600 rounded-full p-0.5" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold">Design Studio</h3>
+                    <p className="text-sm opacity-90">Upgrade for AI design tools</p>
+                  </div>
+                </div>
+                <div className="absolute top-2 right-2">
+                  <span className="bg-white/20 px-2 py-1 rounded text-xs font-bold">AI PRO</span>
+                </div>
               </div>
-            </div>
-          </Link>
+            }
+          >
+            <Link
+              href="/dashboard/designer"
+              className="bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg p-6 text-white hover:from-blue-600 hover:to-purple-600 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl relative"
+            >
+              <div className="flex items-center space-x-3">
+                <div className="relative">
+                  <Squares2X2Icon className="h-8 w-8" />
+                  <SparklesIcon className="h-4 w-4 absolute -top-1 -right-1 text-yellow-300 animate-pulse" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold">AI Design Studio</h3>
+                  <p className="text-sm opacity-90">AI-powered design tools</p>
+                </div>
+              </div>
+            </Link>
+          </CapabilityGate>
+
+          <CapabilityGate 
+            need="voice.agents"
+            fallback={
+              <div className="bg-gradient-to-r from-gray-400 to-gray-500 rounded-lg p-6 text-white relative overflow-hidden">
+                <div className="flex items-center space-x-3">
+                  <div className="relative">
+                    <MicrophoneIcon className="h-8 w-8" />
+                    <LockClosedIcon className="h-4 w-4 absolute -top-1 -right-1 bg-gray-600 rounded-full p-0.5" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold">Voice Agents</h3>
+                    <p className="text-sm opacity-90">Upgrade for AI assistants</p>
+                  </div>
+                </div>
+                <div className="absolute top-2 right-2">
+                  <span className="bg-white/20 px-2 py-1 rounded text-xs font-bold">AI PRO</span>
+                </div>
+              </div>
+            }
+          >
+            <Link
+              href="/dashboard/voice-agent-enhanced"
+              className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg p-6 text-white hover:from-purple-600 hover:to-pink-600 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl relative"
+            >
+              <div className="flex items-center space-x-3">
+                <div className="relative">
+                  <MicrophoneIcon className="h-8 w-8" />
+                  <SparklesIcon className="h-4 w-4 absolute -top-1 -right-1 text-yellow-300 animate-pulse" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold">AI Voice Agents</h3>
+                  <p className="text-sm opacity-90">Smart conversational AI</p>
+                </div>
+              </div>
+            </Link>
+          </CapabilityGate>
 
           <Link
             href="/dashboard/analytics"
-            className="bg-gradient-to-r from-green-500 to-teal-500 rounded-lg p-6 text-white hover:from-green-600 hover:to-teal-600 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+            className="bg-gradient-to-r from-green-500 to-teal-500 rounded-lg p-6 text-white hover:from-green-600 hover:to-teal-600 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl relative"
           >
             <div className="flex items-center space-x-3">
-              <ChartBarIcon className="h-8 w-8" />
+              <div className="relative">
+                <ChartBarIcon className="h-8 w-8" />
+                {hasCapability('ai.analytics', userPlan) && (
+                  <SparklesIcon className="h-4 w-4 absolute -top-1 -right-1 text-yellow-300 animate-pulse" />
+                )}
+              </div>
               <div>
-                <h3 className="text-lg font-semibold">View Reports</h3>
-                <p className="text-sm opacity-90">Analyze performance</p>
+                <h3 className="text-lg font-semibold">
+                  {hasCapability('ai.analytics', userPlan) ? 'AI Analytics' : 'View Reports'}
+                </h3>
+                <p className="text-sm opacity-90">
+                  {hasCapability('ai.analytics', userPlan) ? 'Smart insights & predictions' : 'Basic performance data'}
+                </p>
               </div>
             </div>
           </Link>
         </div>
+
+        {/* AI Features Showcase for Free Users */}
+        {userPlan === 'basic' && (
+          <div className="mt-8 rounded-2xl border-2 border-dashed border-blue-300 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-8">
+            <div className="text-center">
+              <div className="flex justify-center mb-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                  <SparklesIcon className="h-8 w-8 text-white" />
+                </div>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                Unlock AI-Powered Remodeling
+              </h3>
+              <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
+                Upgrade to AI Pro and transform your remodeling business with intelligent automation
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                  <SparklesIcon className="h-6 w-6 text-blue-500 mx-auto mb-2" />
+                  <h4 className="font-semibold text-gray-900 dark:text-white">AI Descriptions</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Auto-generate project descriptions</p>
+                </div>
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                  <MicrophoneIcon className="h-6 w-6 text-purple-500 mx-auto mb-2" />
+                  <h4 className="font-semibold text-gray-900 dark:text-white">Voice Agents</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">24/7 AI customer support</p>
+                </div>
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                  <ChartBarIcon className="h-6 w-6 text-green-500 mx-auto mb-2" />
+                  <h4 className="font-semibold text-gray-900 dark:text-white">Smart Analytics</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Predictive insights & trends</p>
+                </div>
+              </div>
+              
+              <Link
+                href="/dashboard/settings/billing?upgrade=ai-pro"
+                className="inline-flex items-center px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 shadow-lg"
+              >
+                <SparklesIcon className="h-5 w-5 mr-2" />
+                Upgrade to AI Pro - $49/month
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* AI Chat Assistant (AI Pro+ only) */}
+        <CapabilityGate need="ai.chat">
+          <div className="mt-8">
+            <AiChatInterface compact={true} />
+          </div>
+        </CapabilityGate>
+
+        {/* Simple Plan Switching Modal */}
+        {showPlanSwitcher && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md w-full shadow-2xl">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                  Switch Plan
+                </h2>
+                <p className="text-gray-600 dark:text-gray-300">
+                  Choose your plan to see different features
+                </p>
+              </div>
+              
+              <div className="space-y-3">
+                {/* Basic Plan */}
+                <button
+                  onClick={() => handlePlanSwitch('basic')}
+                  className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
+                    userPlan === 'basic'
+                      ? 'border-gray-400 bg-gray-50 dark:bg-gray-700'
+                      : 'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">Basic Plan</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">Free • Core Features</p>
+                    </div>
+                    {userPlan === 'basic' && (
+                      <div className="text-gray-600 dark:text-gray-300">✓</div>
+                    )}
+                  </div>
+                </button>
+
+                {/* AI Pro Plan */}
+                <button
+                  onClick={() => handlePlanSwitch('ai-pro')}
+                  className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
+                    userPlan === 'ai-pro'
+                      ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                      : 'border-gray-200 hover:border-blue-300 dark:border-gray-600 dark:hover:border-blue-500'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center space-x-2">
+                        <SparklesIcon className="h-4 w-4 text-blue-500" />
+                        <h3 className="font-semibold text-gray-900 dark:text-white">AI Pro</h3>
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">$49/mo • AI Features + Voice Agents</p>
+                    </div>
+                    {userPlan === 'ai-pro' && (
+                      <div className="text-blue-600 dark:text-blue-400">✓</div>
+                    )}
+                  </div>
+                </button>
+
+                {/* Enterprise Plan */}
+                <button
+                  onClick={() => handlePlanSwitch('enterprise')}
+                  className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
+                    userPlan === 'enterprise'
+                      ? 'border-purple-400 bg-purple-50 dark:bg-purple-900/20'
+                      : 'border-gray-200 hover:border-purple-300 dark:border-gray-600 dark:hover:border-purple-500'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center space-x-2">
+                        <StarIcon className="h-4 w-4 text-purple-500" />
+                        <h3 className="font-semibold text-gray-900 dark:text-white">Enterprise</h3>
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">$149/mo • Full AI Suite + Priority Support</p>
+                    </div>
+                    {userPlan === 'enterprise' && (
+                      <div className="text-purple-600 dark:text-purple-400">✓</div>
+                    )}
+                  </div>
+                </button>
+              </div>
+
+              <div className="flex space-x-3 mt-6">
+                <button
+                  onClick={() => setShowPlanSwitcher(false)}
+                  className="flex-1 px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
 }

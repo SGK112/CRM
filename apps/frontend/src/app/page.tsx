@@ -397,7 +397,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {coreFeatures.map((feature, index) => (
               <div key={index} className="p-6 rounded-xl bg-[var(--bg)] border border-[var(--border)] hover:border-amber-500/50 transition-colors group">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-600/15 ring-1 ring-amber-500/30 mb-4 group-hover:scale-110 transition-transform">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-600/15 ring-1 ring-amber-500/30 mb-4 transition-colors group-hover:bg-amber-600/25">
                   <feature.icon className="h-6 w-6 text-amber-600" />
                 </div>
                 <h3 className="font-bold text-lg mb-2">{feature.title}</h3>
@@ -494,7 +494,7 @@ export default function HomePage() {
 
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {pricingPlans.map((plan, index) => (
-              <div key={index} className={`relative p-8 rounded-2xl border transition-all hover:scale-105 ${
+              <div key={index} className={`relative p-8 rounded-2xl border transition-all hover:shadow-lg ${
                 plan.popular 
                   ? 'bg-amber-600/5 border-amber-500/50 ring-2 ring-amber-500/20' 
                   : 'bg-[var(--bg)] border-[var(--border)]'

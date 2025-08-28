@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Layout from '../../../../../components/Layout';
 import Link from 'next/link';
 import PhoneInput from '../../../../../components/forms/PhoneInput';
 import AddressInput from '../../../../../components/forms/AddressInput';
@@ -108,13 +107,12 @@ export default function EditClientPage() {
     } catch (e:any) { setError('Network error saving'); } finally { setSaving(false); }
   }
 
-  if (loading) return <Layout><div className="flex items-center justify-center py-32"><div className="animate-spin h-12 w-12 rounded-full border-b-2 border-blue-600"/></div></Layout>;
-  if (error && !form) return <Layout><div className="py-24 text-center"><h2 className="text-2xl font-semibold mb-2">{error}</h2><Link href="/dashboard/clients" className="text-blue-600 hover:underline">Back to Clients</Link></div></Layout>;
+  if (loading) return <div className="flex items-center justify-center py-32"><div className="animate-spin h-12 w-12 rounded-full border-b-2 border-blue-600"/></div>;
+  if (error && !form) return <div className="py-24 text-center"><h2 className="text-2xl font-semibold mb-2">{error}</h2><Link href="/dashboard/clients" className="text-blue-600 hover:underline">Back to Clients</Link></div>;
   if (!form) return null;
 
   return (
-    <Layout>
-      <form onSubmit={save} className="max-w-5xl mx-auto space-y-8">
+    <form onSubmit={save} className="max-w-5xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link href={`/dashboard/clients/${id}`} className="text-gray-700 hover:text-gray-700"><ArrowLeftIcon className="h-6 w-6"/></Link>
@@ -210,10 +208,9 @@ export default function EditClientPage() {
                 <button type="button" onClick={()=>removeTag(t)} className="ml-2 text-blue-600 hover:text-blue-900">×</button>
               </span>
             ))}
-            {(!form.tags || form.tags.length===0) && <span className="text-xs text-gray-700 >No tags yet.</span>}
+            {(!form.tags || form.tags.length===0) && <span className="text-xs text-gray-700">No tags yet.</span>}
           </div>
         </section>
       </form>
-    </Layout>
   );
 }

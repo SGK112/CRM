@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { CheckIcon, XMarkIcon, BuildingOfficeIcon, UserGroupIcon, CreditCardIcon, ClipboardDocumentListIcon } from '@heroicons/react/24/outline';
+import HelpTooltip from '@/components/ui/HelpTooltip';
 
 interface OnboardingStep {
   id: string;

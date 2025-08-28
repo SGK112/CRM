@@ -60,7 +60,7 @@ export default function ProfileSettingsPage() {
 
   const loadUserProfile = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('accessToken');
       if (!token) {
         setMessage('Authentication required');
         return;
@@ -107,7 +107,7 @@ export default function ProfileSettingsPage() {
     setMessage('');
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('accessToken');
       if (!token) {
         setMessage('Authentication required');
         return;
@@ -148,7 +148,7 @@ export default function ProfileSettingsPage() {
     setMessage('');
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('accessToken');
       if (!token) {
         setMessage('Authentication required');
         return;
@@ -187,7 +187,7 @@ export default function ProfileSettingsPage() {
     setMessage('');
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('accessToken');
       if (!token) {
         setMessage('Authentication required');
         return;

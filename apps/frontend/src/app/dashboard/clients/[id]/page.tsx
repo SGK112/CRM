@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Layout from '../../../../components/Layout';
 import {
   UserIcon,
   PhoneIcon,
@@ -127,12 +126,11 @@ export default function ClientDetailPage() {
   const badge = (status:string)=> {
     const map:Record<string,string>={lead:'bg-blue-100 text-blue-800',prospect:'bg-yellow-100 text-yellow-800',active:'bg-green-100 text-green-800',inactive:'bg-gray-100 text-gray-800',churned:'bg-red-100 text-red-800',completed:'bg-purple-100 text-purple-800',paid:'bg-green-100 text-green-800',sent:'bg-blue-100 text-blue-800',overdue:'bg-red-100 text-red-800',scheduled:'bg-blue-100 text-blue-800',cancelled:'bg-red-100 text-red-800'}; return map[status] || 'bg-gray-100 text-gray-800'; };
 
-  if (loading) return <Layout><div className="flex items-center justify-center py-32"><div className="animate-spin h-12 w-12 rounded-full border-b-2 border-blue-600"/></div></Layout>;
-  if (error || !client) return <Layout><div className="py-32 text-center"><h2 className="text-2xl font-bold mb-2">{error||'Client Not Found'}</h2><p className="text-gray-700">The requested client could not be located.</p><div className="mt-6"><Link href="/dashboard/clients" className="text-blue-600 hover:underline">Back to Clients</Link></div></div></Layout>;
+  if (loading) return <div className="flex items-center justify-center py-32"><div className="animate-spin h-12 w-12 rounded-full border-b-2 border-blue-600"/></div>;
+  if (error || !client) return <div className="py-32 text-center"><h2 className="text-2xl font-bold mb-2">{error||'Client Not Found'}</h2><p className="text-gray-700">The requested client could not be located.</p><div className="mt-6"><Link href="/dashboard/clients" className="text-blue-600 hover:underline">Back to Clients</Link></div></div>;
 
   return (
-    <Layout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div className="flex items-start gap-4">
@@ -205,10 +203,10 @@ export default function ClientDetailPage() {
               <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <h3 className="text-lg font-semibold mb-4">Quick Stats</h3>
                 <div className="space-y-3 text-sm">
-                  <div className="flex justify-between"><span className="text-gray-700 >Projects</span><span className="font-medium">{projects.length}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-700 >Invoices</span><span className="font-medium">{invoices.length}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-700 >Appointments</span><span className="font-medium">{appointments.length}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-700 >Last Contact</span><span className="font-medium">{communications[0] ? formatDate(communications[0].timestamp) : '—'}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-700">Projects</span><span className="font-medium">{projects.length}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-700">Invoices</span><span className="font-medium">{invoices.length}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-700">Appointments</span><span className="font-medium">{appointments.length}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-700">Last Contact</span><span className="font-medium">{communications[0] ? formatDate(communications[0].timestamp) : '—'}</span></div>
                 </div>
               </div>
               <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -330,14 +328,13 @@ export default function ClientDetailPage() {
               <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
                 <h3 className="text-sm font-semibold text-gray-900">Recent Calls</h3>
                 <ul className="space-y-3 text-sm">
-                  <li className="flex justify-between"><span>Follow-up Call</span><span className="text-gray-700 >3:45</span></li>
-                  <li className="flex justify-between"><span>Appointment Reminder</span><span className="text-gray-700 >1:20</span></li>
+                  <li className="flex justify-between"><span>Follow-up Call</span><span className="text-gray-700">3:45</span></li>
+                  <li className="flex justify-between"><span>Appointment Reminder</span><span className="text-gray-700">1:20</span></li>
                 </ul>
               </div>
             </div>
           </div>
         )}
       </div>
-    </Layout>
   );
 }

@@ -3,8 +3,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Estimate, EstimateSchema } from './schemas/estimate.schema';
 import { EstimatesService } from './estimates.service';
 import { EstimatesController } from './estimates.controller';
+import { AIEstimateService } from './ai-estimate.service';
+import { AIEstimateController } from './ai-estimate.controller';
 import { PriceItem, PriceItemSchema } from '../pricing/schemas/price-item.schema';
 import { InvoicesModule } from '../invoices/invoices.module';
+import { AiModule } from '../ai/ai.module';
 
 @Module({
   imports: [
@@ -14,9 +17,11 @@ import { InvoicesModule } from '../invoices/invoices.module';
     ]),
     // Needed so EstimatesController can inject InvoicesService for conversions
     InvoicesModule,
+    // Needed for AI services
+    AiModule,
   ],
-  providers: [EstimatesService],
-  controllers: [EstimatesController],
-  exports: [EstimatesService]
+  providers: [EstimatesService, AIEstimateService],
+  controllers: [EstimatesController, AIEstimateController],
+  exports: [EstimatesService, AIEstimateService]
 })
 export class EstimatesModule {}

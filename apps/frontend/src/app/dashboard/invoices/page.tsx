@@ -52,10 +52,11 @@ export default function InvoicesPage(){
                 <th className='py-2 px-3'>Total</th>
                 <th className='py-2 px-3'>Paid</th>
                 <th className='py-2 px-3'>Created</th>
+                <th className='py-2 px-3'>Actions</th>
               </tr>
             </thead>
             <tbody className='divide-y divide-[var(--border)]/60'>
-              {loading && <tr><td colSpan={7} className='py-6 text-center text-xs'>Loading...</td></tr>}
+              {loading && <tr><td colSpan={8} className='py-6 text-center text-xs'>Loading...</td></tr>}
               {!loading && list.map(inv=> (
                 <tr key={inv._id} className='hover:bg-[var(--surface-2)]/60'>
                   <td className='py-2 px-3 font-medium'>{inv.number}</td>
@@ -65,9 +66,17 @@ export default function InvoicesPage(){
                   <td className='py-2 px-3'>{inv.total.toFixed(2)}</td>
                   <td className='py-2 px-3'>{inv.amountPaid.toFixed(2)}</td>
                   <td className='py-2 px-3 text-[11px]'>{new Date(inv.createdAt).toLocaleDateString()}</td>
+                  <td className='py-2 px-3'>
+                    <button 
+                      onClick={() => window.location.href = `/dashboard/invoices/${inv._id}`}
+                      className='text-xs text-blue-600 hover:text-blue-800 hover:underline'
+                    >
+                      View
+                    </button>
+                  </td>
                 </tr>
               ))}
-              {!loading && list.length===0 && <tr><td colSpan={7} className='py-6 text-center text-xs text-gray-700'>No invoices yet.</td></tr>}
+              {!loading && list.length===0 && <tr><td colSpan={8} className='py-6 text-center text-xs text-gray-700'>No invoices yet.</td></tr>}
             </tbody>
           </table>
         </div>

@@ -1,41 +1,37 @@
 'use client';
-import PricingSelector from '../../../../components/PricingSelector';
+
+import { useEffect, useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { 
+  PlusIcon,
+  XMarkIcon,
+  DocumentTextIcon,
+  CurrencyDollarIcon,
+  WrenchScrewdriverIcon,
+  ShoppingBagIcon,
+  TrashIcon
+} from '@heroicons/react/24/outline';
+import { Trash2 } from 'lucide-react';
+import ClientSelector from '../../../../components/ClientSelector';
 import ImageUpload from '../../../../components/forms/ImageUpload';
 import Notes from '../../../../components/forms/Notes';
-import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import AIWritingAssistant from '../../../../components/AIWritingAssistant';
+import { useAI } from '../../../../hooks/useAI';
 
-interface Client {
-  _id: string;
-  name: string;
-  firstName: string;
-  lastName: string;
-  company?: string;
+interface Client { 
+  _id: string; 
+  firstName: string; 
+  lastName: string; 
+  company?: string; 
   email?: string;
   phone?: string;
 }
 
-interface Project {
-  _id: string;
-  title: string;
-  clientId: string;
-  status: string;
-}
-
-interface SelectedPriceItem {
-  _id: string;
-  sku: string;
-  name: string;
-  description?: string;
-  baseCost: number;
-  defaultMarginPct: number;
-  unit: string;
-  vendorId?: string;
-  tags?: string[];
-  quantity: number;
-  customPrice?: number;
-  customMargin?: number;
+interface Project { 
+  _id: string; 
+  title: string; 
+  clientId?: string; 
+  status?: string; 
 }
 
 interface LineItem {
@@ -48,40 +44,41 @@ interface LineItem {
   taxable: boolean;
   sku?: string;
   sellPrice?: number;
+  category?: string;
 }
 
 export default function NewEstimatePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+  const { isAIEnabled } = useAI(); // Use global AI state
   const [clients, setClients] = useState<Client[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string>('');
-  
-  // Form state
   const [selectedClientId, setSelectedClientId] = useState<string>('');
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
-  const [selectedPriceItems, setSelectedPriceItems] = useState<SelectedPriceItem[]>([]);
-  const [items, setItems] = useState<LineItem[]>([
-    {
-      name: 'New Item',
-      description: '',
-      quantity: 1,
-      baseCost: 0,
-      marginPct: 50,
-      taxable: true
-    }
-  ]);
+  const [projectType, setProjectType] = useState<string>('kitchen');
+  const [items, setItems] = useState<LineItem[]>([{ 
+    name: '', 
+    quantity: 1, 
+    baseCost: 0, 
+    marginPct: 50, 
+    taxable: true,
+    category: 'Materials'
+  }]);
   const [discountType, setDiscountType] = useState<'percent' | 'fixed'>('percent');
   const [discountValue, setDiscountValue] = useState<number>(0);
-  const [taxRate, setTaxRate] = useState<number>(8.5);
+  const [taxRate, setTaxRate] = useState<number>(0);
   const [notes, setNotes] = useState<string>('');
+  const [error, setError] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [refreshClients, setRefreshClients] = useState(0);
   const [images, setImages] = useState<any[]>([]);
   const [estimateNotes, setEstimateNotes] = useState<any[]>([]);
-
-  const token = (typeof window !== 'undefined') ? 
-    (localStorage.getItem('accessToken') || localStorage.getItem('token')) : '';
+  const [categories, setCategories] = useState<string[]>([
+    'Materials', 'Labor', 'Equipment', 'Permits', 'Overhead', 'Other'
+  ]);
+  const [showNewCategoryInput, setShowNewCategoryInput] = useState<{[key: number]: boolean}>({});
+  const [newCategoryInput, setNewCategoryInput] = useState<{[key: number]: string}>({});
+  const token = (typeof window !== 'undefined') ? (localStorage.getItem('accessToken') || localStorage.getItem('token')) : '';
 
   // Pre-fill from URL params
   useEffect(() => {
@@ -129,35 +126,15 @@ export default function NewEstimatePage() {
   // Filter projects by selected client
   const clientProjects = projects.filter(p => p.clientId === selectedClientId);
 
-  // Handle pricing selector changes
-  const handlePriceItemSelect = (selectedItem: SelectedPriceItem) => {
-    // Convert to line item and add to items
-    const newLineItem: LineItem = {
-      priceItemId: selectedItem._id,
-      name: selectedItem.name,
-      description: selectedItem.description || '',
-      quantity: selectedItem.quantity,
-      baseCost: selectedItem.baseCost,
-      marginPct: selectedItem.customMargin || selectedItem.defaultMarginPct,
-      taxable: true,
-      sku: selectedItem.sku,
-      sellPrice: selectedItem.customPrice || (selectedItem.baseCost * (1 + (selectedItem.customMargin || selectedItem.defaultMarginPct) / 100))
-    };
-    
-    setItems([...items, newLineItem]);
-    
-    // Update selected items for the pricing selector
-    setSelectedPriceItems([...selectedPriceItems, selectedItem]);
-  };
-
   const addItem = () => {
     setItems([...items, {
-      name: 'New Item',
+      name: '',
       description: '',
       quantity: 1,
       baseCost: 0,
       marginPct: 50,
-      taxable: true
+      taxable: true,
+      category: 'Materials'
     }]);
   };
 
@@ -180,6 +157,27 @@ export default function NewEstimatePage() {
     }
     
     setItems(newItems);
+  };
+
+  // Category management functions
+  const addNewCategory = (itemIndex: number) => {
+    const categoryName = newCategoryInput[itemIndex]?.trim();
+    if (categoryName && !categories.includes(categoryName)) {
+      setCategories([...categories, categoryName]);
+      updateItem(itemIndex, 'category', categoryName);
+      setNewCategoryInput({ ...newCategoryInput, [itemIndex]: '' });
+      setShowNewCategoryInput({ ...showNewCategoryInput, [itemIndex]: false });
+    }
+  };
+
+  const handleCategoryKeyDown = (e: React.KeyboardEvent, itemIndex: number) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addNewCategory(itemIndex);
+    } else if (e.key === 'Escape') {
+      setShowNewCategoryInput({ ...showNewCategoryInput, [itemIndex]: false });
+      setNewCategoryInput({ ...newCategoryInput, [itemIndex]: '' });
+    }
   };
 
   // Calculate totals
@@ -280,14 +278,22 @@ export default function NewEstimatePage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-semibold">New Estimate</h1>
-            <p className="text-sm text-[var(--text-dim)] mt-1">Create a professional estimate with smart pricing</p>
+            <p className="text-sm text-[var(--text-dim)] mt-1">
+              {isAIEnabled 
+                ? 'Create a professional estimate with AI-powered smart pricing and suggestions'
+                : 'Create a professional estimate with standard pricing tools'
+              }
+            </p>
           </div>
-          <button
-            onClick={() => router.back()}
-            className="pill pill-ghost sm"
-          >
-            Cancel
-          </button>
+          
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => router.back()}
+              className="pill pill-ghost sm"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -317,7 +323,7 @@ export default function NewEstimatePage() {
                   <option value="">Choose a client...</option>
                   {clients.map(client => (
                     <option key={client._id} value={client._id}>
-                      {client.company ? `${client.company} (${client.name})` : client.name}
+                      {client.company ? `${client.company} (${client.firstName} ${client.lastName})` : `${client.firstName} ${client.lastName}`}
                     </option>
                   ))}
                 </select>
@@ -368,22 +374,22 @@ export default function NewEstimatePage() {
             </div>
           </div>
 
-          {/* Smart Pricing Selector */}
-          <div className="surface-solid p-6">
-            <h2 className="text-lg font-medium mb-4">Add from Price List</h2>
-            <PricingSelector
-              onItemSelect={handlePriceItemSelect}
-              selectedItems={selectedPriceItems}
-              placeholder="Search and select items from your price lists..."
-              showVendorFilter={true}
-              className="w-full"
-            />
-          </div>
-
           {/* Line Items */}
           <div className="surface-solid p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-medium">Line Items</h2>
+              <div className="flex items-center gap-3">
+                <h2 className="text-lg font-medium">Line Items</h2>
+                {isAIEnabled && (
+                  <div className="flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-full border border-gray-200 dark:border-gray-700">
+                    <svg className="w-3 h-3 text-gray-700 dark:text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    <span className="text-xs text-gray-700 dark:text-gray-300 font-medium">
+                      AI Enhanced
+                    </span>
+                  </div>
+                )}
+              </div>
               <button
                 type="button"
                 onClick={addItem}
@@ -395,23 +401,92 @@ export default function NewEstimatePage() {
             </div>
 
             <div className="space-y-4">
+              {!isAIEnabled && (
+                <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                    <strong>Basic Mode:</strong> Standard description fields without AI suggestions. 
+                    Toggle AI Enhanced mode for smart suggestions and automated descriptions.
+                  </p>
+                </div>
+              )}
               {items.map((item, index) => {
                 const sellPrice = item.baseCost * (1 + item.marginPct / 100);
                 const lineTotal = sellPrice * item.quantity;
                 
                 return (
                   <div key={index} className="border border-[var(--border)] rounded-lg p-4">
+                    {/* Category at the top with custom option */}
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-medium text-sm">Item {index + 1}</h3>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-[var(--accent)]">
+                      <div className="flex items-center gap-2 flex-1">
+                        <label className="text-sm font-medium text-[var(--text)] min-w-fit">
+                          Category:
+                        </label>
+                        {showNewCategoryInput[index] ? (
+                          <div className="flex items-center gap-2 flex-1">
+                            <input
+                              type="text"
+                              value={newCategoryInput[index] || ''}
+                              onChange={(e) => setNewCategoryInput({ 
+                                ...newCategoryInput, 
+                                [index]: e.target.value 
+                              })}
+                              onKeyDown={(e) => handleCategoryKeyDown(e, index)}
+                              placeholder="Enter new category"
+                              className="flex-1 p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                              autoFocus
+                            />
+                            <button
+                              type="button"
+                              onClick={() => addNewCategory(index)}
+                              className="px-3 py-2 bg-brand-600 text-white rounded text-sm font-medium hover:bg-brand-700 transition-colors"
+                            >
+                              Add
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowNewCategoryInput({ ...showNewCategoryInput, [index]: false });
+                                setNewCategoryInput({ ...newCategoryInput, [index]: '' });
+                              }}
+                              className="px-3 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded text-sm hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2 flex-1">
+                            <select
+                              value={item.category || 'Materials'}
+                              onChange={(e) => updateItem(index, 'category', e.target.value)}
+                              className="flex-1 p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                            >
+                              {categories.map(cat => (
+                                <option key={cat} value={cat}>{cat}</option>
+                              ))}
+                            </select>
+                            <button
+                              type="button"
+                              onClick={() => setShowNewCategoryInput({ ...showNewCategoryInput, [index]: true })}
+                              className="flex items-center justify-center w-8 h-8 bg-brand-50 hover:bg-brand-100 dark:bg-brand-900/20 dark:hover:bg-brand-900/40 border border-brand-200 dark:border-brand-700 rounded text-brand-600 dark:text-brand-400 transition-colors"
+                              title="Add new category"
+                            >
+                              <PlusIcon className="h-4 w-4" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Item total and remove button */}
+                      <div className="flex items-center gap-2 ml-4">
+                        <span className="text-sm font-medium text-brand-600 dark:text-brand-400 min-w-fit">
                           ${lineTotal.toFixed(2)}
                         </span>
                         {items.length > 1 && (
                           <button
                             type="button"
                             onClick={() => removeItem(index)}
-                            className="text-red-500 hover:text-red-700 p-1"
+                            className="flex items-center justify-center w-8 h-8 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                            title="Remove item"
                           >
                             <TrashIcon className="h-4 w-4" />
                           </button>
@@ -428,7 +503,18 @@ export default function NewEstimatePage() {
                           type="text"
                           value={item.name}
                           onChange={(e) => updateItem(index, 'name', e.target.value)}
-                          className="w-full p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm"
+                          placeholder="Enter item name..."
+                          onFocus={(e) => {
+                            if (e.target.value === '') {
+                              e.target.placeholder = '';
+                            }
+                          }}
+                          onBlur={(e) => {
+                            if (e.target.value === '') {
+                              e.target.placeholder = 'Enter item name...';
+                            }
+                          }}
+                          className="w-full p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                           required
                         />
                       </div>
@@ -441,7 +527,7 @@ export default function NewEstimatePage() {
                           type="number"
                           value={item.quantity}
                           onChange={(e) => updateItem(index, 'quantity', Number(e.target.value))}
-                          className="w-full p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm"
+                          className="w-full p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                           min="0.01"
                           step="0.01"
                           required
@@ -456,7 +542,7 @@ export default function NewEstimatePage() {
                           type="number"
                           value={item.baseCost}
                           onChange={(e) => updateItem(index, 'baseCost', Number(e.target.value))}
-                          className="w-full p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm"
+                          className="w-full p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                           min="0"
                           step="0.01"
                           required
@@ -471,7 +557,7 @@ export default function NewEstimatePage() {
                           type="number"
                           value={item.marginPct}
                           onChange={(e) => updateItem(index, 'marginPct', Number(e.target.value))}
-                          className="w-full p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm"
+                          className="w-full p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                           min="0"
                           step="0.1"
                           required
@@ -482,13 +568,24 @@ export default function NewEstimatePage() {
                         <label className="block text-sm font-medium text-[var(--text)] mb-1">
                           Description
                         </label>
-                        <input
-                          type="text"
-                          value={item.description || ''}
-                          onChange={(e) => updateItem(index, 'description', e.target.value)}
-                          className="w-full p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm"
-                          placeholder="Optional description"
-                        />
+                        {isAIEnabled ? (
+                          <AIWritingAssistant
+                            value={item.description || ''}
+                            onChange={(value) => updateItem(index, 'description', value)}
+                            placeholder="AI will suggest detailed descriptions..."
+                            itemName={item.name}
+                            category={item.category}
+                            className="text-sm"
+                          />
+                        ) : (
+                          <textarea
+                            value={item.description || ''}
+                            onChange={(e) => updateItem(index, 'description', e.target.value)}
+                            placeholder="Enter item description..."
+                            className="w-full p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent min-h-[80px] resize-y"
+                            rows={3}
+                          />
+                        )}
                       </div>
 
                       <div>
@@ -499,8 +596,18 @@ export default function NewEstimatePage() {
                           type="text"
                           value={item.sku || ''}
                           onChange={(e) => updateItem(index, 'sku', e.target.value)}
-                          className="w-full p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm"
                           placeholder="Optional SKU"
+                          onFocus={(e) => {
+                            if (e.target.value === '') {
+                              e.target.placeholder = '';
+                            }
+                          }}
+                          onBlur={(e) => {
+                            if (e.target.value === '') {
+                              e.target.placeholder = 'Optional SKU';
+                            }
+                          }}
+                          className="w-full p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                         />
                       </div>
 
@@ -510,7 +617,7 @@ export default function NewEstimatePage() {
                             type="checkbox"
                             checked={item.taxable}
                             onChange={(e) => updateItem(index, 'taxable', e.target.checked)}
-                            className="rounded border-[var(--border)] text-[var(--accent)] focus:ring-[var(--accent)]"
+                            className="rounded border-[var(--border)] text-brand-600 focus:ring-brand-500"
                           />
                           <span className="text-sm text-[var(--text)]">Taxable</span>
                         </label>
@@ -518,7 +625,7 @@ export default function NewEstimatePage() {
                     </div>
 
                     {/* Price breakdown */}
-                    <div className="mt-3 pt-3 border-t border-[var(--border)] text-xs text-[var(--text-dim)]">
+                    <div className="mt-3 pt-3 border-t border-[var(--border)] text-xs text-[var(--text-muted)]">
                       <div className="flex gap-6">
                         <span>Unit Price: ${sellPrice.toFixed(2)}</span>
                         <span>Line Total: ${lineTotal.toFixed(2)}</span>
