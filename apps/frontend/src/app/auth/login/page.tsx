@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { EyeIcon, EyeSlashIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline'
 
 export default function LoginPage() {
@@ -11,8 +11,10 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState<string | React.ReactNode>('')
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const isVerified = searchParams.get('verified') === 'true'
 
   const [backendUp, setBackendUp] = useState(true)
   const [checkingHealth, setCheckingHealth] = useState(false)
@@ -81,7 +83,23 @@ export default function LoginPage() {
       } else if (response.status === 400) {
         setError(data?.validation?.[0] || data?.message || 'Validation error')
       } else if (response.status === 401) {
-        setError(data?.message || 'Invalid credentials')
+        const errorMessage = data?.message || 'Invalid credentials';
+        setError(errorMessage);
+        
+        // If it's an email verification error, show a link to resend verification
+        if (errorMessage.includes('verify your email')) {
+          setError(
+            <>
+              {errorMessage}{' '}
+              <Link 
+                href={`/auth/verify-email?email=${encodeURIComponent(email)}`}
+                className="text-amber-400 hover:text-amber-300 underline"
+              >
+                Resend verification email
+              </Link>
+            </>
+          );
+        }
       } else if (response.status >= 500) {
         setError('Server error. Please try again shortly.')
       } else {
@@ -161,6 +179,12 @@ export default function LoginPage() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="relative py-8 px-5 sm:px-10 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)]/70 backdrop-blur-sm shadow-xl">
           <form className="space-y-6" onSubmit={handleSubmit}>
+            {isVerified && (
+              <div className="bg-green-500/10 border border-green-500/40 text-green-300 px-4 py-3 rounded-md text-sm">
+                ✅ Email verified successfully! You can now log in to your account.
+              </div>
+            )}
+            
             {error && (
               <div className="bg-red-500/10 border border-red-500/40 text-red-300 px-4 py-3 rounded-md text-sm">
                 {error}

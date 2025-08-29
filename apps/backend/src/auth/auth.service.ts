@@ -204,6 +204,11 @@ export class AuthService {
         throw new UnauthorizedException('Account is deactivated');
       }
 
+      // Check if email is verified
+      if (!user.isEmailVerified) {
+        throw new UnauthorizedException('Please verify your email address before logging in. Check your inbox for a verification email.');
+      }
+
       // Update last login
       user.lastLoginAt = new Date();
       await user.save();

@@ -78,9 +78,8 @@ export default function RegisterPage() {
       }
 
       if (response.ok) {
-        localStorage.setItem('accessToken', data.accessToken)
-        localStorage.setItem('user', JSON.stringify(data.user))
-        router.push('/dashboard')
+        // Redirect to email verification page with the user's email
+        router.push(`/auth/verify-email?email=${encodeURIComponent(formData.email)}`);
       } else if (response.status === 400) {
         setError(data?.validation?.[0] || data?.message || 'Validation error')
       } else if (response.status === 401) {

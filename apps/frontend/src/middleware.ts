@@ -11,6 +11,7 @@ export function middleware(req: NextRequest) {
     '/auth/login',
     '/auth/register',
     '/auth/forgot-password',
+    '/auth/verify-email',
     '/auth/google/success',
   ]
   if (
