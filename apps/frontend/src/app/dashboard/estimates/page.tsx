@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { 
   Calculator,
   FileText,
@@ -114,6 +115,7 @@ const categoryIcons = {
 };
 
 export default function EstimatesPage() {
+  const router = useRouter();
   const [estimates, setEstimates] = useState<Estimate[]>([]);
   const [filteredEstimates, setFilteredEstimates] = useState<Estimate[]>([]);
   const [loading, setLoading] = useState(true);
@@ -371,7 +373,10 @@ export default function EstimatesPage() {
             AI Assistant
           </button>
           
-          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          <button 
+            onClick={() => router.push('/dashboard/estimates/new')}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
             <Plus className="w-4 h-4" />
             New Estimate
           </button>
