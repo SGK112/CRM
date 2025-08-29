@@ -24,17 +24,17 @@ export default function ForgotPasswordPage() {
     setError('');
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/forgot-password`, {
+      const response = await fetch('/api/auth/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phoneNumber }),
       });
       const data = await response.json();
-      if (data.success) {
+      if (response.ok && data.success) {
         setSuccess(data.message);
         setStep('code');
       } else {
-        setError(data.message);
+        setError(data.message || 'Failed to send reset code');
       }
     } catch (error) {
       setError('Failed to send reset code. Please try again.');
@@ -47,18 +47,18 @@ export default function ForgotPasswordPage() {
     setIsLoading(true);
     setError('');
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/verify-reset-code`, {
+      const response = await fetch('/api/auth/verify-reset-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phoneNumber, code }),
       });
       const data = await response.json();
-      if (data.success) {
+      if (response.ok && data.success) {
         setResetToken(data.token);
         setSuccess(data.message);
         setStep('password');
       } else {
-        setError(data.message);
+        setError(data.message || 'Failed to verify code');
       }
     } catch (error) {
       setError('Failed to verify code. Please try again.');
@@ -79,17 +79,17 @@ export default function ForgotPasswordPage() {
     setIsLoading(true);
     setError('');
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/reset-password`, {
+      const response = await fetch('/api/auth/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: resetToken, newPassword }),
       });
       const data = await response.json();
-      if (data.success) {
+      if (response.ok && data.success) {
         setSuccess('Password reset successfully! Redirecting to login...');
         setTimeout(() => router.push('/auth/login'), 1800);
       } else {
-        setError(data.message);
+        setError(data.message || 'Failed to reset password');
       }
     } catch (error) {
       setError('Failed to reset password. Please try again.');

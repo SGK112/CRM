@@ -6,12 +6,13 @@ services:
     region: oregon
     plan: starter
     buildCommand: |
-      npm install
-      cd apps/backend
-      npm install
+      echo "🔨 Building Remodely CRM Backend..."
+      npm ci --production=false
       npm run build
+      echo "✅ Backend build complete!"
     startCommand: cd apps/backend && npm run start:prod
     healthCheckPath: /api/health
+    autoDeploy: false
     envVars:
       - key: NODE_ENV
         value: production
@@ -30,7 +31,17 @@ services:
       - key: FRONTEND_URL
         value: https://remodely-crm-frontend.onrender.com
       - key: CORS_ORIGINS
-        value: https://remodely-crm-frontend.onrender.com
+        value: https://remodely-crm-frontend.onrender.com,https://remodely-crm-backend.onrender.com
+      # Performance optimizations
+      - key: WEB_CONCURRENCY
+        value: 2
+      - key: MAX_OLD_SPACE_SIZE
+        value: 460
+      # Logging
+      - key: LOG_LEVEL
+        value: info
+      - key: ENABLE_REQUEST_LOGGING
+        value: true
 
   # Frontend Web Service  
   - type: web
@@ -39,11 +50,12 @@ services:
     region: oregon
     plan: starter
     buildCommand: |
-      npm install
-      cd apps/frontend
-      npm install
+      echo "🔨 Building Remodely CRM Frontend..."
+      npm ci --production=false
       npm run build
+      echo "✅ Frontend build complete!"
     startCommand: cd apps/frontend && node .next/standalone/apps/frontend/server.js
+    autoDeploy: false
     envVars:
       - key: NODE_ENV
         value: production
@@ -53,9 +65,14 @@ services:
           name: remodely-crm-frontend
           property: port
       - key: NEXT_PUBLIC_API_URL
-        value: https://remodely-crm-backend.onrender.com/api
+        value: https://remodely-crm-backend.onrender.com
       - key: NEXT_PUBLIC_SOCKET_URL
         value: https://remodely-crm-backend.onrender.com
+      # Performance optimizations
+      - key: WEB_CONCURRENCY
+        value: 1
+      - key: MAX_OLD_SPACE_SIZE
+        value: 460
 
 databases:
   - name: remodely-crm-db

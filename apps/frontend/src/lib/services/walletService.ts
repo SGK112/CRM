@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = '/api';
 
 interface Wallet {
   userId: string;
@@ -89,6 +89,9 @@ class WalletService {
     });
 
     if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('401: Authentication required');
+      }
       if (response.status === 404) {
         return null;
       }
@@ -126,7 +129,7 @@ class WalletService {
   }
 
   async getTransactions(limit?: number): Promise<Transaction[]> {
-    const url = new URL(`${API_BASE_URL}/wallet/transactions`);
+    const url = new URL(`${API_BASE_URL}/wallet/transactions`, window.location.origin);
     if (limit) {
       url.searchParams.append('limit', limit.toString());
     }
@@ -137,6 +140,9 @@ class WalletService {
     });
 
     if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('401: Authentication required');
+      }
       throw new Error('Failed to get transactions');
     }
 
@@ -182,6 +188,9 @@ class WalletService {
     });
 
     if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('401: Authentication required');
+      }
       throw new Error('Failed to get wallet stats');
     }
 

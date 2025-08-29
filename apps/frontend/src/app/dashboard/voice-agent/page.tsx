@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Layout from '../../../components/Layout';
 import { PageHeader } from '../../../components/ui/PageHeader';
 import { PhoneIcon, ArrowPathIcon, MicrophoneIcon, SpeakerWaveIcon } from '@heroicons/react/24/outline';
 import { API_BASE } from '@/lib/api';
@@ -55,13 +54,12 @@ export default function VoiceAgentPage() {
   };
 
   return (
-    <Layout>
-      <div className="space-y-8">
-        <PageHeader 
-          title="Voice Agent" 
-          subtitle="AI-powered conversational agent for inbound and outbound calls." 
-          titleClassName="font-bold text-brand-700 dark:text-brand-400 mb-0"
-        />
+    <div className="space-y-8">
+      <PageHeader 
+        title="Voice Agent" 
+        subtitle="AI-powered conversational agent for inbound and outbound calls." 
+        titleClassName="font-bold text-brand-700 dark:text-brand-400 mb-0"
+      />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
@@ -160,7 +158,6 @@ export default function VoiceAgentPage() {
             </div>
           </div>
         </div>
-      </div>
-    </Layout>
+    </div>
   );
 }

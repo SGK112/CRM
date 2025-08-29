@@ -20,28 +20,34 @@ export default function PlanSwitcher({ currentPlan, onPlanChange }: PlanSwitcher
   }, [currentPlan]);
 
   const handlePlanChange = async (planId: PlanTier) => {
-    setIsLoading(true);
-    
-    try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Update local storage and notify components
-      setUserPlan(planId);
-      setSelectedPlan(planId);
-      
-      // Call optional callback
-      onPlanChange?.(planId);
-      
-      // Show success message
-      alert(`Successfully upgraded to ${PLANS[planId].name}!`);
-      
-    } catch (error) {
-      console.error('Failed to change plan:', error);
-      alert('Failed to change plan. Please try again.');
-    } finally {
-      setIsLoading(false);
+    if (planId === 'basic') {
+      // Handle downgrade to basic plan
+      if (confirm('Are you sure you want to downgrade to the Basic plan? You will lose access to premium features.')) {
+        setIsLoading(true);
+        
+        try {
+          // Cancel current subscription
+          await fetch('/api/billing/subscription', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'cancel' }),
+          });
+          
+          localStorage.setItem('userPlan', planId);
+          setSelectedPlan(planId);
+          if (onPlanChange) onPlanChange(planId);
+          alert('Successfully downgraded to Basic plan. Your subscription will end at the current billing period.');
+        } catch (error) {
+          alert('Failed to downgrade plan. Please try again.');
+        } finally {
+          setIsLoading(false);
+        }
+      }
+      return;
     }
+
+    // For paid plans, redirect to upgrade page with specific plan
+    window.location.href = `/dashboard/upgrade?plan=${planId}`;
   };
 
   const getPlanIcon = (plan: PlanTier) => {

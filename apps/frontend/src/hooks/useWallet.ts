@@ -30,6 +30,16 @@ export function useWallet(): UseWalletReturn {
       setLoading(true);
       setError(null);
 
+      // Check if user is authenticated before making API calls
+      const token = typeof window !== 'undefined' 
+        ? localStorage.getItem('accessToken') || localStorage.getItem('token')
+        : null;
+
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
       const [walletInfo, transactionList, walletStats] = await Promise.all([
         walletService.getWalletInfo(),
         walletService.getTransactions(50),
@@ -40,6 +50,14 @@ export function useWallet(): UseWalletReturn {
       setTransactions(transactionList);
       setStats(walletStats);
     } catch (err) {
+      // Don't show error if it's an authentication issue
+      if (err instanceof Error && (
+        err.message.includes('401') || 
+        err.message.includes('Unauthorized')
+      )) {
+        setLoading(false);
+        return;
+      }
       setError(err instanceof Error ? err.message : 'Failed to load wallet data');
     } finally {
       setLoading(false);
@@ -94,9 +112,13 @@ export function useWallet(): UseWalletReturn {
     }
   }, [refreshWalletData]);
 
-  // Load wallet data on mount
+  // Load wallet data on mount, but delay to allow authentication check
   useEffect(() => {
-    refreshWalletData();
+    const timer = setTimeout(() => {
+      refreshWalletData();
+    }, 100); // Small delay to allow layout authentication check
+
+    return () => clearTimeout(timer);
   }, [refreshWalletData]);
 
   return {

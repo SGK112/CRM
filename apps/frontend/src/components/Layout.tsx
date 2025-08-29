@@ -236,318 +236,272 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <ThemeProvider>
       <AIProvider>
-  <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
-  <RouteMemoryTracker />
-      {/* Mobile sidebar backdrop */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden">
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
-        </div>
-      )}
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+          <RouteMemoryTracker />
+          
+          {/* Mobile sidebar backdrop */}
+          {sidebarOpen && (
+            <div className="fixed inset-0 z-40 lg:hidden">
+              <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
+            </div>
+          )}
 
-      {/* Mobile sidebar */}
-      <div className={mobileOptimized(
-        'fixed inset-y-0 left-0 z-50 w-64 shadow-lg transform transition-transform duration-300 ease-in-out lg:hidden sidebar-container',
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full',
-        mobile.scrollContainer(),
-        mobile.willChange()
-      )}>
-        <div className={mobileOptimized(
-          'flex items-center justify-between h-16 px-4',
-          mobile.touchTarget()
-        )} style={{ borderBottom: '1px solid var(--border)' }}>
-          <Logo />
-          <button 
-            onClick={() => setSidebarOpen(false)} 
-            className={mobileOptimized(
-              'p-2 rounded-md transition-colors',
-              mobile.touchTarget()
-            )}
-            style={{ color: 'var(--text-muted)' }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = 'var(--text)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = 'var(--text-muted)';
-            }}
-            aria-label="Close sidebar"
-          >
-            <XMarkIcon className="h-6 w-6" />
-          </button>
-        </div>
-        <nav className={mobileOptimized(
-          'mt-6 px-2 pb-6',
-          mobile.scrollContainer(),
-          'overscroll-contain'
-        )}>
-          <div className="space-y-1">
-            {updatedNavigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                onClick={() => setSidebarOpen(false)}
-                className={mobileOptimized(
-                  classNames(
-                    'sidebar-nav-item',
-                    item.current ? 'active' : ''
-                  ),
-                  mobile.touchTarget()
-                )}
+          {/* Mobile sidebar */}
+          <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:hidden ${
+            sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}>
+            <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-700">
+              <Logo />
+              <button 
+                onClick={() => setSidebarOpen(false)} 
+                className="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 transition-colors"
+                aria-label="Close sidebar"
               >
-                <item.icon className="icon" />
-                <span>{item.name}</span>
-                {item.badge && item.badge > 0 && (
-                  <span className={classNames(
-                    'ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
-                    item.current 
-                      ? 'bg-amber-600 text-white shadow-sm' 
-                      : 'badge badge-info'
-                  )}>
-                    {item.badge}
-                  </span>
-                )}
-              </Link>
-            ))}
-          </div>
-        </nav>
-      </div>
-
-      {/* Desktop sidebar */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-        <div className="flex min-h-0 flex-1 flex-col sidebar-container" style={{ borderRight: '1px solid var(--border)' }}>
-          <div className="flex h-16 flex-shrink-0 items-center px-4" style={{ borderBottom: '1px solid var(--border)' }}>
-            <Logo />
-          </div>
-          <div className="flex flex-1 flex-col overflow-y-auto">
-            <nav className="flex-1 px-2 py-4">
+                <XMarkIcon className="h-6 w-6" />
+              </button>
+            </div>
+            <nav className="mt-6 px-2 pb-6 overflow-y-auto">
               <div className="space-y-1">
-                {navigationGroups.map(group => {
-                  const groupItems = updatedNavigation.filter(i=> group.items.some(gItem=> gItem.href === i.href));
-                  return (
-                    <div key={group.label} className="mb-4">
-                      <div className="sidebar-nav-group">{group.label}</div>
-                      {groupItems.map(item => {
-                        const originalItem = group.items.find(gi => gi.href === item.href);
-                        const isRestricted = originalItem?.planRequired && originalItem.planRequired !== 'basic' && userPlan === 'basic';
-                        
-                        return (
-                          <Link
-                            key={item.name}
-                            href={isRestricted ? `/dashboard/settings/billing?upgrade=${originalItem.planRequired}` : item.href}
-                            className={classNames(
-                              'sidebar-nav-item',
-                              item.current ? 'active' : '',
-                              isRestricted ? 'opacity-75' : ''
-                            )}
-                          >
-                            <item.icon className={`icon ${isRestricted ? 'text-gray-400' : ''}`} />
-                            <span className="flex-1">{item.name}</span>
-                            {isRestricted && (
-                              <LockClosedIcon className="w-4 h-4 text-amber-500 ml-2" />
-                            )}
-                            {item.badge && item.badge > 0 && !isRestricted && (
-                              <span className={classNames(
-                                'ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
-                                item.current 
-                                  ? 'bg-amber-600 text-white shadow-sm' 
-                                  : 'badge badge-info'
-                              )}>
-                                {item.badge}
-                              </span>
-                            )}
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  );
-                })}
+                {updatedNavigation.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    onClick={() => setSidebarOpen(false)}
+                    className={classNames(
+                      'group flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors',
+                      item.current 
+                        ? 'bg-amber-50 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300' 
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
+                    )}
+                  >
+                    <item.icon className={classNames(
+                      'mr-3 h-5 w-5 flex-shrink-0',
+                      item.current 
+                        ? 'text-amber-600 dark:text-amber-400' 
+                        : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
+                    )} />
+                    <span className="flex-1">{item.name}</span>
+                    {item.badge && item.badge > 0 && (
+                      <span className={classNames(
+                        'ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
+                        item.current 
+                          ? 'bg-amber-600 text-white shadow-sm' 
+                          : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                      )}>
+                        {item.badge}
+                      </span>
+                    )}
+                  </Link>
+                ))}
               </div>
             </nav>
+          </div>
 
-            {/* User profile section */}
-            <div className="flex-shrink-0 p-4" style={{ borderTop: '1px solid var(--border)' }}>
-              <div className="relative">
-                <button
-                  onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="group block w-full rounded-lg p-2 text-left text-sm font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
-                  style={{ 
-                    color: 'var(--text-muted)',
-                    backgroundColor: 'transparent'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'var(--surface-2)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                  }}
-                >
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <div 
-                        className="h-8 w-8 rounded-full flex items-center justify-center"
-                        style={{ backgroundColor: 'var(--accent-light)' }}
-                      >
-                        <span 
-                          className="text-sm font-medium"
-                          style={{ color: 'var(--accent)' }}
-                        >
-                          {user.firstName?.[0]}{user.lastName?.[0]}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="ml-3 flex-1">
-                      <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>
-                        {user.firstName} {user.lastName}
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                          {user.email}
-                        </p>
-                        <PlanBadge plan={userPlan} className="text-xs" />
-                      </div>
-                    </div>
-                    <ChevronDownIcon className="h-4 w-4" style={{ color: 'var(--text-muted)' }} />
+          {/* Desktop sidebar */}
+          <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
+            <div className="flex min-h-0 flex-1 flex-col bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
+              <div className="flex h-16 flex-shrink-0 items-center px-4 border-b border-gray-200 dark:border-gray-700">
+                <Logo />
+              </div>
+              <div className="flex flex-1 flex-col overflow-y-auto">
+                <nav className="flex-1 px-2 py-4">
+                  <div className="space-y-1">
+                    {navigationGroups.map(group => {
+                      const groupItems = updatedNavigation.filter(i=> group.items.some(gItem=> gItem.href === i.href));
+                      return (
+                        <div key={group.label} className="mb-6">
+                          <div className="px-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                            {group.label}
+                          </div>
+                          <div className="space-y-1">
+                            {groupItems.map(item => {
+                              const originalItem = group.items.find(gi => gi.href === item.href);
+                              const isRestricted = originalItem?.planRequired && originalItem.planRequired !== 'basic' && userPlan === 'basic';
+                              
+                              return (
+                                <Link
+                                  key={item.name}
+                                  href={isRestricted ? `/dashboard/settings/billing?upgrade=${originalItem.planRequired}` : item.href}
+                                  className={classNames(
+                                    'group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors',
+                                    item.current 
+                                      ? 'bg-amber-50 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300' 
+                                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white',
+                                    isRestricted ? 'opacity-75' : ''
+                                  )}
+                                >
+                                  <item.icon className={classNames(
+                                    'mr-3 h-5 w-5 flex-shrink-0',
+                                    item.current 
+                                      ? 'text-amber-600 dark:text-amber-400' 
+                                      : isRestricted 
+                                        ? 'text-gray-400 dark:text-gray-500' 
+                                        : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
+                                  )} />
+                                  <span className="flex-1">{item.name}</span>
+                                  {isRestricted && (
+                                    <LockClosedIcon className="w-4 h-4 text-amber-500 ml-2" />
+                                  )}
+                                  {item.badge && item.badge > 0 && !isRestricted && (
+                                    <span className={classNames(
+                                      'ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
+                                      item.current 
+                                        ? 'bg-amber-600 text-white shadow-sm' 
+                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                                    )}>
+                                      {item.badge}
+                                    </span>
+                                  )}
+                                </Link>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                </button>
+                </nav>
 
-                {showUserMenu && (
-                  <div 
-                    className="absolute bottom-full left-0 right-0 mb-2 rounded-md py-1 shadow-lg ring-1 ring-black/10"
-                    style={{ 
-                      backgroundColor: 'var(--surface-2)', 
-                      border: '1px solid var(--border)' 
+                {/* User profile section */}
+                <div className="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-700">
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowUserMenu(!showUserMenu)}
+                      className="group block w-full rounded-lg p-3 text-left text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition-colors"
+                    >
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                          <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
+                            <span className="text-sm font-medium text-amber-700 dark:text-amber-300">
+                              {user.firstName?.[0]}{user.lastName?.[0]}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="ml-3 flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                            {user.firstName} {user.lastName}
+                          </p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                              {user.email}
+                            </p>
+                            <PlanBadge plan={userPlan} className="text-xs flex-shrink-0" />
+                          </div>
+                        </div>
+                        <ChevronDownIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      </div>
+                    </button>
+
+                    {showUserMenu && (
+                      <div className="absolute bottom-full left-0 right-0 mb-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg ring-1 ring-black/10 dark:ring-white/10 border border-gray-200 dark:border-gray-700 py-1">
+                        <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Appearance</span>
+                            <ThemeToggle variant="compact" />
+                          </div>
+                        </div>
+                        <Link
+                          href="/dashboard/settings/profile"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                          onClick={() => setShowUserMenu(false)}
+                        >
+                          Your Profile
+                        </Link>
+                        <Link
+                          href="/dashboard/settings"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                          onClick={() => setShowUserMenu(false)}
+                        >
+                          Settings
+                        </Link>
+                        <button
+                          onClick={() => {
+                            setShowUserMenu(false);
+                            handleLogout();
+                          }}
+                          className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                        >
+                          Sign out
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Main content */}
+          <div className="lg:pl-64 flex flex-col min-h-screen">
+            {/* Top navigation */}
+            <div className="sticky top-0 z-30 flex h-16 flex-shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 backdrop-blur-md bg-opacity-95">
+              <button
+                type="button"
+                className="px-4 border-r border-gray-200 dark:border-gray-700 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 lg:hidden transition-colors"
+                onClick={() => setSidebarOpen(true)}
+                aria-label="Open sidebar"
+              >
+                <Bars3Icon className="h-6 w-6" />
+              </button>
+
+              <div className="flex flex-1 items-center justify-between px-4 sm:px-6 lg:px-8 min-w-0">
+                {/* Search */}
+                <div className="flex items-center flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 max-w-lg">
+                    <SearchBar className="w-full" />
+                  </div>
+                </div>
+
+                <div className="ml-4 flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
+                  {/* AI Enable */}
+                  <AIEnable />
+                  {/* Theme Toggle */}
+                  <ThemeToggle variant="button" />
+                  {/* Notifications */}
+                  <button
+                    type="button"
+                    onClick={() => router.push('/dashboard/notifications')}
+                    className="relative rounded-full bg-gray-100 dark:bg-gray-800 p-2 text-gray-600 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition-all duration-200"
+                    aria-label="View notifications"
+                  >
+                    <span className="sr-only">View notifications</span>
+                    <BellIcon className="h-6 w-6" />
+                    <span className="absolute top-2 right-2 h-3 w-3 rounded-full bg-red-500 text-xs text-white flex items-center justify-center font-medium shadow-sm">
+                      3
+                    </span>
+                  </button>
+                  {/* Quick Create */}
+                  <QuickCreate />
+                  {/* Help Button */}
+                  <button
+                    type="button"
+                    className="hidden sm:inline-flex items-center px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-200"
+                    onClick={() => {
+                      // Focus Copilot widget if available
+                      const evt = new CustomEvent('copilot:open');
+                      window.dispatchEvent(evt);
                     }}
                   >
-                    <div className="px-4 py-2 mb-1" style={{ borderBottom: '1px solid var(--border)' }}>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs uppercase tracking-wide text-tertiary">Appearance</span>
-                        <ThemeToggle variant="compact" />
-                      </div>
-                    </div>
-                    <Link
-                      href="/dashboard/settings/profile"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700/80"
-                      onClick={() => setShowUserMenu(false)}
-                    >
-                      Your Profile
-                    </Link>
-                    <Link
-                      href="/dashboard/settings"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700/80"
-                      onClick={() => setShowUserMenu(false)}
-                    >
-                      Settings
-                    </Link>
-                    <button
-                      onClick={() => {
-                        setShowUserMenu(false);
-                        handleLogout();
-                      }}
-                      className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700/80"
-                    >
-                      Sign out
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main content */}
-      <div className="lg:pl-64 flex flex-col min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
-        {/* Top navigation */}
-        <div className={mobileOptimized(
-          'sticky top-0 z-50 flex h-16 flex-shrink-0 backdrop-blur-md bg-opacity-95',
-          mobile.safeTop()
-        )} style={{ 
-          backgroundColor: 'var(--surface-1)', 
-          borderBottom: '1px solid var(--border)' 
-        }}>
-          <button
-            type="button"
-            className={mobileOptimized(
-              'px-4 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 lg:hidden transition-colors',
-              mobile.touchTarget()
-            )}
-            style={{ 
-              color: 'var(--text-muted)',
-              borderRight: '1px solid var(--border)'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--surface-2)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-            }}
-            onClick={() => setSidebarOpen(true)}
-            aria-label="Open sidebar"
-          >
-            <Bars3Icon className="h-6 w-6" />
-          </button>
-
-          <div className="flex flex-1 items-center justify-between px-4 sm:px-6 lg:px-8 min-w-0">
-            {/* Search */}
-            <div className="flex items-center flex-1 min-w-0">
-              <div className="flex-1 min-w-0 max-w-lg">
-                <SearchBar className="w-full" />
+                    <QuestionMarkCircleIcon className="h-4 w-4 text-gray-400 mr-1" />
+                    Help
+                  </button>
+                </div>
               </div>
             </div>
 
-      <div className="ml-4 flex items-center md:ml-6 shrink-0 space-x-2 sm:space-x-3">
-              {/* AI Enable */}
-              <AIEnable />
-              {/* Theme Toggle */}
-              <ThemeToggle variant="button" />
-              {/* Notifications */}
-              <button
-                type="button"
-                onClick={() => router.push('/dashboard/notifications')}
-                className={mobileOptimized(
-                  'relative rounded-full bg-gray-100 dark:bg-gray-800 p-2 text-gray-600 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition-all duration-200 hover:scale-105',
-                  mobile.touchTarget()
-                )}
-                aria-label="View notifications"
-              >
-                <span className="sr-only">View notifications</span>
-                <BellIcon className="h-6 w-6" />
-                <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-xs text-white flex items-center justify-center font-medium shadow-sm">
-                  3
-                </span>
-              </button>
-              {/* Quick Create */}
-              <QuickCreate />
-              {/* Help Button */}
-              <button
-                type="button"
-                className="group hidden sm:inline-flex items-center px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-200 hover:scale-105"
-                onClick={() => {
-                  // Focus Copilot widget if available
-                  const evt = new CustomEvent('copilot:open');
-                  window.dispatchEvent(evt);
-                }}
-              >
-                <QuestionMarkCircleIcon className="h-4 w-4 text-gray-400 group-hover:text-gray-500 mr-1" />
-                Help
-              </button>
-            </div>
+            {/* Page content */}
+            <main className="flex-1 py-6 overflow-y-auto">
+              <div className={`mx-auto ${
+                pathname.startsWith('/dashboard/clients') ? 'max-w-none px-4 sm:px-6 lg:px-8' : 'max-w-7xl px-4 sm:px-6 lg:px-8'
+              }`}>
+                {children}
+              </div>
+            </main>
+
+            {/* Footer with Copilot Tab */}
+            <FooterCopilot />
           </div>
         </div>
-
-        {/* Page content */}
-        <main className="flex-1 py-6 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 dark:hover:scrollbar-thumb-gray-500">
-          <div className={`mx-auto scroll-smooth ${
-            pathname.startsWith('/dashboard/clients') ? 'max-w-none px-4 sm:px-6 lg:px-8' : 'max-w-7xl px-4 sm:px-6 lg:px-8'
-          }`}>
-            {children}
-          </div>
-        </main>
-
-        {/* Footer with Copilot Tab */}
-        <FooterCopilot />
-      </div>
-    </div>
   </AIProvider>
   </ThemeProvider>
   );

@@ -270,13 +270,15 @@ export default function RegisterPage() {
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center bg-transparent border-none focus:outline-none"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  title={showPassword ? 'Hide password' : 'Show password'}
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <EyeSlashIcon className="h-5 w-5 text-[var(--text-faint)]" />
+                    <EyeSlashIcon className="h-5 w-5 text-[var(--text-muted)] hover:text-[var(--text)] transition-colors duration-200 cursor-pointer" />
                   ) : (
-                    <EyeIcon className="h-5 w-5 text-[var(--text-faint)]" />
+                    <EyeIcon className="h-5 w-5 text-[var(--text-muted)] hover:text-[var(--text)] transition-colors duration-200 cursor-pointer" />
                   )}
                 </button>
               </div>

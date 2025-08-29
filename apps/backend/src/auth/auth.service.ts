@@ -40,6 +40,7 @@ export class AuthService {
           lastName: 'User',
           role: 'owner',
           workspaceId: 'demo_workspace_1',
+          phone: '+1234567890', // Add demo phone number
           isEmailVerified: true,
           isPhoneVerified: false,
           twoFactorEnabled: false,
@@ -57,6 +58,7 @@ export class AuthService {
       lastName: 'User',
       role: 'owner',
       workspaceId: 'demo_workspace_1',
+      phone: '+1234567890', // Add demo phone number
       avatar: null,
       isEmailVerified: true,
       isPhoneVerified: false,
@@ -374,6 +376,8 @@ export class AuthService {
   // SMS-based Password Reset Methods
   async sendPasswordResetSMS(phoneNumber: string): Promise<{ success: boolean; message: string }> {
     try {
+      console.log(`🔄 Password reset request for phone: ${phoneNumber}`);
+      
       // Find user by phone number in demo users
       let user = null;
       for (const demoUser of demoUsers.values()) {
@@ -388,13 +392,16 @@ export class AuthService {
         try {
           user = await this.userModel.findOne({ phone: phoneNumber });
         } catch (error) {
-          console.log('Database phone lookup failed');
+          console.log('Database phone lookup failed, only demo users available');
         }
       }
 
       if (!user) {
+        console.log(`❌ No user found with phone: ${phoneNumber}`);
         return { success: false, message: 'No account found with this phone number' };
       }
+
+      console.log(`✅ User found: ${user.email || user.firstName}`);
 
       // Generate 6-digit code
       const code = this.twilioService.generateRandomCode(6);
@@ -404,20 +411,24 @@ export class AuthService {
       this.passwordResetCodes.set(phoneNumber, {
         code,
         expires,
-        userId: user.id || user._id.toString(),
+        userId: user.id || user._id?.toString(),
       });
+
+      console.log(`🔑 Generated reset code: ${code} (expires: ${expires})`);
 
       // Send SMS
       const sent = await this.twilioService.sendPasswordResetCode(phoneNumber, code);
       
       if (sent) {
-        return { success: true, message: 'Reset code sent to your phone' };
+        console.log(`✅ Reset SMS sent successfully to ${phoneNumber}`);
+        return { success: true, message: 'Reset code sent to your phone. Check your SMS messages.' };
       } else {
-        return { success: false, message: 'Failed to send reset code' };
+        console.log(`❌ Failed to send SMS to ${phoneNumber}`);
+        return { success: false, message: 'Failed to send reset code. Please try again.' };
       }
     } catch (error) {
       console.error('Password reset SMS error:', error);
-      return { success: false, message: 'An error occurred' };
+      return { success: false, message: 'An error occurred while sending the reset code' };
     }
   }
 

@@ -43,7 +43,8 @@ export class TwilioService {
   async sendSMS(to: string, message: string): Promise<boolean> {
     try {
       if (!this.client) {
-        console.log('Twilio not configured - SMS simulation:', { to, message });
+        console.log('🔧 Twilio not configured - SMS simulation mode');
+        console.log(`📱 Simulated SMS to ${to}: ${message}`);
         return true; // Simulate success for development
       }
 
@@ -53,16 +54,25 @@ export class TwilioService {
         to: to,
       });
 
-      console.log('SMS sent successfully:', result.sid);
+      console.log('✅ SMS sent successfully:', result.sid);
       return true;
     } catch (error) {
-      console.error('Failed to send SMS:', error);
+      console.error('❌ Failed to send SMS:', error);
       return false;
     }
   }
 
   async sendPasswordResetCode(phoneNumber: string, code: string): Promise<boolean> {
     const message = `Your CRM password reset code is: ${code}. This code expires in 10 minutes.`;
+    
+    if (!this.client) {
+      console.log('🔧 Twilio not configured - SMS simulation mode');
+      console.log(`📱 Simulated SMS to ${phoneNumber}: ${message}`);
+      console.log(`🔑 Reset Code: ${code}`);
+      // Return true for development to simulate successful SMS
+      return true;
+    }
+    
     return this.sendSMS(phoneNumber, message);
   }
 

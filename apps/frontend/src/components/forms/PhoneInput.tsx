@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { PhoneIcon } from '@heroicons/react/24/outline';
 
 interface PhoneInputProps {
   value: string;
@@ -109,7 +110,7 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
         autoComplete="tel"
       />
       <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-        <span className="text-gray-400 text-sm">📞</span>
+        <PhoneIcon className="h-5 w-5 text-[var(--text-muted)]" />
       </div>
     </div>
   );

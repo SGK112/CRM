@@ -6,54 +6,92 @@ import Layout from '../../../../components/Layout';
 import { PageHeader } from '../../../../components/ui/PageHeader';
 import PlanSwitcher from '../../../../components/PlanSwitcher';
 import { CapabilityGate, PlanBadge } from '../../../../components/CapabilityGate';
-import { getUserPlan, PLANS, type PlanTier } from '@/lib/plans';
+import { getUserPlan, setUserPlan, PLANS, type PlanTier } from '@/lib/plans';
 import { 
   CreditCardIcon, 
   ClockIcon, 
   CheckCircleIcon,
   ExclamationTriangleIcon,
-  CogIcon
+  CogIcon,
+  ArrowRightIcon
 } from '@heroicons/react/24/outline';
 
-export default function BillingSettingsPage() {
+// Mock billing history data
+const billingHistory = [
+  {
+    id: '1',
+    date: '2024-01-01',
+    plan: 'AI Professional',
+    period: 'Jan 2024 - Feb 2024',
+    amount: 49,
+    status: 'paid' as const,
+  },
+  {
+    id: '2', 
+    date: '2023-12-01',
+    plan: 'AI Professional',
+    period: 'Dec 2023 - Jan 2024',
+    amount: 49,
+    status: 'paid' as const,
+  },
+  {
+    id: '3',
+    date: '2023-11-01', 
+    plan: 'Basic',
+    period: 'Nov 2023 - Dec 2023',
+    amount: 0,
+    status: 'paid' as const,
+  },
+];
+
+export default function BillingPage() {
   const [currentPlan, setCurrentPlan] = useState<PlanTier>('basic');
-  const [loading, setLoading] = useState(true);
-  const [billingHistory, setBillingHistory] = useState<any[]>([]);
+  const [showPlanSwitcher, setShowPlanSwitcher] = useState(false);
+  const [subscriptionStatus, setSubscriptionStatus] = useState('active');
   const searchParams = useSearchParams();
+  
+  const success = searchParams.get('success');
+  const newPlan = searchParams.get('plan') as PlanTier;
   const upgradeParam = searchParams.get('upgrade') as PlanTier;
 
   useEffect(() => {
-    setCurrentPlan(getUserPlan());
-    setLoading(false);
-    
-    // Mock billing history
-    setBillingHistory([
-      {
-        id: '1',
-        date: '2024-01-01',
-        plan: 'AI Professional',
-        amount: 49,
-        status: 'paid',
-        period: 'January 2024'
-      },
-      {
-        id: '2',
-        date: '2024-02-01', 
-        plan: 'AI Professional',
-        amount: 49,
-        status: 'paid',
-        period: 'February 2024'
-      },
-      {
-        id: '3',
-        date: '2024-03-01',
-        plan: 'AI Professional', 
-        amount: 49,
-        status: 'pending',
-        period: 'March 2024'
+    const plan = getUserPlan();
+    setCurrentPlan(plan);
+
+    // Handle successful upgrade
+    if (success === 'true' && newPlan) {
+      setUserPlan(newPlan);
+      setCurrentPlan(newPlan);
+      
+      // Show success message
+      const planName = PLANS[newPlan]?.name || newPlan;
+      alert(`🎉 Welcome to ${planName}! Your subscription is now active.`);
+      
+      // Clean up URL
+      window.history.replaceState({}, '', '/dashboard/settings/billing');
+    }
+  }, [success, newPlan]);
+
+  const handleManageBilling = async () => {
+    try {
+      const response = await fetch('/api/billing/portal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          returnUrl: window.location.href 
+        }),
+      });
+
+      if (response.ok) {
+        const { url } = await response.json();
+        window.location.href = url;
+      } else {
+        alert('Unable to access billing portal. Please contact support.');
       }
-    ]);
-  }, []);
+    } catch (error) {
+      alert('Failed to open billing portal. Please try again.');
+    }
+  };
 
   const handlePlanChange = (newPlan: PlanTier) => {
     setCurrentPlan(newPlan);
@@ -71,9 +109,40 @@ export default function BillingSettingsPage() {
           actions={
             <div className="flex items-center gap-3">
               <PlanBadge plan={currentPlan} />
+              <button
+                onClick={handleManageBilling}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-900 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-800 dark:hover:bg-gray-600 transition-colors"
+              >
+                <CogIcon className="w-4 h-4" />
+                Manage Billing
+              </button>
             </div>
           }
         />
+
+        {/* Upgrade Prompt */}
+        {upgradeParam && upgradeParam !== currentPlan && (
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+            <div className="flex items-start gap-4">
+              <ExclamationTriangleIcon className="w-6 h-6 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
+                  Upgrade to {PLANS[upgradeParam].name}
+                </h4>
+                <p className="text-blue-800 dark:text-blue-200 mb-4">
+                  You need to upgrade to access this feature and unlock powerful AI-driven capabilities.
+                </p>
+                <button
+                  onClick={() => window.location.href = `/dashboard/upgrade?plan=${upgradeParam}`}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Upgrade Now
+                  <ArrowRightIcon className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Current Plan Overview */}
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
@@ -152,23 +221,6 @@ export default function BillingSettingsPage() {
           </div>
         </div>
 
-        {/* Upgrade Prompt */}
-        {upgradeParam && upgradeParam !== currentPlan && (
-          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
-            <div className="flex items-start gap-3">
-              <ExclamationTriangleIcon className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-              <div>
-                <h4 className="font-medium text-amber-800 dark:text-amber-200">
-                  Upgrade Required
-                </h4>
-                <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-                  You need to upgrade to {PLANS[upgradeParam].name} to access this feature.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Plan Switcher */}
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
           <PlanSwitcher 
@@ -183,8 +235,11 @@ export default function BillingSettingsPage() {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
               Billing History
             </h3>
-            <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-              Download All
+            <button
+              onClick={handleManageBilling}
+              className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+            >
+              View All Invoices
             </button>
           </div>
 
@@ -230,7 +285,10 @@ export default function BillingSettingsPage() {
                       </span>
                     </td>
                     <td className="py-3 px-4">
-                      <button className="text-blue-600 hover:text-blue-700 text-sm">
+                      <button 
+                        onClick={handleManageBilling}
+                        className="text-blue-600 hover:text-blue-700 text-sm"
+                      >
                         Download
                       </button>
                     </td>
@@ -247,7 +305,10 @@ export default function BillingSettingsPage() {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
               Payment Method
             </h3>
-            <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+            <button 
+              onClick={handleManageBilling}
+              className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+            >
               Update
             </button>
           </div>
@@ -270,3 +331,4 @@ export default function BillingSettingsPage() {
     </Layout>
   );
 }
+

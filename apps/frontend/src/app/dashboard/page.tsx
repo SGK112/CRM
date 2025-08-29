@@ -22,7 +22,10 @@ import {
   InformationCircleIcon,
   MicrophoneIcon,
   ChatBubbleLeftRightIcon,
-  StarIcon
+  StarIcon,
+  BuildingOfficeIcon,
+  BuildingStorefrontIcon,
+  PencilSquareIcon
 } from '@heroicons/react/24/outline';
 import { getUserPlan, hasCapability, PLANS, type PlanTier, type PlanCapabilities, setUserPlan } from '@/lib/plans';
 import { CapabilityGate } from '@/components/CapabilityGate';
@@ -61,11 +64,11 @@ interface QuickStat {
 }
 
 const remodelingTypes = {
-  kitchen: { label: 'Kitchen Remodel', color: 'bg-amber-500', icon: '🍳' },
-  bathroom: { label: 'Bathroom Remodel', color: 'bg-blue-500', icon: '🚿' },
-  whole_home: { label: 'Whole Home', color: 'bg-purple-500', icon: '🏠' },
-  addition: { label: 'Home Addition', color: 'bg-green-500', icon: '🔨' },
-  exterior: { label: 'Exterior/Siding', color: 'bg-orange-500', icon: '🏡' }
+  kitchen: { label: 'Kitchen Remodel', color: 'bg-amber-500', icon: WrenchScrewdriverIcon },
+  bathroom: { label: 'Bathroom Remodel', color: 'bg-blue-500', icon: HomeIcon },
+  whole_home: { label: 'Whole Home', color: 'bg-purple-500', icon: BuildingOfficeIcon },
+  addition: { label: 'Home Addition', color: 'bg-green-500', icon: BuildingStorefrontIcon },
+  exterior: { label: 'Exterior/Siding', color: 'bg-orange-500', icon: PencilSquareIcon }
 };
 
 const statusSteps = {
@@ -319,7 +322,8 @@ export default function RemodelingDashboard() {
                   ) : (
                     <div className="relative">
                       <HomeIcon className="h-10 w-10 text-white" />
-                      <SparklesIcon className="h-5 w-5 text-yellow-300 absolute -top-1 -right-1 animate-pulse" />
+                      {/* Fixed sparkle icon positioning */}
+                      <SparklesIcon className="h-4 w-4 text-yellow-300 absolute -top-0.5 -right-0.5 animate-pulse bg-amber-600 rounded-full p-0.5" />
                     </div>
                   )}
                 </div>
@@ -346,8 +350,7 @@ export default function RemodelingDashboard() {
           {quickStats.map((stat, index) => (
             <div
               key={index}
-              className="rounded-xl border-2 theme-border p-6 transition-all duration-300 hover:shadow-xl hover:scale-105 hover:border-red-400 dark:hover:border-red-500 relative overflow-hidden"
-              style={{ backgroundColor: 'var(--surface-1)' }}
+              className="rounded-xl border-2 border-gray-200 dark:border-gray-700 p-6 bg-white dark:bg-gray-800 transition-all duration-300 hover:shadow-xl hover:scale-105 hover:border-amber-400 dark:hover:border-amber-500 relative overflow-hidden"
             >
               {/* Enhanced gradient backgrounds */}
               <div className={`absolute inset-0 opacity-30 ${
@@ -358,52 +361,63 @@ export default function RemodelingDashboard() {
               }`}></div>
               
               <div className="relative z-10">
-                {/* Percentage Badge - Top Right Corner */}
-                {stat.change && (
-                  <div className={`absolute -top-2 -right-2 flex items-center px-2 py-1 rounded-full text-xs font-bold shadow-lg z-20 ${
-                    stat.trend === 'up' 
-                      ? 'bg-green-500 dark:bg-green-600 text-white' 
-                      : 'bg-red-500 dark:bg-red-600 text-white'
-                  }`}>
-                    {stat.trend === 'up' ? (
-                      <ArrowTrendingUpIcon className="h-2.5 w-2.5 mr-0.5" />
-                    ) : (
-                      <ArrowTrendingDownIcon className="h-2.5 w-2.5 mr-0.5" />
+                {/* Improved Card Layout with Better Alignment */}
+                <div className="h-full flex flex-col justify-between">
+                  {/* Header Row - Better aligned with green bubble */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      {/* Green notification bubble aligned with title */}
+                      {stat.change && (
+                        <div className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold shadow-lg ${
+                          stat.trend === 'up' 
+                            ? 'bg-green-500 dark:bg-green-600 text-white' 
+                            : 'bg-red-500 dark:bg-red-600 text-white'
+                        }`}>
+                          {stat.trend === 'up' ? (
+                            <ArrowTrendingUpIcon className="h-3 w-3" />
+                          ) : (
+                            <ArrowTrendingDownIcon className="h-3 w-3" />
+                          )}
+                        </div>
+                      )}
+                      <p className="text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-400">
+                        {stat.label}
+                      </p>
+                      <HelpTooltip 
+                        content={
+                          index === 0 ? "Total revenue generated from completed projects and invoices. This includes all paid estimates and project payments." :
+                          index === 1 ? "Number of active projects currently in progress. Projects are considered active from approval through completion." :
+                          index === 2 ? "Total number of clients in your CRM system, including leads, active clients, and past customers." :
+                          "Average project value based on completed projects over the last 12 months. Helps track business growth trends."
+                        }
+                        title={stat.label}
+                        size="sm"
+                      />
+                    </div>
+                    
+                    {/* Percentage Badge - Right aligned */}
+                    {stat.change && (
+                      <div className={`flex items-center px-2 py-1 rounded-md text-xs font-bold shadow-lg ${
+                        stat.trend === 'up' 
+                          ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' 
+                          : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
+                      }`}>
+                        <span className="text-xs font-bold">{stat.trend === 'up' ? '+' : '-'}{Math.abs(stat.change)}%</span>
+                      </div>
                     )}
-                    <span className="text-[10px] font-bold">{Math.abs(stat.change)}%</span>
-                  </div>
-                )}
-                
-                {/* Improved Grid Layout */}
-                <div className="grid grid-rows-[auto_1fr_auto] h-full min-h-[120px]">
-                  {/* Header Row - Simplified without percentage */}
-                  <div className="mb-3 flex items-center gap-2">
-                    <p className="text-sm font-semibold uppercase tracking-wide leading-tight pr-8" style={{ color: 'var(--text-muted)' }}>
-                      {stat.label}
-                    </p>
-                    <HelpTooltip 
-                      content={
-                        index === 0 ? "Total revenue generated from completed projects and invoices. This includes all paid estimates and project payments." :
-                        index === 1 ? "Number of active projects currently in progress. Projects are considered active from approval through completion." :
-                        index === 2 ? "Total number of clients in your CRM system, including leads, active clients, and past customers." :
-                        "Average project value based on completed projects over the last 12 months. Helps track business growth trends."
-                      }
-                      title={stat.label}
-                      size="sm"
-                    />
                   </div>
                   
-                  {/* Main Value Row */}
-                  <div className="flex items-center">
-                    <p className="text-3xl lg:text-4xl font-bold leading-none" style={{ color: 'var(--text)' }}>
+                  {/* Main Value Row - Center aligned */}
+                  <div className="flex-1 flex items-center justify-center my-6">
+                    <p className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white text-center">
                       {stat.value}
                     </p>
                   </div>
                   
                   {/* Bottom Row - Change Description */}
                   {stat.change && (
-                    <div className="flex items-center justify-start mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                      <span className={`text-xs font-medium ${
+                    <div className="flex items-center justify-center pt-3 border-t border-gray-200 dark:border-gray-700">
+                      <span className={`text-sm font-medium text-center ${
                         stat.trend === 'up' 
                           ? 'text-green-600 dark:text-green-400' 
                           : 'text-red-600 dark:text-red-400'
@@ -416,11 +430,11 @@ export default function RemodelingDashboard() {
               </div>
               
               {/* Enhanced Corner Accent */}
-              <div className={`absolute top-0 right-0 w-16 h-16 opacity-20 ${
-                index === 0 ? 'bg-gradient-to-bl from-green-400 to-transparent' :
-                index === 1 ? 'bg-gradient-to-bl from-blue-400 to-transparent' :
-                index === 2 ? 'bg-gradient-to-bl from-purple-400 to-transparent' :
-                'bg-gradient-to-bl from-orange-400 to-transparent'
+              <div className={`absolute bottom-0 right-0 w-16 h-16 opacity-20 ${
+                index === 0 ? 'bg-gradient-to-tl from-green-400 to-transparent' :
+                index === 1 ? 'bg-gradient-to-tl from-blue-400 to-transparent' :
+                index === 2 ? 'bg-gradient-to-tl from-purple-400 to-transparent' :
+                'bg-gradient-to-tl from-orange-400 to-transparent'
               }`}></div>
             </div>
           ))}
@@ -463,8 +477,8 @@ export default function RemodelingDashboard() {
             <div className="absolute top-4 right-24 w-12 h-12 bg-slate-500/20 dark:bg-slate-600/20 rounded-full blur-xl"></div>
             <div className="absolute -bottom-2 -left-2 w-16 h-16 bg-slate-600/30 dark:bg-slate-700/30 rounded-full blur-2xl"></div>
           </div>
-          <div className="p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="p-8">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
               {recentProjects.map((project) => {
                 const projectType = remodelingTypes[project.type];
                 const projectStatus = statusSteps[project.status];
@@ -472,46 +486,102 @@ export default function RemodelingDashboard() {
                 return (
                   <div
                     key={project.id}
-                    className="border theme-border rounded-lg p-4 hover:shadow-md transition-all duration-200 cursor-pointer group"
+                    className="group relative bg-white dark:bg-gray-800 rounded-2xl border-2 border-gray-100 dark:border-gray-700 p-6 hover:border-amber-400 dark:hover:border-amber-500 hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:scale-[1.02] overflow-hidden"
                     onClick={() => router.push(`/dashboard/projects/${project.id}`)}
                   >
-                    {/* Project Header */}
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center space-x-3">
-                        <div className={`w-10 h-10 ${projectType.color} rounded-lg flex items-center justify-center text-white text-lg`}>
-                          {projectType.icon}
-                        </div>
-                        <div>
-                          <h3 className="font-semibold group-hover:text-orange-600 transition-colors" style={{ color: 'var(--text)' }}>
-                            {project.title}
-                          </h3>
-                          <p className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>{project.client}</p>
-                        </div>
-                      </div>
-                      <span className="text-lg font-bold" style={{ color: 'var(--text)' }}>
-                        ${project.budget.toLocaleString()}
-                      </span>
-                    </div>
-
-                    {/* Progress Bar */}
-                    <div className="mb-3">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${projectStatus.color} text-white`}>
-                          {projectStatus.label}
-                        </span>
-                        <span className="text-sm font-semibold" style={{ color: 'var(--text-muted)' }}>{project.progress}%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                        <div
-                          className="bg-orange-600 dark:bg-orange-500 h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${project.progress}%` }}
-                        ></div>
+                    {/* Enhanced Background Gradient */}
+                    <div className="absolute inset-0 opacity-20 bg-gradient-to-br from-amber-50 via-transparent to-orange-50 dark:from-amber-900/10 dark:via-transparent dark:to-orange-900/10 group-hover:opacity-30 transition-opacity duration-300"></div>
+                    
+                    {/* Floating Action Indicator */}
+                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+                      <div className="w-8 h-8 bg-amber-500 dark:bg-amber-600 rounded-full flex items-center justify-center shadow-lg">
+                        <ArrowTrendingUpIcon className="h-4 w-4 text-white" />
                       </div>
                     </div>
 
-                    {/* Next Milestone */}
-                    <div className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>
-                      <span className="font-semibold">Next: </span>{project.nextMilestone}
+                    <div className="relative z-10">
+                      {/* Enhanced Project Header */}
+                      <div className="flex items-start justify-between mb-6">
+                        <div className="flex items-start space-x-4">
+                          <div className={`w-14 h-14 ${projectType.color} rounded-2xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                            <projectType.icon className="h-7 w-7" />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors duration-200 leading-tight">
+                              {project.title}
+                            </h3>
+                            <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-1 flex items-center">
+                              <UserGroupIcon className="h-4 w-4 mr-1.5" />
+                              {project.client}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                              {projectType.label}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                            ${(project.budget / 1000).toFixed(0)}K
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                            Budget
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Enhanced Progress Section */}
+                      <div className="mb-6">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center space-x-3">
+                            <span className={`inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-bold ${projectStatus.color} text-white shadow-md`}>
+                              <div className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse"></div>
+                              {projectStatus.label}
+                            </span>
+                            <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                              Step {projectStatus.step} of 5
+                            </span>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-lg font-bold text-gray-900 dark:text-white">{project.progress}%</span>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">Complete</div>
+                          </div>
+                        </div>
+                        
+                        {/* Enhanced Progress Bar */}
+                        <div className="relative">
+                          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 shadow-inner">
+                            <div
+                              className="bg-gradient-to-r from-amber-500 to-orange-500 h-3 rounded-full transition-all duration-500 shadow-md relative overflow-hidden"
+                              style={{ width: `${project.progress}%` }}
+                            >
+                              <div className="absolute inset-0 bg-white opacity-20 animate-pulse"></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Enhanced Next Milestone */}
+                      <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 border border-gray-200 dark:border-gray-600">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                              <CalendarDaysIcon className="h-4 w-4 text-white" />
+                            </div>
+                            <div>
+                              <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                                Next Milestone
+                              </div>
+                              <div className="text-sm font-bold text-gray-900 dark:text-white">
+                                {project.nextMilestone}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-green-500 rounded-full animate-ping"></div>
+                            <span className="text-xs font-medium text-green-600 dark:text-green-400">Active</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 );
@@ -520,25 +590,27 @@ export default function RemodelingDashboard() {
           </div>
         </div>
 
-        {/* AI-Enhanced Quick Actions */}
+        {/* AI-Enhanced Quick Actions - Better Grid Alignment */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Link
             href="/dashboard/projects/new"
             className="bg-gradient-to-r from-orange-500 to-red-500 rounded-lg p-6 text-white hover:from-orange-600 hover:to-red-600 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <PlusIcon className="h-8 w-8" />
-                <div>
-                  <h3 className="text-lg font-semibold">New Project</h3>
-                  <p className="text-sm opacity-90">Start a new remodeling project</p>
+            <div className="flex flex-col h-full">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                  <PlusIcon className="h-8 w-8" />
+                  <div>
+                    <h3 className="text-lg font-semibold">New Project</h3>
+                    <p className="text-sm opacity-90">Start a new remodeling project</p>
+                  </div>
                 </div>
+                <HelpTooltip 
+                  content="Create a new remodeling project with client information, scope, timeline, and budget. Track progress from initial consultation to completion."
+                  title="New Project"
+                  size="sm"
+                />
               </div>
-              <HelpTooltip 
-                content="Create a new remodeling project with client information, scope, timeline, and budget. Track progress from initial consultation to completion."
-                title="New Project"
-                size="sm"
-              />
             </div>
           </Link>
 
@@ -546,18 +618,23 @@ export default function RemodelingDashboard() {
             need="design.studio"
             fallback={
               <div className="bg-gradient-to-r from-gray-400 to-gray-500 rounded-lg p-6 text-white relative overflow-hidden">
-                <div className="flex items-center space-x-3">
-                  <div className="relative">
-                    <Squares2X2Icon className="h-8 w-8" />
-                    <LockClosedIcon className="h-4 w-4 absolute -top-1 -right-1 bg-gray-600 rounded-full p-0.5" />
+                <div className="flex flex-col h-full">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="relative">
+                        <Squares2X2Icon className="h-8 w-8" />
+                        {/* Fixed lock icon positioning */}
+                        <LockClosedIcon className="h-3 w-3 absolute -top-0.5 -right-0.5 bg-gray-700 text-white rounded-full p-0.5" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold">Design Studio</h3>
+                        <p className="text-sm opacity-90">Upgrade for AI design tools</p>
+                      </div>
+                    </div>
+                    <div className="absolute top-2 right-2">
+                      <span className="bg-white/20 px-2 py-1 rounded text-xs font-bold">AI PRO</span>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-lg font-semibold">Design Studio</h3>
-                    <p className="text-sm opacity-90">Upgrade for AI design tools</p>
-                  </div>
-                </div>
-                <div className="absolute top-2 right-2">
-                  <span className="bg-white/20 px-2 py-1 rounded text-xs font-bold">AI PRO</span>
                 </div>
               </div>
             }
@@ -566,14 +643,19 @@ export default function RemodelingDashboard() {
               href="/dashboard/designer"
               className="bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg p-6 text-white hover:from-blue-600 hover:to-purple-600 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl relative"
             >
-              <div className="flex items-center space-x-3">
-                <div className="relative">
-                  <Squares2X2Icon className="h-8 w-8" />
-                  <SparklesIcon className="h-4 w-4 absolute -top-1 -right-1 text-yellow-300 animate-pulse" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold">AI Design Studio</h3>
-                  <p className="text-sm opacity-90">AI-powered design tools</p>
+              <div className="flex flex-col h-full">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="relative">
+                      <Squares2X2Icon className="h-8 w-8" />
+                      {/* Fixed sparkle icon positioning to prevent overlap */}
+                      <SparklesIcon className="h-3 w-3 absolute -top-0.5 -right-0.5 text-yellow-300 animate-pulse bg-blue-600 rounded-full p-0.5" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold">AI Design Studio</h3>
+                      <p className="text-sm opacity-90">AI-powered design tools</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </Link>
@@ -583,18 +665,23 @@ export default function RemodelingDashboard() {
             need="voice.agents"
             fallback={
               <div className="bg-gradient-to-r from-gray-400 to-gray-500 rounded-lg p-6 text-white relative overflow-hidden">
-                <div className="flex items-center space-x-3">
-                  <div className="relative">
-                    <MicrophoneIcon className="h-8 w-8" />
-                    <LockClosedIcon className="h-4 w-4 absolute -top-1 -right-1 bg-gray-600 rounded-full p-0.5" />
+                <div className="flex flex-col h-full">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="relative">
+                        <MicrophoneIcon className="h-8 w-8" />
+                        {/* Fixed lock icon positioning */}
+                        <LockClosedIcon className="h-3 w-3 absolute -top-0.5 -right-0.5 bg-gray-700 text-white rounded-full p-0.5" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold">Voice Agents</h3>
+                        <p className="text-sm opacity-90">Upgrade for AI assistants</p>
+                      </div>
+                    </div>
+                    <div className="absolute top-2 right-2">
+                      <span className="bg-white/20 px-2 py-1 rounded text-xs font-bold">AI PRO</span>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-lg font-semibold">Voice Agents</h3>
-                    <p className="text-sm opacity-90">Upgrade for AI assistants</p>
-                  </div>
-                </div>
-                <div className="absolute top-2 right-2">
-                  <span className="bg-white/20 px-2 py-1 rounded text-xs font-bold">AI PRO</span>
                 </div>
               </div>
             }
@@ -603,14 +690,19 @@ export default function RemodelingDashboard() {
               href="/dashboard/voice-agent-enhanced"
               className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg p-6 text-white hover:from-purple-600 hover:to-pink-600 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl relative"
             >
-              <div className="flex items-center space-x-3">
-                <div className="relative">
-                  <MicrophoneIcon className="h-8 w-8" />
-                  <SparklesIcon className="h-4 w-4 absolute -top-1 -right-1 text-yellow-300 animate-pulse" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold">AI Voice Agents</h3>
-                  <p className="text-sm opacity-90">Smart conversational AI</p>
+              <div className="flex flex-col h-full">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="relative">
+                      <MicrophoneIcon className="h-8 w-8" />
+                      {/* Fixed sparkle icon positioning to prevent overlap */}
+                      <SparklesIcon className="h-3 w-3 absolute -top-0.5 -right-0.5 text-yellow-300 animate-pulse bg-purple-600 rounded-full p-0.5" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold">AI Voice Agents</h3>
+                      <p className="text-sm opacity-90">Smart conversational AI</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </Link>
@@ -620,20 +712,24 @@ export default function RemodelingDashboard() {
             href="/dashboard/analytics"
             className="bg-gradient-to-r from-green-500 to-teal-500 rounded-lg p-6 text-white hover:from-green-600 hover:to-teal-600 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl relative"
           >
-            <div className="flex items-center space-x-3">
-              <div className="relative">
-                <ChartBarIcon className="h-8 w-8" />
-                {hasCapability('ai.analytics', userPlan) && (
-                  <SparklesIcon className="h-4 w-4 absolute -top-1 -right-1 text-yellow-300 animate-pulse" />
-                )}
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold">
-                  {hasCapability('ai.analytics', userPlan) ? 'AI Analytics' : 'View Reports'}
-                </h3>
-                <p className="text-sm opacity-90">
-                  {hasCapability('ai.analytics', userPlan) ? 'Smart insights & predictions' : 'Basic performance data'}
-                </p>
+            <div className="flex flex-col h-full">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                  <div className="relative">
+                    <ChartBarIcon className="h-8 w-8" />
+                    {hasCapability('ai.analytics', userPlan) && (
+                      <SparklesIcon className="h-3 w-3 absolute -top-0.5 -right-0.5 text-yellow-300 animate-pulse bg-green-600 rounded-full p-0.5" />
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold">
+                      {hasCapability('ai.analytics', userPlan) ? 'AI Analytics' : 'View Reports'}
+                    </h3>
+                    <p className="text-sm opacity-90">
+                      {hasCapability('ai.analytics', userPlan) ? 'Smart insights & predictions' : 'Basic performance data'}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </Link>
@@ -674,7 +770,7 @@ export default function RemodelingDashboard() {
               </div>
               
               <Link
-                href="/dashboard/settings/billing?upgrade=ai-pro"
+                href="/settings/billing?upgrade=ai-pro"
                 className="inline-flex items-center px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 shadow-lg"
               >
                 <SparklesIcon className="h-5 w-5 mr-2" />
