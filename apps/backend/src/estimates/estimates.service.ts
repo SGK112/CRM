@@ -5,6 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Estimate, EstimateDocument } from './schemas/estimate.schema';
 import { PriceItem, PriceItemDocument } from '../pricing/schemas/price-item.schema';
+import { Client, ClientDocument } from '../clients/schemas/client.schema';
 
 interface CreateEstimateDto {
   number?: string;
@@ -29,6 +30,7 @@ export class EstimatesService {
   constructor(
     @InjectModel(Estimate.name) private estimateModel: Model<EstimateDocument>,
     @InjectModel(PriceItem.name) private priceModel: Model<PriceItemDocument>,
+  @InjectModel(Client.name) private clientModel: Model<ClientDocument>,
     private emailService: EmailService,
     // Optionally inject ClientsService if needed for more client info
   ) {}
@@ -162,9 +164,8 @@ export class EstimatesService {
       doc.status = 'sent';
       await doc.save();
     }
-    // Fetch client info (assumes you have a Client model/service)
-    const clientModel = doc.constructor.db.model('Client');
-    const client = await clientModel.findOne({ _id: doc.clientId, workspaceId });
+  // Fetch client info
+  const client = await this.clientModel.findOne({ _id: doc.clientId, workspaceId });
     if (!client || !client.email) return doc; // Can't send without client email
 
     // Generate PDF

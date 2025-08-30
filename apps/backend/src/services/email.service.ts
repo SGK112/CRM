@@ -1,15 +1,97 @@
-export class EmailService {
-  private isConfigured = false;
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import * as nodemailer from 'nodemailer';
+import * as sgMail from '@sendgrid/mail';
 
-  async sendEmail(options: { to: string; subject: string; html: string; text?: string }): Promise<boolean> {
+export interface SendEmailOptions {
+  to: string;
+  subject: string;
+  html?: string;
+  text?: string;
+  from?: string;
+  attachments?: Array<{ filename: string; content: Buffer }>;
+}
+
+@Injectable()
+export class EmailService {
+  private transporter?: nodemailer.Transporter;
+  private isConfigured = false;
+  private useSendGridAPI = false;
+
+  constructor(private readonly configService: ConfigService) {
+    this.setupTransporter();
+  }
+
+  private setupTransporter() {
+    const sendGridApiKey = this.configService.get<string>('SENDGRID_API_KEY');
+    if (sendGridApiKey) {
+      sgMail.setApiKey(sendGridApiKey);
+      this.useSendGridAPI = true;
+      this.isConfigured = true;
+      return;
+    }
+    const host = this.configService.get<string>('SMTP_HOST');
+    const port = this.configService.get<string>('SMTP_PORT');
+    const user = this.configService.get<string>('SMTP_USER');
+    const pass = this.configService.get<string>('SMTP_PASS');
+    if (host && port && user && pass) {
+      this.transporter = nodemailer.createTransport({
+        host,
+        port: parseInt(port, 10),
+        secure: port === '465',
+        auth: { user, pass },
+      });
+      this.isConfigured = true;
+    }
+  }
+
+  async sendEmail(options: SendEmailOptions): Promise<boolean> {
     try {
-      // Implement your email sending logic here (e.g., using nodemailer or another service)
-      // Example:
-      // const result = await transporter.sendMail({ ...options });
-      // console.log('Email sent successfully via SMTP:', result.messageId);
-      return true;
-    } catch (error) {
-      console.error('Failed to send email:', error);
+      if (!this.isConfigured) {
+        return true; // simulate success in dev
+      }
+
+      if (this.useSendGridAPI) {
+        const fromEmail =
+          options.from ||
+          this.configService.get<string>('SENDGRID_FROM_EMAIL') ||
+          this.configService.get<string>('SMTP_FROM') ||
+          'noreply@crmapp.com';
+        const fromName = this.configService.get<string>('SENDGRID_FROM_NAME') || 'Remodely CRM';
+        const msg: any = {
+          to: options.to,
+          from: { email: fromEmail, name: fromName },
+          subject: options.subject,
+          html: options.html,
+          text: options.text,
+        };
+        if (options.attachments?.length) {
+          msg.attachments = options.attachments.map(att => ({
+            content: att.content.toString('base64'),
+            filename: att.filename,
+            type: 'application/pdf',
+            disposition: 'attachment',
+          }));
+        }
+        await sgMail.send(msg);
+        return true;
+      }
+
+      if (this.transporter) {
+        const from = options.from || this.configService.get<string>('SMTP_FROM') || 'noreply@crmapp.com';
+        await this.transporter.sendMail({
+          from,
+          to: options.to,
+          subject: options.subject,
+          html: options.html,
+          text: options.text,
+          attachments: options.attachments,
+        } as any);
+        return true;
+      }
+
+      return false;
+    } catch {
       return false;
     }
   }
@@ -51,11 +133,7 @@ export class EmailService {
         </div>
       </div>
     `;
-    return this.sendEmail({
-      to: clientEmail,
-      subject: `Appointment Confirmation - ${formattedDate}`,
-      html,
-    });
+    return this.sendEmail({ to: clientEmail, subject: `Appointment Confirmation - ${formattedDate}`, html });
   }
 
   async sendEstimateFollowUp(options: {
@@ -84,11 +162,7 @@ export class EmailService {
         </div>
       </div>
     `;
-    return this.sendEmail({
-      to: clientEmail,
-      subject: `Estimate Follow-up - ${estimateNumber}`,
-      html,
-    });
+    return this.sendEmail({ to: clientEmail, subject: `Estimate Follow-up - ${estimateNumber}`, html });
   }
 
   async sendGeneralFollowUp(options: {
@@ -117,11 +191,7 @@ export class EmailService {
         </div>
       </div>
     `;
-    return this.sendEmail({
-      to: clientEmail,
-      subject,
-      html,
-    });
+    return this.sendEmail({ to: clientEmail, subject, html });
   }
 
   get configured(): boolean {
