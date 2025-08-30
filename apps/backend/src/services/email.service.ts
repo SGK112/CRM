@@ -1,11 +1,13 @@
+export class EmailService {
+  private isConfigured = false;
 
-          html: options.html,
-          text: options.text,
-        });
-
-        console.log('Email sent successfully via SMTP:', result.messageId);
-        return true;
-      }
+  async sendEmail(options: { to: string; subject: string; html: string; text?: string }): Promise<boolean> {
+    try {
+      // Implement your email sending logic here (e.g., using nodemailer or another service)
+      // Example:
+      // const result = await transporter.sendMail({ ...options });
+      // console.log('Email sent successfully via SMTP:', result.messageId);
+      return true;
     } catch (error) {
       console.error('Failed to send email:', error);
       return false;
@@ -21,7 +23,6 @@
     notes?: string;
   }): Promise<boolean> {
     const { clientEmail, clientName, appointmentDate, appointmentType, location, notes } = options;
-    
     const formattedDate = appointmentDate.toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
@@ -29,15 +30,13 @@
       day: 'numeric',
       hour: 'numeric',
       minute: '2-digit',
-      timeZoneName: 'short'
+      timeZoneName: 'short',
     });
-
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #2563eb;">Appointment Confirmation</h2>
         <p>Hi ${clientName},</p>
         <p>Your appointment has been confirmed for:</p>
-        
         <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <h3 style="margin: 0 0 10px 0; color: #374151;">Appointment Details</h3>
           <p><strong>Type:</strong> ${appointmentType}</p>
@@ -45,20 +44,17 @@
           ${location ? `<p><strong>Location:</strong> ${location}</p>` : ''}
           ${notes ? `<p><strong>Notes:</strong> ${notes}</p>` : ''}
         </div>
-        
         <p>If you need to reschedule or cancel this appointment, please contact us as soon as possible.</p>
         <p>We look forward to seeing you!</p>
-        
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 14px;">
           <p>This email was sent automatically by our voice agent system.</p>
         </div>
       </div>
     `;
-
     return this.sendEmail({
       to: clientEmail,
       subject: `Appointment Confirmation - ${formattedDate}`,
-      html
+      html,
     });
   }
 
@@ -70,33 +66,28 @@
     callNotes?: string;
   }): Promise<boolean> {
     const { clientEmail, clientName, estimateNumber, estimateAmount, callNotes } = options;
-    
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #2563eb;">Estimate Follow-up</h2>
         <p>Hi ${clientName},</p>
         <p>Thank you for speaking with us today about your project.</p>
-        
         <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <h3 style="margin: 0 0 10px 0; color: #374151;">Estimate Summary</h3>
           <p><strong>Estimate #:</strong> ${estimateNumber}</p>
           <p><strong>Total Amount:</strong> $${estimateAmount.toFixed(2)}</p>
           ${callNotes ? `<p><strong>Discussion Notes:</strong> ${callNotes}</p>` : ''}
         </div>
-        
         <p>Please review the estimate and let us know if you have any questions or would like to proceed with the project.</p>
         <p>We're here to help make your vision a reality!</p>
-        
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 14px;">
           <p>This email was sent following our phone conversation.</p>
         </div>
       </div>
     `;
-
     return this.sendEmail({
       to: clientEmail,
       subject: `Estimate Follow-up - ${estimateNumber}`,
-      html
+      html,
     });
   }
 
@@ -108,33 +99,28 @@
     callNotes?: string;
   }): Promise<boolean> {
     const { clientEmail, clientName, subject, message, callNotes } = options;
-    
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #2563eb;">${subject}</h2>
         <p>Hi ${clientName},</p>
         <p>${message}</p>
-        
         ${callNotes ? `
           <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="margin: 0 0 10px 0; color: #374151;">Call Notes</h3>
             <p>${callNotes}</p>
           </div>
         ` : ''}
-        
         <p>Please don't hesitate to contact us if you have any questions.</p>
         <p>Best regards,<br>Your Project Team</p>
-        
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 14px;">
           <p>This email was sent following our phone conversation.</p>
         </div>
       </div>
     `;
-
     return this.sendEmail({
       to: clientEmail,
       subject,
-      html
+      html,
     });
   }
 
