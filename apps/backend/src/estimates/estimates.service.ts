@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { EmailService } from '../services/email.service';
-import * as PDFDocument from 'pdfkit';
-import { ClientsService } from '../clients/clients.service';
-import { Readable } from 'stream';
+import PDFDocument from 'pdfkit';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Estimate, EstimateDocument } from './schemas/estimate.schema';
@@ -35,7 +33,7 @@ export class EstimatesService {
     // Optionally inject ClientsService if needed for more client info
   ) {}
 
-  private async generateEstimatePDF(estimate: any, client: any): Promise<Buffer> {
+  private async generateEstimatePDF(estimate: EstimateDocument, client: { firstName: string; lastName: string; email?: string; company?: string }): Promise<Buffer> {
     const doc = new PDFDocument();
     const buffers: Buffer[] = [];
     doc.on('data', buffers.push.bind(buffers));
@@ -49,14 +47,14 @@ export class EstimatesService {
     if (client.company) doc.text(`Company: ${client.company}`);
     doc.moveDown();
     doc.text('Items:');
-    estimate.items.forEach((item, idx) => {
-      doc.text(`${idx + 1}. ${item.name} - Qty: ${item.quantity} - $${item.sellPrice.toFixed(2)}`);
+    estimate.items.forEach((item: { name: string; quantity: number; sellPrice?: number }, idx: number) => {
+      doc.text(`${idx + 1}. ${item.name} - Qty: ${item.quantity} - $${item.sellPrice?.toFixed(2)}`);
     });
     doc.moveDown();
-    doc.text(`Subtotal: $${estimate.subtotalSell?.toFixed(2)}`);
-    doc.text(`Discount: $${estimate.discountAmount?.toFixed(2)}`);
-    doc.text(`Tax: $${estimate.taxAmount?.toFixed(2)}`);
-    doc.text(`Total: $${estimate.total?.toFixed(2)}`);
+  if (typeof estimate.subtotalSell === 'number') doc.text(`Subtotal: $${estimate.subtotalSell.toFixed(2)}`);
+  if (typeof estimate.discountAmount === 'number') doc.text(`Discount: $${estimate.discountAmount.toFixed(2)}`);
+  if (typeof estimate.taxAmount === 'number') doc.text(`Tax: $${estimate.taxAmount.toFixed(2)}`);
+  if (typeof estimate.total === 'number') doc.text(`Total: $${estimate.total.toFixed(2)}`);
     doc.end();
     return await new Promise((resolve, reject) => {
       doc.on('end', () => {
@@ -106,9 +104,9 @@ export class EstimatesService {
       dto.number = `EST-${(1000 + count + 1)}`;
     }
     // Build line items, enriching from price items if provided
-    const items = [] as any[];
+  const items: Array<{ priceItemId?: string; name?: string; description?: string; quantity?: number; baseCost?: number; marginPct?: number; taxable?: boolean; sku?: string }> = [];
     for (const input of dto.items || []) {
-      const li = { ...input } as any;
+  const li = { ...input };
       if (input.priceItemId) {
         const pi = await this.priceModel.findOne({ _id: input.priceItemId, workspaceId });
         if (pi) {
@@ -136,7 +134,7 @@ export class EstimatesService {
       taxRate: dto.taxRate || 0,
       notes: dto.notes,
     });
-    this.computeTotals(doc as any);
+  this.computeTotals(doc);
     await doc.save();
     return doc;
   }
@@ -144,7 +142,7 @@ export class EstimatesService {
   async recalc(id: string, workspaceId: string) {
     const doc = await this.estimateModel.findOne({ _id: id, workspaceId });
     if (!doc) return null;
-    this.computeTotals(doc as any);
+  this.computeTotals(doc);
     await doc.save();
     return doc;
   }
@@ -210,13 +208,13 @@ export class EstimatesService {
         sellPrice: 0,
         taxable: !!li.taxable,
         sku: li.sku,
-      })) as any;
+  }));
     }
     if (dto.discountType) doc.discountType = dto.discountType;
     if (dto.discountValue !== undefined) doc.discountValue = dto.discountValue;
     if (dto.taxRate !== undefined) doc.taxRate = dto.taxRate;
     if (dto.notes !== undefined) doc.notes = dto.notes;
-    this.computeTotals(doc as any);
+  this.computeTotals(doc);
     await doc.save();
     return doc;
   }
