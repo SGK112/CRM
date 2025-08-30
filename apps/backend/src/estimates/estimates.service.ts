@@ -32,10 +32,17 @@ export class EstimatesService {
   private computeTotals(doc: EstimateDocument) {
     let subtotalCost = 0; let subtotalSell = 0; let totalMargin = 0;
     doc.items.forEach(li => {
-      const cost = (li.baseCost || 0) * (li.quantity || 1);
-      const sell = cost * (1 + (li.marginPct||0)/100);
-      li.sellPrice = sell;
-      subtotalCost += cost; subtotalSell += sell; totalMargin += (sell - cost);
+      const unitCost = li.baseCost || 0;
+      const quantity = li.quantity || 1;
+      const unitSellPrice = unitCost * (1 + (li.marginPct||0)/100);
+      li.sellPrice = unitSellPrice; // Store per-unit sell price
+      
+      const totalCost = unitCost * quantity;
+      const totalSell = unitSellPrice * quantity;
+      
+      subtotalCost += totalCost; 
+      subtotalSell += totalSell; 
+      totalMargin += (totalSell - totalCost);
     });
     doc.subtotalCost = subtotalCost;
     doc.subtotalSell = subtotalSell;
