@@ -5,10 +5,29 @@
  * This script will delete all data from the CRM database except for admin users
  */
 
+/* eslint-disable @typescript-eslint/no-var-requires, no-console, @typescript-eslint/no-unused-vars */
 const { MongoClient } = require('mongodb');
+const fs = require('fs');
 
-const MONGODB_URI = 'mongodb://localhost:27017/remodely-crm';
-const ADMIN_EMAIL = 'help.remodely@gmail.com';
+/* eslint-disable no-console */
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable import/no-commonjs */
+function loadMongoUri() {
+  if (process.env.MONGODB_URI) return process.env.MONGODB_URI;
+  try {
+    const env = fs.readFileSync('.env', 'utf8');
+    const match = env.match(/^MONGODB_URI=(.+)$/m);
+    if (match && match[1]) return match[1].trim();
+  } catch { /* no .env file */ }
+  try {
+    const envEx = fs.readFileSync('.env.example', 'utf8');
+    const match = envEx.match(/^MONGODB_URI=(.+)$/m);
+    if (match && match[1]) return match[1].trim();
+  } catch { /* no .env.example file */ }
+  return 'mongodb://localhost:27017/remodely-crm';
+}
+
+const MONGODB_URI = loadMongoUri();
 
 async function resetDatabase() {
   let client;
@@ -18,8 +37,8 @@ async function resetDatabase() {
     client = new MongoClient(MONGODB_URI);
     await client.connect();
 
-    const db = client.db();
-    console.log('✅ Connected to database: remodely-crm');
+  const db = client.db();
+  console.log(`✅ Connected to database: ${db.databaseName}`);
 
     // Get all collections
     const collections = await db.listCollections().toArray();

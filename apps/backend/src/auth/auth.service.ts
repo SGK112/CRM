@@ -6,12 +6,36 @@ import * as bcrypt from 'bcrypt';
 import { User, UserDocument } from '../users/schemas/user.schema';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
 import { TwilioService } from '../services/twilio.service';
+/* eslint-disable @typescript-eslint/no-explicit-any, no-console, @typescript-eslint/no-unused-vars */
 
-// In-memory store for demo accounts (for persistence across sessions)
-const demoUsers = new Map<string, any>();
+type DemoUser = {
+  id: string;
+  email: string;
+  password?: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  workspaceId: string;
+  phone?: string | null;
+  avatar?: string | null;
+  isEmailVerified: boolean;
+  authProvider?: string;
+  googleId?: string;
+  isPhoneVerified: boolean;
+  twoFactorEnabled: boolean;
+  isActive: boolean;
+  subscriptionPlan?: string;
+  subscriptionStatus?: string;
+  trialEndsAt?: Date;
+  lastLoginAt: Date | null;
+  createdAt: Date;
+};
+// In-memory store for optional demo accounts (disabled by default)
+const demoUsers = new Map<string, DemoUser>();
 
 @Injectable()
 export class AuthService {
+  private readonly useDemoUsers: boolean = process.env.USE_DEMO_USERS === 'true';
   private passwordResetCodes = new Map<string, { code: string; expires: Date; userId: string }>();
 
   constructor(
@@ -19,8 +43,10 @@ export class AuthService {
     public jwtService: JwtService,
     private twilioService: TwilioService,
   ) {
-    // Initialize with a demo user
-    this.initializeDemoUsers();
+    // Initialize demo users only when explicitly enabled
+    if (this.useDemoUsers) {
+      this.initializeDemoUsers();
+    }
   }
 
   private async initializeDemoUsers() {
@@ -28,28 +54,8 @@ export class AuthService {
     // If already seeded skip
     if (demoUsers.has(demoEmail)) return;
     const hashedPassword = await bcrypt.hash('demo123', 12);
-    // Ensure a persistent DB record exists so JWT sub remains valid after restarts.
-    let dbUser: any = null;
-    try {
-      dbUser = await this.userModel.findOne({ email: demoEmail });
-      if (!dbUser) {
-        dbUser = new this.userModel({
-          email: demoEmail,
-          password: hashedPassword,
-          firstName: 'Demo',
-          lastName: 'User',
-          role: 'owner',
-          workspaceId: 'demo_workspace_1',
-          phone: '+1234567890', // Add demo phone number
-          isEmailVerified: true,
-          isPhoneVerified: false,
-          twoFactorEnabled: false,
-          isActive: true,
-        });
-        await dbUser.save();
-      }
-    } catch {/* swallow */}
-    const stableId = dbUser?._id?.toString() || 'demo_user_1';
+    // Do NOT persist demo users to DB; keep in-memory only when enabled
+    const stableId = 'demo_user_1';
     demoUsers.set(demoEmail, {
       id: stableId,
       email: demoEmail,
@@ -151,9 +157,9 @@ export class AuthService {
   async login(loginDto: LoginDto): Promise<any> {
     const { email, password } = loginDto;
 
-    // First check demo users
-    const demoUser = demoUsers.get(email);
-    if (demoUser) {
+  // First check demo users when enabled
+  const demoUser = this.useDemoUsers ? demoUsers.get(email) : undefined;
+  if (demoUser) {
       const isPasswordValid = await bcrypt.compare(password, demoUser.password);
       if (!isPasswordValid) {
         throw new UnauthorizedException('Invalid credentials');
@@ -241,9 +247,9 @@ export class AuthService {
   }
 
   async validateUser(email: string, password: string): Promise<any> {
-    // Check demo users first
-    const demoUser = demoUsers.get(email);
-    if (demoUser && await bcrypt.compare(password, demoUser.password)) {
+  // Check demo users first when enabled
+  const demoUser = this.useDemoUsers ? demoUsers.get(email) : undefined;
+  if (demoUser && await bcrypt.compare(password, demoUser.password)) {
       const { password: _, ...result } = demoUser;
       return result;
     }
@@ -261,11 +267,13 @@ export class AuthService {
     return null;
   }
 
-  async findUserById(id: string): Promise<User | null> {
-    // Check demo users first
-    for (const user of demoUsers.values()) {
-      if (user.id === id) {
-        return user;
+  async findUserById(id: string): Promise<any> {
+    // Check demo users first when enabled
+    if (this.useDemoUsers) {
+      for (const user of demoUsers.values()) {
+        if (user.id === id) {
+          return user;
+        }
       }
     }
 
@@ -277,10 +285,12 @@ export class AuthService {
     }
   }
 
-  async findUserByEmail(email: string): Promise<User | null> {
-    // check in-memory first
-    const mem = demoUsers.get(email);
-    if (mem) return mem;
+  async findUserByEmail(email: string): Promise<any> {
+    // check in-memory first when enabled
+    if (this.useDemoUsers) {
+      const mem = demoUsers.get(email);
+      if (mem) return mem;
+    }
     try {
       return this.userModel.findOne({ email }).select('-password');
     } catch { return null; }
@@ -288,8 +298,8 @@ export class AuthService {
 
   // Google OAuth Methods
   async findOrCreateGoogleUser(googleUser: any): Promise<any> {
-    // Check demo users first
-    const existingDemoUser = demoUsers.get(googleUser.email);
+  // Check demo users first when enabled
+  const existingDemoUser = this.useDemoUsers ? demoUsers.get(googleUser.email) : undefined;
     if (existingDemoUser) {
       // Special handling for super admin
       if (googleUser.email === 'help.remodely@gmail.com') {
@@ -306,7 +316,7 @@ export class AuthService {
     try {
       user = await this.userModel.findOne({ email: googleUser.email });
     } catch (error) {
-      console.log('Database check failed, creating demo user');
+      console.log('Database check failed');
     }
 
     if (!user) {
@@ -328,12 +338,17 @@ export class AuthService {
         googleId: googleUser.id,
         role: googleUser.email === 'help.remodely@gmail.com' ? 'owner' : 'owner',
         isActive: true,
+        isPhoneVerified: false,
+        twoFactorEnabled: false,
+        lastLoginAt: null,
         subscriptionPlan: googleUser.email === 'help.remodely@gmail.com' ? 'growth' : 'free',
         subscriptionStatus: googleUser.email === 'help.remodely@gmail.com' ? 'active' : 'active',
         createdAt: new Date(),
       };
 
-      demoUsers.set(googleUser.email, newUser);
+      if (this.useDemoUsers) {
+        demoUsers.set(googleUser.email, newUser);
+      }
 
       // Try to save to database too
       try {
@@ -352,7 +367,7 @@ export class AuthService {
         });
         await user.save();
       } catch (error) {
-        console.log('Database save failed, using demo user');
+        console.log('Database save failed');
         return newUser;
       }
     } else {
@@ -378,12 +393,14 @@ export class AuthService {
     try {
       console.log(`🔄 Password reset request for phone: ${phoneNumber}`);
       
-      // Find user by phone number in demo users
+      // Find user by phone number in demo users when enabled
       let user = null;
-      for (const demoUser of demoUsers.values()) {
-        if (demoUser.phone === phoneNumber) {
-          user = demoUser;
-          break;
+      if (this.useDemoUsers) {
+        for (const demoUser of demoUsers.values()) {
+          if (demoUser.phone === phoneNumber) {
+            user = demoUser;
+            break;
+          }
         }
       }
 
@@ -474,12 +491,14 @@ export class AuthService {
 
       const hashedPassword = await bcrypt.hash(newPassword, 12);
       
-      // Update demo user if exists
-      for (const [email, user] of demoUsers.entries()) {
-        if (user.id === decoded.userId) {
-          user.password = hashedPassword;
-          demoUsers.set(email, user);
-          break;
+      // Update demo user if exists (when enabled)
+      if (this.useDemoUsers) {
+        for (const [email, user] of demoUsers.entries()) {
+          if (user.id === decoded.userId) {
+            user.password = hashedPassword;
+            demoUsers.set(email, user);
+            break;
+          }
         }
       }
 

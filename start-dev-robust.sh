@@ -72,6 +72,7 @@ print_success "Ports 3000 and 3001 are available"
 
 # Start the development server
 print_status "Starting development server..."
+export USE_DEMO_USERS=false
 npm run dev
 
 # If we get here, the server was stopped
