@@ -58,7 +58,7 @@ export class EmailService {
           this.configService.get<string>('SMTP_FROM') ||
           'noreply@crmapp.com';
         const fromName = this.configService.get<string>('SENDGRID_FROM_NAME') || 'Remodely CRM';
-        const msg: any = {
+        const msg: sgMail.MailDataRequired = {
           to: options.to,
           from: { email: fromEmail, name: fromName },
           subject: options.subject,
@@ -86,7 +86,7 @@ export class EmailService {
           html: options.html,
           text: options.text,
           attachments: options.attachments,
-        } as any);
+        } as nodemailer.SendMailOptions);
         return true;
       }
 
