@@ -1,4 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { EmailService } from '../services/email.service';
+import * as PDFDocument from 'pdfkit';
+import { ClientsService } from '../clients/clients.service';
+import { Readable } from 'stream';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Estimate, EstimateDocument } from './schemas/estimate.schema';
@@ -27,7 +31,40 @@ export class EstimatesService {
   constructor(
     @InjectModel(Estimate.name) private estimateModel: Model<EstimateDocument>,
     @InjectModel(PriceItem.name) private priceModel: Model<PriceItemDocument>,
+    private emailService: EmailService,
+    // Optionally inject ClientsService if needed for more client info
   ) {}
+
+  private async generateEstimatePDF(estimate: any, client: any): Promise<Buffer> {
+    const doc = new PDFDocument();
+    const buffers: Buffer[] = [];
+    doc.on('data', buffers.push.bind(buffers));
+    doc.on('end', () => {});
+
+    doc.fontSize(20).text('Estimate', { align: 'center' });
+    doc.moveDown();
+    doc.fontSize(12).text(`Estimate #: ${estimate.number}`);
+    doc.text(`Client: ${client.firstName} ${client.lastName}`);
+    if (client.email) doc.text(`Email: ${client.email}`);
+    if (client.company) doc.text(`Company: ${client.company}`);
+    doc.moveDown();
+    doc.text('Items:');
+    estimate.items.forEach((item, idx) => {
+      doc.text(`${idx + 1}. ${item.name} - Qty: ${item.quantity} - $${item.sellPrice.toFixed(2)}`);
+    });
+    doc.moveDown();
+    doc.text(`Subtotal: $${estimate.subtotalSell?.toFixed(2)}`);
+    doc.text(`Discount: $${estimate.discountAmount?.toFixed(2)}`);
+    doc.text(`Tax: $${estimate.taxAmount?.toFixed(2)}`);
+    doc.text(`Total: $${estimate.total?.toFixed(2)}`);
+    doc.end();
+    return await new Promise((resolve, reject) => {
+      doc.on('end', () => {
+        resolve(Buffer.concat(buffers));
+      });
+      doc.on('error', reject);
+    });
+  }
 
   private computeTotals(doc: EstimateDocument) {
     let subtotalCost = 0; let subtotalSell = 0; let totalMargin = 0;
@@ -127,7 +164,26 @@ export class EstimatesService {
       doc.status = 'sent';
       await doc.save();
     }
-    // TODO: integrate email service or notification dispatch
+    // Fetch client info (assumes you have a Client model/service)
+    const clientModel = doc.constructor.db.model('Client');
+    const client = await clientModel.findOne({ _id: doc.clientId, workspaceId });
+    if (!client || !client.email) return doc; // Can't send without client email
+
+    // Generate PDF
+    const pdfBuffer = await this.generateEstimatePDF(doc, client);
+
+    // Send email with PDF attachment
+    await this.emailService.sendEmail({
+      to: client.email,
+      subject: `Your Estimate from Remodely CRM (#${doc.number})`,
+      html: `<p>Dear ${client.firstName},</p><p>Please find your estimate attached.</p>`,
+      attachments: [
+        {
+          filename: `Estimate-${doc.number}.pdf`,
+          content: pdfBuffer,
+        },
+      ],
+    });
     return doc;
   }
 

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Estimate, EstimateSchema } from './schemas/estimate.schema';
 import { EstimatesService } from './estimates.service';
+import { EmailService } from '../services/email.service';
 import { EstimatesController } from './estimates.controller';
 import { AIEstimateService } from './ai-estimate.service';
 import { AIEstimateController } from './ai-estimate.controller';
@@ -20,7 +21,7 @@ import { AiModule } from '../ai/ai.module';
     // Needed for AI services
     AiModule,
   ],
-  providers: [EstimatesService, AIEstimateService],
+  providers: [EstimatesService, AIEstimateService, EmailService],
   controllers: [EstimatesController, AIEstimateController],
   exports: [EstimatesService, AIEstimateService]
 })
