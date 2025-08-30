@@ -1,4 +1,4 @@
-import { Controller, Post, UseGuards, Get, Req } from '@nestjs/common';
+import { Controller, Post, UseGuards, Get, Req, Delete } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { DevService } from './dev.service';
 import { Request } from 'express';
@@ -22,5 +22,15 @@ export class DevController {
   async verifyAccess(@Req() req: Request) {
     const user = req.user as any;
     return await this.devService.verifyUserAccess(user);
+  }
+
+  @Delete('reset-all-data')
+  async resetAllData(@Req() req: Request) {
+    const user = req.user as any;
+    if (user.email !== 'help.remodely@gmail.com') {
+      throw new Error('Unauthorized: This endpoint is only for help.remodely@gmail.com');
+    }
+    
+    return await this.devService.resetAllData(user.email);
   }
 }

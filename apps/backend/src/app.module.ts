@@ -32,6 +32,7 @@ import { AiTokensModule } from './ai-tokens/ai-tokens.module';
 import { CommunicationsModule } from './communications/communications.module';
 import { UserConfigModule } from './user-config/user-config.module';
 import { DevModule } from './dev/dev.module';
+import { AdminModule } from './admin/admin.module';
 import { QuickBooksModule } from './quickbooks/quickbooks.module';
 import { WalletModule } from './wallet/wallet.module';
 import { TwilioNumbersModule } from './twilio-numbers/twilio-numbers.module';
@@ -78,6 +79,7 @@ import { TwilioNumbersModule } from './twilio-numbers/twilio-numbers.module';
   CommunicationsModule,
   UserConfigModule,
   DevModule,
+  AdminModule,
   QuickBooksModule,
   WalletModule,
   TwilioNumbersModule,

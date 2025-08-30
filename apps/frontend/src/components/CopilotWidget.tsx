@@ -118,12 +118,12 @@ export default function CopilotWidget() {
               </div>
             </div>
             <div className="flex flex-wrap gap-1">
-              {['/projects','/clients','/new-project'].map(s => (
+              {['/dashboard/projects','/dashboard/clients','/new-project'].map(s => (
                 <button
                   key={s}
                   onClick={() => setCommandAndOpen(s)}
                   className="text-[10px] px-2 py-1 rounded bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-gray-700 dark:bg-[var(--surface-2)] dark:hover:bg-[var(--surface-3)] dark:text-gray-200 border border-[var(--border)] dark:border-gray-800 transition-colors"
-                >{s}</button>
+                >{s.replace('/dashboard', '')}</button>
               ))}
             </div>
             <div className="flex items-center justify-between pt-1">

@@ -38,7 +38,9 @@ import {
   ArrowsPointingOutIcon,
   MicrophoneIcon,
   LockClosedIcon,
-  WalletIcon
+  WalletIcon,
+  ShieldCheckIcon,
+  CreditCardIcon
 } from '@heroicons/react/24/outline';
 import Logo from './Logo';
 import { ThemeProvider, useTheme } from './ThemeProvider';
@@ -183,9 +185,11 @@ export default function Layout({ children }: LayoutProps) {
     {
       label: 'Business Management', 
       items: [
+        { name: 'Billing & Payments', href: '/billing', icon: CreditCardIcon },
         { name: 'TON Wallet', href: '/dashboard/wallet', icon: WalletIcon },
         { name: 'Documents & Files', href: '/dashboard/documents', icon: DocumentTextIcon },
         { name: 'Reports & Analytics', href: '/dashboard/analytics', icon: ChartBarIcon },
+        { name: 'Admin Dashboard', href: '/dashboard/admin', icon: ShieldCheckIcon },
         { name: 'Settings', href: '/dashboard/settings', icon: CogIcon }
       ]
     }

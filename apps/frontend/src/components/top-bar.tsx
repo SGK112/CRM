@@ -34,8 +34,8 @@ export function TopBar() {
         </Link>
         <nav className="flex items-center gap-4 text-xs text-secondary">
           <Link href="/dashboard" className="hover:text-amber-500 transition-colors">Dashboard</Link>
-          <Link href="/clients" className="hover:text-amber-500 transition-colors">Clients</Link>
-          <Link href="/projects" className="hover:text-amber-500 transition-colors">Projects</Link>
+          <Link href="/dashboard/clients" className="hover:text-amber-500 transition-colors">Clients</Link>
+          <Link href="/dashboard/projects" className="hover:text-amber-500 transition-colors">Projects</Link>
         </nav>
         <div className="ml-auto flex items-center gap-4">
           <ThemeToggle variant="button" />

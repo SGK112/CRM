@@ -1,0 +1,48 @@
+services:
+  # Backend API Service - Single Service Deployment
+  - type: web
+    name: crm-backend
+    env: node
+    region: oregon
+    plan: starter
+    # Root directory build commands
+    buildCommand: |
+      echo "Installing root dependencies..."
+      npm install
+      echo "Building backend..."
+      npm run build --workspace=@remodely-crm/backend
+      echo "Build completed, checking dist directory..."
+      ls -la apps/backend/dist/
+    # Start from root, navigate to backend
+    startCommand: |
+      echo "Current directory:" && pwd
+      echo "Listing root:" && ls -la
+      echo "Checking apps directory:" && ls -la apps/
+      echo "Checking backend directory:" && ls -la apps/backend/
+      echo "Checking dist directory:" && ls -la apps/backend/dist/ || echo "No dist directory found"
+      echo "Checking for main.js:" && find apps/backend/dist -name "main.js" -type f
+      cd apps/backend && npm run start:render
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        fromService:
+          type: web
+          name: crm-backend
+          property: port
+      - key: MONGODB_URI
+        value: mongodb+srv://crmuser:YOUR_PASSWORD@cluster0.mongodb.net/crm?retryWrites=true&w=majority
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        value: https://crm-h137.onrender.com
+      - key: CORS_ORIGINS
+        value: https://crm-h137.onrender.com
+      # Email configuration
+      - key: SENDGRID_API_KEY
+        value: your_sendgrid_api_key_here
+      - key: SENDGRID_FROM_EMAIL
+        value: noreply@remodely.ai
+      - key: SENDGRID_FROM_NAME
+        value: Remodely CRM

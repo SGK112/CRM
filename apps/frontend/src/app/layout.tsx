@@ -69,63 +69,52 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   {children}
                 </main>
                 <ConditionalFooter>
-                  <footer className="mt-20 border-t border-[var(--border)] bg-[var(--surface-1)] backdrop-blur-sm relative overflow-hidden">
-                <div className="pointer-events-none absolute inset-0">
-                  <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-amber-500/30 to-transparent" />
-                  <div className="absolute -top-24 right-0 h-64 w-64 rounded-full bg-amber-600/5 blur-3xl" />
-                </div>
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-8 text-sm">
-                    <div className="col-span-2 md:col-span-2">
-                      <div className="flex items-center gap-2 mb-4">
-                        <div className="h-9 w-9 rounded-md bg-amber-600 flex items-center justify-center shadow-inner ring-1 ring-amber-400/40">
-                          <span className="text-xs font-bold tracking-wide text-white">RA</span>
-                        </div>
-                        <span className="font-semibold text-[var(--text)] tracking-tight">Remodely Ai</span>
+                              {/* Minimal Professional Footer */}
+            <footer className="border-t border-[var(--border)] mt-auto">
+              <div className="max-w-6xl mx-auto px-4 py-8 sm:py-12">
+                {/* Main Footer Content - Simplified */}
+                <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-6">
+                  {/* Brand Section */}
+                  <div className="flex flex-col md:flex-row items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-amber-600 rounded-lg flex items-center justify-center">
+                        <span className="text-white font-bold text-sm">R</span>
                       </div>
-                      <p className="text-[var(--text-dim)] text-xs leading-relaxed max-w-sm">
-                        Purpose‑built CRM & operations platform for construction teams. Increase efficiency, profitability, and client satisfaction with a unified workflow.
-                      </p>
+                      <span className="text-xl font-bold">Remodely CRM</span>
                     </div>
-                    <div>
-                      <h4 className="font-semibold text-[var(--text)] mb-3 text-xs uppercase tracking-wide">Product</h4>
-                      <ul className="space-y-2 text-[var(--text-dim)]">
-                        <li><a className="hover:text-[var(--accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 rounded-sm transition-colors" href="/features">Features</a></li>
-                        <li><a className="hover:text-[var(--accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 rounded-sm transition-colors" href="/pricing">Pricing</a></li>
-                        <li><a className="hover:text-[var(--accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 rounded-sm transition-colors" href="/demo">Demo</a></li>
-                        <li><a className="hover:text-[var(--accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 rounded-sm transition-colors" href="/roadmap">Roadmap</a></li>
-                      </ul>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-[var(--text)] mb-3 text-xs uppercase tracking-wide">Resources</h4>
-                      <ul className="space-y-2 text-[var(--text-dim)]">
-                        <li><a className="hover:text-[var(--accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 rounded-sm transition-colors" href="/docs">Docs</a></li>
-                        <li><a className="hover:text-[var(--accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 rounded-sm transition-colors" href="/integrations">Integrations</a></li>
-                        <li><a className="hover:text-[var(--accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 rounded-sm transition-colors" href="/blog">Blog</a></li>
-                        <li><a className="hover:text-[var(--accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 rounded-sm transition-colors" href="/support">Support</a></li>
-                        <li><a className="hover:text-[var(--text-dim)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 rounded-sm transition-colors" href="/status">Status</a></li>
-                      </ul>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-[var(--text)] mb-3 text-xs uppercase tracking-wide">Company</h4>
-                      <ul className="space-y-2 text-[var(--text-dim)]">
-                        <li><a className="hover:text-[var(--accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 rounded-sm transition-colors" href="/about">About</a></li>
-                        <li><a className="hover:text-[var(--accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 rounded-sm transition-colors" href="/careers">Careers</a></li>
-                        <li><a className="hover:text-[var(--accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 rounded-sm transition-colors" href="/privacy">Privacy</a></li>
-                        <li><a className="hover:text-[var(--accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 rounded-sm transition-colors" href="/terms">Terms</a></li>
-                      </ul>
-                    </div>
+                    <p className="text-[var(--text-dim)] text-sm text-center md:text-left max-w-md">
+                      The mobile-first construction CRM that grows with your business.
+                    </p>
                   </div>
-                  <div className="mt-10 pt-6 border-t border-[var(--border)] flex flex-col md:flex-row items-center justify-between gap-4">
-                    <p className="text-xs text-[var(--text-faint)]">© {new Date().getFullYear()} Remodely Ai. All rights reserved. <span className="ml-2 text-[var(--text-faint)]" data-build="ddf068b">build ddf068b</span></p>
-                    <div className="flex items-center gap-5 text-xs text-[var(--text-faint)]">
-                      <a className="hover:text-[var(--accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 rounded-sm transition-colors" href="/security">Security</a>
-                      <a className="hover:text-[var(--accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 rounded-sm transition-colors" href="/legal">Legal</a>
-                      <a className="hover:text-[var(--accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 rounded-sm transition-colors" href="/contact">Contact</a>
+
+                  {/* Essential Links Only */}
+                  <div className="flex items-center gap-4 sm:gap-6 text-sm">
+                    <a href="/contact" className="text-[var(--text-dim)] hover:text-amber-600 transition-colors">Contact</a>
+                    <a href="/auth/login" className="text-[var(--text-dim)] hover:text-amber-600 transition-colors">Sign In</a>
+                    <a href="/auth/register" className="btn btn-amber px-4 py-2 text-sm">Get Started</a>
+                  </div>
+                </div>
+
+                {/* Bottom Bar - Legal & Social */}
+                <div className="border-t border-[var(--border)] pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="text-sm text-[var(--text-dim)] text-center sm:text-left">
+                    © 2025 Remodely CRM. All rights reserved.
+                  </div>
+                  <div className="flex items-center gap-4 text-sm">
+                    <a href="/privacy" className="text-[var(--text-dim)] hover:text-amber-600 transition-colors">Privacy</a>
+                    <a href="/terms" className="text-[var(--text-dim)] hover:text-amber-600 transition-colors">Terms</a>
+                    <div className="flex gap-3 ml-2">
+                      <a href="#" className="text-[var(--text-dim)] hover:text-amber-600 transition-colors" aria-label="LinkedIn">
+                        <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                      </a>
+                      <a href="#" className="text-[var(--text-dim)] hover:text-amber-600 transition-colors" aria-label="Twitter">
+                        <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+                      </a>
                     </div>
                   </div>
                 </div>
-              </footer>
+              </div>
+            </footer>
             </ConditionalFooter>
           </div>
         </Providers>

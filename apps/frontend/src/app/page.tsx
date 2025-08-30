@@ -9,32 +9,67 @@ import {
   ChartBarIcon,
   CurrencyDollarIcon,
   UserGroupIcon,
-  DocumentDuplicateIcon,
   PhotoIcon,
-  ShareIcon,
-  PhoneIcon,
-  ChatBubbleLeftRightIcon,
   CalendarIcon,
   BuildingOfficeIcon,
   WrenchScrewdriverIcon,
-  CloudArrowUpIcon,
   CogIcon,
   ArrowRightIcon,
   PlayIcon,
   CheckIcon,
   StarIcon,
   ClockIcon,
-  BanknotesIcon,
-  UserPlusIcon,
   DocumentTextIcon,
-  PresentationChartLineIcon,
   SpeakerWaveIcon,
   BoltIcon,
-  LightBulbIcon,
   RocketLaunchIcon,
   Bars3Icon,
   XMarkIcon
 } from '@heroicons/react/24/outline'
+
+// Typing animation component
+interface TypewriterTextProps {
+  text: string;
+  speed?: number;
+  delay?: number;
+  className?: string;
+}
+
+function TypewriterText({ text, speed = 50, delay = 0, className = "" }: TypewriterTextProps) {
+  const [displayedText, setDisplayedText] = useState("")
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [started, setStarted] = useState(false)
+
+  useEffect(() => {
+    const startTimeout = setTimeout(() => {
+      setStarted(true)
+    }, delay)
+
+    return () => clearTimeout(startTimeout)
+  }, [delay])
+
+  useEffect(() => {
+    if (!started) return
+
+    if (currentIndex < text.length) {
+      const timeout = setTimeout(() => {
+        setDisplayedText(prev => prev + text[currentIndex])
+        setCurrentIndex(prev => prev + 1)
+      }, speed)
+
+      return () => clearTimeout(timeout)
+    }
+  }, [currentIndex, text, speed, started])
+
+  return (
+    <span className={className}>
+      {displayedText}
+      {currentIndex < text.length && (
+        <span className="animate-pulse text-amber-500">|</span>
+      )}
+    </span>
+  )
+}
 
 // Features data
 const coreFeatures = [
@@ -190,6 +225,7 @@ export default function HomePage() {
   const [activeTestimonial, setActiveTestimonial] = useState(0)
   const [isYearly, setIsYearly] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [showFloatingAssistant, setShowFloatingAssistant] = useState(false)
 
   // Rotate testimonials every 5 seconds
   useEffect(() => {
@@ -197,6 +233,15 @@ export default function HomePage() {
       setActiveTestimonial((prev) => (prev + 1) % testimonials.length)
     }, 5000)
     return () => clearInterval(interval)
+  }, [])
+
+  // Show floating assistant after scrolling
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowFloatingAssistant(window.scrollY > window.innerHeight * 0.7)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   return (
@@ -222,7 +267,7 @@ export default function HomePage() {
                 <a href="#pricing" className="text-[var(--text-dim)] hover:text-[var(--text)] transition-colors">Pricing</a>
                 <a href="#testimonials" className="text-[var(--text-dim)] hover:text-[var(--text)] transition-colors">Reviews</a>
                 <Link href="/auth/login" className="btn btn-outline">Sign In</Link>
-                <Link href="/auth/register" className="btn gradient-amber">Get Started</Link>
+                <Link href="/auth/register" className="btn btn-amber">Get Started</Link>
               </div>
             </div>
 
@@ -271,16 +316,37 @@ export default function HomePage() {
       <section className="relative z-10 px-4 py-20 sm:py-32">
         <div className="max-w-7xl mx-auto text-center">
           <div className="mb-8">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600/10 border border-amber-500/30 rounded-full mb-6">
-              <SparklesIcon className="h-4 w-4 text-amber-600" />
-              <span className="text-sm font-semibold text-amber-600 dark:text-amber-400">AI-Powered Construction CRM</span>
-            </div>
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-              Turn Every Project Into <span className="gradient-amber">Profit</span>
+              <TypewriterText 
+                text="Turn Every Project Into " 
+                speed={50}
+                delay={500}
+              />
+              <span className="gradient-amber">
+                <TypewriterText 
+                  text="Profit" 
+                  speed={80}
+                  delay={1800}
+                />
+              </span>
             </h1>
             <p className="text-xl sm:text-2xl text-[var(--text-dim)] mb-8 max-w-4xl mx-auto leading-relaxed">
-              Stop chasing paperwork and losing track of costs. Our construction CRM streamlines client management, automates estimates to invoices, and keeps your team organized — so you can focus on building great projects.
+              The complete business management platform designed specifically for construction contractors. Streamline estimates, manage projects, track costs, and grow your business with tools that actually understand construction.
             </p>
+            <div className="flex flex-col sm:flex-row gap-6 justify-center text-lg text-[var(--text-dim)] mb-8">
+              <div className="flex items-center justify-center gap-2">
+                <CheckIcon className="h-5 w-5 text-emerald-500" />
+                <span>From estimate to invoice in minutes</span>
+              </div>
+              <div className="flex items-center justify-center gap-2">
+                <CheckIcon className="h-5 w-5 text-emerald-500" />
+                <span>Real profit tracking on every job</span>
+              </div>
+              <div className="flex items-center justify-center gap-2">
+                <CheckIcon className="h-5 w-5 text-emerald-500" />
+                <span>Built for contractors, by contractors</span>
+              </div>
+            </div>
           </div>
 
           {/* CTA Buttons */}
@@ -288,11 +354,8 @@ export default function HomePage() {
             <Link href="/auth/register" className="btn btn-amber shadow-soft shine text-lg px-8 py-4">
               Start Free Trial
             </Link>
-            <Link href="/dashboard" className="btn btn-outline text-lg px-8 py-4 hover:border-amber-500/60 hover:text-amber-300 transition">
-              Live Demo →
-            </Link>
-            <Link href="/voice-agent-demo" className="btn btn-outline text-lg px-8 py-4 hover:border-amber-500/60 hover:text-amber-300 transition">
-              Try AI Voice Agent
+            <Link href="/dashboard" className="btn btn-outline text-lg px-8 py-4">
+              View Live Demo →
             </Link>
           </div>
 
@@ -314,7 +377,7 @@ export default function HomePage() {
 
           {/* Industry tags */}
           <div className="flex flex-wrap gap-3 justify-center">
-            {['Kitchen Remodeling', 'Bathroom Renovation', 'Whole Home Remodels', 'Home Additions', 'Exterior Renovations', 'Custom Cabinetry'].map(tag => (
+            {['Kitchen Remodeling', 'Bathroom Renovation', 'Whole Home Remodels', 'Home Additions', 'Exterior Renovations', 'Custom Cabinetry'].map((tag) => (
               <span key={tag} className="px-4 py-2 rounded-full border border-[var(--border)] bg-[var(--surface-2)] text-sm font-medium">
                 {tag}
               </span>
@@ -389,19 +452,23 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Everything You Need to <span className="gradient-amber">Scale Your Business</span>
             </h2>
-            <p className="text-xl text-[var(--text-dim)] max-w-3xl mx-auto">
-              From client management to AI-powered automation, we've built the complete solution for modern construction companies.
-            </p>
+            <div className="text-xl text-[var(--text-dim)] max-w-3xl mx-auto">
+              <p>From client management to AI-powered automation, we've built the complete solution for modern construction companies.</p>
+            </div>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {coreFeatures.map((feature, index) => (
-              <div key={index} className="p-6 rounded-xl bg-[var(--bg)] border border-[var(--border)] hover:border-amber-500/50 transition-colors group">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-600/15 ring-1 ring-amber-500/30 mb-4 transition-colors group-hover:bg-amber-600/25">
+              <div key={index} className="p-6 rounded-xl bg-[var(--bg)] border border-[var(--border)] hover:border-amber-500/50 transition-colors">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-600/15 ring-1 ring-amber-500/30 mb-4">
                   <feature.icon className="h-6 w-6 text-amber-600" />
                 </div>
-                <h3 className="font-bold text-lg mb-2">{feature.title}</h3>
-                <p className="text-[var(--text-dim)] text-sm mb-4 leading-relaxed">{feature.description}</p>
+                <h3 className="font-bold text-lg mb-2">
+                  {feature.title}
+                </h3>
+                <div className="text-[var(--text-dim)] text-sm mb-4 leading-relaxed">
+                  <p>{feature.description}</p>
+                </div>
                 <ul className="space-y-1">
                   {feature.benefits.map((benefit, benefitIndex) => (
                     <li key={benefitIndex} className="flex items-center gap-2 text-xs text-[var(--text-dim)]">
@@ -574,9 +641,9 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-4xl font-bold mb-6">
               Ready to Transform Your <span className="gradient-amber">Construction Business?</span>
             </h2>
-            <p className="text-xl text-[var(--text-dim)] mb-8 max-w-2xl mx-auto">
-              Join hundreds of construction companies that have streamlined their operations and increased profits with Remodely CRM.
-            </p>
+            <div className="text-xl text-[var(--text-dim)] mb-8 max-w-2xl mx-auto">
+              <p>Join hundreds of construction companies that have streamlined their operations and increased profits with Remodely CRM.</p>
+            </div>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
               <Link href="/auth/register" className="btn btn-amber text-lg px-8 py-4 shadow-soft shine">
@@ -606,6 +673,18 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Floating Assistant Button */}
+      <div className={`fixed bottom-6 right-6 z-50 transition-all duration-500 ${
+        showFloatingAssistant ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0 pointer-events-none'
+      }`}>
+        <button className="group bg-amber-600 hover:bg-amber-700 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300">
+          <SparklesIcon className="w-6 h-6 transition-transform duration-300 group-hover:rotate-12" />
+          <div className="absolute -top-12 right-0 bg-gray-900 text-white text-sm px-3 py-2 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+            Need help? Try our AI assistant!
+          </div>
+        </button>
+      </div>
 
       </div> {/* Close the pt-16 container */}
     </div>

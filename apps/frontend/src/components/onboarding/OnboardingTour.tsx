@@ -131,17 +131,70 @@ export default function OnboardingTour({ steps, isActive, onComplete, onSkip }: 
         .onboarding-highlight {
           position: relative;
           z-index: 55;
-          box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.5);
-          border-radius: 8px;
-          animation: pulse 2s infinite;
+          border-radius: 12px;
+          background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(251, 191, 36, 0.05));
+          animation: onboarding-pulse 2.5s ease-in-out infinite;
+          transition: all 0.3s ease;
         }
         
-        @keyframes pulse {
+        .onboarding-highlight::before {
+          content: '';
+          position: absolute;
+          top: -3px;
+          left: -3px;
+          right: -3px;
+          bottom: -3px;
+          background: linear-gradient(45deg, 
+            rgba(245, 158, 11, 0.6), 
+            rgba(251, 191, 36, 0.4), 
+            rgba(245, 158, 11, 0.6)
+          );
+          border-radius: 15px;
+          z-index: -1;
+          animation: onboarding-border-rotate 3s linear infinite;
+        }
+        
+        @keyframes onboarding-pulse {
           0%, 100% {
-            box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.5);
+            box-shadow: 
+              0 0 20px rgba(245, 158, 11, 0.3),
+              0 0 40px rgba(245, 158, 11, 0.1);
           }
           50% {
-            box-shadow: 0 0 0 8px rgba(245, 158, 11, 0.3);
+            box-shadow: 
+              0 0 30px rgba(245, 158, 11, 0.5),
+              0 0 60px rgba(245, 158, 11, 0.2);
+          }
+        }
+        
+        @keyframes onboarding-border-rotate {
+          0% {
+            background: linear-gradient(45deg, 
+              rgba(245, 158, 11, 0.6), 
+              rgba(251, 191, 36, 0.4), 
+              rgba(245, 158, 11, 0.6)
+            );
+          }
+          33% {
+            background: linear-gradient(135deg, 
+              rgba(251, 191, 36, 0.6), 
+              rgba(245, 158, 11, 0.4), 
+              rgba(251, 191, 36, 0.6)
+            );
+          }
+          66% {
+            background: linear-gradient(225deg, 
+              rgba(245, 158, 11, 0.6), 
+              rgba(251, 191, 36, 0.4), 
+              rgba(245, 158, 11, 0.6)
+            );
+          }
+          100% {
+            background: linear-gradient(315deg, 
+              rgba(251, 191, 36, 0.6), 
+              rgba(245, 158, 11, 0.4), 
+              rgba(251, 191, 36, 0.6)
+            );
           }
         }
       `}</style>
