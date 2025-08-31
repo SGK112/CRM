@@ -147,7 +147,7 @@ export default function SearchBar({ className = '', placeholder = 'Search projec
           onChange={(e) => handleInputChange(e.target.value)}
           onFocus={handleMobileFocus}
           onKeyDown={handleKeyDown}
-          className="block w-full rounded-lg border-0 py-2 pl-10 pr-10 bg-[var(--input-bg)] text-[var(--text)] ring-1 ring-inset ring-[var(--border)] placeholder:text-[var(--text-faint)] focus:ring-2 focus:ring-inset focus:ring-[var(--accent)] sm:text-sm sm:leading-6 transition-colors"
+          className="block w-full rounded-lg border-0 py-2 pl-10 pr-10 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ring-1 ring-inset ring-gray-300 dark:ring-gray-600 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6 transition-colors"
           placeholder={placeholder}
         />
         {inputValue && (
@@ -164,28 +164,28 @@ export default function SearchBar({ className = '', placeholder = 'Search projec
         )}
       </div>
 
-      {/* Search Dropdown (Desktop Only) */}
+      {/* Search Dropdown (Desktop Only) - Enhanced with solid background */}
       {!isMobile && isOpen && (
         <div
           ref={dropdownRef}
-          className="absolute top-full left-0 right-0 z-50 mt-1 bg-[var(--surface-1)] rounded-lg shadow-lg ring-1 ring-black/5 max-h-96 overflow-y-auto border border-[var(--border)]"
+          className="absolute top-full left-0 right-0 z-50 mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg ring-1 ring-black/5 dark:ring-white/10 max-h-96 overflow-y-auto border border-gray-200 dark:border-gray-700"
         >
           {/* Loading State */}
           {isLoading && (
-            <div className="px-4 py-3 text-center">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[var(--accent)] mx-auto"></div>
-              <p className="text-sm text-[var(--text-dim)] mt-2">Searching...</p>
+            <div className="px-4 py-3 text-center bg-white dark:bg-gray-800">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto"></div>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Searching...</p>
             </div>
           )}
 
           {/* No Query - Show Recent Searches */}
           {!query && !isLoading && recentSearches.length > 0 && (
-            <div className="p-3">
+            <div className="p-3 bg-white dark:bg-gray-800">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-medium text-[var(--text)]">Recent searches</h3>
+                <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">Recent searches</h3>
                 <button
                   onClick={clearRecentSearches}
-                  className="text-xs text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors"
+                  className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
                 >
                   Clear
                 </button>
@@ -195,9 +195,9 @@ export default function SearchBar({ className = '', placeholder = 'Search projec
                   <button
                     key={index}
                     onClick={() => handleRecentSearchClick(recentQuery)}
-                    className="flex items-center w-full px-2 py-2 text-sm text-[var(--text-dim)] hover:bg-[var(--surface-2)] rounded-md transition-colors"
+                    className="flex items-center w-full px-2 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
                   >
-                    <ClockIcon className="h-4 w-4 text-[var(--text-faint)] mr-2" />
+                    <ClockIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-2" />
                     {recentQuery}
                   </button>
                 ))}
@@ -207,8 +207,8 @@ export default function SearchBar({ className = '', placeholder = 'Search projec
 
           {/* Search Results */}
           {query && !isLoading && results.length > 0 && (
-            <div className="p-3">
-              <h3 className="text-sm font-medium text-[var(--text)] mb-2">
+            <div className="p-3 bg-white dark:bg-gray-800">
+              <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
                 Results for "{query}" ({results.length})
               </h3>
               <div className="space-y-1">
@@ -220,46 +220,46 @@ export default function SearchBar({ className = '', placeholder = 'Search projec
                     <button
                       key={result.id}
                       onClick={() => handleResultClick(result.url)}
-                      className="flex items-start w-full px-2 py-3 text-left hover:bg-[var(--surface-2)] rounded-md group transition-colors"
+                      className="flex items-start w-full px-2 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md group transition-colors"
                     >
                       <div className={`flex-shrink-0 p-1.5 rounded-md ${colorClass} mr-3 mt-0.5`}>
                         <Icon className="h-4 w-4" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-[var(--text)] group-hover:text-[var(--accent)] transition-colors">
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                           {result.title}
                         </p>
-                        <p className="text-sm text-[var(--text-dim)] truncate">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
                           {result.description}
                         </p>
                         {result.metadata && (
                           <div className="flex items-center space-x-4 mt-1">
                             {result.type === 'project' && result.metadata.status && (
-                              <span className="text-xs text-[var(--text-faint)]">
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
                                 Status: {result.metadata.status}
                               </span>
                             )}
                             {result.type === 'client' && result.metadata.projects && (
-                              <span className="text-xs text-[var(--text-faint)]">
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
                                 {result.metadata.projects} project(s)
                               </span>
                             )}
                             {result.type === 'document' && result.metadata.size && (
-                              <span className="text-xs text-[var(--text-faint)]">
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
                                 {result.metadata.size}
                               </span>
                             )}
                             {result.type === 'design' && result.metadata.status && (
-                              <span className="text-xs text-[var(--text-faint)]">{result.metadata.status}</span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">{result.metadata.status}</span>
                             )}
                             {result.type === 'template' && result.metadata.category && (
-                              <span className="text-xs text-[var(--text-faint)]">{result.metadata.category}</span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">{result.metadata.category}</span>
                             )}
                             {result.type === 'template' && typeof result.metadata.uses === 'number' && (
-                              <span className="text-xs text-[var(--text-faint)]">{result.metadata.uses} uses</span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">{result.metadata.uses} uses</span>
                             )}
                             {result.type === 'message' && result.metadata.timestamp && (
-                              <span className="text-xs text-[var(--text-faint)]">
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
                                 {result.metadata.timestamp}
                               </span>
                             )}
@@ -275,10 +275,10 @@ export default function SearchBar({ className = '', placeholder = 'Search projec
 
           {/* No Results */}
           {query && !isLoading && results.length === 0 && (
-            <div className="px-4 py-6 text-center">
-              <MagnifyingGlassIcon className="h-12 w-12 text-[var(--text-faint)] mx-auto mb-3" />
-              <p className="text-sm text-[var(--text-dim)]">No results found for "{query}"</p>
-              <p className="text-xs text-[var(--text-faint)] mt-1">
+            <div className="px-4 py-6 text-center bg-white dark:bg-gray-800">
+              <MagnifyingGlassIcon className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
+              <p className="text-sm text-gray-600 dark:text-gray-400">No results found for "{query}"</p>
+              <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
                 Try searching for projects, clients, documents, or messages
               </p>
             </div>
@@ -286,10 +286,10 @@ export default function SearchBar({ className = '', placeholder = 'Search projec
 
           {/* Search Tips */}
           {!query && !isLoading && recentSearches.length === 0 && (
-            <div className="px-4 py-6 text-center">
-              <MagnifyingGlassIcon className="h-12 w-12 text-[var(--text-faint)] mx-auto mb-3" />
-              <p className="text-sm text-[var(--text-dim)] mb-2">Start typing to search</p>
-              <div className="text-xs text-[var(--text-faint)] space-y-1">
+            <div className="px-4 py-6 text-center bg-white dark:bg-gray-800">
+              <MagnifyingGlassIcon className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Start typing to search</p>
+              <div className="text-xs text-gray-500 dark:text-gray-500 space-y-1">
                 <p>• Search projects by name or status</p>
                 <p>• Find clients by company or contact info</p>
                 <p>• Look up documents by name or project</p>

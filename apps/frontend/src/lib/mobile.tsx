@@ -38,11 +38,11 @@ export const mobile = {
     ...classes
   ),
   
-  // Scroll containers with momentum
+  // Scroll containers with momentum - enhanced for mobile
   scrollContainer: (...classes: string[]) => mobileOptimized(
-    'overflow-auto overscroll-behavior-contain',
-    '-webkit-overflow-scrolling: touch',
-    'scroll-smooth',
+    'overflow-y-auto overflow-x-hidden overscroll-contain',
+    'scroll-smooth will-change-scroll transform-gpu',
+    'scrollbar-none mobile-sidebar-scroll',
     ...classes
   ),
   

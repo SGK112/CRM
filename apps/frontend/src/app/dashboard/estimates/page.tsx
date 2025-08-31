@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
-import { 
+import { useRouter, useSearchParams } from 'next/navigation';
+import { generateEstimatePDF, generateBulkPDF, downloadDataAsCSV } from '@/lib/pdf-generator';
+import {
   Calculator,
   FileText,
   Download,
@@ -131,6 +132,39 @@ export default function EstimatesPage() {
   const [showAiAssistant, setShowAiAssistant] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
 
+  // PDF download handlers
+  const handleDownloadPDF = async (estimate: Estimate) => {
+    try {
+      await generateEstimatePDF(estimate);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      setError('Failed to generate PDF. Please try again.');
+    }
+  };
+
+  const handleBulkDownload = async (type: 'pdf' | 'csv') => {
+    try {
+      if (type === 'pdf') {
+        await generateBulkPDF(filteredEstimates, 'estimates');
+      } else {
+        const csvData = filteredEstimates.map(est => ({
+          id: est.id,
+          title: est.title,
+          clientName: est.clientName,
+          projectType: est.projectType,
+          status: est.status,
+          totalAmount: est.totalAmount,
+          createdAt: est.createdAt.toLocaleDateString(),
+          validUntil: est.validUntil.toLocaleDateString()
+        }));
+        downloadDataAsCSV(csvData, `estimates-${new Date().toISOString().split('T')[0]}`);
+      }
+    } catch (error) {
+      console.error('Error generating bulk download:', error);
+      setError('Failed to generate download. Please try again.');
+    }
+  };
+
   useEffect(() => {
     fetchEstimates();
   }, []);
@@ -143,7 +177,7 @@ export default function EstimatesPage() {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Mock data with comprehensive estimates for kitchen/bath remodeling
       const mockEstimates: Estimate[] = [
         {
@@ -300,7 +334,7 @@ export default function EstimatesPage() {
           }
         }
       ];
-      
+
       setEstimates(mockEstimates);
     } catch (error) {
       console.error('Error fetching estimates:', error);
@@ -318,10 +352,10 @@ export default function EstimatesPage() {
       const matchesStatus = statusFilter === 'all' || estimate.status === statusFilter;
       const matchesProjectType = projectTypeFilter === 'all' || estimate.projectType === projectTypeFilter;
       const matchesPriority = priorityFilter === 'all' || estimate.priority === priorityFilter;
-      
+
       return matchesSearch && matchesStatus && matchesProjectType && matchesPriority;
     });
-    
+
     setFilteredEstimates(filtered);
   };
 
@@ -331,7 +365,7 @@ export default function EstimatesPage() {
     const approved = filteredEstimates.filter(e => e.status === 'approved').length;
     const totalValue = filteredEstimates.reduce((sum, e) => sum + e.totalAmount, 0);
     const avgValue = total > 0 ? totalValue / total : 0;
-    
+
     return { total, pending, approved, totalValue, avgValue };
   }, [filteredEstimates]);
 
@@ -355,8 +389,28 @@ export default function EstimatesPage() {
             AI-driven estimation for kitchen & bath remodeling projects
           </p>
         </div>
-        
+
         <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handleBulkDownload('pdf')}
+              className="flex items-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+              title="Download all estimates as PDF"
+            >
+              <Download className="w-4 h-4" />
+              PDF
+            </button>
+            
+            <button
+              onClick={() => handleBulkDownload('csv')}
+              className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+              title="Download all estimates as CSV"
+            >
+              <Download className="w-4 h-4" />
+              CSV
+            </button>
+          </div>
+          
           <button
             onClick={() => setShowFilters(!showFilters)}
             className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
@@ -364,7 +418,7 @@ export default function EstimatesPage() {
             <Filter className="w-4 h-4" />
             Filters
           </button>
-          
+
           <button
             onClick={() => setShowAiAssistant(true)}
             className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
@@ -372,8 +426,8 @@ export default function EstimatesPage() {
             <Bot className="w-4 h-4" />
             AI Assistant
           </button>
-          
-          <button 
+
+          <button
             onClick={() => router.push('/dashboard/estimates/new')}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
@@ -394,7 +448,7 @@ export default function EstimatesPage() {
             <FileText className="w-8 h-8 text-blue-500" />
           </div>
         </div>
-        
+
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
@@ -404,7 +458,7 @@ export default function EstimatesPage() {
             <Clock className="w-8 h-8 text-yellow-500" />
           </div>
         </div>
-        
+
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
@@ -414,7 +468,7 @@ export default function EstimatesPage() {
             <CheckCircle className="w-8 h-8 text-green-500" />
           </div>
         </div>
-        
+
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
@@ -424,7 +478,7 @@ export default function EstimatesPage() {
             <DollarSign className="w-8 h-8 text-purple-500" />
           </div>
         </div>
-        
+
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
@@ -455,7 +509,7 @@ export default function EstimatesPage() {
                 />
               </div>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Status
@@ -475,7 +529,7 @@ export default function EstimatesPage() {
                 <option value="completed">Completed</option>
               </select>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Project Type
@@ -494,7 +548,7 @@ export default function EstimatesPage() {
                 <option value="commercial">Commercial</option>
               </select>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Priority
@@ -535,7 +589,7 @@ export default function EstimatesPage() {
                     {estimate.clientName}
                   </p>
                 </div>
-                
+
                 <span
                   className="px-2 py-1 text-xs rounded-full text-white"
                   style={{ backgroundColor: projectTypeColors[estimate.projectType] }}
@@ -543,7 +597,7 @@ export default function EstimatesPage() {
                   {estimate.projectType}
                 </span>
               </div>
-              
+
               <div className="space-y-2 mb-4">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-800 dark:text-gray-300">Amount:</span>
@@ -551,7 +605,7 @@ export default function EstimatesPage() {
                     ${estimate.totalAmount.toLocaleString()}
                   </span>
                 </div>
-                
+
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-800 dark:text-gray-300">Status:</span>
                   <span className={`px-2 py-1 text-xs rounded-full ${statusColors[estimate.status]}`}>
@@ -570,7 +624,7 @@ export default function EstimatesPage() {
                   </span>
                 </div>
               </div>
-              
+
               {estimate.aiInsights && (
                 <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg">
                   <div className="flex items-center gap-2 mb-1">
@@ -584,13 +638,23 @@ export default function EstimatesPage() {
                   </p>
                 </div>
               )}
-              
+
               <div className="flex items-center justify-between mt-4">
                 <div className="text-xs text-gray-700 dark:text-gray-300">
                   Created {estimate.createdAt.toLocaleDateString()}
                 </div>
-                
+
                 <div className="flex items-center gap-1">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDownloadPDF(estimate);
+                    }}
+                    className="p-1.5 bg-red-100 dark:bg-red-900 rounded hover:bg-red-200 dark:hover:bg-red-800 transition-colors"
+                    title="Download PDF"
+                  >
+                    <Download className="w-3 h-3 text-red-600" />
+                  </button>
                   {estimate.sentAt && (
                     <div className="p-1 bg-blue-100 dark:bg-blue-900 rounded">
                       <Send className="w-3 h-3 text-blue-600" />
@@ -614,7 +678,7 @@ export default function EstimatesPage() {
           <div className="flex items-center gap-2">
             <AlertCircle className="w-4 h-4" />
             <span>{error}</span>
-            <button 
+            <button
               onClick={() => setError(null)}
               className="ml-2 text-red-500 hover:text-red-700"
             >

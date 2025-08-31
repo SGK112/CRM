@@ -183,6 +183,19 @@ module.exports = {
         '.tap-highlight-none': {
           '-webkit-tap-highlight-color': 'transparent',
         },
+        '.scrollbar-none': {
+          'scrollbar-width': 'none',
+          '-ms-overflow-style': 'none',
+          '&::-webkit-scrollbar': {
+            'display': 'none'
+          }
+        },
+        '.overscroll-contain': {
+          'overscroll-behavior': 'contain',
+        },
+        '.will-change-scroll': {
+          'will-change': 'scroll-position',
+        }
       })
     }
   ],

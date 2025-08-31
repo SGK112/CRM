@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import SearchBar from './SearchBar';
-import CopilotWidget from './CopilotWidget';
 import AIAssistant from './AIAssistant';
 import RouteMemoryTracker from './RouteMemoryTracker';
 import { useInboxStats } from '../hooks/useInboxStats';
@@ -14,25 +13,18 @@ import {
   UserGroupIcon,
   CalendarDaysIcon,
   DocumentTextIcon,
-  MegaphoneIcon,
   CogIcon,
   Bars3Icon,
   XMarkIcon,
   BellIcon,
   PhoneIcon,
-  MagnifyingGlassIcon,
-  UserCircleIcon,
   ChevronDownIcon,
-  BuildingOfficeIcon,
   WrenchScrewdriverIcon,
-  CloudArrowUpIcon,
   PencilSquareIcon,
   ChartBarIcon,
   ShoppingBagIcon,
-  BuildingStorefrontIcon,
   CalculatorIcon,
   SparklesIcon,
-  PlusCircleIcon,
   QuestionMarkCircleIcon,
   ChevronUpIcon,
   ArrowsPointingOutIcon,
@@ -44,13 +36,13 @@ import {
   InboxIcon
 } from '@heroicons/react/24/outline';
 import Logo from './Logo';
-import { ThemeProvider, useTheme } from './ThemeProvider';
+import { ThemeProvider } from './ThemeProvider';
 import { AIProvider } from '../hooks/useAI';
 import ThemeToggle from './ThemeToggle';
 import AIEnable from './AIEnable';
 import { mobileOptimized, mobile } from '@/lib/mobile';
 import { PlanBadge } from './CapabilityGate';
-import { getUserPlan, hasCapability } from '@/lib/plans';
+import { getUserPlan } from '@/lib/plans';
 
 interface User {
   id: string;
@@ -112,7 +104,7 @@ export default function Layout({ children }: LayoutProps) {
         router.push('/dashboard');
       }
     } catch (error) {
-      console.error('Failed to parse user data:', error);
+      // Failed to parse user data - clear and redirect
       localStorage.removeItem('token');
       localStorage.removeItem('accessToken');
       localStorage.removeItem('user');
@@ -256,82 +248,119 @@ export default function Layout({ children }: LayoutProps) {
           <div className={`fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-gray-800 shadow-2xl transform transition-transform duration-300 ease-in-out lg:hidden ${
             sidebarOpen ? 'translate-x-0' : '-translate-x-full'
           }`}>
-            {/* Mobile header with enhanced styling */}
-            <div className={mobile.navigation(
-              'flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-700'
-            )}>
-              <Logo />
-              <button 
-                onClick={() => setSidebarOpen(false)} 
-                className={mobile.button(
-                  'p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700'
-                )}
-                aria-label="Close sidebar"
-              >
-                <XMarkIcon className="h-6 w-6" />
-              </button>
-            </div>
-            
-            {/* Mobile navigation with enhanced touch targets */}
-            <nav className={mobile.scrollContainer('mt-2 px-3 pb-6 overflow-y-auto h-full')}>
-              <div className="space-y-1">
-                {navigationGroups.map(group => {
-                  const groupItems = updatedNavigation.filter(i=> group.items.some(gItem=> gItem.href === i.href));
-                  return (
-                    <div key={group.label} className="mb-6">
-                      <div className="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        {group.label}
-                      </div>
-                      <div className="space-y-1">
-                        {groupItems.map(item => {
-                          const originalItem = group.items.find(gi => gi.href === item.href);
-                          const isRestricted = originalItem?.planRequired && originalItem.planRequired !== 'basic' && userPlan === 'basic';
-                          
-                          return (
-                            <Link
-                              key={item.name}
-                              href={isRestricted ? `/dashboard/settings/billing?upgrade=${originalItem.planRequired}` : item.href}
-                              onClick={() => setSidebarOpen(false)}
-                              className={classNames(
-                                mobile.touchTarget(),
-                                'group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200',
-                                item.current 
-                                  ? 'bg-amber-50 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 shadow-sm' 
-                                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white active:scale-95',
-                                isRestricted ? 'opacity-75' : ''
-                              )}
-                            >
-                              <item.icon className={classNames(
-                                'mr-3 h-5 w-5 flex-shrink-0',
-                                item.current 
-                                  ? 'text-amber-600 dark:text-amber-400' 
-                                  : isRestricted 
-                                    ? 'text-gray-400 dark:text-gray-500' 
-                                    : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
-                              )} />
-                              <span className="flex-1">{item.name}</span>
-                              {isRestricted && (
-                                <LockClosedIcon className="w-4 h-4 text-amber-500 ml-2" />
-                              )}
-                              {item.badge && item.badge > 0 && !isRestricted && (
-                                <span className={classNames(
-                                  'ml-auto inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium',
-                                  item.current 
-                                    ? 'bg-amber-600 text-white shadow-sm' 
-                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
-                                )}>
-                                  {item.badge}
-                                </span>
-                              )}
-                            </Link>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })}
+            <div className="flex flex-col h-full">
+              {/* Mobile header with enhanced styling */}
+              <div className={mobile.navigation(
+                'flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0'
+              )}>
+                <Logo />
+                <button 
+                  onClick={() => setSidebarOpen(false)} 
+                  className={mobile.button(
+                    'p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700'
+                  )}
+                  aria-label="Close sidebar"
+                >
+                  <XMarkIcon className="h-6 w-6" />
+                </button>
               </div>
-            </nav>
+              
+              {/* Mobile navigation with enhanced scrolling */}
+              <nav className={mobile.scrollContainer('flex-1 overflow-y-auto overscroll-contain mt-2 px-3')}>
+                <div className="pb-safe-bottom space-y-1" style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
+                  {navigationGroups.map(group => {
+                    const groupItems = updatedNavigation.filter(i=> group.items.some(gItem=> gItem.href === i.href));
+                    return (
+                      <div key={group.label} className="mb-6">
+                        <div className="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          {group.label}
+                        </div>
+                        <div className="space-y-1">
+                          {groupItems.map(item => {
+                            const originalItem = group.items.find(gi => gi.href === item.href);
+                            const isRestricted = originalItem?.planRequired && originalItem.planRequired !== 'basic' && userPlan === 'basic';
+                            
+                            return (
+                              <Link
+                                key={item.name}
+                                href={isRestricted ? `/dashboard/settings/billing?upgrade=${originalItem.planRequired}` : item.href}
+                                onClick={() => setSidebarOpen(false)}
+                                className={classNames(
+                                  mobile.touchTarget(),
+                                  'group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200',
+                                  item.current 
+                                    ? 'bg-amber-50 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 shadow-sm' 
+                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white active:scale-95',
+                                  isRestricted ? 'opacity-75' : ''
+                                )}
+                              >
+                                <item.icon className={classNames(
+                                  'mr-3 h-5 w-5 flex-shrink-0',
+                                  item.current 
+                                    ? 'text-amber-600 dark:text-amber-400' 
+                                    : isRestricted 
+                                      ? 'text-gray-400 dark:text-gray-500' 
+                                      : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
+                                )} />
+                                <span className="flex-1">{item.name}</span>
+                                {isRestricted && (
+                                  <LockClosedIcon className="w-4 h-4 text-amber-500 ml-2" />
+                                )}
+                                {item.badge && item.badge > 0 && !isRestricted && (
+                                  <span className={classNames(
+                                    'ml-auto inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium',
+                                    item.current 
+                                      ? 'bg-amber-600 text-white shadow-sm' 
+                                      : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                                  )}>
+                                    {item.badge}
+                                  </span>
+                                )}
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {/* PDF Download Section */}
+                  <div className="mb-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div className="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      PDF Downloads
+                    </div>
+                    <div className="space-y-1">
+                      <Link
+                        href="/dashboard/estimates?download=pdf"
+                        onClick={() => setSidebarOpen(false)}
+                        className={classNames(
+                          mobile.touchTarget(),
+                          'group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200',
+                          'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white active:scale-95'
+                        )}
+                      >
+                        <DocumentTextIcon className="mr-3 h-5 w-5 flex-shrink-0 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300" />
+                        <span className="flex-1">Download Estimates PDF</span>
+                        <ArrowsPointingOutIcon className="w-4 h-4 text-gray-400 ml-2" />
+                      </Link>
+                      <Link
+                        href="/dashboard/invoices?download=pdf"
+                        onClick={() => setSidebarOpen(false)}
+                        className={classNames(
+                          mobile.touchTarget(),
+                          'group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200',
+                          'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white active:scale-95'
+                        )}
+                      >
+                        <ShoppingBagIcon className="mr-3 h-5 w-5 flex-shrink-0 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300" />
+                        <span className="flex-1">Download Invoices PDF</span>
+                        <ArrowsPointingOutIcon className="w-4 h-4 text-gray-400 ml-2" />
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </nav>
+            </div>
           </div>
 
           {/* Desktop sidebar */}
@@ -470,71 +499,73 @@ export default function Layout({ children }: LayoutProps) {
 
           {/* Main content */}
           <div className="lg:pl-64 flex flex-col min-h-screen">
-            {/* Top navigation with enhanced mobile experience */}
-            <div className={mobile.navigation(
-              'flex h-16 flex-shrink-0 items-center justify-between px-4 sm:px-6 lg:px-8'
-            )}>
-              <button
-                type="button"
-                className={mobile.button(
-                  'px-4 py-2 border-r border-gray-200 dark:border-gray-700 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 lg:hidden'
-                )}
-                onClick={() => setSidebarOpen(true)}
-                aria-label="Open sidebar"
-              >
-                <Bars3Icon className="h-6 w-6" />
-              </button>
+            {/* Enhanced Header with solid background */}
+            <header className="sticky top-0 z-40 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm backdrop-blur-md">
+              <div className={mobile.navigation(
+                'flex h-16 flex-shrink-0 items-center justify-between px-4 sm:px-6 lg:px-8'
+              )}>
+                <button
+                  type="button"
+                  className={mobile.button(
+                    'px-4 py-2 border-r border-gray-200 dark:border-gray-700 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 lg:hidden'
+                  )}
+                  onClick={() => setSidebarOpen(true)}
+                  aria-label="Open sidebar"
+                >
+                  <Bars3Icon className="h-6 w-6" />
+                </button>
 
-              <div className="flex flex-1 items-center justify-between min-w-0 ml-4 lg:ml-0">
-                {/* Search with mobile optimization */}
-                <div className="flex items-center flex-1 min-w-0">
-                  <div className="flex-1 min-w-0 max-w-lg">
-                    <SearchBar className="w-full" />
+                <div className="flex flex-1 items-center justify-between min-w-0 ml-4 lg:ml-0">
+                  {/* Search with enhanced solid background */}
+                  <div className="flex items-center flex-1 min-w-0">
+                    <div className="flex-1 min-w-0 max-w-lg">
+                      <SearchBar className="w-full" />
+                    </div>
+                  </div>
+
+                  <div className="ml-4 flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
+                    {/* AI Enable */}
+                    <AIEnable />
+                    {/* Theme Toggle */}
+                    <ThemeToggle variant="button" />
+                    {/* Notifications with enhanced styling */}
+                    <button
+                      type="button"
+                      onClick={() => router.push('/dashboard/inbox')}
+                      className={mobile.button(
+                        'relative bg-gray-100 dark:bg-gray-800 p-2.5 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200'
+                      )}
+                      aria-label="View inbox messages"
+                    >
+                      <span className="sr-only">View inbox messages</span>
+                      <BellIcon className="h-6 w-6" />
+                      {inboxStats && inboxStats.unread && inboxStats.unread > 0 && (
+                        <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-xs text-white flex items-center justify-center font-medium shadow-sm animate-pulse">
+                          {inboxStats.unread > 99 ? '99+' : inboxStats.unread}
+                        </span>
+                      )}
+                    </button>
+                    {/* Quick Create with enhanced styling */}
+                    <QuickCreate />
+                    {/* Help Button with solid background */}
+                    <button
+                      type="button"
+                      className={mobile.button(
+                        'hidden sm:inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-all duration-200'
+                      )}
+                      onClick={() => {
+                        // Focus Copilot widget if available
+                        const evt = new CustomEvent('copilot:open');
+                        window.dispatchEvent(evt);
+                      }}
+                    >
+                      <QuestionMarkCircleIcon className="h-4 w-4 text-gray-400 mr-1" />
+                      Help
+                    </button>
                   </div>
                 </div>
-
-                <div className="ml-4 flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
-                  {/* AI Enable */}
-                  <AIEnable />
-                  {/* Theme Toggle */}
-                  <ThemeToggle variant="button" />
-                  {/* Notifications with enhanced mobile styling */}
-                  <button
-                    type="button"
-                    onClick={() => router.push('/dashboard/inbox')}
-                    className={mobile.button(
-                      'relative bg-gray-100 dark:bg-gray-800 p-2.5 text-gray-600 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-gray-200 dark:hover:bg-gray-700'
-                    )}
-                    aria-label="View inbox messages"
-                  >
-                    <span className="sr-only">View inbox messages</span>
-                    <BellIcon className="h-6 w-6" />
-                    {inboxStats && inboxStats.unread && inboxStats.unread > 0 && (
-                      <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-xs text-white flex items-center justify-center font-medium shadow-sm animate-pulse">
-                        {inboxStats.unread > 99 ? '99+' : inboxStats.unread}
-                      </span>
-                    )}
-                  </button>
-                  {/* Quick Create with mobile enhancement */}
-                  <QuickCreate />
-                  {/* Help Button - hidden on mobile for space */}
-                  <button
-                    type="button"
-                    className={mobile.button(
-                      'hidden sm:inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500'
-                    )}
-                    onClick={() => {
-                      // Focus Copilot widget if available
-                      const evt = new CustomEvent('copilot:open');
-                      window.dispatchEvent(evt);
-                    }}
-                  >
-                    <QuestionMarkCircleIcon className="h-4 w-4 text-gray-400 mr-1" />
-                    Help
-                  </button>
-                </div>
               </div>
-            </div>
+            </header>
 
             {/* Page content with mobile optimization */}
             <main className={mobile.scrollContainer('flex-1 py-4 sm:py-6 overflow-y-auto')}>
