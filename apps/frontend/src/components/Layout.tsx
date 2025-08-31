@@ -7,6 +7,7 @@ import SearchBar from './SearchBar';
 import CopilotWidget from './CopilotWidget';
 import AIAssistant from './AIAssistant';
 import RouteMemoryTracker from './RouteMemoryTracker';
+import { useInboxStats } from '../hooks/useInboxStats';
 import {
   HomeIcon,
   ClipboardDocumentListIcon,
@@ -40,7 +41,8 @@ import {
   LockClosedIcon,
   WalletIcon,
   ShieldCheckIcon,
-  CreditCardIcon
+  CreditCardIcon,
+  InboxIcon
 } from '@heroicons/react/24/outline';
 import Logo from './Logo';
 import { ThemeProvider, useTheme } from './ThemeProvider';
@@ -81,6 +83,7 @@ export default function Layout({ children }: LayoutProps) {
   const [userPlan, setUserPlan] = useState<'basic' | 'ai-pro' | 'enterprise'>('basic');
   const router = useRouter();
   const pathname = usePathname();
+  const { stats: inboxStats } = useInboxStats();
 
   useEffect(() => {
     // Only check authentication on client side after component mounts
@@ -178,6 +181,7 @@ export default function Layout({ children }: LayoutProps) {
           icon: MicrophoneIcon,
           planRequired: 'ai-pro' as const
         },
+        { name: 'Inbox', href: '/dashboard/inbox', icon: InboxIcon },
         { name: 'Communications', href: '/dashboard/chat', icon: ChatBubbleLeftRightIcon, badge: 5 },
         { name: 'Phone Numbers', href: '/dashboard/phone-numbers', icon: PhoneIcon },
       ]
@@ -464,15 +468,17 @@ export default function Layout({ children }: LayoutProps) {
                   {/* Notifications */}
                   <button
                     type="button"
-                    onClick={() => router.push('/dashboard/notifications')}
+                    onClick={() => router.push('/dashboard/inbox')}
                     className="relative rounded-full bg-gray-100 dark:bg-gray-800 p-2 text-gray-600 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition-all duration-200"
-                    aria-label="View notifications"
+                    aria-label="View inbox messages"
                   >
-                    <span className="sr-only">View notifications</span>
+                    <span className="sr-only">View inbox messages</span>
                     <BellIcon className="h-6 w-6" />
-                    <span className="absolute top-2 right-2 h-3 w-3 rounded-full bg-red-500 text-xs text-white flex items-center justify-center font-medium shadow-sm">
-                      3
-                    </span>
+                    {inboxStats && inboxStats.unread && inboxStats.unread > 0 && (
+                      <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-xs text-white flex items-center justify-center font-medium shadow-sm">
+                        {inboxStats.unread > 99 ? '99+' : inboxStats.unread}
+                      </span>
+                    )}
                   </button>
                   {/* Quick Create */}
                   <QuickCreate />

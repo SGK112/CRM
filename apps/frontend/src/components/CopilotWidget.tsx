@@ -88,14 +88,14 @@ export default function CopilotWidget() {
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setIsExpanded(!isExpanded)}
-                className="p-1 rounded-md hover:bg-[var(--surface-3)] dark:hover:bg-[var(--surface-2)] text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
+                className="p-1 rounded-md hover:bg-[var(--surface-3)] dark:hover:bg-[var(--surface-2)] text-gray-600 dark:text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
                 title="Expand"
               >
                 <ArrowsPointingOutIcon className="h-4 w-4" />
               </button>
               <button
                 onClick={closeAll}
-                className="p-1 rounded-md hover:bg-[var(--surface-3)] dark:hover:bg-[var(--surface-2)] text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
+                className="p-1 rounded-md hover:bg-[var(--surface-3)] dark:hover:bg-[var(--surface-2)] text-gray-600 dark:text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
                 title="Close Copilot"
               >
                 <XMarkIcon className="h-4 w-4" />

@@ -72,14 +72,20 @@ export default function RegisterPage() {
         body: JSON.stringify(formData),
       })
 
-      let data: any = null
+  let data: { verificationUrl?: string; message?: string; validation?: string[] } | null = null
       try { data = await response.json() } catch {
         // ignore json parse error
       }
 
       if (response.ok) {
-        // Redirect to email verification page with the user's email
-        router.push(`/auth/verify-email?email=${encodeURIComponent(formData.email)}`);
+        // If backend exposed a dev verificationUrl, use it to verify immediately (no email needed)
+        const devVerificationUrl = data?.verificationUrl as string | undefined
+        if (devVerificationUrl) {
+          router.push(devVerificationUrl)
+        } else {
+          // Fallback: go to the verification page prompting resend by email
+          router.push(`/auth/verify-email?email=${encodeURIComponent(formData.email)}`)
+        }
       } else if (response.status === 400) {
         setError(data?.validation?.[0] || data?.message || 'Validation error')
       } else if (response.status === 401) {

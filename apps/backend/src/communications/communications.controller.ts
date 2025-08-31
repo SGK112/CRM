@@ -35,8 +35,39 @@ export class CommunicationsController {
   @Post('email/template')
   @ApiOperation({ summary: 'Send templated email to client' })
   @ApiResponse({ status: 201, description: 'Templated email sent successfully' })
-  async sendTemplatedEmail(@Body() data: any, @Request() req) {
-    return this.communicationsService.sendTemplatedEmail(data, req.user.workspaceId, req.user._id);
+  async sendTemplatedEmail(@Body() data: {
+    type: 'appointment' | 'estimate' | 'followup';
+    clientId: string;
+    clientName?: string;
+    appointmentDate?: string; // ISO string from client
+    appointmentType?: string;
+    location?: string;
+    notes?: string;
+    estimateNumber?: string;
+    estimateAmount?: number;
+    subject?: string;
+    message?: string;
+    callNotes?: string;
+  }, @Request() req) {
+    // Convert appointmentDate to Date if provided
+    const normalized: {
+      type: 'appointment' | 'estimate' | 'followup';
+      clientId: string;
+      clientName?: string;
+      appointmentDate?: Date;
+      appointmentType?: string;
+      location?: string;
+      notes?: string;
+      estimateNumber?: string;
+      estimateAmount?: number;
+      subject?: string;
+      message?: string;
+      callNotes?: string;
+    } = {
+      ...data,
+      appointmentDate: data.appointmentDate ? new Date(data.appointmentDate) : undefined,
+    };
+    return this.communicationsService.sendTemplatedEmail(normalized, req.user.workspaceId, req.user._id);
   }
 
   @Post('test-email')

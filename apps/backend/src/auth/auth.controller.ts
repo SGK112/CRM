@@ -1,7 +1,7 @@
-import { Controller, Post, Body, UseGuards, Request, Get, Req, Res, Logger, Query } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Request, Get, Req, Res, Logger } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { LoginDto, RegisterDto, PasswordResetDto } from './dto/auth.dto';
+import { LoginDto, RegisterDto } from './dto/auth.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { EmailVerificationService } from './email-verification.service';
@@ -27,14 +27,19 @@ export class AuthController {
     // Send verification email after successful registration
     if (result.user && result.user.email) {
       try {
-        await this.emailVerificationService.sendVerificationEmail({
+        const emailResult = await this.emailVerificationService.sendVerificationEmail({
           id: result.user.id,
           email: result.user.email,
           firstName: result.user.firstName
         });
-        console.log('📧 Verification email sent successfully for:', result.user.email);
-      } catch (emailError) {
-        console.error('📧 Failed to send verification email:', emailError);
+        this.logger.log(`Verification email send attempted for: ${result.user.email}`);
+        if (emailResult?.verificationUrl) {
+          // Attach a dev-only hint to the response
+          (result as unknown as { verificationUrl?: string }).verificationUrl = emailResult.verificationUrl;
+        }
+      } catch (emailError: unknown) {
+        const stack = typeof emailError === 'object' && emailError && 'stack' in emailError ? String((emailError as { stack?: string }).stack) : undefined;
+        this.logger.error('Failed to send verification email', stack || String(emailError));
         // Don't fail registration if email fails
       }
     }
@@ -85,7 +90,7 @@ export class AuthController {
   @Get('google')
   @UseGuards(AuthGuard('google'))
   @ApiOperation({ summary: 'Initiate Google OAuth login' })
-  async googleAuth(@Req() req) {
+  async googleAuth() {
     // Initiates Google OAuth flow
   }
 

@@ -166,7 +166,7 @@ export default function QuickActions({ isOpen, onToggle }: QuickActionsProps) {
                     <action.icon className="h-5 w-5" />
                   </div>
                   <div className="flex-1">
-                    <p className="font-medium text-gray-900 group-hover:text-gray-700">
+                    <p className="font-medium text-gray-900 group-hover:text-amber-600 transition-colors">
                       {action.name}
                     </p>
                     <p className="text-xs text-gray-500">
@@ -183,7 +183,7 @@ export default function QuickActions({ isOpen, onToggle }: QuickActionsProps) {
                     <action.icon className="h-5 w-5" />
                   </div>
                   <div className="flex-1">
-                    <p className="font-medium text-gray-900 group-hover:text-gray-700">
+                    <p className="font-medium text-gray-900 group-hover:text-amber-600 transition-colors">
                       {action.name}
                     </p>
                     <p className="text-xs text-gray-500">

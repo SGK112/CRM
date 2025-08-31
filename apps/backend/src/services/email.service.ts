@@ -48,7 +48,13 @@ export class EmailService {
   async sendEmail(options: SendEmailOptions): Promise<boolean> {
     try {
       if (!this.isConfigured) {
-        return true; // simulate success in dev
+        // Surface a clear warning to avoid masking delivery problems
+        // Configure SENDGRID_API_KEY (preferred) or SMTP_HOST/SMTP_PORT/SMTP_USER/SMTP_PASS in env.
+        // Optionally set SENDGRID_FROM_EMAIL or SMTP_FROM for the sender address.
+        // Returning false ensures callers can surface a helpful error to the UI/logs.
+        // eslint-disable-next-line no-console
+        console.warn('[EmailService] Email provider is not configured. Set SENDGRID_API_KEY or SMTP_* env vars to enable email delivery.');
+        return false;
       }
 
       if (this.useSendGridAPI) {
@@ -196,5 +202,11 @@ export class EmailService {
 
   get configured(): boolean {
     return this.isConfigured;
+  }
+
+  get provider(): 'sendgrid' | 'smtp' | 'none' {
+    if (this.useSendGridAPI) return 'sendgrid';
+    if (this.transporter) return 'smtp';
+    return 'none';
   }
 }

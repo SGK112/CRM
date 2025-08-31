@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '../users/schemas/user.schema';
@@ -17,13 +17,14 @@ interface EmailVerificationToken {
 export class EmailVerificationService {
   // In-memory storage for tokens (in production, use Redis or database)
   private verificationTokens = new Map<string, EmailVerificationToken>();
+  private readonly logger = new Logger('EmailVerificationService');
 
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private emailService: EmailService,
   ) {}
 
-  async sendVerificationEmail(user: { id: string; email: string; firstName: string }): Promise<boolean> {
+  async sendVerificationEmail(user: { id: string; email: string; firstName: string }): Promise<{ success: boolean; verificationUrl?: string }> {
     try {
       // Generate verification token
       const token = crypto.randomBytes(32).toString('hex');
@@ -42,33 +43,35 @@ export class EmailVerificationService {
       this.cleanupExpiredTokens();
 
       // Create verification URL - handle different environments
-      const frontendUrl = process.env.FRONTEND_URL || 
-                         process.env.NEXT_PUBLIC_FRONTEND_URL || 
-                         'http://localhost:3000';
-      
-      // Always use production URL if available, or fallback based on current environment
-      const isLocalhost = frontendUrl.includes('localhost');
-      const prodUrl = 'https://crm-h137.onrender.com';
-      
-      const baseUrl = isLocalhost ? prodUrl : frontendUrl;
-        
+      // Default to the actual dev frontend port (3005) when not explicitly set
+      const frontendUrl =
+        process.env.FRONTEND_URL ||
+        process.env.NEXT_PUBLIC_FRONTEND_URL ||
+        'http://localhost:3005';
+      const baseUrl = frontendUrl;
       const verificationUrl = `${baseUrl.replace(/\/$/, '')}/auth/verify-email?token=${token}`;
 
       // Send verification email
-      const emailSent = await this.emailService.sendEmail({
+  const emailSent = await this.emailService.sendEmail({
         to: user.email,
         subject: 'Verify Your Email Address - Remodely CRM',
         html: this.getVerificationEmailTemplate(user.firstName, verificationUrl),
       });
 
-      return emailSent;
+      // Log link in dev to assist debugging
+      if (process.env.NODE_ENV !== 'production') {
+        // eslint-disable-next-line no-console
+        console.log(`[EmailVerification] Verification link for ${user.email}: ${verificationUrl}`);
+      }
+
+  return { success: emailSent, verificationUrl: process.env.NODE_ENV !== 'production' ? verificationUrl : undefined };
     } catch (error) {
-      console.error('Failed to send verification email:', error);
-      return false;
+      this.logger.error('Failed to send verification email', error?.stack || String(error));
+  return { success: false };
     }
   }
 
-  async verifyEmail(token: string): Promise<{ success: boolean; message: string; user?: any }> {
+  async verifyEmail(token: string): Promise<{ success: boolean; message: string; user?: { id: string; email: string; firstName: string; lastName: string; isEmailVerified: boolean } }> {
     try {
       const tokenData = this.verificationTokens.get(token);
 
@@ -91,7 +94,7 @@ export class EmailVerificationService {
         { new: true }
       );
 
-      if (!user) {
+  if (!user) {
         return { success: false, message: 'User not found' };
       }
 
@@ -110,7 +113,7 @@ export class EmailVerificationService {
         },
       };
     } catch (error) {
-      console.error('Failed to verify email:', error);
+      this.logger.error('Failed to verify email', error?.stack || String(error));
       return { success: false, message: 'Failed to verify email' };
     }
   }
@@ -129,19 +132,22 @@ export class EmailVerificationService {
       }
 
       // Send new verification email
-      const emailSent = await this.sendVerificationEmail({
+      const emailResult = await this.sendVerificationEmail({
         id: user._id.toString(),
         email: user.email,
         firstName: user.firstName,
       });
-
-      if (emailSent) {
-        return { success: true, message: 'Verification email sent successfully' };
-      } else {
-        return { success: false, message: 'Failed to send verification email' };
+      if (emailResult.success) {
+        const resp: { success: boolean; message: string; verificationUrl?: string } = {
+          success: true,
+          message: 'Verification email sent successfully',
+        };
+        if (emailResult.verificationUrl) resp.verificationUrl = emailResult.verificationUrl;
+        return resp;
       }
+      return { success: false, message: 'Failed to send verification email' };
     } catch (error) {
-      console.error('Failed to resend verification email:', error);
+      this.logger.error('Failed to resend verification email', error?.stack || String(error));
       return { success: false, message: 'Failed to send verification email' };
     }
   }
@@ -158,7 +164,7 @@ export class EmailVerificationService {
         email: user.email,
       };
     } catch (error) {
-      console.error('Failed to check verification status:', error);
+      this.logger.error('Failed to check verification status', error?.stack || String(error));
       return { isVerified: false };
     }
   }

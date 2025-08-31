@@ -33,6 +33,8 @@ print_error() {
 print_status "Cleaning up existing processes..."
 lsof -ti:3000 | xargs kill -9 2>/dev/null || true
 lsof -ti:3001 | xargs kill -9 2>/dev/null || true
+# Also ensure frontend dev port is free
+lsof -ti:3005 | xargs kill -9 2>/dev/null || true
 pkill -f "npm run dev" 2>/dev/null || true
 sleep 2
 
@@ -68,11 +70,20 @@ if lsof -i:3001 > /dev/null 2>&1; then
     exit 1
 fi
 
-print_success "Ports 3000 and 3001 are available"
+if lsof -i:3005 > /dev/null 2>&1; then
+    print_error "Port 3005 is still in use!"
+    lsof -i:3005
+    exit 1
+fi
+
+print_success "Ports 3000, 3001 and 3005 are available"
 
 # Start the development server
 print_status "Starting development server..."
+# Ensure correct frontend URL is propagated for link generation in dev
 export USE_DEMO_USERS=false
+export FRONTEND_URL=${FRONTEND_URL:-http://localhost:3005}
+export NEXT_PUBLIC_FRONTEND_URL=${NEXT_PUBLIC_FRONTEND_URL:-http://localhost:3005}
 npm run dev
 
 # If we get here, the server was stopped

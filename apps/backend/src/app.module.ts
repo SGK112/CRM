@@ -36,6 +36,7 @@ import { AdminModule } from './admin/admin.module';
 import { QuickBooksModule } from './quickbooks/quickbooks.module';
 import { WalletModule } from './wallet/wallet.module';
 import { TwilioNumbersModule } from './twilio-numbers/twilio-numbers.module';
+import { InboxModule } from './inbox/inbox.module';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { TwilioNumbersModule } from './twilio-numbers/twilio-numbers.module';
     ChatModule,
     IntegrationsModule,
     NotificationsModule,
+    InboxModule,
     DocumentsModule,
   MarketingModule,
   VoiceAgentModule,

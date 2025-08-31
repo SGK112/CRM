@@ -4,7 +4,6 @@ import { RevealInit } from '@/components/RevealInit'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import {
-  SparklesIcon,
   ShieldCheckIcon,
   ChartBarIcon,
   CurrencyDollarIcon,
@@ -225,7 +224,6 @@ export default function HomePage() {
   const [activeTestimonial, setActiveTestimonial] = useState(0)
   const [isYearly, setIsYearly] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [showFloatingAssistant, setShowFloatingAssistant] = useState(false)
 
   // Rotate testimonials every 5 seconds
   useEffect(() => {
@@ -235,21 +233,12 @@ export default function HomePage() {
     return () => clearInterval(interval)
   }, [])
 
-  // Show floating assistant after scrolling
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowFloatingAssistant(window.scrollY > window.innerHeight * 0.7)
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
   return (
     <div className="min-h-screen text-[var(--text)]">
       <RevealInit />
       
       {/* Navigation Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[var(--bg-primary)]/90 backdrop-blur-sm border-b border-[var(--border)]">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[var(--bg-primary)]/90 backdrop-blur-sm">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
@@ -673,18 +662,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Floating Assistant Button */}
-      <div className={`fixed bottom-6 right-6 z-50 transition-all duration-500 ${
-        showFloatingAssistant ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0 pointer-events-none'
-      }`}>
-        <button className="group bg-amber-600 hover:bg-amber-700 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300">
-          <SparklesIcon className="w-6 h-6 transition-transform duration-300 group-hover:rotate-12" />
-          <div className="absolute -top-12 right-0 bg-gray-900 text-white text-sm px-3 py-2 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
-            Need help? Try our AI assistant!
-          </div>
-        </button>
-      </div>
 
       </div> {/* Close the pt-16 container */}
     </div>

@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, BadRequestException, InternalServerErrorException, Logger } from '@nestjs/common';
 import { EmailService } from '../services/email.service';
 import { TwilioService } from '../services/twilio.service';
 import { SendEmailDto, SendSmsDto } from './dto/communications.dto';
@@ -9,6 +9,7 @@ import { User, UserDocument } from '../users/schemas/user.schema';
 
 @Injectable()
 export class CommunicationsService {
+  private readonly logger = new Logger('CommunicationsService');
   constructor(
     private readonly emailService: EmailService,
     private readonly twilioService: TwilioService,
@@ -19,11 +20,14 @@ export class CommunicationsService {
   async getServiceStatus(workspaceId: string) {
     // Check if email and SMS services are configured for this workspace
     const user = await this.userModel.findOne({ workspaceId }).exec();
-    
+
+    const globalEmailConfigured = this.emailService.configured;
+    const globalEmailProvider = this.emailService.provider;
+
     return {
       email: {
-        configured: !!(user?.emailConfig?.smtpHost && user?.emailConfig?.smtpUser),
-        provider: user?.emailConfig?.provider || 'Not configured'
+        configured: globalEmailConfigured || !!(user?.emailConfig?.smtpHost && user?.emailConfig?.smtpUser),
+        provider: user?.emailConfig?.provider || (globalEmailProvider !== 'none' ? globalEmailProvider : 'Not configured')
       },
       sms: {
         configured: !!(user?.twilioConfig?.accountSid && user?.twilioConfig?.authToken),
@@ -56,7 +60,7 @@ export class CommunicationsService {
       };
 
       // Send email
-      const result = await this.emailService.sendEmail(emailData);
+  const result = await this.emailService.sendEmail(emailData);
 
       // Log communication (you might want to create a communications log schema)
       await this.logCommunication({
@@ -67,15 +71,15 @@ export class CommunicationsService {
         subject: sendEmailDto.subject,
         message: sendEmailDto.message,
         sentAt: new Date(),
-        status: 'sent'
+        status: result ? 'sent' : 'failed'
       });
 
       return {
-        success: true,
-        message: 'Email sent successfully'
+        success: result,
+        message: result ? 'Email sent successfully' : 'Failed to send email (provider not configured or error)'
       };
     } catch (error) {
-      console.error('Email sending error:', error);
+      this.logger.error('Email sending error', error?.stack || String(error));
       throw new InternalServerErrorException('Failed to send email');
     }
   }
@@ -120,40 +124,75 @@ export class CommunicationsService {
         message: result ? 'SMS sent successfully' : 'Failed to send SMS'
       };
     } catch (error) {
-      console.error('SMS sending error:', error);
+      this.logger.error('SMS sending error', error?.stack || String(error));
       throw new InternalServerErrorException('Failed to send SMS');
     }
   }
 
-  async sendTemplatedEmail(data: any, workspaceId: string, userId: string) {
+  async sendTemplatedEmail(data: {
+    type: 'appointment' | 'estimate' | 'followup';
+    clientId: string;
+    clientName?: string;
+    appointmentDate?: Date;
+    appointmentType?: string;
+    location?: string;
+    notes?: string;
+    estimateNumber?: string;
+    estimateAmount?: number;
+    subject?: string;
+    message?: string;
+    callNotes?: string;
+  }, workspaceId: string, userId: string) {
     // Implementation for templated emails (appointments, estimates, etc.)
     // This would use the existing EmailService templates
     try {
       const { type, clientId, ...templateData } = data;
       
-      const client = await this.clientModel.findById(clientId).exec();
+      const client = await this.clientModel.findOne({ 
+        _id: clientId, 
+        workspaceId: workspaceId 
+      }).exec();
       if (!client) {
         throw new BadRequestException('Client not found');
       }
 
-      let result;
+      let result: boolean;
       switch (type) {
         case 'appointment':
+          if (!templateData.appointmentDate || !templateData.appointmentType) {
+            throw new BadRequestException('Missing appointmentDate or appointmentType for appointment email');
+          }
           result = await this.emailService.sendAppointmentConfirmation({
             clientEmail: client.email,
-            ...templateData
+            clientName: templateData.clientName || `${client.firstName} ${client.lastName}`.trim(),
+            appointmentDate: templateData.appointmentDate,
+            appointmentType: templateData.appointmentType,
+            location: templateData.location,
+            notes: templateData.notes,
           });
           break;
         case 'estimate':
+          if (!templateData.estimateNumber || typeof templateData.estimateAmount !== 'number') {
+            throw new BadRequestException('Missing estimateNumber or estimateAmount for estimate email');
+          }
           result = await this.emailService.sendEstimateFollowUp({
             clientEmail: client.email,
-            ...templateData
+            clientName: templateData.clientName || `${client.firstName} ${client.lastName}`.trim(),
+            estimateNumber: templateData.estimateNumber,
+            estimateAmount: templateData.estimateAmount,
+            callNotes: templateData.callNotes,
           });
           break;
         case 'followup':
+          if (!templateData.subject || !templateData.message) {
+            throw new BadRequestException('Missing subject or message for followup email');
+          }
           result = await this.emailService.sendGeneralFollowUp({
             clientEmail: client.email,
-            ...templateData
+            clientName: templateData.clientName || `${client.firstName} ${client.lastName}`.trim(),
+            subject: templateData.subject,
+            message: templateData.message,
+            callNotes: templateData.callNotes,
           });
           break;
         default:
@@ -165,11 +204,12 @@ export class CommunicationsService {
         message: result ? 'Templated email sent successfully' : 'Failed to send templated email'
       };
     } catch (error) {
-      console.error('Templated email error:', error);
+    this.logger.error('Templated email error', error?.stack || String(error));
       throw new InternalServerErrorException('Failed to send templated email');
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private formatEmailBody(message: string, user: any, client: any): string {
     // Format the email with signature and professional layout
     return `
@@ -191,10 +231,11 @@ export class CommunicationsService {
     `;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async logCommunication(data: any) {
     // This would save to a communications log collection
     // For now, just console.log - you can implement proper logging later
-    console.log('Communication logged:', data);
+    this.logger.debug(`Communication logged: ${JSON.stringify(data)}`);
   }
 
   async sendTestEmail(testEmail: string, userId: string) {
@@ -224,7 +265,7 @@ export class CommunicationsService {
         message: result ? 'Test email sent successfully' : 'Failed to send test email'
       };
     } catch (error) {
-      console.error('Test email error:', error);
+  this.logger.error('Test email error', error?.stack || String(error));
       throw new InternalServerErrorException('Failed to send test email');
     }
   }
@@ -246,7 +287,7 @@ export class CommunicationsService {
         message: result ? 'Test SMS sent successfully' : 'Failed to send test SMS'
       };
     } catch (error) {
-      console.error('Test SMS error:', error);
+  this.logger.error('Test SMS error', error?.stack || String(error));
       throw new InternalServerErrorException('Failed to send test SMS');
     }
   }
