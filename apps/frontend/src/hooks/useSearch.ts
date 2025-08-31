@@ -100,7 +100,7 @@ const mockData: SearchResult[] = [
     type: 'message',
     title: 'Project Update from Mike',
     description: 'Status update on warehouse construction',
-    url: '/dashboard/chat/10',
+    url: '/dashboard/inbox',
     metadata: { sender: 'Mike Thompson', timestamp: '2 hours ago' }
   },
   {
@@ -108,7 +108,7 @@ const mockData: SearchResult[] = [
     type: 'message',
     title: 'Client Feedback',
     description: 'Johnson family feedback on kitchen design',
-    url: '/dashboard/chat/11',
+    url: '/dashboard/inbox',
     metadata: { sender: 'Sarah Johnson', timestamp: '1 day ago' }
   }
 ]

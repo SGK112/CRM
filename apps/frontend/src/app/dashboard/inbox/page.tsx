@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { 
   Mail, 
   Bell, 
@@ -75,6 +76,7 @@ interface InboxStats {
 }
 
 export default function InboxPage() {
+  const searchParams = useSearchParams();
   const [messages, setMessages] = useState<InboxMessage[]>([]);
   const [selectedMessage, setSelectedMessage] = useState<InboxMessage | null>(null);
   const [stats, setStats] = useState<InboxStats | null>(null);
@@ -96,6 +98,13 @@ export default function InboxPage() {
     content: '',
     type: 'email' as 'email' | 'sms',
   });
+
+  // Check for compose parameter and open modal
+  useEffect(() => {
+    if (searchParams.get('compose') === '1') {
+      setShowCompose(true);
+    }
+  }, [searchParams]);
 
   const fetchMessages = useCallback(async () => {
     try {

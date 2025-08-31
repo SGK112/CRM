@@ -14,7 +14,6 @@ import {
   UserGroupIcon,
   CalendarDaysIcon,
   DocumentTextIcon,
-  ChatBubbleLeftRightIcon,
   MegaphoneIcon,
   CogIcon,
   Bars3Icon,
@@ -181,8 +180,7 @@ export default function Layout({ children }: LayoutProps) {
           icon: MicrophoneIcon,
           planRequired: 'ai-pro' as const
         },
-        { name: 'Inbox', href: '/dashboard/inbox', icon: InboxIcon },
-        { name: 'Communications', href: '/dashboard/chat', icon: ChatBubbleLeftRightIcon, badge: 5 },
+        { name: 'Inbox & Communications', href: '/dashboard/inbox', icon: InboxIcon },
         { name: 'Phone Numbers', href: '/dashboard/phone-numbers', icon: PhoneIcon },
       ]
     },
@@ -701,7 +699,7 @@ function QuickCreate() {
               { label: 'Project', href: '/dashboard/projects?new=1' },
               { label: 'Client', href: '/dashboard/clients?new=1' },
               { label: 'Design', href: '/dashboard/designer?view=new' },
-              { label: 'Message', href: '/dashboard/chat?compose=1' }
+              { label: 'Message', href: '/dashboard/inbox?compose=1' }
             ].map(item => (
               <Link
                 key={item.label}

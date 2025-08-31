@@ -72,7 +72,7 @@ export default function QuickActions({ isOpen, onToggle }: QuickActionsProps) {
     },
     {
       name: 'Send Message',
-      href: '/dashboard/chat/new',
+      href: '/dashboard/inbox?compose=1',
       icon: ChatBubbleLeftRightIcon,
       color: 'bg-indigo-500',
       description: 'Message a client or team member'
