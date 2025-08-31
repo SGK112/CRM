@@ -1,0 +1,200 @@
+/* Mobile-optimized CRM styles */
+
+/* Safe areas for notched devices */
+:root {
+  --safe-area-inset-top: env(safe-area-inset-top);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom);
+  --safe-area-inset-left: env(safe-area-inset-left);
+  --safe-area-inset-right: env(safe-area-inset-right);
+}
+
+/* Mobile viewport optimizations */
+@supports (-webkit-appearance: none) {
+  .mobile-viewport {
+    height: -webkit-fill-available;
+    min-height: -webkit-fill-available;
+  }
+}
+
+/* Enhanced touch targets */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Smooth scrolling with momentum */
+.scroll-container {
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* App-like card interactions */
+.mobile-card {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+.mobile-card:active {
+  transform: scale(0.98);
+  transition-duration: 150ms;
+}
+
+/* Enhanced button feedback */
+.mobile-button {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+.mobile-button:active {
+  transform: scale(0.95);
+  transition-duration: 150ms;
+}
+
+/* iOS-style safe area support */
+.safe-top {
+  padding-top: max(1rem, env(safe-area-inset-top));
+}
+
+.safe-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+.safe-left {
+  padding-left: max(1rem, env(safe-area-inset-left));
+}
+
+.safe-right {
+  padding-right: max(1rem, env(safe-area-inset-right));
+}
+
+/* Mobile navigation improvements */
+.mobile-nav {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.dark .mobile-nav {
+  background: rgba(17, 24, 39, 0.9);
+}
+
+/* Bottom sheet styles */
+.bottom-sheet {
+  border-top-left-radius: 1.5rem;
+  border-top-right-radius: 1.5rem;
+  box-shadow: 0 -10px 25px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Mobile-optimized text scaling */
+@media (max-width: 640px) {
+  .mobile-title {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+  
+  .mobile-subtitle {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+  
+  .mobile-body {
+    font-size: 0.875rem;
+    line-height: 1.5rem;
+  }
+}
+
+/* Optimized grid layouts for mobile */
+.mobile-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .mobile-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .mobile-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+/* Enhanced accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .mobile-card,
+  .mobile-button {
+    transition: none;
+  }
+  
+  .mobile-card:active,
+  .mobile-button:active {
+    transform: none;
+  }
+}
+
+/* Dark mode optimizations */
+@media (prefers-color-scheme: dark) {
+  .mobile-card {
+    border-color: rgba(55, 65, 81, 0.5);
+  }
+  
+  .mobile-nav {
+    background: rgba(17, 24, 39, 0.9);
+  }
+}
+
+/* Landscape orientation adjustments */
+@media (orientation: landscape) and (max-height: 500px) {
+  .mobile-header {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  
+  .mobile-spacing {
+    padding: 0.75rem;
+  }
+}
+
+/* High DPI display optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .mobile-card {
+    border-width: 0.5px;
+  }
+}
+
+/* Keyboard navigation support */
+.mobile-card:focus-visible,
+.mobile-button:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Performance optimizations */
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-scroll {
+  will-change: scroll-position;
+}
+
+/* Container queries for responsive components */
+@container (max-width: 300px) {
+  .mobile-card-content {
+    padding: 0.75rem;
+  }
+  
+  .mobile-card-title {
+    font-size: 0.875rem;
+  }
+}

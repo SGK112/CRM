@@ -253,52 +253,83 @@ export default function Layout({ children }: LayoutProps) {
           )}
 
           {/* Mobile sidebar */}
-          <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:hidden ${
+          <div className={`fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-gray-800 shadow-2xl transform transition-transform duration-300 ease-in-out lg:hidden ${
             sidebarOpen ? 'translate-x-0' : '-translate-x-full'
           }`}>
-            <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-700">
+            {/* Mobile header with enhanced styling */}
+            <div className={mobile.navigation(
+              'flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-700'
+            )}>
               <Logo />
               <button 
                 onClick={() => setSidebarOpen(false)} 
-                className="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 transition-colors"
+                className={mobile.button(
+                  'p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700'
+                )}
                 aria-label="Close sidebar"
               >
                 <XMarkIcon className="h-6 w-6" />
               </button>
             </div>
-            <nav className="mt-6 px-2 pb-6 overflow-y-auto">
+            
+            {/* Mobile navigation with enhanced touch targets */}
+            <nav className={mobile.scrollContainer('mt-2 px-3 pb-6 overflow-y-auto h-full')}>
               <div className="space-y-1">
-                {updatedNavigation.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    onClick={() => setSidebarOpen(false)}
-                    className={classNames(
-                      'group flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors',
-                      item.current 
-                        ? 'bg-amber-50 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300' 
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
-                    )}
-                  >
-                    <item.icon className={classNames(
-                      'mr-3 h-5 w-5 flex-shrink-0',
-                      item.current 
-                        ? 'text-amber-600 dark:text-amber-400' 
-                        : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
-                    )} />
-                    <span className="flex-1">{item.name}</span>
-                    {item.badge && item.badge > 0 && (
-                      <span className={classNames(
-                        'ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
-                        item.current 
-                          ? 'bg-amber-600 text-white shadow-sm' 
-                          : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
-                      )}>
-                        {item.badge}
-                      </span>
-                    )}
-                  </Link>
-                ))}
+                {navigationGroups.map(group => {
+                  const groupItems = updatedNavigation.filter(i=> group.items.some(gItem=> gItem.href === i.href));
+                  return (
+                    <div key={group.label} className="mb-6">
+                      <div className="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        {group.label}
+                      </div>
+                      <div className="space-y-1">
+                        {groupItems.map(item => {
+                          const originalItem = group.items.find(gi => gi.href === item.href);
+                          const isRestricted = originalItem?.planRequired && originalItem.planRequired !== 'basic' && userPlan === 'basic';
+                          
+                          return (
+                            <Link
+                              key={item.name}
+                              href={isRestricted ? `/dashboard/settings/billing?upgrade=${originalItem.planRequired}` : item.href}
+                              onClick={() => setSidebarOpen(false)}
+                              className={classNames(
+                                mobile.touchTarget(),
+                                'group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200',
+                                item.current 
+                                  ? 'bg-amber-50 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 shadow-sm' 
+                                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white active:scale-95',
+                                isRestricted ? 'opacity-75' : ''
+                              )}
+                            >
+                              <item.icon className={classNames(
+                                'mr-3 h-5 w-5 flex-shrink-0',
+                                item.current 
+                                  ? 'text-amber-600 dark:text-amber-400' 
+                                  : isRestricted 
+                                    ? 'text-gray-400 dark:text-gray-500' 
+                                    : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
+                              )} />
+                              <span className="flex-1">{item.name}</span>
+                              {isRestricted && (
+                                <LockClosedIcon className="w-4 h-4 text-amber-500 ml-2" />
+                              )}
+                              {item.badge && item.badge > 0 && !isRestricted && (
+                                <span className={classNames(
+                                  'ml-auto inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium',
+                                  item.current 
+                                    ? 'bg-amber-600 text-white shadow-sm' 
+                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                                )}>
+                                  {item.badge}
+                                </span>
+                              )}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </nav>
           </div>
@@ -439,19 +470,23 @@ export default function Layout({ children }: LayoutProps) {
 
           {/* Main content */}
           <div className="lg:pl-64 flex flex-col min-h-screen">
-            {/* Top navigation */}
-            <div className="sticky top-0 z-30 flex h-16 flex-shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 backdrop-blur-md bg-opacity-95">
+            {/* Top navigation with enhanced mobile experience */}
+            <div className={mobile.navigation(
+              'flex h-16 flex-shrink-0 items-center justify-between px-4 sm:px-6 lg:px-8'
+            )}>
               <button
                 type="button"
-                className="px-4 border-r border-gray-200 dark:border-gray-700 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 lg:hidden transition-colors"
+                className={mobile.button(
+                  'px-4 py-2 border-r border-gray-200 dark:border-gray-700 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 lg:hidden'
+                )}
                 onClick={() => setSidebarOpen(true)}
                 aria-label="Open sidebar"
               >
                 <Bars3Icon className="h-6 w-6" />
               </button>
 
-              <div className="flex flex-1 items-center justify-between px-4 sm:px-6 lg:px-8 min-w-0">
-                {/* Search */}
+              <div className="flex flex-1 items-center justify-between min-w-0 ml-4 lg:ml-0">
+                {/* Search with mobile optimization */}
                 <div className="flex items-center flex-1 min-w-0">
                   <div className="flex-1 min-w-0 max-w-lg">
                     <SearchBar className="w-full" />
@@ -463,27 +498,31 @@ export default function Layout({ children }: LayoutProps) {
                   <AIEnable />
                   {/* Theme Toggle */}
                   <ThemeToggle variant="button" />
-                  {/* Notifications */}
+                  {/* Notifications with enhanced mobile styling */}
                   <button
                     type="button"
                     onClick={() => router.push('/dashboard/inbox')}
-                    className="relative rounded-full bg-gray-100 dark:bg-gray-800 p-2 text-gray-600 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition-all duration-200"
+                    className={mobile.button(
+                      'relative bg-gray-100 dark:bg-gray-800 p-2.5 text-gray-600 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                    )}
                     aria-label="View inbox messages"
                   >
                     <span className="sr-only">View inbox messages</span>
                     <BellIcon className="h-6 w-6" />
                     {inboxStats && inboxStats.unread && inboxStats.unread > 0 && (
-                      <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-xs text-white flex items-center justify-center font-medium shadow-sm">
+                      <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-xs text-white flex items-center justify-center font-medium shadow-sm animate-pulse">
                         {inboxStats.unread > 99 ? '99+' : inboxStats.unread}
                       </span>
                     )}
                   </button>
-                  {/* Quick Create */}
+                  {/* Quick Create with mobile enhancement */}
                   <QuickCreate />
-                  {/* Help Button */}
+                  {/* Help Button - hidden on mobile for space */}
                   <button
                     type="button"
-                    className="hidden sm:inline-flex items-center px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-200"
+                    className={mobile.button(
+                      'hidden sm:inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500'
+                    )}
                     onClick={() => {
                       // Focus Copilot widget if available
                       const evt = new CustomEvent('copilot:open');
@@ -497,11 +536,12 @@ export default function Layout({ children }: LayoutProps) {
               </div>
             </div>
 
-            {/* Page content */}
-            <main className="flex-1 py-6 overflow-y-auto">
-              <div className={`mx-auto ${
-                pathname.startsWith('/dashboard/clients') ? 'max-w-none px-4 sm:px-6 lg:px-8' : 'max-w-7xl px-4 sm:px-6 lg:px-8'
-              }`}>
+            {/* Page content with mobile optimization */}
+            <main className={mobile.scrollContainer('flex-1 py-4 sm:py-6 overflow-y-auto')}>
+              <div className={classNames(
+                mobile.spacing.page(),
+                pathname.startsWith('/dashboard/clients') ? 'max-w-none' : 'max-w-7xl mx-auto'
+              )}>
                 {children}
               </div>
             </main>
@@ -568,7 +608,7 @@ function FooterCopilot() {
     <>
       {/* Inline Footer Copilot */}
       <div className={mobileOptimized(
-        'sticky z-30 relative overflow-hidden footer-copilot-safe',
+        'sticky bottom-0 z-30 overflow-hidden footer-copilot-safe',
         mobile.safeBottom()
       )} style={{ bottom: 'var(--safe-area-inset-bottom, 0px)' }}>
         {/* Enhanced professional background */}

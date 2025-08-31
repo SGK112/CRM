@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   HomeIcon,
-  CurrencyDollarIcon,
   ClipboardDocumentListIcon,
   UserGroupIcon,
   CalendarDaysIcon,
@@ -13,24 +12,30 @@ import {
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
   PlusIcon,
-  EyeIcon,
   ChartBarIcon,
-  CameraIcon,
   Squares2X2Icon,
   SparklesIcon,
   LockClosedIcon,
-  InformationCircleIcon,
   MicrophoneIcon,
-  ChatBubbleLeftRightIcon,
   StarIcon,
   BuildingOfficeIcon,
   BuildingStorefrontIcon,
   PencilSquareIcon
 } from '@heroicons/react/24/outline';
-import { getUserPlan, hasCapability, PLANS, type PlanTier, type PlanCapabilities, setUserPlan } from '@/lib/plans';
+import { getUserPlan, hasCapability, type PlanTier } from '@/lib/plans';
 import { CapabilityGate } from '@/components/CapabilityGate';
 import AiChatInterface from '@/components/AiChatInterface';
 import HelpTooltip from '@/components/ui/HelpTooltip';
+import { mobile } from '@/lib/mobile';
+
+interface User {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  workspaceId: string;
+}
 
 interface DashboardStats {
   totalRevenue: number;
@@ -81,7 +86,7 @@ const statusSteps = {
 
 export default function RemodelingDashboard() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [userPlan, setUserPlan] = useState<PlanTier>('basic');
   const [showPlanSwitcher, setShowPlanSwitcher] = useState(false);
   const [stats, setStats] = useState<DashboardStats>({
@@ -185,7 +190,8 @@ export default function RemodelingDashboard() {
 
   const handlePlanSwitch = (newPlan: PlanTier) => {
     setUserPlan(newPlan);
-    setUserPlan(newPlan); // Update both local state and localStorage
+    // Update localStorage directly since setUserPlan function is just for saving
+    localStorage.setItem('userPlan', newPlan);
     setShowPlanSwitcher(false);
   };
 
@@ -196,17 +202,6 @@ export default function RemodelingDashboard() {
     if (hour < 12) return `Good morning, ${firstName}!`;
     if (hour < 17) return `Good afternoon, ${firstName}!`;
     return `Good evening, ${firstName}!`;
-  };
-
-  const getMotivationalMessage = () => {
-    const messages = [
-      "Your projects are looking great! Keep up the excellent work.",
-      "Turning houses into dream homes, one project at a time.",
-      "Every renovation tells a story. What's yours today?",
-      "Building relationships through quality craftsmanship.",
-      "Creating beautiful spaces that families will love for years."
-    ];
-    return messages[Math.floor(Math.random() * messages.length)];
   };
 
   const quickStats: QuickStat[] = [
@@ -249,9 +244,9 @@ export default function RemodelingDashboard() {
   }
 
   return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Personalized Header with Plan Badge */}
-        <div className="mb-8 relative overflow-hidden rounded-2xl shadow-2xl border-2 theme-border">
+      <div className={mobile.spacing.page('max-w-7xl mx-auto')}>
+        {/* Mobile-optimized Personalized Header with Plan Badge */}
+        <div className={mobile.card('mb-6 relative overflow-hidden')}>
           {/* Enhanced gradient for AI plans */}
           <div className={`absolute inset-0 opacity-90 ${
             userPlan === 'basic' 
@@ -262,25 +257,27 @@ export default function RemodelingDashboard() {
           }`}></div>
           <div className="absolute inset-0 bg-gradient-to-tr from-black/20 via-transparent to-white/10"></div>
           
-          {/* Content */}
-          <div className="relative z-10 p-8">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <div className="flex items-center space-x-4 mb-3">
-                  <h1 className="text-4xl md:text-5xl font-bold text-white drop-shadow-lg">
+          {/* Mobile-optimized Content */}
+          <div className={mobile.spacing.card('relative z-10')}>
+            <div className="flex flex-col space-y-4">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h1 className={mobile.text.title('text-white drop-shadow-lg mb-3')}>
                     {getPersonalizedGreeting()}
                   </h1>
                   
-                  {/* Plan Badge - Now Clickable */}
+                  {/* Mobile-friendly Plan Badge */}
                   <button 
                     onClick={() => setShowPlanSwitcher(true)}
-                    className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-bold transition-all duration-200 hover:scale-105 ${
-                      userPlan === 'basic' 
-                        ? 'bg-white/20 text-white border border-white/30 hover:bg-white/30'
-                        : userPlan === 'ai-pro'
-                        ? 'bg-gradient-to-r from-blue-400 to-cyan-400 text-white shadow-lg hover:shadow-xl'
-                        : 'bg-gradient-to-r from-purple-400 to-pink-400 text-white shadow-lg hover:shadow-xl'
-                    }`}
+                    className={mobile.button(
+                      `inline-flex items-center px-3 py-2 rounded-full text-sm font-bold ${
+                        userPlan === 'basic' 
+                          ? 'bg-white/20 text-white border border-white/30 hover:bg-white/30'
+                          : userPlan === 'ai-pro'
+                          ? 'bg-gradient-to-r from-blue-400 to-cyan-400 text-white shadow-lg hover:shadow-xl'
+                          : 'bg-gradient-to-r from-purple-400 to-pink-400 text-white shadow-lg hover:shadow-xl'
+                      }`
+                    )}
                   >
                     {userPlan === 'basic' && <span>FREE PLAN ↗</span>}
                     {userPlan === 'ai-pro' && (
@@ -298,59 +295,54 @@ export default function RemodelingDashboard() {
                   </button>
                 </div>
                 
-                <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 border border-white/30">
-                  <p className="text-xl text-white font-medium leading-relaxed drop-shadow-md">
-                    {userPlan === 'basic' 
-                      ? "Great work! Upgrade to unlock AI-powered insights and voice agents."
-                      : userPlan === 'ai-pro'
-                      ? "🤖 AI is working for you! Smart insights and voice agents available."
-                      : "🚀 Enterprise power activated! Full AI suite and premium support."
-                    }
-                  </p>
+                {/* Mobile-optimized Decorative elements */}
+                <div className="flex items-center space-x-3">
+                  <div className={`w-16 h-16 rounded-full flex items-center justify-center backdrop-blur-sm ${
+                    userPlan === 'basic' 
+                      ? 'bg-white/20'
+                      : 'bg-white/30 shadow-lg'
+                  }`}>
+                    {userPlan === 'basic' ? (
+                      <HomeIcon className="h-8 w-8 text-white" />
+                    ) : (
+                      <div className="relative">
+                        <HomeIcon className="h-8 w-8 text-white" />
+                        <SparklesIcon className="h-3 w-3 text-yellow-300 absolute -top-0.5 -right-0.5 animate-pulse bg-amber-600 rounded-full p-0.5" />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
               
-              {/* Decorative elements with AI indicator */}
-              <div className="hidden md:flex items-center space-x-4 ml-8">
-                <div className={`w-20 h-20 rounded-full flex items-center justify-center backdrop-blur-sm ${
-                  userPlan === 'basic' 
-                    ? 'bg-white/20'
-                    : 'bg-white/30 shadow-lg'
-                }`}>
-                  {userPlan === 'basic' ? (
-                    <HomeIcon className="h-10 w-10 text-white" />
-                  ) : (
-                    <div className="relative">
-                      <HomeIcon className="h-10 w-10 text-white" />
-                      {/* Fixed sparkle icon positioning */}
-                      <SparklesIcon className="h-4 w-4 text-yellow-300 absolute -top-0.5 -right-0.5 animate-pulse bg-amber-600 rounded-full p-0.5" />
-                    </div>
-                  )}
-                </div>
-                <div className="text-right">
-                  <div className="text-white/90 text-sm font-medium">Remodely CRM</div>
-                  <div className="text-white text-lg font-bold">
-                    {userPlan === 'basic' ? 'Dashboard' : 'AI Dashboard'}
-                  </div>
-                </div>
+              <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 border border-white/30">
+                <p className={mobile.text.subtitle('text-white font-medium leading-relaxed drop-shadow-md')}>
+                  {userPlan === 'basic' 
+                    ? "Great work! Upgrade to unlock AI-powered insights and voice agents."
+                    : userPlan === 'ai-pro'
+                    ? "🤖 AI is working for you! Smart insights and voice agents available."
+                    : "🚀 Enterprise power activated! Full AI suite and premium support."
+                  }
+                </p>
               </div>
             </div>
           </div>
           
-          {/* Enhanced animated background elements */}
-          <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
-          <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-white/5 rounded-full blur-2xl"></div>
+          {/* Mobile-optimized animated background elements */}
+          <div className="absolute -top-2 -right-2 w-16 h-16 bg-white/10 rounded-full blur-xl"></div>
+          <div className="absolute -bottom-4 -left-4 w-20 h-20 bg-white/5 rounded-full blur-2xl"></div>
           {userPlan !== 'basic' && (
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-gradient-to-r from-purple-400/10 to-blue-400/10 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-gradient-to-r from-purple-400/10 to-blue-400/10 rounded-full blur-3xl animate-pulse"></div>
           )}
         </div>
 
-        {/* Enhanced Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* Mobile-optimized Quick Stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {quickStats.map((stat, index) => (
             <div
               key={index}
-              className="rounded-xl border-2 border-gray-200 dark:border-gray-700 p-6 bg-white dark:bg-gray-800 transition-all duration-300 hover:shadow-xl hover:scale-105 hover:border-amber-400 dark:hover:border-amber-500 relative overflow-hidden"
+              className={mobile.card(
+                'transition-all duration-300 hover:shadow-xl active:scale-95 relative overflow-hidden border-2 border-gray-200 dark:border-gray-700 hover:border-amber-400 dark:hover:border-amber-500'
+              )}
             >
               {/* Enhanced gradient backgrounds */}
               <div className={`absolute inset-0 opacity-30 ${
@@ -360,19 +352,19 @@ export default function RemodelingDashboard() {
                 'bg-gradient-to-br from-orange-100 via-transparent to-orange-50 dark:from-orange-900/20 dark:via-transparent dark:to-orange-800/10'
               }`}></div>
               
-              <div className="relative z-10">
-                {/* Improved Card Layout with Better Alignment */}
+              <div className={mobile.spacing.tight('relative z-10')}>
                 <div className="h-full flex flex-col justify-between">
-                  {/* Header Row - Better aligned with green bubble */}
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      {/* Green notification bubble aligned with title */}
+                  {/* Mobile-optimized header */}
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
                       {stat.change && (
-                        <div className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold shadow-lg ${
-                          stat.trend === 'up' 
-                            ? 'bg-green-500 dark:bg-green-600 text-white' 
-                            : 'bg-red-500 dark:bg-red-600 text-white'
-                        }`}>
+                        <div className={mobile.touchTarget(
+                          `flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold shadow-lg ${
+                            stat.trend === 'up' 
+                              ? 'bg-green-500 dark:bg-green-600 text-white' 
+                              : 'bg-red-500 dark:bg-red-600 text-white'
+                          }`
+                        )}>
                           {stat.trend === 'up' ? (
                             <ArrowTrendingUpIcon className="h-3 w-3" />
                           ) : (
@@ -380,22 +372,11 @@ export default function RemodelingDashboard() {
                           )}
                         </div>
                       )}
-                      <p className="text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-400">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-400">
                         {stat.label}
                       </p>
-                      <HelpTooltip 
-                        content={
-                          index === 0 ? "Total revenue generated from completed projects and invoices. This includes all paid estimates and project payments." :
-                          index === 1 ? "Number of active projects currently in progress. Projects are considered active from approval through completion." :
-                          index === 2 ? "Total number of clients in your CRM system, including leads, active clients, and past customers." :
-                          "Average project value based on completed projects over the last 12 months. Helps track business growth trends."
-                        }
-                        title={stat.label}
-                        size="sm"
-                      />
                     </div>
                     
-                    {/* Percentage Badge - Right aligned */}
                     {stat.change && (
                       <div className={`flex items-center px-2 py-1 rounded-md text-xs font-bold shadow-lg ${
                         stat.trend === 'up' 
@@ -407,17 +388,17 @@ export default function RemodelingDashboard() {
                     )}
                   </div>
                   
-                  {/* Main Value Row - Center aligned */}
-                  <div className="flex-1 flex items-center justify-center my-6">
-                    <p className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white text-center">
+                  {/* Mobile-optimized main value */}
+                  <div className="flex-1 flex items-center justify-center my-4">
+                    <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white text-center">
                       {stat.value}
                     </p>
                   </div>
                   
-                  {/* Bottom Row - Change Description */}
+                  {/* Mobile-optimized change description */}
                   {stat.change && (
-                    <div className="flex items-center justify-center pt-3 border-t border-gray-200 dark:border-gray-700">
-                      <span className={`text-sm font-medium text-center ${
+                    <div className="flex items-center justify-center pt-2 border-t border-gray-200 dark:border-gray-700">
+                      <span className={`text-xs font-medium text-center ${
                         stat.trend === 'up' 
                           ? 'text-green-600 dark:text-green-400' 
                           : 'text-red-600 dark:text-red-400'
@@ -428,14 +409,6 @@ export default function RemodelingDashboard() {
                   )}
                 </div>
               </div>
-              
-              {/* Enhanced Corner Accent */}
-              <div className={`absolute bottom-0 right-0 w-16 h-16 opacity-20 ${
-                index === 0 ? 'bg-gradient-to-tl from-green-400 to-transparent' :
-                index === 1 ? 'bg-gradient-to-tl from-blue-400 to-transparent' :
-                index === 2 ? 'bg-gradient-to-tl from-purple-400 to-transparent' :
-                'bg-gradient-to-tl from-orange-400 to-transparent'
-              }`}></div>
             </div>
           ))}
         </div>

@@ -122,7 +122,68 @@ module.exports = {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
       },
+      // Mobile-specific spacing and sizing
+      spacing: {
+        'safe-top': 'env(safe-area-inset-top)',
+        'safe-bottom': 'env(safe-area-inset-bottom)',
+        'safe-left': 'env(safe-area-inset-left)',
+        'safe-right': 'env(safe-area-inset-right)',
+      },
+      minHeight: {
+        'screen-safe': 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom))',
+        'touch': '44px', // Minimum touch target size
+      },
+      minWidth: {
+        'touch': '44px', // Minimum touch target size
+      },
+      // App-like border radius
+      borderRadius: {
+        'app': '1.5rem',
+        'app-lg': '2rem',
+      },
+      // Mobile-optimized shadows
+      boxShadow: {
+        'app': '0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        'app-lg': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+      },
+      // Mobile-friendly transitions
+      transitionDuration: {
+        'fast': '150ms',
+        'normal': '200ms',
+        'slow': '300ms',
+      },
+      // Mobile viewport units
+      height: {
+        'screen-dynamic': '100dvh',
+        'screen-small': '100svh',
+        'screen-large': '100lvh',
+      },
     },
   },
-  plugins: [],
+  plugins: [
+    // Custom utilities for mobile optimization
+    function({ addUtilities }) {
+      addUtilities({
+        '.touch-manipulation': {
+          'touch-action': 'manipulation',
+        },
+        '.touch-none': {
+          'touch-action': 'none',
+        },
+        '.scroll-smooth-momentum': {
+          '-webkit-overflow-scrolling': 'touch',
+          'scroll-behavior': 'smooth',
+        },
+        '.backface-hidden': {
+          'backface-visibility': 'hidden',
+        },
+        '.transform-gpu': {
+          'transform': 'translateZ(0)',
+        },
+        '.tap-highlight-none': {
+          '-webkit-tap-highlight-color': 'transparent',
+        },
+      })
+    }
+  ],
 }

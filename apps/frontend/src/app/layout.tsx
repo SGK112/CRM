@@ -8,12 +8,12 @@ import { SubscriptionProvider } from '../components/subscription-context'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'Remodely Ai - Construction Management Platform',
-  description: 'Enterprise CRM solution for general contractors and construction companies. Manage clients, projects, estimates, invoices, and teams in one platform.',
-  keywords: 'construction CRM, contractor software, project management, estimation software, construction business management',
-  authors: [{ name: 'Remodely Ai' }],
-  creator: 'Remodely Ai',
-  publisher: 'Remodely Ai',
+  title: 'Remodely CRM - Mobile-First Construction Management',
+  description: 'Professional CRM app for remodeling contractors. Manage projects, clients, estimates, and teams on any device with our mobile-optimized platform.',
+  keywords: 'construction CRM, contractor app, mobile CRM, project management, remodeling software, construction business management',
+  authors: [{ name: 'Remodely CRM' }],
+  creator: 'Remodely CRM',
+  publisher: 'Remodely CRM',
   formatDetection: {
     email: false,
     address: false,
@@ -23,6 +23,12 @@ export const metadata = {
     icon: '/favicon.svg',
     shortcut: '/favicon.svg',
     apple: '/favicon.svg'
+  },
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Remodely CRM'
   },
   robots: {
     index: true,
@@ -38,14 +44,14 @@ export const metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    title: 'Remodely Ai - Construction Management Platform',
-    description: 'Enterprise CRM solution for general contractors and construction companies. Manage clients, projects, estimates, invoices, and teams in one platform.',
-    siteName: 'Remodely Ai',
+    title: 'Remodely CRM - Mobile-First Construction Management',
+    description: 'Professional CRM app for remodeling contractors. Manage projects, clients, estimates, and teams on any device with our mobile-optimized platform.',
+    siteName: 'Remodely CRM',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Remodely Ai - Construction Management Platform',
-    description: 'Enterprise CRM solution for general contractors and construction companies. Manage clients, projects, estimates, invoices, and teams in one platform.',
+    title: 'Remodely CRM - Mobile-First Construction Management',
+    description: 'Professional CRM app for remodeling contractors. Manage projects, clients, estimates, and teams on any device with our mobile-optimized platform.',
   },
 }
 
@@ -54,6 +60,8 @@ export const viewport = {
   initialScale: 1,
   maximumScale: 1,
   viewportFit: 'cover',
+  userScalable: false,
+  themeColor: '#d97706',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
