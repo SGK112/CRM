@@ -67,7 +67,7 @@ export class CommunicationsController {
       ...data,
       appointmentDate: data.appointmentDate ? new Date(data.appointmentDate) : undefined,
     };
-    return this.communicationsService.sendTemplatedEmail(normalized, req.user.workspaceId, req.user._id);
+    return this.communicationsService.sendTemplatedEmail(normalized, req.user.workspaceId);
   }
 
   @Post('test-email')

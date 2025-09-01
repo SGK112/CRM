@@ -4,7 +4,7 @@ import { Document } from 'mongoose';
 export type AppointmentDocument = Appointment & Document;
 
 @Schema({ timestamps: true })
-export class Appointment {
+export class Appointment extends Document {
   @Prop({ required: true })
   clientId: string;
 
