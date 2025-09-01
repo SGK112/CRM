@@ -30,6 +30,8 @@ export class UsersController {
       lastName?: string;
       phone?: string;
       avatar?: string;
+  emailSignatureHtml?: string;
+  emailSignatureText?: string;
     }
   ) {
     const userId = req.user.sub || req.user._id;

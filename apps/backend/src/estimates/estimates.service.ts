@@ -7,7 +7,7 @@ import { Estimate, EstimateDocument } from './schemas/estimate.schema';
 import { PriceItem, PriceItemDocument } from '../pricing/schemas/price-item.schema';
 import { Client, ClientDocument } from '../clients/schemas/client.schema';
 
-interface CreateEstimateDto {
+export interface CreateEstimateDto {
   number?: string;
   clientId: string;
   projectId?: string;
@@ -17,7 +17,7 @@ interface CreateEstimateDto {
   taxRate?: number;
   notes?: string;
 }
-interface UpdateEstimateDto {
+export interface UpdateEstimateDto {
   items?: { priceItemId?: string; name?: string; description?: string; quantity?: number; baseCost?: number; marginPct?: number; taxable?: boolean; sku?: string; }[];
   discountType?: 'percent'|'fixed';
   discountValue?: number;
@@ -73,12 +73,12 @@ export class EstimatesService {
       const quantity = li.quantity || 1;
       const unitSellPrice = unitCost * (1 + (li.marginPct||0)/100);
       li.sellPrice = unitSellPrice; // Store per-unit sell price
-      
+
       const totalCost = unitCost * quantity;
       const totalSell = unitSellPrice * quantity;
-      
-      subtotalCost += totalCost; 
-      subtotalSell += totalSell; 
+
+      subtotalCost += totalCost;
+      subtotalSell += totalSell;
       totalMargin += (totalSell - totalCost);
     });
     doc.subtotalCost = subtotalCost;
@@ -218,5 +218,25 @@ export class EstimatesService {
   this.computeTotals(doc);
     await doc.save();
     return doc;
+  }
+
+  // Generate a PDF buffer for a given estimate id in the workspace
+  async getPdf(id: string, workspaceId: string): Promise<{ buffer: Buffer; filename: string } | null> {
+    const doc = await this.estimateModel.findOne({ _id: id, workspaceId });
+    if (!doc) return null;
+    // Ensure totals are up to date before generating
+    this.computeTotals(doc);
+    const client = await this.clientModel.findOne({ _id: doc.clientId, workspaceId });
+    const clientInfo = client
+      ? { firstName: client.firstName, lastName: client.lastName, email: client.email, company: client.company }
+      : { firstName: 'Client', lastName: '', email: undefined, company: undefined };
+    const buffer = await this.generateEstimatePDF(doc, clientInfo);
+    const filename = `Estimate-${doc.number || id}.pdf`;
+    return { buffer, filename };
+  }
+
+  async remove(id: string, workspaceId: string) {
+    const res = await this.estimateModel.deleteOne({ _id: id, workspaceId });
+    return { deleted: res.deletedCount === 1 };
   }
 }

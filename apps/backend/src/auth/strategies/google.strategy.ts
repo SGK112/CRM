@@ -21,8 +21,8 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     super({
       clientID: (clientID && !clientID.includes('your-google')) ? clientID : 'dummy-client-id',
       clientSecret: (clientSecret && !clientSecret.includes('your-google')) ? clientSecret : 'dummy-client-secret',
-      callbackURL,
-      scope: ['email', 'profile'],
+  callbackURL,
+  scope: ['email', 'profile', 'https://www.googleapis.com/auth/calendar'],
     });
 
     const logger = new Logger('GoogleStrategy');
@@ -32,23 +32,23 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   async validate(
     accessToken: string,
     refreshToken: string,
-    profile: any,
+    profile: unknown,
     done: VerifyCallback,
-  ): Promise<any> {
-    const { name, emails, photos } = profile;
-    
+  ): Promise<void> {
+    const p = profile as { id?: string; name: { givenName: string; familyName: string }; emails: Array<{ value: string }>; photos: Array<{ value: string }> };
+    const { name, emails, photos } = p;
+
     const user = {
-      email: emails[0].value,
-      firstName: name.givenName,
-      lastName: name.familyName,
-      picture: photos[0].value,
+      id: p?.id,
+      email: emails?.[0]?.value,
+      firstName: name?.givenName,
+      lastName: name?.familyName,
+      picture: photos?.[0]?.value,
       accessToken,
       refreshToken,
     };
 
-    // Check if user exists, if not create them
     const existingUser = await this.authService.findOrCreateGoogleUser(user);
-    
     done(null, existingUser);
   }
 }

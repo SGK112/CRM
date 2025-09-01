@@ -99,6 +99,35 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   @ApiOperation({ summary: 'Google OAuth callback' })
   async googleAuthRedirect(@Req() req, @Res() res) {
+    // Persist Google OAuth tokens if available
+  try {
+      const uid = req.user?._id || req.user?.id;
+      if (uid && (req.user?.accessToken || req.user?.refreshToken)) {
+    // Update DB user when possible
+        try {
+          // Lazily require to avoid circulars at module load
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          const mongoose = require('mongoose');
+          const UserModel = mongoose.models.User || mongoose.model('User');
+          if (UserModel?.findById) {
+            const u = await UserModel.findById(uid);
+            if (u) {
+              u.googleAuth = {
+                ...(u.googleAuth || {}),
+                accessToken: req.user.accessToken,
+                refreshToken: req.user.refreshToken,
+              };
+              await u.save();
+            }
+          }
+        } catch {
+          // In demo mode, or if model not available, skip silently
+        }
+      }
+    } catch {
+      // non-fatal – continue login flow
+    }
+
     // Generate JWT for the authenticated user
     const userId = req.user?._id || req.user?.id; // demo users store id, db users _id
     const workspaceId = req.user?.workspaceId || `ws_${Date.now().toString(36)}`;

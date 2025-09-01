@@ -1,7 +1,9 @@
-import { Body, Controller, Get, Post, Param, Req, UseGuards, Patch } from '@nestjs/common';
+import { Body, Controller, Get, Post, Param, Req, UseGuards, Patch, Res, Delete } from '@nestjs/common';
 import { EstimatesService } from './estimates.service';
 import { InvoicesService } from '../invoices/invoices.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Response } from 'express';
+import { CreateEstimateDto, UpdateEstimateDto } from './estimates.service';
 
 @Controller('estimates')
 @UseGuards(JwtAuthGuard)
@@ -15,7 +17,7 @@ export class EstimatesController {
   }
 
   @Post()
-  create(@Body() body: any, @Req() req) {
+  create(@Body() body: CreateEstimateDto, @Req() req) {
     const workspaceId = req.user.workspaceId || req.user.sub;
     return this.estimates.create(body, workspaceId);
   }
@@ -51,8 +53,27 @@ export class EstimatesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() body: any, @Req() req) {
+  update(@Param('id') id: string, @Body() body: UpdateEstimateDto, @Req() req) {
     const workspaceId = req.user.workspaceId || req.user.sub;
     return this.estimates.update(id, workspaceId, body);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string, @Req() req) {
+    const workspaceId = req.user.workspaceId || req.user.sub;
+    return this.estimates.remove(id, workspaceId);
+  }
+
+  // Download estimate as PDF
+  @Get(':id/pdf')
+  async downloadPdf(@Param('id') id: string, @Req() req, @Res() res: Response) {
+    const workspaceId = req.user.workspaceId || req.user.sub;
+    const result = await this.estimates.getPdf(id, workspaceId);
+    if (!result) {
+      return res.status(404).json({ message: 'Estimate not found' });
+    }
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${result.filename}"`);
+    return res.send(result.buffer);
   }
 }

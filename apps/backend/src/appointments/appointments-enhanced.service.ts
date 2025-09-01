@@ -4,18 +4,47 @@ import { Model } from 'mongoose';
 import { Appointment, AppointmentDocument } from './schemas/appointment.schema';
 import { EmailService } from '../services/email.service';
 import { TwilioService } from '../services/twilio.service';
-import { 
-  CreateAppointmentDto, 
-  UpdateAppointmentDto, 
+import {
+  CreateAppointmentDto,
+  UpdateAppointmentDto,
   AvailabilityCheckDto,
   CalendarEventDto,
   AppointmentStatus,
-  AppointmentType,
-  AppointmentFilters,
-  PaginationOptions,
-  AppointmentStats,
-  ConflictCheckResult
+  AppointmentType
 } from './dto/appointment.dto';
+
+interface AppointmentFilters {
+  workspaceId: string;
+  startDate?: Date;
+  endDate?: Date;
+  status?: string;
+  type?: string;
+  assignedTo?: string;
+  clientId?: string;
+  search?: string;
+}
+
+interface PaginationOptions {
+  limit: number;
+  offset: number;
+}
+
+interface ConflictCheckResult {
+  hasConflict: boolean;
+  conflictingAppointments?: Appointment[];
+  availableSlots?: { start: Date; end: Date }[];
+}
+
+interface AppointmentStats {
+  total: number;
+  byStatus: Record<string, number>;
+  byType: Record<string, number>;
+  today: number;
+  thisWeek: number;
+  thisMonth: number;
+  upcoming: number;
+  overdue: number;
+}
 
 @Injectable()
 export class AppointmentsService {
@@ -39,7 +68,7 @@ export class AppointmentsService {
     );
 
     if (conflictCheck.hasConflict) {
-      throw new ConflictException('Time slot not available');
+      throw new ConflictException('Time slot is already booked. Please choose a different time.');
     }
 
     const appointmentData = {
@@ -128,8 +157,8 @@ export class AppointmentsService {
       borderColor: this.getStatusColor(appointment.status),
       textColor: '#ffffff',
       extendedProps: {
-        type: appointment.type as AppointmentType,
-        status: appointment.status as AppointmentStatus,
+        type: appointment.type,
+        status: appointment.status,
         priority: appointment.metadata?.priority,
         clientId: appointment.clientId,
         location: appointment.location,
@@ -259,21 +288,21 @@ export class AppointmentsService {
       .exec();
 
     const conflicts: Appointment[] = [];
-    
+
     for (let i = 0; i < appointments.length - 1; i++) {
       const current = appointments[i];
       const next = appointments[i + 1];
-      
+
       const currentEnd = new Date(current.scheduledDate.getTime() + current.duration * 60000);
-      
+
       if (
         current.assignedTo === next.assignedTo &&
         currentEnd > next.scheduledDate
       ) {
-        if (!conflicts.find(a => (a as any)._id.equals((current as any)._id))) {
+        if (!conflicts.find(a => a._id.equals(current._id))) {
           conflicts.push(current);
         }
-        if (!conflicts.find(a => (a as any)._id.equals((next as any)._id))) {
+        if (!conflicts.find(a => a._id.equals(next._id))) {
           conflicts.push(next);
         }
       }
@@ -300,7 +329,7 @@ export class AppointmentsService {
 
     // Check for conflicts if rescheduling
     if (updateAppointmentDto.scheduledDate || updateAppointmentDto.duration) {
-      const newDate = updateAppointmentDto.scheduledDate 
+      const newDate = updateAppointmentDto.scheduledDate
         ? new Date(updateAppointmentDto.scheduledDate)
         : appointment.scheduledDate;
       const newDuration = updateAppointmentDto.duration || appointment.duration;
@@ -325,8 +354,8 @@ export class AppointmentsService {
     }
 
     // Update metadata
-    if (updateAppointmentDto.priority || updateAppointmentDto.followUpRequired || 
-        updateAppointmentDto.preferredContactMethod || updateAppointmentDto.estimateId || 
+    if (updateAppointmentDto.priority || updateAppointmentDto.followUpRequired ||
+        updateAppointmentDto.preferredContactMethod || updateAppointmentDto.estimateId ||
         updateAppointmentDto.invoiceId) {
       updateData.metadata = {
         ...appointment.metadata,
@@ -447,7 +476,7 @@ export class AppointmentsService {
 
     try {
       await this.sendReminderNotification(appointment);
-      
+
       await this.appointmentModel.findOneAndUpdate(
         { _id: id, workspaceId },
         { reminderSent: true }
@@ -594,20 +623,20 @@ export class AppointmentsService {
     return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
   }
 
-  public async sendConfirmationEmail(appointment: Appointment): Promise<void> {
+  private async sendConfirmationEmail(appointment: Appointment): Promise<void> {
     // Implementation depends on your email service
     // This is a placeholder
-    console.log(`Sending confirmation email for appointment ${(appointment as any)._id}`);
+    console.log(`Sending confirmation email for appointment ${appointment._id}`);
   }
 
   private async sendRescheduleNotification(appointment: Appointment): Promise<void> {
     // Implementation depends on your notification service
-    console.log(`Sending reschedule notification for appointment ${(appointment as any)._id}`);
+    console.log(`Sending reschedule notification for appointment ${appointment._id}`);
   }
 
   private async sendReminderNotification(appointment: Appointment): Promise<void> {
     // Implementation depends on your notification service
-    console.log(`Sending reminder for appointment ${(appointment as any)._id}`);
+    console.log(`Sending reminder for appointment ${appointment._id}`);
   }
 
   // Legacy methods for backward compatibility

@@ -80,6 +80,21 @@ export default function InvoicesPage(){
     return list.reduce((acc,i)=>{ acc.subtotal+=i.subtotal; acc.tax+=i.taxAmount; acc.total+=i.total; acc.paid+=i.amountPaid; return acc; }, { subtotal:0, tax:0, total:0, paid:0 });
   },[list]);
 
+  const handleDelete = async (id: string) => {
+    const ok = window.confirm('Delete this invoice? This cannot be undone.');
+    if (!ok) return;
+    try {
+      const res = await fetch(`${API_BASE}/invoices/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+      if (res.ok) {
+        setList(prev => prev.filter(i => i._id !== id));
+      } else {
+        setError('Failed to delete invoice');
+      }
+    } catch (e) {
+      setError('Error deleting invoice');
+    }
+  };
+
   return (
     <div className='space-y-6'>
         <PageHeader
@@ -164,6 +179,12 @@ export default function InvoicesPage(){
                         className='text-xs text-blue-600 hover:text-blue-800 hover:underline'
                       >
                         View
+                      </button>
+                      <button
+                        onClick={(e)=>{ e.stopPropagation(); handleDelete(inv._id); }}
+                        className='text-xs text-red-600 hover:text-red-800 hover:underline'
+                      >
+                        Delete
                       </button>
                     </div>
                   </td>

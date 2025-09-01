@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Param, Body, Req, UseGuards, Patch } from '@nestjs/common';
-import { InvoicesService } from './invoices.service';
+import { Controller, Get, Post, Param, Body, Req, UseGuards, Patch, Delete, Res } from '@nestjs/common';
+import { InvoicesService, CreateInvoiceDto, UpdateInvoiceDto, RecordPaymentDto } from './invoices.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Response } from 'express';
 
 @Controller('invoices')
 @UseGuards(JwtAuthGuard)
@@ -20,7 +21,7 @@ export class InvoicesController {
   }
 
   @Post()
-  create(@Body() body: any, @Req() req) {
+  create(@Body() body: CreateInvoiceDto, @Req() req) {
     const workspaceId = req.user.workspaceId || req.user.sub;
     return this.invoices.create(body, workspaceId);
   }
@@ -32,7 +33,7 @@ export class InvoicesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() body: any, @Req() req) {
+  update(@Param('id') id: string, @Body() body: UpdateInvoiceDto, @Req() req) {
     const workspaceId = req.user.workspaceId || req.user.sub;
     return this.invoices.update(id, workspaceId, body);
   }
@@ -44,8 +45,27 @@ export class InvoicesController {
   }
 
   @Post(':id/payments')
-  recordPayment(@Param('id') id: string, @Body() body: any, @Req() req) {
+  recordPayment(@Param('id') id: string, @Body() body: RecordPaymentDto, @Req() req) {
     const workspaceId = req.user.workspaceId || req.user.sub;
     return this.invoices.recordPayment(id, workspaceId, body);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string, @Req() req) {
+    const workspaceId = req.user.workspaceId || req.user.sub;
+    return this.invoices.remove(id, workspaceId);
+  }
+
+  // Download invoice as PDF
+  @Get(':id/pdf')
+  async downloadPdf(@Param('id') id: string, @Req() req, @Res() res: Response) {
+    const workspaceId = req.user.workspaceId || req.user.sub;
+    const result = await this.invoices.getPdf(id, workspaceId);
+    if (!result) {
+      return res.status(404).json({ message: 'Invoice not found' });
+    }
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${result.filename}"`);
+    return res.send(result.buffer);
   }
 }

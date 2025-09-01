@@ -12,6 +12,8 @@ interface UserProfile {
   company?: string;
   jobTitle?: string;
   bio?: string;
+  emailSignatureHtml?: string;
+  emailSignatureText?: string;
 }
 
 interface NotificationPreferences {
@@ -80,7 +82,6 @@ export default function ProfileSettingsPage() {
       const data = await response.json();
       setProfile(data);
     } catch (error) {
-      console.error('Error loading profile:', error);
       setMessage('Failed to load profile data');
     } finally {
       setLoading(false);
@@ -95,7 +96,7 @@ export default function ProfileSettingsPage() {
       // For now, we'll use default preferences since we don't have them from backend yet
       // In a real implementation, you'd fetch from /api/users/notifications
     } catch (error) {
-      console.error('Error loading notification preferences:', error);
+      // ignore
     }
   };
 
@@ -129,7 +130,6 @@ export default function ProfileSettingsPage() {
       setMessage('Profile updated successfully!');
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
-      console.error('Error updating profile:', error);
       setMessage('Failed to update profile');
     } finally {
       setSaving(false);
@@ -174,9 +174,9 @@ export default function ProfileSettingsPage() {
       setMessage('Password updated successfully!');
       setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
       setTimeout(() => setMessage(''), 3000);
-    } catch (error: any) {
-      console.error('Error updating password:', error);
-      setMessage(error.message || 'Failed to update password');
+    } catch (error: unknown) {
+      const msg = (error && typeof error === 'object' && 'message' in error) ? String((error as { message?: string }).message) : 'Failed to update password';
+      setMessage(msg);
     } finally {
       setSaving(false);
     }
@@ -209,7 +209,6 @@ export default function ProfileSettingsPage() {
       setMessage('Notification preferences saved!');
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
-      console.error('Error updating notifications:', error);
       setMessage('Failed to update notification preferences');
     } finally {
       setSaving(false);
@@ -389,6 +388,31 @@ export default function ProfileSettingsPage() {
                       value={profile.bio || ''}
                       onChange={(e) => setProfile({...profile, bio: e.target.value})}
                       className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-md text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-transparent resize-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                      Email Signature (HTML)
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={profile.emailSignatureHtml || ''}
+                      onChange={(e) => setProfile({ ...profile, emailSignatureHtml: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-md text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-transparent"
+                      placeholder="<p>Best regards,<br/>Your Name</p>"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                      Email Signature (Text fallback)
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={profile.emailSignatureText || ''}
+                      onChange={(e) => setProfile({ ...profile, emailSignatureText: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-md text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-transparent"
+                      placeholder={"Best regards,\nYour Name"}
                     />
                   </div>
 

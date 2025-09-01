@@ -266,10 +266,7 @@ export class VoiceAgentService {
 
       // Send confirmation email if client has email
       if (client.email) {
-        await this.appointmentsService.sendConfirmationEmail((appointment as any)._id.toString(), {
-          email: client.email,
-          name: clientName
-        });
+        await this.appointmentsService.sendConfirmationEmail(appointment);
       }
     }
 

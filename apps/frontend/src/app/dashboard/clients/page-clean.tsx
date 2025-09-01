@@ -29,7 +29,7 @@ export default function ClientsPage() {
   useEffect(() => {
     const loadClients = async () => {
       setLoading(true);
-      
+
       // Mock data - replace with actual API calls
       setTimeout(() => {
         setClients([
@@ -62,7 +62,7 @@ export default function ClientsPage() {
           }
         ]);
         setLoading(false);
-      }, 800);
+      }, 1000);
     };
 
     loadClients();
@@ -83,8 +83,8 @@ export default function ClientsPage() {
   if (loading) {
     return (
       <div className={simple.page()}>
-        <div className={simple.loading.container}>
-          <div className={`${simple.loading.spinner} h-8 w-8`} />
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
       </div>
     );
@@ -92,7 +92,7 @@ export default function ClientsPage() {
 
   return (
     <div className={simple.page()}>
-      {/* Header */}
+      {/* Simple Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h1 className={simple.text.title()}>Clients</h1>
@@ -108,49 +108,46 @@ export default function ClientsPage() {
       </div>
 
       {/* Stats */}
-      <div className={`${simple.grid.cols4} ${simple.grid.gap} mb-6`}>
-        <div className={simple.card()}>
-          <div className={simple.section('flex items-center justify-between')}>
+      <div className={simple.grid.cols4 + ' mb-6'}>
+        <div className={simple.card('p-4')}>
+          <div className="flex items-center gap-3">
+            <UserGroupIcon className="h-8 w-8 text-blue-600" />
             <div>
-              <p className={simple.text.small('mb-1')}>Total Clients</p>
+              <p className={simple.text.small()}>Total Clients</p>
               <p className={simple.text.title('text-2xl')}>{stats.total}</p>
             </div>
-            <UserGroupIcon className="h-8 w-8 text-blue-600 opacity-80" />
           </div>
         </div>
-        
-        <div className={simple.card()}>
-          <div className={simple.section('flex items-center justify-between')}>
-            <div>
-              <p className={simple.text.small('mb-1')}>Active</p>
-              <p className={simple.text.title('text-2xl')}>{stats.active}</p>
-            </div>
+        <div className={simple.card('p-4')}>
+          <div className="flex items-center gap-3">
             <div className="h-8 w-8 bg-green-100 rounded-lg flex items-center justify-center">
               <div className="h-3 w-3 bg-green-600 rounded-full"></div>
             </div>
+            <div>
+              <p className={simple.text.small()}>Active</p>
+              <p className={simple.text.title('text-2xl')}>{stats.active}</p>
+            </div>
           </div>
         </div>
-        
-        <div className={simple.card()}>
-          <div className={simple.section('flex items-center justify-between')}>
-            <div>
-              <p className={simple.text.small('mb-1')}>Leads</p>
-              <p className={simple.text.title('text-2xl')}>{stats.leads}</p>
-            </div>
+        <div className={simple.card('p-4')}>
+          <div className="flex items-center gap-3">
             <div className="h-8 w-8 bg-yellow-100 rounded-lg flex items-center justify-center">
               <div className="h-3 w-3 bg-yellow-600 rounded-full"></div>
             </div>
+            <div>
+              <p className={simple.text.small()}>Leads</p>
+              <p className={simple.text.title('text-2xl')}>{stats.leads}</p>
+            </div>
           </div>
         </div>
-        
-        <div className={simple.card()}>
-          <div className={simple.section('flex items-center justify-between')}>
-            <div>
-              <p className={simple.text.small('mb-1')}>Total Value</p>
-              <p className={simple.text.title('text-2xl')}>${(stats.totalValue / 1000).toFixed(0)}k</p>
-            </div>
+        <div className={simple.card('p-4')}>
+          <div className="flex items-center gap-3">
             <div className="h-8 w-8 bg-blue-100 rounded-lg flex items-center justify-center">
               <span className="text-blue-600 text-xs font-bold">$</span>
+            </div>
+            <div>
+              <p className={simple.text.small()}>Total Value</p>
+              <p className={simple.text.title('text-2xl')}>${(stats.totalValue / 1000).toFixed(0)}k</p>
             </div>
           </div>
         </div>
@@ -171,67 +168,66 @@ export default function ClientsPage() {
       </div>
 
       {/* Client List */}
-      {filteredClients.length > 0 ? (
-        <div className={`${simple.grid.cols1} lg:grid-cols-2 xl:grid-cols-3 ${simple.grid.gap}`}>
-          {filteredClients.map((client) => (
-            <Link
-              key={client.id}
-              href={`/dashboard/clients/${client.id}`}
-              className={simple.card('hover:scale-[1.02] transition-transform')}
-            >
-              <div className={simple.section()}>
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <h3 className={simple.text.subtitle('mb-1')}>{client.name}</h3>
-                    <span className={simple.badge(
-                      client.status === 'active' ? 'success' : 
-                      client.status === 'lead' ? 'warning' : 'neutral'
-                    )}>
-                      {client.status}
-                    </span>
-                  </div>
-                </div>
-                
-                <div className={`${simple.spacing.xs} mb-4`}>
-                  <div className="flex items-center gap-2">
-                    <EnvelopeIcon className="h-4 w-4 text-gray-400" />
-                    <span className={simple.text.small()}>{client.email}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <PhoneIcon className="h-4 w-4 text-gray-400" />
-                    <span className={simple.text.small()}>{client.phone}</span>
-                  </div>
-                </div>
-
-                <div className="flex justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
-                  <div>
-                    <span className={simple.text.small()}>Projects</span>
-                    <p className="font-medium text-gray-900 dark:text-white">{client.projectsCount}</p>
-                  </div>
-                  <div className="text-right">
-                    <span className={simple.text.small()}>Value</span>
-                    <p className="font-medium text-gray-900 dark:text-white">
-                      ${client.totalValue.toLocaleString()}
-                    </p>
-                  </div>
-                </div>
+      <div className={simple.grid.cols1 + ' lg:grid-cols-2 xl:grid-cols-3 gap-4'}>
+        {filteredClients.map((client) => (
+          <Link
+            key={client.id}
+            href={`/dashboard/clients/${client.id}`}
+            className={simple.card('p-4 hover:scale-[1.02] transition-transform')}
+          >
+            <div className="flex items-start justify-between mb-3">
+              <div>
+                <h3 className={simple.text.subtitle()}>{client.name}</h3>
+                <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
+                  client.status === 'active'
+                    ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                    : client.status === 'lead'
+                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
+                    : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300'
+                }`}>
+                  {client.status}
+                </span>
               </div>
-            </Link>
-          ))}
-        </div>
-      ) : (
-        <div className={simple.empty.container}>
-          <UserGroupIcon className={simple.empty.icon} />
-          <h3 className={simple.empty.title}>
-            {searchTerm ? 'No clients found' : 'No clients yet'}
-          </h3>
-          <p className={simple.empty.description}>
+            </div>
+
+            <div className="space-y-2 mb-4">
+              <div className="flex items-center gap-2">
+                <EnvelopeIcon className="h-4 w-4 text-gray-400" />
+                <span className={simple.text.small()}>{client.email}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <PhoneIcon className="h-4 w-4 text-gray-400" />
+                <span className={simple.text.small()}>{client.phone}</span>
+              </div>
+            </div>
+
+            <div className="flex justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
+              <div>
+                <span className={simple.text.small()}>Projects</span>
+                <p className="font-medium text-gray-900 dark:text-white">{client.projectsCount}</p>
+              </div>
+              <div className="text-right">
+                <span className={simple.text.small()}>Value</span>
+                <p className="font-medium text-gray-900 dark:text-white">
+                  ${client.totalValue.toLocaleString()}
+                </p>
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+
+      {filteredClients.length === 0 && (
+        <div className="text-center py-12">
+          <UserGroupIcon className="mx-auto h-12 w-12 text-gray-400" />
+          <h3 className={simple.text.subtitle('mt-2')}>No clients found</h3>
+          <p className={simple.text.body('mt-1')}>
             {searchTerm ? 'Try adjusting your search terms' : 'Get started by adding your first client'}
           </p>
           {!searchTerm && (
             <Link
               href="/dashboard/clients/new"
-              className={simple.button('primary', 'inline-flex items-center gap-2')}
+              className={simple.button('primary', 'mt-4 inline-flex items-center gap-2')}
             >
               <PlusIcon className="h-4 w-4" />
               Add Your First Client

@@ -51,6 +51,31 @@ export class User {
   @Prop()
   lastLoginAt?: Date;
 
+  // Email signature (per-user)
+  @Prop()
+  emailSignatureHtml?: string; // preferred rich signature
+
+  @Prop()
+  emailSignatureText?: string; // fallback plain-text signature
+
+  // Google OAuth tokens (for Calendar sync; optional)
+  @Prop({
+    type: {
+      accessToken: String,
+      refreshToken: String,
+      scope: String,
+      tokenType: String,
+      expiryDate: Number,
+    }
+  })
+  googleAuth?: {
+    accessToken?: string;
+    refreshToken?: string;
+    scope?: string;
+    tokenType?: string;
+    expiryDate?: number; // ms since epoch
+  };
+
   // Subscription / Billing
   @Prop()
   stripeCustomerId?: string;

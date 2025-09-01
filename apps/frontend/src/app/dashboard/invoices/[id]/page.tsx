@@ -1,7 +1,9 @@
 'use client';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { API_BASE } from '../../../../lib/api';
+import { TrashIcon, ArrowLeftIcon, PaperAirplaneIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import Link from 'next/link';
 
 interface LineItem { name:string; description?:string; quantity:number; unitPrice:number; total:number; taxable:boolean; }
 interface Invoice { _id:string; number:string; status:string; items:LineItem[]; subtotal:number; taxRate:number; taxAmount:number; total:number; amountPaid:number; notes?:string; dueDate?:string; }
@@ -9,28 +11,83 @@ interface Invoice { _id:string; number:string; status:string; items:LineItem[]; 
 export default function InvoiceDetail(){
   const params = useParams();
   const id = params?.id as string;
+  const router = useRouter();
   const [inv,setInv]=useState<Invoice|null>(null);
   const [loading,setLoading]=useState(true);
+  const [deleting,setDeleting]=useState(false);
   const token = (typeof window!=='undefined') ? localStorage.getItem('accessToken') : '';
-  const fetchOne = async () => {
-    const res = await fetch(`${API_BASE}/invoices/${id}`, { headers:{ Authorization:`Bearer ${token}` }});
-    if(res.ok) setInv(await res.json());
-    setLoading(false);
+  useEffect(()=>{
+    if(!id) return;
+    (async ()=>{
+      const res = await fetch(`${API_BASE}/invoices/${id}`, { headers:{ Authorization:`Bearer ${token}` }});
+      if(res.ok) setInv(await res.json());
+      setLoading(false);
+    })();
+  },[id, token]);
+
+  const deleteInvoice = async () => {
+    if(!id || deleting) return;
+    const ok = window.confirm('Delete this invoice? This cannot be undone.');
+    if(!ok) return;
+    setDeleting(true);
+    try{
+      const res = await fetch(`${API_BASE}/invoices/${id}`, { method: 'DELETE', headers:{ Authorization:`Bearer ${token}` }});
+      if(res.ok) {
+        router.push('/dashboard/invoices');
+      }
+    } finally{
+      setDeleting(false);
+    }
   };
-  useEffect(()=>{ if(id) fetchOne(); },[id]);
+  const sendInvoice = async () => {
+    if(!id) return;
+    try{
+      const res = await fetch(`${API_BASE}/invoices/${id}/send`, { method:'POST', headers:{ Authorization:`Bearer ${token}` }});
+      if(res.ok){
+        // refresh
+        const refreshed = await fetch(`${API_BASE}/invoices/${id}`, { headers:{ Authorization:`Bearer ${token}` }});
+        if (refreshed.ok) setInv(await refreshed.json());
+      }
+  } catch (e) { /* noop */ }
+  };
+  const downloadPdf = async () => {
+    if(!id) return;
+    try{
+      const res = await fetch(`${API_BASE}/invoices/${id}/pdf`, { headers:{ Authorization:`Bearer ${token}` }});
+      if(!res.ok) return;
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `invoice-${id}.pdf`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+  } catch (e) { /* noop */ }
+  };
   return (
     <div className='space-y-6'>
       {loading && <div className='text-sm text-gray-700'>Loading...</div>}
       {!loading && inv && (
         <>
           <div className='flex items-center justify-between flex-wrap gap-4'>
-              <div>
+              <div className='flex items-center gap-3'>
+                <Link href="/dashboard/invoices" className='text-gray-600 hover:text-gray-900'>
+                  <ArrowLeftIcon className='h-5 w-5' />
+                </Link>
                 <h1 className='text-2xl font-semibold'>Invoice {inv.number}</h1>
                 <p className='text-sm text-gray-800 dark:text-[var(--text-dim)]'>Status: {inv.status}</p>
               </div>
               <div className='flex gap-2'>
-                <button className='pill pill-tint-blue sm'>Record Payment</button>
-                <button className='pill pill-tint-green sm'>Send</button>
+                <button onClick={deleteInvoice} disabled={deleting} className='pill pill-ghost sm text-red-600'>
+                  <TrashIcon className='h-4 w-4 mr-1' />
+                  {deleting ? 'Deleting…' : 'Delete'}
+                </button>
+                <button className='pill pill-tint-blue sm' onClick={downloadPdf}>
+                  <ArrowDownTrayIcon className='h-4 w-4 mr-1'/> PDF
+                </button>
+                <button className='pill pill-tint-green sm' onClick={sendInvoice}>
+                  <PaperAirplaneIcon className='h-4 w-4 mr-1'/> Send
+                </button>
               </div>
             </div>
             <div className='grid md:grid-cols-3 gap-6'>

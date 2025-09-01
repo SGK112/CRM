@@ -142,7 +142,8 @@ export class CommunicationsService {
     subject?: string;
     message?: string;
     callNotes?: string;
-  }, workspaceId: string, userId: string) {
+  }, workspaceId: string) {
+    // userId is reserved for future per-user template selection and audit logging
     // Implementation for templated emails (appointments, estimates, etc.)
     // This would use the existing EmailService templates
     try {
@@ -212,7 +213,8 @@ export class CommunicationsService {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private formatEmailBody(message: string, user: any, client: any): string {
     // Format the email with signature and professional layout
-    return `
+  const signatureHtml = user.emailSignatureHtml || (user.emailSignatureText ? user.emailSignatureText.replace(/\n/g, '<br>') : '');
+  return `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="padding: 20px; background-color: #f8f9fa; border-radius: 8px;">
           <p>Dear ${client.firstName} ${client.lastName},</p>
@@ -225,6 +227,7 @@ export class CommunicationsService {
             <p style="margin: 0;"><strong>${user.firstName} ${user.lastName}</strong></p>
             <p style="margin: 5px 0; color: #6c757d;">${user.email}</p>
             <p style="margin: 0; color: #6c757d;">${user.phone || ''}</p>
+      ${signatureHtml ? `<div style="margin-top: 12px; color: #374151;">${signatureHtml}</div>` : ''}
           </div>
         </div>
       </div>

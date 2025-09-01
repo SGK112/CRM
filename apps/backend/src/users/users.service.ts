@@ -22,7 +22,9 @@ export class UsersService {
     firstName?: string;
     lastName?: string;
     phone?: string;
-    avatar?: string;
+  avatar?: string;
+  emailSignatureHtml?: string;
+  emailSignatureText?: string;
   }): Promise<User> {
     try {
       const updatedUser = await this.userModel.findByIdAndUpdate(

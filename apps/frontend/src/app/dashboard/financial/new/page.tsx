@@ -250,7 +250,7 @@ export default function NewFinancialDocumentPage() {
             className="inline-flex items-center gap-2 px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Financial Hub
+            Back to Sales
           </button>
           <EstimateInvoiceToggle 
             currentMode={mode} 

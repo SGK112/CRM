@@ -1,14 +1,16 @@
-import { Controller, Get, Post, Query, Param, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Query, Param, UseGuards, Req, Body } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { IntegrationsService } from './integrations.service';
 import { IntegrationManagerService } from './integration-manager.service';
+import { GoogleCalendarService } from './google-calendar.service';
 
 @Controller('integrations')
 @UseGuards(JwtAuthGuard)
 export class IntegrationsController {
   constructor(
     private readonly integrationsService: IntegrationsService,
-    private readonly integrationManager: IntegrationManagerService
+    private readonly integrationManager: IntegrationManagerService,
+    private readonly googleCalendar: GoogleCalendarService,
   ) {}
 
   @Get('status')
@@ -21,7 +23,7 @@ export class IntegrationsController {
     const integrations = this.integrationsService.getAllIntegrations();
     
     // Remove sensitive credentials from the response
-    return Object.entries(integrations).reduce((acc, [name, config]) => {
+  return Object.entries(integrations).reduce((acc: Record<string, { enabled: boolean; configured: boolean; fields: { name: string; configured: boolean }[] }>, [name, config]) => {
       acc[name] = {
         enabled: config.enabled,
         configured: config.enabled && Object.values(config.credentials).every(val => val !== ''),
@@ -31,18 +33,18 @@ export class IntegrationsController {
         })),
       };
       return acc;
-    }, {} as Record<string, any>);
+  }, {} as Record<string, { enabled: boolean; configured: boolean; fields: { name: string; configured: boolean }[] }>);
   }
 
   // NEW USER-FRIENDLY ENDPOINTS
 
   @Get('available')
-  async getAvailableIntegrations(@Req() req: any) {
+  async getAvailableIntegrations(@Req() req: { user: { id: string } }) {
     return this.integrationManager.getAvailableIntegrations(req.user.id);
   }
 
   @Get('communication-status')
-  async getCommunicationCapabilities(@Req() req: any) {
+  async getCommunicationCapabilities(@Req() req: { user: { id: string } }) {
     return this.integrationManager.getCommunicationCapabilities(req.user.id);
   }
 
@@ -65,7 +67,7 @@ export class IntegrationsController {
   async handleEmailCallback(
     @Param('provider') provider: 'gmail' | 'outlook',
     @Query('code') code: string,
-    @Req() req: any
+    @Req() req: { user: { id: string } }
   ) {
     if (!code) {
       return { success: false, message: 'Authorization code is required' };
@@ -75,7 +77,7 @@ export class IntegrationsController {
   }
 
   @Post('stripe/connect')
-  async initiateStripeConnection(@Req() req: any) {
+  async initiateStripeConnection(@Req() req: { user: { id: string } }) {
     // Generate Stripe Connect OAuth URL
     const clientId = process.env.STRIPE_CLIENT_ID;
     const redirectUri = `${process.env.FRONTEND_URL}/integrations/stripe/callback`;
@@ -87,6 +89,25 @@ export class IntegrationsController {
       oauthUrl: stripeOAuthUrl,
       instructions: 'You will be redirected to Stripe to connect your payment account'
     };
+  }
+
+  // Google Calendar minimal endpoints
+  @Get('google-calendar/status')
+  async googleCalendarStatus(@Req() req: { user: { id: string } }) {
+    return this.googleCalendar.getStatus(req.user.id);
+  }
+
+  @Get('google-calendar/events')
+  async listGoogleCalendarEvents(@Req() req: { user: { id: string } }) {
+    return this.googleCalendar.listEvents(req.user.id);
+  }
+
+  @Post('google-calendar/events')
+  async createGoogleCalendarEvent(
+    @Req() req: { user: { id: string } },
+    @Body() body: { summary: string; description?: string; start: string; end: string }
+  ) {
+    return this.googleCalendar.createEvent(req.user.id, body);
   }
 
   private buildGmailOAuthUrl(): string {

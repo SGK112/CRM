@@ -6,42 +6,20 @@ import { useTheme } from '../../../components/ThemeProvider';
 import CommunicationSettings from '../../../components/CommunicationSettings';
 import {
   UserIcon,
-  CogIcon,
   BellIcon,
   ShieldCheckIcon,
   CreditCardIcon,
-  GlobeAltIcon,
   KeyIcon,
-  CloudIcon,
-  DevicePhoneMobileIcon,
   EnvelopeIcon,
-  EyeIcon,
-  EyeSlashIcon,
-  CheckCircleIcon,
-  ExclamationTriangleIcon,
   SwatchIcon
 } from '@heroicons/react/24/outline';
 
-interface IntegrationSetting {
-  id: string;
-  name: string;
-  description: string;
-  enabled: boolean;
-  configured: boolean;
-  icon: any;
-  configFields: {
-    name: string;
-    label: string;
-    type: 'text' | 'password' | 'url';
-    value: string;
-    required: boolean;
-  }[];
-}
+// (Integrations list moved to a dedicated page)
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('general');
   const router = useRouter();
-  const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
+  // (password toggles only used in integrations subpage)
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -105,7 +83,8 @@ export default function SettingsPage() {
       }
     } catch (error) {
       setMessage({ type: 'error', text: 'Failed to load profile data' });
-      console.error('Profile load error:', error);
+  // eslint-disable-next-line no-console
+  console.error('Profile load error:', error);
     } finally {
       setLoading(false);
     }
@@ -155,7 +134,8 @@ export default function SettingsPage() {
       }
     } catch (error) {
       setMessage({ type: 'error', text: 'Failed to update profile' });
-      console.error('Profile update error:', error);
+  // eslint-disable-next-line no-console
+  console.error('Profile update error:', error);
     } finally {
       setSaving(false);
     }
@@ -190,94 +170,14 @@ export default function SettingsPage() {
       }
     } catch (error) {
       setMessage({ type: 'error', text: 'Failed to update notification preferences' });
-      console.error('Notification update error:', error);
+  // eslint-disable-next-line no-console
+  console.error('Notification update error:', error);
     } finally {
       setSaving(false);
     }
   };
 
-  const [integrations, setIntegrations] = useState<IntegrationSetting[]>([
-    {
-      id: 'quickbooks',
-      name: 'QuickBooks Online',
-      description: 'Sync estimates, invoices, customers, and financial data with QuickBooks',
-      enabled: false,
-      configured: false,
-      icon: CreditCardIcon,
-      configFields: [
-        { name: 'companyId', label: 'Company ID', type: 'text', value: '', required: true },
-        { name: 'accessToken', label: 'Access Token', type: 'password', value: '', required: true },
-        { name: 'refreshToken', label: 'Refresh Token', type: 'password', value: '', required: true },
-        { name: 'realmId', label: 'Realm ID', type: 'text', value: '', required: true },
-        { name: 'autoSync', label: 'Auto Sync', type: 'text', value: 'true', required: false }
-      ]
-    },
-    {
-      id: 'google',
-      name: 'Google Workspace',
-      description: 'Connect Google Calendar, Drive, and Gmail for seamless integration',
-      enabled: false,
-      configured: false,
-      icon: GlobeAltIcon,
-      configFields: [
-        { name: 'clientId', label: 'Client ID', type: 'text', value: '', required: true },
-        { name: 'clientSecret', label: 'Client Secret', type: 'password', value: '', required: true },
-        { name: 'redirectUri', label: 'Redirect URI', type: 'url', value: '', required: true }
-      ]
-    },
-    {
-      id: 'stripe',
-      name: 'Stripe',
-      description: 'Process payments and manage invoices with Stripe',
-      enabled: false,
-      configured: false,
-      icon: CreditCardIcon,
-      configFields: [
-        { name: 'publishableKey', label: 'Publishable Key', type: 'text', value: '', required: true },
-        { name: 'secretKey', label: 'Secret Key', type: 'password', value: '', required: true },
-        { name: 'webhookSecret', label: 'Webhook Secret', type: 'password', value: '', required: false }
-      ]
-    },
-    {
-      id: 'twilio',
-      name: 'Twilio',
-      description: 'Send SMS notifications and verify phone numbers',
-      enabled: false,
-      configured: false,
-      icon: DevicePhoneMobileIcon,
-      configFields: [
-        { name: 'accountSid', label: 'Account SID', type: 'text', value: '', required: true },
-        { name: 'authToken', label: 'Auth Token', type: 'password', value: '', required: true },
-        { name: 'phoneNumber', label: 'Twilio Phone Number', type: 'text', value: '', required: true }
-      ]
-    },
-    {
-      id: 'cloudinary',
-      name: 'Cloudinary',
-      description: 'Manage and optimize images and videos',
-      enabled: false,
-      configured: false,
-      icon: CloudIcon,
-      configFields: [
-        { name: 'cloudName', label: 'Cloud Name', type: 'text', value: '', required: true },
-        { name: 'apiKey', label: 'API Key', type: 'text', value: '', required: true },
-        { name: 'apiSecret', label: 'API Secret', type: 'password', value: '', required: true }
-      ]
-    },
-    {
-      id: 'sendgrid',
-      name: 'SendGrid',
-      description: 'Send transactional and marketing emails',
-      enabled: false,
-      configured: false,
-      icon: EnvelopeIcon,
-      configFields: [
-        { name: 'apiKey', label: 'API Key', type: 'password', value: '', required: true },
-        { name: 'fromEmail', label: 'From Email', type: 'text', value: '', required: true },
-        { name: 'fromName', label: 'From Name', type: 'text', value: '', required: true }
-      ]
-    }
-  ]);
+  // (integrations config moved to integrations page)
 
   const tabs = [
     { id: 'general', name: 'General', icon: UserIcon },
@@ -289,67 +189,27 @@ export default function SettingsPage() {
     { id: 'billing', name: 'Billing', icon: CreditCardIcon }
   ];
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: string, value: unknown) => {
     setFormData(prev => ({
       ...prev,
-      [field]: value
+    [field]: value as never
     }));
   };
 
-  const handleNestedInputChange = (parent: string, field: string, value: any) => {
+  const handleNestedInputChange = (parent: string, field: string, value: unknown) => {
     setFormData(prev => {
-      const parentData = prev[parent as keyof typeof prev] as Record<string, any>;
+    const parentData = prev[parent as keyof typeof prev] as Record<string, unknown>;
       return {
         ...prev,
         [parent]: {
           ...parentData,
-          [field]: value
+      [field]: value as never
         }
       };
     });
   };
 
-  const handleIntegrationFieldChange = (integrationId: string, fieldName: string, value: string) => {
-    setIntegrations(prev => 
-      prev.map(integration => {
-        if (integration.id === integrationId) {
-          return {
-            ...integration,
-            configFields: integration.configFields.map(field => 
-              field.name === fieldName ? { ...field, value } : field
-            )
-          };
-        }
-        return integration;
-      })
-    );
-  };
-
-  const handleIntegrationToggle = (integrationId: string) => {
-    setIntegrations(prev => 
-      prev.map(integration => {
-        if (integration.id === integrationId) {
-          const allRequiredFieldsFilled = integration.configFields
-            .filter(field => field.required)
-            .every(field => field.value.trim() !== '');
-          
-          return {
-            ...integration,
-            enabled: !integration.enabled,
-            configured: allRequiredFieldsFilled
-          };
-        }
-        return integration;
-      })
-    );
-  };
-
-  const togglePasswordVisibility = (fieldId: string) => {
-    setShowPasswords(prev => ({
-      ...prev,
-      [fieldId]: !prev[fieldId]
-    }));
-  };
+  // (handlers moved to integrations page)
 
   const renderGeneralTab = () => (
     <div className="space-y-6">
@@ -557,96 +417,6 @@ export default function SettingsPage() {
     </div>
   );
 
-  const renderIntegrationsTab = () => (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-medium text-gray-900 dark:text-[var(--text)] mb-4">Third-Party Integrations</h3>
-        <p className="text-sm text-gray-800 dark:text-[var(--text-dim)] mb-6">
-          Connect your CRM with external services to enhance functionality.
-        </p>
-        
-        <div className="space-y-6">
-          {integrations.map((integration) => {
-            const IconComponent = integration.icon;
-            
-            return (
-              <div key={integration.id} className="border border-gray-200 dark:border-token rounded-lg p-6 bg-white dark:bg-[var(--surface-2)]">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-gray-100 dark:bg-[var(--surface-3)] rounded-lg">
-                      <IconComponent className="h-6 w-6 text-gray-800 dark:text-[var(--text-dim)]" />
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-medium text-gray-900 dark:text-[var(--text)]">{integration.name}</h4>
-                      <p className="text-sm text-gray-800 dark:text-[var(--text-dim)]">{integration.description}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    {integration.configured ? (
-                      <CheckCircleIcon className="h-5 w-5 text-green-500" />
-                    ) : (
-                      <ExclamationTriangleIcon className="h-5 w-5 text-yellow-500" />
-                    )}
-                    <button
-                      onClick={() => handleIntegrationToggle(integration.id)}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        integration.enabled ? 'bg-blue-600' : 'bg-gray-200'
-                      }`}
-                    >
-                      <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          integration.enabled ? 'translate-x-6' : 'translate-x-1'
-                        }`}
-                      />
-                    </button>
-                  </div>
-                </div>
-
-                {integration.enabled && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-gray-200 dark:border-token">
-                    {integration.configFields.map((field) => {
-                      const fieldId = `${integration.id}-${field.name}`;
-                      const showPassword = showPasswords[fieldId];
-                      
-                      return (
-                        <div key={field.name}>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-[var(--text)] mb-2">
-                            {field.label} {field.required && <span className="text-red-500">*</span>}
-                          </label>
-                          <div className="relative">
-                            <input
-                              type={field.type === 'password' && !showPassword ? 'password' : 'text'}
-                              value={field.value}
-                              onChange={(e) => handleIntegrationFieldChange(integration.id, field.name, e.target.value)}
-                              placeholder={`Enter ${field.label.toLowerCase()}`}
-                              className="input"
-                            />
-                            {field.type === 'password' && (
-                              <button
-                                type="button"
-                                onClick={() => togglePasswordVisibility(fieldId)}
-                                className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                              >
-                                {showPassword ? (
-                                  <EyeSlashIcon className="h-5 w-5 text-gray-400 dark:text-[var(--text-dim)]" />
-                                ) : (
-                                  <EyeIcon className="h-5 w-5 text-gray-400 dark:text-[var(--text-dim)]" />
-                                )}
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
 
   const renderBillingTab = () => (
     <div className="space-y-6">
@@ -710,7 +480,8 @@ export default function SettingsPage() {
       case 'communications':
         return <CommunicationSettings />;
       case 'integrations':
-        return renderIntegrationsTab();
+  router.push('/dashboard/settings/integrations');
+  return null;
       case 'billing':
         return renderBillingTab();
       default:

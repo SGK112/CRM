@@ -319,7 +319,7 @@ export class AuthService {
       console.log('Database check failed');
     }
 
-    if (!user) {
+  if (!user) {
       // Create new user in demo store
       const workspaceId = googleUser.email === 'help.remodely@gmail.com' 
         ? 'super_admin_workspace' 
@@ -364,6 +364,10 @@ export class AuthService {
           role: googleUser.email === 'help.remodely@gmail.com' ? 'owner' : 'owner',
           subscriptionPlan: googleUser.email === 'help.remodely@gmail.com' ? 'growth' : 'free',
           subscriptionStatus: googleUser.email === 'help.remodely@gmail.com' ? 'active' : 'active',
+          googleAuth: {
+            accessToken: googleUser.accessToken,
+            refreshToken: googleUser.refreshToken,
+          }
         });
         await user.save();
       } catch (error) {
@@ -383,6 +387,20 @@ export class AuthService {
           console.log('Database update failed for super admin');
         }
       }
+    }
+
+    // Update tokens on existing user if provided
+    try {
+      if (user && (googleUser.accessToken || googleUser.refreshToken)) {
+        user.googleAuth = {
+          ...(user.googleAuth || {}),
+          accessToken: googleUser.accessToken || user.googleAuth?.accessToken,
+          refreshToken: googleUser.refreshToken || user.googleAuth?.refreshToken,
+        };
+        await user.save();
+      }
+    } catch (err) {
+      // ignore token persist errors
     }
 
     return user;

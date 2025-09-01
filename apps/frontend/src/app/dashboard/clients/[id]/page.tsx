@@ -1,15 +1,28 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 
+interface Client {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email?: string;
+  phone?: string;
+  company?: string;
+  status?: string;
+  createdAt: string;
+}
+
 export default function ClientDetailPage() {
   const { id: clientId } = useParams();
-  const [client, setClient] = useState<any>(null);
+  const router = useRouter();
+  const [client, setClient] = useState<Client | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!clientId) return;
@@ -76,6 +89,34 @@ export default function ClientDetailPage() {
               Client since {new Date(client.createdAt).toLocaleDateString()}
             </p>
           </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={async () => {
+              if (!clientId || deleting) return;
+              const ok = window.confirm('Delete this client? This cannot be undone.');
+              if (!ok) return;
+              setDeleting(true);
+              try {
+                const res = await fetch(`/api/clients/${clientId}`, {
+                  method: 'DELETE',
+                  headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+                });
+                if (res.ok) router.push('/dashboard/clients');
+              } finally {
+                setDeleting(false);
+              }
+            }}
+            className="pill pill-ghost sm text-red-600"
+          >
+            {deleting ? 'Deleting…' : 'Delete'}
+          </button>
+          <Link
+            href={`/dashboard/clients/${clientId}/edit`}
+            className="pill pill-ghost sm"
+          >
+            Edit
+          </Link>
         </div>
       </div>
 

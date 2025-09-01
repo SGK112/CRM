@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { 
-  PlusIcon, 
+import {
+  PlusIcon,
   MagnifyingGlassIcon,
   BuildingOfficeIcon,
   CalendarIcon,
@@ -65,18 +65,16 @@ export default function ProjectsPage() {
         const data = await response.json();
         setProjects(Array.isArray(data) ? data : data.projects || []);
       } else {
-        // Failed to fetch projects
+        console.error('Failed to fetch projects');
       }
     } catch (error) {
-      // Error fetching projects
+      console.error('Error fetching projects:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchProjects();
-  }, [router]);  const filteredProjects = projects.filter(project =>
+  const filteredProjects = projects.filter(project =>
     project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
     project.clientName?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -94,21 +92,6 @@ export default function ProjectsPage() {
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) return 'Not set';
     return new Date(dateString).toLocaleDateString();
-  };
-
-  const deleteProject = async (projectId: string) => {
-    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
-    if (!token) { return; }
-    const ok = window.confirm('Delete this project? This cannot be undone.');
-    if (!ok) return;
-    try {
-      const res = await fetch(`/api/projects/${projectId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
-      if (res.ok) {
-        setProjects(prev => prev.filter(p => p._id !== projectId));
-      }
-    } catch (e) {
-      // ignore for now; show toast in future
-    }
   };
 
   if (loading) {
@@ -143,14 +126,14 @@ export default function ProjectsPage() {
             placeholder="Search projects..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className={simple.input('pl-10')}
+            className={simple.input({ size: 'medium' }) + ' pl-10'}
           />
         </div>
 
         {/* Add Project Button */}
         <Link
           href="/dashboard/projects/new"
-          className={simple.button('primary', 'inline-flex items-center')}
+          className={simple.button('primary')}
         >
           <PlusIcon className="h-4 w-4 mr-2" />
           New Project
@@ -159,36 +142,36 @@ export default function ProjectsPage() {
 
       {/* Quick Stats */}
       <div className={simple.grid.cols4 + ' mb-8'}>
-        <div className={simple.card('p-6')}>
-          <div className="text-2xl font-bold text-gray-900 dark:text-white">
+        <div className={simple.card()}>
+                    <div className={simple.text.title()}>
             {projects.length}
           </div>
           <div className={simple.text.small()}>
             Total Projects
           </div>
         </div>
-        <div className={simple.card('p-6')}>
-          <div className="text-2xl font-bold text-gray-900 dark:text-white">
+        <div className={simple.card()}>
+          <div className={simple.text.title()}>
             {projects.filter(p => p.status === 'active').length}
           </div>
           <div className={simple.text.small()}>
-            Active Projects
+            Active
           </div>
         </div>
-        <div className={simple.card('p-6')}>
-          <div className="text-2xl font-bold text-gray-900 dark:text-white">
+        <div className={simple.card()}>
+          <div className={simple.text.title()}>
             {projects.filter(p => p.status === 'completed').length}
           </div>
           <div className={simple.text.small()}>
             Completed
           </div>
         </div>
-        <div className={simple.card('p-6')}>
-          <div className="text-2xl font-bold text-gray-900 dark:text-white">
-            {formatCurrency(projects.reduce((sum, p) => sum + (p.budget || 0), 0))}
+        <div className={simple.card()}>
+          <div className={simple.text.title()}>
+            {projects.filter(p => p.status === 'pending').length}
           </div>
           <div className={simple.text.small()}>
-            Total Budget
+            Pending
           </div>
         </div>
       </div>
@@ -197,19 +180,19 @@ export default function ProjectsPage() {
       {filteredProjects.length > 0 ? (
         <div className="space-y-4">
           {filteredProjects.map((project) => (
-            <div key={project._id} className={simple.card('p-6')}>
+            <div key={project._id} className={simple.card()}>
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-2">
-                    <h3 className={simple.text.subtitle()}>
+                    <h3 className={simple.text('heading-sm')}>
                       {project.title}
                     </h3>
                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${statusColors[project.status]}`}>
                       {project.status.replace('_', ' ').toUpperCase()}
                     </span>
                   </div>
-                  
-                  <p className={simple.text.body('mb-4')}>
+
+                  <p className={simple.text('body') + ' mb-4'}>
                     {project.description}
                   </p>
 
@@ -220,14 +203,14 @@ export default function ProjectsPage() {
                         {project.clientName}
                       </div>
                     )}
-                    
+
                     {project.budget && (
                       <div className="flex items-center text-gray-600 dark:text-gray-400">
                         <CurrencyDollarIcon className="h-4 w-4 mr-2" />
                         {formatCurrency(project.budget)}
                       </div>
                     )}
-                    
+
                     <div className="flex items-center text-gray-600 dark:text-gray-400">
                       <CalendarIcon className="h-4 w-4 mr-2" />
                       {formatDate(project.startDate)}
@@ -235,35 +218,29 @@ export default function ProjectsPage() {
                   </div>
                 </div>
 
-                <div className="ml-4 flex items-center gap-2">
+                <div className="ml-4">
                   <Link
                     href={`/dashboard/projects/${project._id}`}
-                    className={simple.button('secondary', 'inline-flex items-center')}
+                    className={simple.button({ variant: 'secondary', size: 'small' })}
                   >
                     <EyeIcon className="h-4 w-4 mr-1" />
                     View
                   </Link>
-                  <button
-                    onClick={() => deleteProject(project._id)}
-                    className={simple.button('secondary', 'inline-flex items-center text-red-600 border-red-200 hover:bg-red-50')}
-                  >
-                    Delete
-                  </button>
                 </div>
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className={simple.card('text-center py-12')}>
+        <div className={simple.card() + ' text-center py-12'}>
           <div className="text-gray-400 mb-4">
             <BuildingOfficeIcon className="h-16 w-16 mx-auto" />
           </div>
-          <h3 className={simple.text.subtitle('mb-2')}>
+          <h3 className={simple.text('heading-sm') + ' mb-2'}>
             {searchTerm ? 'No projects found' : 'No projects yet'}
           </h3>
-          <p className={simple.text.body('mb-6')}>
-            {searchTerm 
+          <p className={simple.text('subtext') + ' mb-6'}>
+            {searchTerm
               ? `No projects match "${searchTerm}". Try a different search term.`
               : 'Get started by creating your first project.'
             }
@@ -271,7 +248,7 @@ export default function ProjectsPage() {
           {!searchTerm && (
             <Link
               href="/dashboard/projects/new"
-              className={simple.button('primary', 'inline-flex items-center')}
+              className={simple.button({ variant: 'primary', size: 'medium' })}
             >
               <PlusIcon className="h-4 w-4 mr-2" />
               Create Your First Project

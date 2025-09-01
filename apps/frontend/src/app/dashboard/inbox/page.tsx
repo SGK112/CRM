@@ -118,7 +118,7 @@ export default function InboxPage() {
       if (filters.priority !== 'all') queryParams.append('priority', filters.priority);
       if (filters.search) queryParams.append('search', filters.search);
 
-      const response = await fetch(`/api/inbox?${queryParams}`, {
+      const response = await fetch(`http://localhost:3001/api/notifications?${queryParams}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -127,7 +127,32 @@ export default function InboxPage() {
 
       if (response.ok) {
         const data = await response.json();
-        setMessages(data.messages);
+        // Convert notifications to message format
+        const convertedMessages: InboxMessage[] = Array.isArray(data) ? data.map((notification: {
+          _id?: string;
+          id?: string;
+          title?: string;
+          message?: string;
+          content?: string;
+          read?: boolean;
+          priority?: string;
+          createdAt?: string;
+          updatedAt?: string;
+        }) => ({
+          _id: notification._id || notification.id || '',
+          type: 'notification' as const,
+          subject: notification.title || notification.message || 'Notification',
+          content: notification.message || notification.content || '',
+          sender: 'System',
+          senderName: 'CRM System',
+          isRead: notification.read || false,
+          isStarred: false,
+          isArchived: false,
+          priority: (notification.priority as 'low' | 'normal' | 'high' | 'urgent') || 'normal',
+          createdAt: notification.createdAt || new Date().toISOString(),
+          lastActivity: notification.updatedAt || notification.createdAt || new Date().toISOString(),
+        })) : [];
+        setMessages(convertedMessages);
       }
     } catch (error) {
       // Error handled silently for better UX
@@ -193,7 +218,7 @@ export default function InboxPage() {
   const fetchStats = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/inbox/stats', {
+      const response = await fetch('http://localhost:3001/api/notifications/count', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -202,7 +227,24 @@ export default function InboxPage() {
 
       if (response.ok) {
         const data = await response.json();
-        setStats(data);
+        setStats({
+          total: data.count || 0,
+          unread: data.count || 0,
+          starred: 0,
+          archived: 0,
+          byType: {
+            email: 0,
+            notification: data.count || 0,
+            sms: 0,
+            system: 0,
+          },
+          byPriority: {
+            urgent: 0,
+            high: 0,
+            normal: data.count || 0,
+            low: 0,
+          }
+        });
       }
     } catch (error) {
       // Error handled silently for better UX
@@ -218,7 +260,7 @@ export default function InboxPage() {
     setActionLoading(messageId);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/inbox/${messageId}/read`, {
+      const response = await fetch(`http://localhost:3001/api/notifications/${messageId}/read`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -290,7 +332,7 @@ export default function InboxPage() {
   const markAllAsRead = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/inbox/mark-all-read', {
+      const response = await fetch('http://localhost:3001/api/notifications/mark-all-read', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

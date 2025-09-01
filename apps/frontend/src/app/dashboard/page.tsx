@@ -5,9 +5,10 @@ import Link from 'next/link';
 import {
   PlusIcon,
   ChartBarIcon,
-  UserGroupIcon
+  UserGroupIcon,
+  ClipboardDocumentListIcon,
+  CurrencyDollarIcon
 } from '@heroicons/react/24/outline';
-import { getUserPlan } from '@/lib/plans';
 import { simple } from '@/lib/simple-ui';
 
 interface User {
@@ -35,7 +36,7 @@ interface RecentProject {
   progress: number;
 }
 
-export default function RemodelingDashboard() {
+export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [stats, setStats] = useState<DashboardStats>({
     totalRevenue: 0,
@@ -52,9 +53,6 @@ export default function RemodelingDashboard() {
     if (userData) {
       setUser(JSON.parse(userData));
     }
-    
-    // Get current user plan
-    getUserPlan();
 
     // Load mock data
     setTimeout(() => {
@@ -93,7 +91,7 @@ export default function RemodelingDashboard() {
       ]);
 
       setLoading(false);
-    }, 1000);
+    }, 800);
   }, []);
 
   const getGreeting = () => {
@@ -105,18 +103,28 @@ export default function RemodelingDashboard() {
     return `Good evening, ${firstName}!`;
   };
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'construction': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
+      case 'finishing': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
+      case 'permits': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
+      case 'design': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300';
+    }
+  };
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className={simple.loading.page}>
+        <div className={`${simple.loading.spinner} h-12 w-12`} />
       </div>
     );
   }
 
   return (
-    <div className={simple.page('max-w-6xl mx-auto')}>
-      {/* Simple Header */}
-      <div className={simple.card('mb-6')}>
+    <div className={simple.page()}>
+      {/* Welcome Header */}
+      <div className={`${simple.card()} mb-6`}>
         <div className={simple.section()}>
           <h1 className={simple.text.title('mb-2')}>
             {getGreeting()}
@@ -127,41 +135,45 @@ export default function RemodelingDashboard() {
         </div>
       </div>
 
-      {/* Simple Stats Grid */}
-      <div className={`${simple.grid.cols4} mb-6`}>
-        <div className={simple.card('text-center')}>
-          <div className={simple.section()}>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">
-              ${stats.totalRevenue.toLocaleString()}
+      {/* Stats Grid */}
+      <div className={`${simple.grid.cols4} ${simple.grid.gap} mb-6`}>
+        <div className={simple.card()}>
+          <div className={simple.section('flex items-center justify-between')}>
+            <div>
+              <p className={simple.text.small('mb-1')}>Total Revenue</p>
+              <p className={simple.text.title('text-2xl')}>${stats.totalRevenue.toLocaleString()}</p>
             </div>
-            <div className={simple.text.small()}>Total Revenue</div>
+            <CurrencyDollarIcon className="h-8 w-8 text-blue-600 opacity-80" />
           </div>
         </div>
         
-        <div className={simple.card('text-center')}>
-          <div className={simple.section()}>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">
-              {stats.activeProjects}
+        <div className={simple.card()}>
+          <div className={simple.section('flex items-center justify-between')}>
+            <div>
+              <p className={simple.text.small('mb-1')}>Active Projects</p>
+              <p className={simple.text.title('text-2xl')}>{stats.activeProjects}</p>
             </div>
-            <div className={simple.text.small()}>Active Projects</div>
+            <ClipboardDocumentListIcon className="h-8 w-8 text-blue-600 opacity-80" />
           </div>
         </div>
         
-        <div className={simple.card('text-center')}>
-          <div className={simple.section()}>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">
-              {stats.totalClients}
+        <div className={simple.card()}>
+          <div className={simple.section('flex items-center justify-between')}>
+            <div>
+              <p className={simple.text.small('mb-1')}>Total Clients</p>
+              <p className={simple.text.title('text-2xl')}>{stats.totalClients}</p>
             </div>
-            <div className={simple.text.small()}>Total Clients</div>
+            <UserGroupIcon className="h-8 w-8 text-blue-600 opacity-80" />
           </div>
         </div>
         
-        <div className={simple.card('text-center')}>
-          <div className={simple.section()}>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">
-              ${stats.avgProjectValue.toLocaleString()}
+        <div className={simple.card()}>
+          <div className={simple.section('flex items-center justify-between')}>
+            <div>
+              <p className={simple.text.small('mb-1')}>Avg Project Value</p>
+              <p className={simple.text.title('text-2xl')}>${stats.avgProjectValue.toLocaleString()}</p>
             </div>
-            <div className={simple.text.small()}>Avg Project</div>
+            <ChartBarIcon className="h-8 w-8 text-blue-600 opacity-80" />
           </div>
         </div>
       </div>
@@ -169,7 +181,7 @@ export default function RemodelingDashboard() {
       {/* Recent Projects */}
       <div className={simple.card('mb-6')}>
         <div className={simple.section()}>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-6">
             <h2 className={simple.text.subtitle()}>Recent Projects</h2>
             <Link
               href="/dashboard/projects"
@@ -185,24 +197,28 @@ export default function RemodelingDashboard() {
                 key={project.id}
                 className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-blue-300 transition-colors"
               >
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-medium text-gray-900 dark:text-white">{project.title}</h3>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <h3 className="font-medium text-gray-900 dark:text-white">{project.title}</h3>
+                    <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium capitalize ${getStatusColor(project.status)}`}>
+                      {project.status}
+                    </span>
+                  </div>
                   <span className="text-sm font-medium text-gray-900 dark:text-white">
                     ${(project.budget / 1000).toFixed(0)}K
                   </span>
                 </div>
+                
                 <div className="flex items-center justify-between mb-3">
                   <span className={simple.text.small()}>{project.client}</span>
-                  <span className={`${simple.text.small()} capitalize`}>{project.status}</span>
+                  <span className={simple.text.small()}>{project.progress}% complete</span>
                 </div>
+                
                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                   <div
                     className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                     style={{ width: `${project.progress}%` }}
-                  ></div>
-                </div>
-                <div className="text-right mt-1">
-                  <span className="text-xs text-gray-500 dark:text-gray-400">{project.progress}% complete</span>
+                  />
                 </div>
               </div>
             ))}
@@ -210,30 +226,39 @@ export default function RemodelingDashboard() {
         </div>
       </div>
 
-      {/* Simple Quick Actions */}
-      <div className={simple.grid.cols3}>
+      {/* Quick Actions */}
+      <div className={`${simple.grid.cols3} ${simple.grid.gap}`}>
         <Link
           href="/dashboard/projects/new"
-          className="bg-blue-600 hover:bg-blue-700 text-white p-6 rounded-lg text-center transition-colors duration-200"
+          className={`${simple.card('hover:scale-[1.02] transition-transform')} text-center`}
         >
-          <PlusIcon className="h-8 w-8 mx-auto mb-2" />
-          <div className="font-medium">New Project</div>
+          <div className={simple.section()}>
+            <PlusIcon className="h-8 w-8 mx-auto mb-3 text-blue-600" />
+            <div className="font-medium text-gray-900 dark:text-white">New Project</div>
+            <p className={simple.text.small('mt-1')}>Start a new remodeling project</p>
+          </div>
         </Link>
 
         <Link
           href="/dashboard/clients"
-          className="bg-green-600 hover:bg-green-700 text-white p-6 rounded-lg text-center transition-colors duration-200"
+          className={`${simple.card('hover:scale-[1.02] transition-transform')} text-center`}
         >
-          <UserGroupIcon className="h-8 w-8 mx-auto mb-2" />
-          <div className="font-medium">Manage Clients</div>
+          <div className={simple.section()}>
+            <UserGroupIcon className="h-8 w-8 mx-auto mb-3 text-green-600" />
+            <div className="font-medium text-gray-900 dark:text-white">Manage Clients</div>
+            <p className={simple.text.small('mt-1')}>View and manage client relationships</p>
+          </div>
         </Link>
 
         <Link
           href="/dashboard/analytics"
-          className="bg-purple-600 hover:bg-purple-700 text-white p-6 rounded-lg text-center transition-colors duration-200"
+          className={`${simple.card('hover:scale-[1.02] transition-transform')} text-center`}
         >
-          <ChartBarIcon className="h-8 w-8 mx-auto mb-2" />
-          <div className="font-medium">View Reports</div>
+          <div className={simple.section()}>
+            <ChartBarIcon className="h-8 w-8 mx-auto mb-3 text-purple-600" />
+            <div className="font-medium text-gray-900 dark:text-white">View Reports</div>
+            <p className={simple.text.small('mt-1')}>Analyze business performance</p>
+          </div>
         </Link>
       </div>
     </div>

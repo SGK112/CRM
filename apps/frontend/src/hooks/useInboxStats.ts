@@ -21,7 +21,7 @@ export function useInboxStats() {
         return;
       }
 
-      const response = await fetch('/api/inbox/stats', {
+      const response = await fetch('http://localhost:3001/api/notifications/count', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -30,10 +30,15 @@ export function useInboxStats() {
 
       if (response.ok) {
         const data = await response.json();
-        setStats(data);
+        setStats({
+          total: data.count || 0,
+          unread: data.count || 0,
+          starred: 0,
+          archived: 0
+        });
       }
     } catch (error) {
-      console.error('Failed to fetch inbox stats:', error);
+      // Silently fail - inbox stats are not critical
     } finally {
       setLoading(false);
     }

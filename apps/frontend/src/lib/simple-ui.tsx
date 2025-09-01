@@ -43,6 +43,18 @@ export const simple = {
   input: (additionalClasses = '') => 
     `w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 ${additionalClasses}`,
   
+  // Status badges (to match API expected by pages)
+  badge: (variant: 'success' | 'warning' | 'error' | 'info' | 'neutral' = 'neutral', additionalClasses = '') => {
+    const variants = {
+      success: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+      warning: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
+      error: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+      info: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+      neutral: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300'
+    } as const;
+    return `inline-flex px-2 py-1 rounded-full text-xs font-medium ${variants[variant]} ${additionalClasses}`;
+  },
+  
   // Clean grid layouts
   grid: {
     cols1: 'grid grid-cols-1 gap-4',
@@ -57,5 +69,20 @@ export const simple = {
     sm: 'space-y-4',
     md: 'space-y-6',
     lg: 'space-y-8'
+  },
+
+  // Loading states (to match API expected by pages)
+  loading: {
+    spinner: 'animate-spin rounded-full border-2 border-blue-600 border-t-transparent',
+    container: 'flex items-center justify-center py-12',
+    page: 'flex items-center justify-center min-h-screen'
+  },
+
+  // Empty states (for consistency with other pages)
+  empty: {
+    container: 'text-center py-12',
+    icon: 'mx-auto h-12 w-12 text-gray-400 mb-4',
+    title: 'text-lg font-medium text-gray-900 dark:text-white mb-2',
+    description: 'text-gray-500 dark:text-gray-400 mb-4'
   }
 };

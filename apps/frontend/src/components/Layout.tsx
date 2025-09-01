@@ -20,7 +20,6 @@ import {
   PhoneIcon,
   ChevronDownIcon,
   WrenchScrewdriverIcon,
-  PencilSquareIcon,
   ChartBarIcon,
   ShoppingBagIcon,
   CalculatorIcon,
@@ -64,6 +63,12 @@ interface NavigationItem {
   current?: boolean;
   badge?: number;
   planRequired?: 'basic' | 'ai-pro' | 'enterprise';
+}
+
+interface NavigationGroup {
+  label: string;
+  items: NavigationItem[];
+  hidden?: boolean;
 }
 
 export default function Layout({ children }: LayoutProps) {
@@ -138,11 +143,12 @@ export default function Layout({ children }: LayoutProps) {
     fetchCounts();
   }, []);
 
-  const navigationGroups: { label: string; items: NavigationItem[] }[] = [
+  const navigationGroups: NavigationGroup[] = [
     {
       label: 'Core Operations',
       items: [
         { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+  { name: 'Inbox', href: '/dashboard/inbox', icon: InboxIcon, badge: inboxStats?.unread },
         { name: 'Projects', href: '/dashboard/projects', icon: ClipboardDocumentListIcon, badge: counts?.projects },
         { name: 'Clients', href: '/dashboard/clients', icon: UserGroupIcon, badge: counts?.clients },
         { name: 'Calendar', href: '/dashboard/calendar', icon: CalendarDaysIcon },
@@ -151,20 +157,13 @@ export default function Layout({ children }: LayoutProps) {
     {
       label: 'Design & Sales',
       items: [
-        { 
-          name: 'Design Studio', 
-          href: '/dashboard/designer', 
-          icon: PencilSquareIcon,
-          planRequired: 'ai-pro' as const
-        },
-        { name: 'Financial Hub', href: '/dashboard/financial', icon: CalculatorIcon },
-        { name: 'Estimates & Pricing', href: '/dashboard/estimates', icon: DocumentTextIcon },
-        { name: 'Invoices & Billing', href: '/dashboard/invoices', icon: ShoppingBagIcon },
-        { name: 'Material Catalog', href: '/dashboard/catalog', icon: WrenchScrewdriverIcon },
+  { name: 'Sales', href: '/dashboard/financial', icon: CalculatorIcon },
+  { name: 'Price Sheets', href: '/dashboard/catalog', icon: WrenchScrewdriverIcon },
       ]
     },
     {
       label: 'AI & Voice', 
+      hidden: true, // Hide AI apps in their own category
       items: [
         { 
           name: 'Voice Agents', 
@@ -172,14 +171,12 @@ export default function Layout({ children }: LayoutProps) {
           icon: MicrophoneIcon,
           planRequired: 'ai-pro' as const
         },
-        { name: 'Inbox & Communications', href: '/dashboard/inbox', icon: InboxIcon },
         { name: 'Phone Numbers', href: '/dashboard/phone-numbers', icon: PhoneIcon },
       ]
     },
     {
       label: 'Business Management', 
       items: [
-        { name: 'Billing & Payments', href: '/billing', icon: CreditCardIcon },
         { name: 'TON Wallet', href: '/dashboard/wallet', icon: WalletIcon },
         { name: 'Documents & Files', href: '/dashboard/documents', icon: DocumentTextIcon },
         { name: 'Reports & Analytics', href: '/dashboard/analytics', icon: ChartBarIcon },
@@ -268,7 +265,7 @@ export default function Layout({ children }: LayoutProps) {
               {/* Mobile navigation with enhanced scrolling */}
               <nav className={mobile.scrollContainer('flex-1 overflow-y-auto overscroll-contain mt-2 px-3')}>
                 <div className="pb-safe-bottom space-y-1" style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
-                  {navigationGroups.map(group => {
+                  {navigationGroups.filter(group => !group.hidden).map(group => {
                     const groupItems = updatedNavigation.filter(i=> group.items.some(gItem=> gItem.href === i.href));
                     return (
                       <div key={group.label} className="mb-6">
@@ -372,7 +369,7 @@ export default function Layout({ children }: LayoutProps) {
               <div className="flex flex-1 flex-col overflow-y-auto">
                 <nav className="flex-1 px-2 py-4">
                   <div className="space-y-1">
-                    {navigationGroups.map(group => {
+                    {navigationGroups.filter(group => !group.hidden).map(group => {
                       const groupItems = updatedNavigation.filter(i=> group.items.some(gItem=> gItem.href === i.href));
                       return (
                         <div key={group.label} className="mb-6">
@@ -474,6 +471,14 @@ export default function Layout({ children }: LayoutProps) {
                           Your Profile
                         </Link>
                         <Link
+                          href="/billing"
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                          onClick={() => setShowUserMenu(false)}
+                        >
+                          <CreditCardIcon className="h-4 w-4" />
+                          Billing & Payments
+                        </Link>
+                        <Link
                           href="/dashboard/settings"
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
                           onClick={() => setShowUserMenu(false)}
@@ -499,70 +504,54 @@ export default function Layout({ children }: LayoutProps) {
 
           {/* Main content */}
           <div className="lg:pl-64 flex flex-col min-h-screen">
-            {/* Enhanced Header with solid background */}
-            <header className="sticky top-0 z-40 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm backdrop-blur-md">
-              <div className={mobile.navigation(
-                'flex h-16 flex-shrink-0 items-center justify-between px-4 sm:px-6 lg:px-8'
-              )}>
+            {/* Simplified Clean Header */}
+            <header className="sticky top-0 z-40 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex h-14 items-center justify-between px-4 lg:px-6">
+                {/* Mobile menu button */}
                 <button
                   type="button"
-                  className={mobile.button(
-                    'px-4 py-2 border-r border-gray-200 dark:border-gray-700 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 lg:hidden'
-                  )}
+                  className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 rounded-lg lg:hidden"
                   onClick={() => setSidebarOpen(true)}
-                  aria-label="Open sidebar"
                 >
-                  <Bars3Icon className="h-6 w-6" />
+                  <Bars3Icon className="h-5 w-5" />
                 </button>
 
-                <div className="flex flex-1 items-center justify-between min-w-0 ml-4 lg:ml-0">
-                  {/* Search with enhanced solid background */}
-                  <div className="flex items-center flex-1 min-w-0">
-                    <div className="flex-1 min-w-0 max-w-lg">
-                      <SearchBar className="w-full" />
-                    </div>
-                  </div>
+                {/* Search */}
+                <div className="flex-1 max-w-lg lg:ml-0 ml-4">
+                  <SearchBar />
+                </div>
 
-                  <div className="ml-4 flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
-                    {/* AI Enable */}
-                    <AIEnable />
-                    {/* Theme Toggle */}
-                    <ThemeToggle variant="button" />
-                    {/* Notifications with enhanced styling */}
-                    <button
-                      type="button"
-                      onClick={() => router.push('/dashboard/inbox')}
-                      className={mobile.button(
-                        'relative bg-gray-100 dark:bg-gray-800 p-2.5 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200'
-                      )}
-                      aria-label="View inbox messages"
-                    >
-                      <span className="sr-only">View inbox messages</span>
-                      <BellIcon className="h-6 w-6" />
-                      {inboxStats && inboxStats.unread && inboxStats.unread > 0 && (
-                        <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-xs text-white flex items-center justify-center font-medium shadow-sm animate-pulse">
-                          {inboxStats.unread > 99 ? '99+' : inboxStats.unread}
-                        </span>
-                      )}
-                    </button>
-                    {/* Quick Create with enhanced styling */}
-                    <QuickCreate />
-                    {/* Help Button with solid background */}
-                    <button
-                      type="button"
-                      className={mobile.button(
-                        'hidden sm:inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-all duration-200'
-                      )}
-                      onClick={() => {
-                        // Focus Copilot widget if available
-                        const evt = new CustomEvent('copilot:open');
-                        window.dispatchEvent(evt);
-                      }}
-                    >
-                      <QuestionMarkCircleIcon className="h-4 w-4 text-gray-400 mr-1" />
-                      Help
-                    </button>
-                  </div>
+                {/* Right actions */}
+                <div className="flex items-center gap-2 ml-4">
+                  <AIEnable />
+                  <ThemeToggle variant="button" />
+                  
+                  {/* Notifications */}
+                  <button
+                    onClick={() => router.push('/dashboard/inbox')}
+                    className="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 rounded-lg"
+                  >
+                    <BellIcon className="h-5 w-5" />
+                    {inboxStats && inboxStats.unread && inboxStats.unread > 0 && (
+                      <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                        {inboxStats.unread > 9 ? '9+' : inboxStats.unread}
+                      </span>
+                    )}
+                  </button>
+                  
+                  <QuickCreate />
+                  
+                  {/* Help button */}
+                  <button
+                    className="hidden sm:flex items-center px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                    onClick={() => {
+                      const evt = new CustomEvent('copilot:open');
+                      window.dispatchEvent(evt);
+                    }}
+                  >
+                    <QuestionMarkCircleIcon className="h-4 w-4 mr-1" />
+                    Help
+                  </button>
                 </div>
               </div>
             </header>

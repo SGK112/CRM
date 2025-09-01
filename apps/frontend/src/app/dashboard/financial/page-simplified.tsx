@@ -135,8 +135,8 @@ export default function SimplifiedFinancialHub() {
   if (loading) {
     return (
       <div className={simple.page()}>
-        <div className={simple.loading.container}>
-          <div className={`${simple.loading.spinner} h-8 w-8`} />
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
       </div>
     );
@@ -150,7 +150,7 @@ export default function SimplifiedFinancialHub() {
           <h1 className={simple.text.title()}>Sales</h1>
           <p className={simple.text.body()}>All your monetization tools in one place</p>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <Link
             href="/dashboard/estimates/new"
@@ -170,9 +170,8 @@ export default function SimplifiedFinancialHub() {
       </div>
 
       {/* Stats Cards */}
-      <div className={`${simple.grid.cols4} gap-4 sm:gap-6 mb-6`}>
-        <div className={simple.card()}>
-          <div className={simple.section('py-4 sm:py-5')}>
+      <div className={simple.grid.cols4 + ' mb-6'}>
+        <div className={simple.card('p-4')}>
           <div className="flex items-center gap-3">
             <DocumentTextIcon className="h-8 w-8 text-blue-600" />
             <div>
@@ -181,11 +180,9 @@ export default function SimplifiedFinancialHub() {
               <p className={simple.text.small('text-yellow-600')}>{stats.pendingEstimates} pending</p>
             </div>
           </div>
-          </div>
         </div>
-        
-        <div className={simple.card()}>
-          <div className={simple.section('py-4 sm:py-5')}>
+
+        <div className={simple.card('p-4')}>
           <div className="flex items-center gap-3">
             <ShoppingBagIcon className="h-8 w-8 text-green-600" />
             <div>
@@ -194,11 +191,9 @@ export default function SimplifiedFinancialHub() {
               <p className={simple.text.small('text-green-600')}>{stats.paidInvoices} paid</p>
             </div>
           </div>
-          </div>
         </div>
-        
-        <div className={simple.card()}>
-          <div className={simple.section('py-4 sm:py-5')}>
+
+        <div className={simple.card('p-4')}>
           <div className="flex items-center gap-3">
             <CreditCardIcon className="h-8 w-8 text-purple-600" />
             <div>
@@ -207,11 +202,9 @@ export default function SimplifiedFinancialHub() {
               <p className={simple.text.small('text-gray-600')}>${(stats.pendingRevenue / 1000).toFixed(0)}k pending</p>
             </div>
           </div>
-          </div>
         </div>
-        
-        <div className={simple.card()}>
-          <div className={simple.section('py-4 sm:py-5')}>
+
+        <div className={simple.card('p-4')}>
           <div className="flex items-center gap-3">
             <WrenchScrewdriverIcon className="h-8 w-8 text-orange-600" />
             <div>
@@ -220,13 +213,12 @@ export default function SimplifiedFinancialHub() {
               <p className={simple.text.small('text-orange-600')}>{stats.lowStock} low stock</p>
             </div>
           </div>
-          </div>
         </div>
       </div>
 
       {/* Tab Navigation */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div className="flex bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-1 overflow-x-auto whitespace-nowrap">
+        <div className="flex bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 p-1">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
@@ -262,7 +254,7 @@ export default function SimplifiedFinancialHub() {
       {/* Content */}
       {activeTab === 'overview' ? (
         /* Overview Tab */
-        <div className={`${simple.spacing.md}`}>
+        <div className="space-y-6">
           {/* Recent Activity */}
           <div className={simple.card()}>
             <div className={simple.section()}>
@@ -315,38 +307,32 @@ export default function SimplifiedFinancialHub() {
           <div className={simple.card()}>
             <div className={simple.section()}>
               <h2 className={simple.text.subtitle('mb-4')}>Quick Actions</h2>
-              <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6`}>
+              <div className={simple.grid.cols3 + ' gap-4'}>
                 <Link
                   href="/dashboard/estimates/new"
-                  className={simple.card('hover:scale-[1.02] transition-transform text-center')}
+                  className={simple.card('p-4 hover:scale-[1.02] transition-transform text-center')}
                 >
-                  <div className={simple.section('py-6')}>
-                    <DocumentTextIcon className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                    <h3 className={simple.text.subtitle('mb-1')}>Create Estimate</h3>
-                    <p className={simple.text.small()}>Generate professional estimates</p>
-                  </div>
+                  <DocumentTextIcon className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+                  <h3 className={simple.text.subtitle('mb-1')}>Create Estimate</h3>
+                  <p className={simple.text.small()}>Generate professional estimates</p>
                 </Link>
-                
+
                 <Link
                   href="/dashboard/invoices/new"
-                  className={simple.card('hover:scale-[1.02] transition-transform text-center')}
+                  className={simple.card('p-4 hover:scale-[1.02] transition-transform text-center')}
                 >
-                  <div className={simple.section('py-6')}>
-                    <ShoppingBagIcon className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                    <h3 className={simple.text.subtitle('mb-1')}>Create Invoice</h3>
-                    <p className={simple.text.small()}>Send invoices to clients</p>
-                  </div>
+                  <ShoppingBagIcon className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                  <h3 className={simple.text.subtitle('mb-1')}>Create Invoice</h3>
+                  <p className={simple.text.small()}>Send invoices to clients</p>
                 </Link>
-                
+
                 <Link
                   href="/dashboard/catalog"
-                  className={simple.card('hover:scale-[1.02] transition-transform text-center')}
+                  className={simple.card('p-4 hover:scale-[1.02] transition-transform text-center')}
                 >
-                  <div className={simple.section('py-6')}>
-                    <WrenchScrewdriverIcon className="h-8 w-8 text-orange-600 mx-auto mb-2" />
-                    <h3 className={simple.text.subtitle('mb-1')}>Manage Materials</h3>
-                    <p className={simple.text.small()}>Update price sheets</p>
-                  </div>
+                  <WrenchScrewdriverIcon className="h-8 w-8 text-orange-600 mx-auto mb-2" />
+                  <h3 className={simple.text.subtitle('mb-1')}>Manage Materials</h3>
+                  <p className={simple.text.small()}>Update price sheets</p>
                 </Link>
               </div>
             </div>
@@ -394,7 +380,7 @@ export default function SimplifiedFinancialHub() {
                       <p className={simple.text.small()}>Created: {item.createdAt}</p>
                     </div>
                   </div>
-                  
+
                   <div className="text-right">
                     {item.amount && (
                       <p className="font-medium text-gray-900 dark:text-white mb-1">
@@ -422,7 +408,7 @@ export default function SimplifiedFinancialHub() {
                   </div>
                 </Link>
               ))}
-              
+
               {filteredItems.length === 0 && (
                 <div className="text-center py-12">
                   <div className="mx-auto h-12 w-12 text-gray-400 mb-4">
