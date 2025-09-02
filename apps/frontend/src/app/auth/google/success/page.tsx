@@ -34,13 +34,20 @@ export default function GoogleSuccessPage() {
           if (res.ok) {
             const user = await res.json()
             localStorage.setItem('user', JSON.stringify(user))
+
+            // Check if this user has Google auth (indicating calendar connection)
+            if (user.googleAuth && (user.googleAuth.accessToken || user.googleAuth.refreshToken)) {
+              if (!cancelled) router.replace('/dashboard/settings/integrations')
+              return
+            }
           }
         } catch {/* ignore profile errors; token is enough for now */}
 
         if (!cancelled) router.replace('/dashboard')
-      } catch (e: any) {
+      } catch (e: unknown) {
+        const errorMessage = e instanceof Error ? e.message : 'Login failed'
         if (!cancelled) {
-          setError(e?.message || 'Login failed')
+          setError(errorMessage)
           router.replace('/auth/login')
         }
       }
@@ -59,4 +66,3 @@ export default function GoogleSuccessPage() {
     </div>
   )
 }
- 

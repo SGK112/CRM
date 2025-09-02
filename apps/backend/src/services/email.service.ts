@@ -53,7 +53,9 @@ export class EmailService {
         // Optionally set SENDGRID_FROM_EMAIL or SMTP_FROM for the sender address.
         // Returning false ensures callers can surface a helpful error to the UI/logs.
         // eslint-disable-next-line no-console
-        console.warn('[EmailService] Email provider is not configured. Set SENDGRID_API_KEY or SMTP_* env vars to enable email delivery.');
+        console.warn(
+          '[EmailService] Email provider is not configured. Set SENDGRID_API_KEY or SMTP_* env vars to enable email delivery.'
+        );
         return false;
       }
 
@@ -84,7 +86,8 @@ export class EmailService {
       }
 
       if (this.transporter) {
-        const from = options.from || this.configService.get<string>('SMTP_FROM') || 'noreply@crmapp.com';
+        const from =
+          options.from || this.configService.get<string>('SMTP_FROM') || 'noreply@crmapp.com';
         await this.transporter.sendMail({
           from,
           to: options.to,
@@ -139,7 +142,11 @@ export class EmailService {
         </div>
       </div>
     `;
-    return this.sendEmail({ to: clientEmail, subject: `Appointment Confirmation - ${formattedDate}`, html });
+    return this.sendEmail({
+      to: clientEmail,
+      subject: `Appointment Confirmation - ${formattedDate}`,
+      html,
+    });
   }
 
   async sendEstimateFollowUp(options: {
@@ -168,7 +175,11 @@ export class EmailService {
         </div>
       </div>
     `;
-    return this.sendEmail({ to: clientEmail, subject: `Estimate Follow-up - ${estimateNumber}`, html });
+    return this.sendEmail({
+      to: clientEmail,
+      subject: `Estimate Follow-up - ${estimateNumber}`,
+      html,
+    });
   }
 
   async sendGeneralFollowUp(options: {
@@ -184,12 +195,16 @@ export class EmailService {
         <h2 style="color: #2563eb;">${subject}</h2>
         <p>Hi ${clientName},</p>
         <p>${message}</p>
-        ${callNotes ? `
+        ${
+          callNotes
+            ? `
           <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="margin: 0 0 10px 0; color: #374151;">Call Notes</h3>
             <p>${callNotes}</p>
           </div>
-        ` : ''}
+        `
+            : ''
+        }
         <p>Please don't hesitate to contact us if you have any questions.</p>
         <p>Best regards,<br>Your Project Team</p>
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 14px;">

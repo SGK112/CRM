@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import { useState, useRef, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   MagnifyingGlassIcon,
   DocumentTextIcon,
@@ -12,14 +12,14 @@ import {
   ClockIcon,
   CubeTransparentIcon,
   RectangleGroupIcon,
-  ArrowLeftIcon
-} from '@heroicons/react/24/outline'
-import { useSearch } from '@/hooks/useSearch'
+  ArrowLeftIcon,
+} from '@heroicons/react/24/outline';
+import { useSearch } from '@/hooks/useSearch';
 
 interface MobileSearchBarProps {
-  className?: string
-  placeholder?: string
-  onClose?: () => void
+  className?: string;
+  placeholder?: string;
+  onClose?: () => void;
 }
 
 const typeIcons = {
@@ -29,8 +29,8 @@ const typeIcons = {
   message: ChatBubbleLeftRightIcon,
   user: UserGroupIcon,
   design: CubeTransparentIcon,
-  template: RectangleGroupIcon
-} as const
+  template: RectangleGroupIcon,
+} as const;
 
 const typeColors = {
   project: 'text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/30',
@@ -39,55 +39,56 @@ const typeColors = {
   message: 'text-purple-600 bg-purple-100 dark:text-purple-400 dark:bg-purple-900/30',
   user: 'text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-900/30',
   design: 'text-indigo-600 bg-indigo-100 dark:text-indigo-400 dark:bg-indigo-900/30',
-  template: 'text-pink-600 bg-pink-100 dark:text-pink-400 dark:bg-pink-900/30'
-} as const
+  template: 'text-pink-600 bg-pink-100 dark:text-pink-400 dark:bg-pink-900/30',
+} as const;
 
-export default function MobileSearchBar({ 
-  className = '', 
+export default function MobileSearchBar({
+  className = '',
   placeholder = 'Search projects, clients, documents...',
-  onClose
+  onClose,
 }: MobileSearchBarProps) {
-  const [inputValue, setInputValue] = useState('')
-  const inputRef = useRef<HTMLInputElement>(null)
-  const router = useRouter()
-  
-  const { query, results, isLoading, recentSearches, search, clearSearch, clearRecentSearches } = useSearch()
+  const [inputValue, setInputValue] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+
+  const { query, results, isLoading, recentSearches, search, clearSearch, clearRecentSearches } =
+    useSearch();
 
   // Auto-focus input when component mounts
   useEffect(() => {
-    inputRef.current?.focus()
-  }, [])
+    inputRef.current?.focus();
+  }, []);
 
   // Handle input change
   const handleInputChange = (value: string) => {
-    setInputValue(value)
-    search(value)
-  }
+    setInputValue(value);
+    search(value);
+  };
 
   // Handle result click
   const handleResultClick = (url: string) => {
-    setInputValue('')
-    clearSearch()
-    router.push(url)
-    onClose?.()
-  }
+    setInputValue('');
+    clearSearch();
+    router.push(url);
+    onClose?.();
+  };
 
   // Handle recent search click
   const handleRecentSearchClick = (searchQuery: string) => {
-    setInputValue(searchQuery)
-    search(searchQuery)
-    inputRef.current?.focus()
-  }
+    setInputValue(searchQuery);
+    search(searchQuery);
+    inputRef.current?.focus();
+  };
 
   // Handle keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
-      onClose?.()
+      onClose?.();
     }
     if (e.key === 'Enter' && results.length > 0) {
-      handleResultClick(results[0].url)
+      handleResultClick(results[0].url);
     }
-  }
+  };
 
   return (
     <div className={`fixed inset-0 z-50 bg-[var(--bg)] ${className}`}>
@@ -100,7 +101,7 @@ export default function MobileSearchBar({
         >
           <ArrowLeftIcon className="h-5 w-5" />
         </button>
-        
+
         <div className="flex-1 relative">
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
             <MagnifyingGlassIcon className="h-5 w-5 text-[var(--text-faint)]" />
@@ -109,7 +110,7 @@ export default function MobileSearchBar({
             ref={inputRef}
             type="text"
             value={inputValue}
-            onChange={(e) => handleInputChange(e.target.value)}
+            onChange={e => handleInputChange(e.target.value)}
             onKeyDown={handleKeyDown}
             className="block w-full rounded-lg border-0 py-3 pl-10 pr-10 bg-[var(--input-bg)] text-[var(--text)] ring-1 ring-inset ring-[var(--border)] placeholder:text-[var(--text-faint)] focus:ring-2 focus:ring-inset focus:ring-[var(--accent)] text-base transition-colors"
             placeholder={placeholder}
@@ -117,8 +118,8 @@ export default function MobileSearchBar({
           {inputValue && (
             <button
               onClick={() => {
-                setInputValue('')
-                clearSearch()
+                setInputValue('');
+                clearSearch();
               }}
               className="absolute inset-y-0 right-0 flex items-center pr-3 text-[var(--text-faint)] hover:text-[var(--text-dim)] transition-colors"
             >
@@ -172,10 +173,12 @@ export default function MobileSearchBar({
               Results for "{query}" ({results.length})
             </h3>
             <div className="space-y-2">
-              {results.map((result) => {
-                const Icon = typeIcons[result.type as keyof typeof typeIcons] || DocumentTextIcon
-                const colorClass = typeColors[result.type as keyof typeof typeColors] || 'text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-900/30'
-                
+              {results.map(result => {
+                const Icon = typeIcons[result.type as keyof typeof typeIcons] || DocumentTextIcon;
+                const colorClass =
+                  typeColors[result.type as keyof typeof typeColors] ||
+                  'text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-900/30';
+
                 return (
                   <button
                     key={result.id}
@@ -213,7 +216,7 @@ export default function MobileSearchBar({
                       )}
                     </div>
                   </button>
-                )
+                );
               })}
             </div>
           </div>
@@ -245,5 +248,5 @@ export default function MobileSearchBar({
         )}
       </div>
     </div>
-  )
+  );
 }

@@ -1,4 +1,13 @@
-import { Body, Controller, Post, Get, Query, BadRequestException, UseGuards, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Get,
+  Query,
+  BadRequestException,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from '../users/schemas/user.schema';
@@ -11,7 +20,10 @@ export class BillingController {
   private stripe: Stripe | null = null;
   private trialDays: number;
 
-  constructor(private config: ConfigService, @InjectModel(User.name) private userModel: Model<UserDocument>) {
+  constructor(
+    private config: ConfigService,
+    @InjectModel(User.name) private userModel: Model<UserDocument>
+  ) {
     const secret = this.config.get<string>('STRIPE_SECRET_KEY');
     if (secret) {
       this.stripe = new Stripe(secret, { apiVersion: '2023-08-16' });
@@ -19,21 +31,25 @@ export class BillingController {
       // Log once (console.log acceptable; could integrate Nest Logger if desired)
       // Avoid throwing so auth & other modules still work without billing configured.
       // eslint-disable-next-line no-console
-      console.warn('[Billing] STRIPE_SECRET_KEY not set – billing endpoints will return configuration errors until provided.');
+      console.warn(
+        '[Billing] STRIPE_SECRET_KEY not set – billing endpoints will return configuration errors until provided.'
+      );
     }
     this.trialDays = parseInt(this.config.get<string>('STRIPE_TRIAL_DAYS') || '14', 10);
   }
 
   @Post('create-checkout-session')
-  async createCheckoutSession(@Body() body: { priceId: string; customerEmail?: string; workspaceName?: string }) {
-  if (!this.stripe) {
+  async createCheckoutSession(
+    @Body() body: { priceId: string; customerEmail?: string; workspaceName?: string }
+  ) {
+    if (!this.stripe) {
       throw new BadRequestException('Stripe not configured');
     }
     if (!body.priceId) throw new BadRequestException('Missing priceId');
 
-  const session = await this.stripe.checkout.sessions.create({
+    const session = await this.stripe.checkout.sessions.create({
       mode: 'subscription',
-      line_items: [ { price: body.priceId, quantity: 1 } ],
+      line_items: [{ price: body.priceId, quantity: 1 }],
       allow_promotion_codes: true,
       subscription_data: {
         trial_period_days: this.trialDays,
@@ -53,7 +69,7 @@ export class BillingController {
 
   @Get('session')
   async getCheckoutSession(@Query('id') id: string) {
-  if (!this.stripe) {
+    if (!this.stripe) {
       throw new BadRequestException('Stripe not configured');
     }
     if (!id) throw new BadRequestException('Missing id');
@@ -76,7 +92,11 @@ export class BillingController {
   async getMySubscription(@Req() req) {
     const email = req.user?.email;
     if (!email) throw new BadRequestException('Missing user context');
-    const user = await this.userModel.findOne({ email }).select('stripeCustomerId stripeSubscriptionId subscriptionPlan subscriptionStatus trialEndsAt');
+    const user = await this.userModel
+      .findOne({ email })
+      .select(
+        'stripeCustomerId stripeSubscriptionId subscriptionPlan subscriptionStatus trialEndsAt'
+      );
     return {
       customerId: user?.stripeCustomerId || null,
       subscriptionId: user?.stripeSubscriptionId || null,

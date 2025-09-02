@@ -12,14 +12,14 @@ export class CreateMediaRecordDto {
   @IsOptional() @IsNumber() height?: number;
   @IsString() hash: string;
   @IsString() publicId: string;
-  @IsOptional() @IsIn(['public','workspace','restricted']) access?: string;
+  @IsOptional() @IsIn(['public', 'workspace', 'restricted']) access?: string;
   @IsOptional() @IsArray() tags?: string[];
 }
 
 export class SignUploadDto {
   @IsOptional() @IsString() folder?: string;
   @IsOptional() @IsString() projectId?: string;
-  @IsOptional() @IsIn(['public','workspace','restricted']) access?: string;
+  @IsOptional() @IsIn(['public', 'workspace', 'restricted']) access?: string;
   @IsOptional() @IsArray() tags?: string[];
   @IsOptional() @IsString() mimeType?: string;
 }

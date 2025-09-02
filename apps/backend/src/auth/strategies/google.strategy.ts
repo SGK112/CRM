@@ -8,21 +8,24 @@ import { AuthService } from '../auth.service';
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(
     private configService: ConfigService,
-    private authService: AuthService,
+    private authService: AuthService
   ) {
-  const clientID = configService.get('GOOGLE_CLIENT_ID');
-  const clientSecret = configService.get('GOOGLE_CLIENT_SECRET');
-  const configuredCallback = configService.get('GOOGLE_REDIRECT_URI');
+    const clientID = configService.get('GOOGLE_CLIENT_ID');
+    const clientSecret = configService.get('GOOGLE_CLIENT_SECRET');
+    const configuredCallback = configService.get('GOOGLE_REDIRECT_URI');
 
     // Use provided credentials or dummy values to prevent startup errors
-  // Prefer explicit GOOGLE_REDIRECT_URI; else default to non-prefixed path for local dev
-  // We expose both /auth/google/callback (no prefix) and /api/auth/google/callback (prefixed) via main.ts exclusion
-  const callbackURL = configuredCallback || 'http://localhost:3001/auth/google/callback';
+    // Prefer explicit GOOGLE_REDIRECT_URI; else default to non-prefixed path for local dev
+    // We expose both /auth/google/callback (no prefix) and /api/auth/google/callback (prefixed) via main.ts exclusion
+    const callbackURL = configuredCallback || 'http://localhost:3001/auth/google/callback';
     super({
-      clientID: (clientID && !clientID.includes('your-google')) ? clientID : 'dummy-client-id',
-      clientSecret: (clientSecret && !clientSecret.includes('your-google')) ? clientSecret : 'dummy-client-secret',
-  callbackURL,
-  scope: ['email', 'profile', 'https://www.googleapis.com/auth/calendar'],
+      clientID: clientID && !clientID.includes('your-google') ? clientID : 'dummy-client-id',
+      clientSecret:
+        clientSecret && !clientSecret.includes('your-google')
+          ? clientSecret
+          : 'dummy-client-secret',
+      callbackURL,
+      scope: ['email', 'profile', 'https://www.googleapis.com/auth/calendar'],
     });
 
     const logger = new Logger('GoogleStrategy');
@@ -33,9 +36,14 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     accessToken: string,
     refreshToken: string,
     profile: unknown,
-    done: VerifyCallback,
+    done: VerifyCallback
   ): Promise<void> {
-    const p = profile as { id?: string; name: { givenName: string; familyName: string }; emails: Array<{ value: string }>; photos: Array<{ value: string }> };
+    const p = profile as {
+      id?: string;
+      name: { givenName: string; familyName: string };
+      emails: Array<{ value: string }>;
+      photos: Array<{ value: string }>;
+    };
     const { name, emails, photos } = p;
 
     const user = {

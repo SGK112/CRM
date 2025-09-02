@@ -1,7 +1,15 @@
-"use client";
+'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { SparklesIcon, CommandLineIcon, XMarkIcon, ArrowsPointingOutIcon, ChevronUpDownIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import {
+  SparklesIcon,
+  CommandLineIcon,
+  XMarkIcon,
+  ArrowsPointingOutIcon,
+  ChevronUpDownIcon,
+  ChevronUpIcon,
+  ChevronDownIcon,
+} from '@heroicons/react/24/outline';
 import AIAssistant from './AIAssistant';
 
 type Stage = 'closed' | 'minimized' | 'open';
@@ -9,7 +17,7 @@ type Stage = 'closed' | 'minimized' | 'open';
 export default function CopilotWidget() {
   // Three stages: closed (tiny tab), minimized (widget), open (full assistant)
   const [stage, setStage] = useState<Stage>('minimized');
-  const [draft, setDraft] = useState("");
+  const [draft, setDraft] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -18,7 +26,7 @@ export default function CopilotWidget() {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
-        setStage(s => s === 'open' ? 'minimized' : 'open');
+        setStage(s => (s === 'open' ? 'minimized' : 'open'));
       }
     };
     window.addEventListener('keydown', handler);
@@ -28,7 +36,10 @@ export default function CopilotWidget() {
   const focusInputSoon = () => setTimeout(() => inputRef.current?.focus(), 40);
 
   const openAssistant = () => setStage('open');
-  const openMinimized = () => { setStage('minimized'); focusInputSoon(); };
+  const openMinimized = () => {
+    setStage('minimized');
+    focusInputSoon();
+  };
   const closeAll = () => setStage('closed');
   const cycleFromClosed = () => openMinimized();
 
@@ -62,7 +73,9 @@ export default function CopilotWidget() {
                 <SparklesIcon className="h-5 w-5 text-white" />
               </div>
               <div className="flex-1 text-left">
-                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Remodely Ai</p>
+                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                  Remodely Ai
+                </p>
                 <p className="text-[11px] text-gray-600 dark:text-gray-400">Click to activate</p>
               </div>
               <span className="text-[10px] font-medium text-gray-500 dark:text-gray-500">⌘K</span>
@@ -82,8 +95,12 @@ export default function CopilotWidget() {
               <SparklesIcon className="h-5 w-5 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-gray-900 dark:text-gray-100">Remodely Ai Assistant</p>
-              <p className="text-[10px] text-gray-600 dark:text-gray-400 tracking-tight">AI workspace assistant</p>
+              <p className="text-xs font-semibold text-gray-900 dark:text-gray-100">
+                Remodely Ai Assistant
+              </p>
+              <p className="text-[10px] text-gray-600 dark:text-gray-400 tracking-tight">
+                AI workspace assistant
+              </p>
             </div>
             <div className="flex items-center gap-1">
               <button
@@ -118,12 +135,14 @@ export default function CopilotWidget() {
               </div>
             </div>
             <div className="flex flex-wrap gap-1">
-              {['/dashboard/projects','/dashboard/clients','/new-project'].map(s => (
+              {['/dashboard/projects', '/dashboard/clients', '/new-project'].map(s => (
                 <button
                   key={s}
                   onClick={() => setCommandAndOpen(s)}
                   className="text-[10px] px-2 py-1 rounded bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-gray-700 dark:bg-[var(--surface-2)] dark:hover:bg-[var(--surface-3)] dark:text-gray-200 border border-[var(--border)] dark:border-gray-800 transition-colors"
-                >{s.replace('/dashboard', '')}</button>
+                >
+                  {s.replace('/dashboard', '')}
+                </button>
               ))}
             </div>
             <div className="flex items-center justify-between pt-1">

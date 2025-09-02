@@ -5,8 +5,19 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { EnvelopeIcon, DevicePhoneMobileIcon, CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  EnvelopeIcon,
+  DevicePhoneMobileIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+} from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 
 interface EmailConfig {
@@ -29,11 +40,11 @@ interface TwilioConfig {
 
 export default function CommunicationSettings() {
   const [isLoading, setIsLoading] = useState(false);
-  const [status, setStatus] = useState({ 
-    email: { configured: false, provider: '' }, 
-    sms: { configured: false, phoneNumber: '' } 
+  const [status, setStatus] = useState({
+    email: { configured: false, provider: '' },
+    sms: { configured: false, phoneNumber: '' },
   });
-  
+
   // Email configuration
   const [emailConfig, setEmailConfig] = useState<EmailConfig>({
     provider: 'smtp',
@@ -43,7 +54,7 @@ export default function CommunicationSettings() {
     smtpPassword: '',
     fromEmail: '',
     fromName: '',
-    secure: true
+    secure: true,
   });
 
   // Twilio configuration
@@ -51,7 +62,7 @@ export default function CommunicationSettings() {
     accountSid: '',
     authToken: '',
     phoneNumber: '',
-    webhookUrl: ''
+    webhookUrl: '',
   });
 
   useEffect(() => {
@@ -170,7 +181,9 @@ export default function CommunicationSettings() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <div className={`p-4 rounded-lg border ${status.email.configured ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800' : 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800'}`}>
+        <div
+          className={`p-4 rounded-lg border ${status.email.configured ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800' : 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800'}`}
+        >
           <div className="flex items-center gap-2">
             <EnvelopeIcon className="h-5 w-5" />
             <h3 className="font-semibold">Email Service</h3>
@@ -185,7 +198,9 @@ export default function CommunicationSettings() {
           </p>
         </div>
 
-        <div className={`p-4 rounded-lg border ${status.sms.configured ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800' : 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800'}`}>
+        <div
+          className={`p-4 rounded-lg border ${status.sms.configured ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800' : 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800'}`}
+        >
           <div className="flex items-center gap-2">
             <DevicePhoneMobileIcon className="h-5 w-5" />
             <h3 className="font-semibold">SMS Service</h3>
@@ -210,11 +225,14 @@ export default function CommunicationSettings() {
         <TabsContent value="email" className="space-y-6">
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border">
             <h3 className="text-lg font-semibold mb-4">SMTP Email Settings</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="provider">Email Provider</Label>
-                <Select value={emailConfig.provider} onValueChange={(value) => setEmailConfig({...emailConfig, provider: value})}>
+                <Select
+                  value={emailConfig.provider}
+                  onValueChange={value => setEmailConfig({ ...emailConfig, provider: value })}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -231,7 +249,7 @@ export default function CommunicationSettings() {
                 <Input
                   id="smtpHost"
                   value={emailConfig.smtpHost}
-                  onChange={(e) => setEmailConfig({...emailConfig, smtpHost: e.target.value})}
+                  onChange={e => setEmailConfig({ ...emailConfig, smtpHost: e.target.value })}
                   placeholder="smtp.gmail.com"
                 />
               </div>
@@ -242,14 +260,21 @@ export default function CommunicationSettings() {
                   id="smtpPort"
                   type="number"
                   value={emailConfig.smtpPort}
-                  onChange={(e) => setEmailConfig({...emailConfig, smtpPort: parseInt(e.target.value)})}
+                  onChange={e =>
+                    setEmailConfig({ ...emailConfig, smtpPort: parseInt(e.target.value) })
+                  }
                   placeholder="587"
                 />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="secure">Security</Label>
-                <Select value={emailConfig.secure.toString()} onValueChange={(value) => setEmailConfig({...emailConfig, secure: value === 'true'})}>
+                <Select
+                  value={emailConfig.secure.toString()}
+                  onValueChange={value =>
+                    setEmailConfig({ ...emailConfig, secure: value === 'true' })
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -265,7 +290,7 @@ export default function CommunicationSettings() {
                 <Input
                   id="smtpUser"
                   value={emailConfig.smtpUser}
-                  onChange={(e) => setEmailConfig({...emailConfig, smtpUser: e.target.value})}
+                  onChange={e => setEmailConfig({ ...emailConfig, smtpUser: e.target.value })}
                   placeholder="your.email@gmail.com"
                 />
               </div>
@@ -276,7 +301,7 @@ export default function CommunicationSettings() {
                   id="smtpPassword"
                   type="password"
                   value={emailConfig.smtpPassword}
-                  onChange={(e) => setEmailConfig({...emailConfig, smtpPassword: e.target.value})}
+                  onChange={e => setEmailConfig({ ...emailConfig, smtpPassword: e.target.value })}
                   placeholder="Your app password"
                 />
               </div>
@@ -286,7 +311,7 @@ export default function CommunicationSettings() {
                 <Input
                   id="fromEmail"
                   value={emailConfig.fromEmail}
-                  onChange={(e) => setEmailConfig({...emailConfig, fromEmail: e.target.value})}
+                  onChange={e => setEmailConfig({ ...emailConfig, fromEmail: e.target.value })}
                   placeholder="noreply@yourcompany.com"
                 />
               </div>
@@ -296,7 +321,7 @@ export default function CommunicationSettings() {
                 <Input
                   id="fromName"
                   value={emailConfig.fromName}
-                  onChange={(e) => setEmailConfig({...emailConfig, fromName: e.target.value})}
+                  onChange={e => setEmailConfig({ ...emailConfig, fromName: e.target.value })}
                   placeholder="Your Company Name"
                 />
               </div>
@@ -306,7 +331,11 @@ export default function CommunicationSettings() {
               <Button onClick={saveEmailConfig} disabled={isLoading}>
                 {isLoading ? 'Saving...' : 'Save Email Config'}
               </Button>
-              <Button intent="secondary" onClick={testEmailConfig} disabled={isLoading || !status.email.configured}>
+              <Button
+                intent="secondary"
+                onClick={testEmailConfig}
+                disabled={isLoading || !status.email.configured}
+              >
                 Test Email
               </Button>
             </div>
@@ -316,11 +345,16 @@ export default function CommunicationSettings() {
         <TabsContent value="sms" className="space-y-6">
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border">
             <h3 className="text-lg font-semibold mb-4">Twilio SMS Settings</h3>
-            
+
             <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mb-4">
               <p className="text-sm text-blue-800 dark:text-blue-200">
                 <strong>Note:</strong> You need a Twilio account to send SMS. Visit{' '}
-                <a href="https://www.twilio.com" target="_blank" rel="noopener noreferrer" className="underline">
+                <a
+                  href="https://www.twilio.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline"
+                >
                   twilio.com
                 </a>{' '}
                 to sign up and get your credentials.
@@ -333,7 +367,7 @@ export default function CommunicationSettings() {
                 <Input
                   id="accountSid"
                   value={twilioConfig.accountSid}
-                  onChange={(e) => setTwilioConfig({...twilioConfig, accountSid: e.target.value})}
+                  onChange={e => setTwilioConfig({ ...twilioConfig, accountSid: e.target.value })}
                   placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
                 />
               </div>
@@ -344,7 +378,7 @@ export default function CommunicationSettings() {
                   id="authToken"
                   type="password"
                   value={twilioConfig.authToken}
-                  onChange={(e) => setTwilioConfig({...twilioConfig, authToken: e.target.value})}
+                  onChange={e => setTwilioConfig({ ...twilioConfig, authToken: e.target.value })}
                   placeholder="Your Twilio auth token"
                 />
               </div>
@@ -354,7 +388,7 @@ export default function CommunicationSettings() {
                 <Input
                   id="phoneNumber"
                   value={twilioConfig.phoneNumber}
-                  onChange={(e) => setTwilioConfig({...twilioConfig, phoneNumber: e.target.value})}
+                  onChange={e => setTwilioConfig({ ...twilioConfig, phoneNumber: e.target.value })}
                   placeholder="+1234567890"
                 />
               </div>
@@ -364,7 +398,7 @@ export default function CommunicationSettings() {
                 <Input
                   id="webhookUrl"
                   value={twilioConfig.webhookUrl}
-                  onChange={(e) => setTwilioConfig({...twilioConfig, webhookUrl: e.target.value})}
+                  onChange={e => setTwilioConfig({ ...twilioConfig, webhookUrl: e.target.value })}
                   placeholder="https://yourapp.com/webhook"
                 />
               </div>
@@ -374,7 +408,11 @@ export default function CommunicationSettings() {
               <Button onClick={saveTwilioConfig} disabled={isLoading}>
                 {isLoading ? 'Saving...' : 'Save SMS Config'}
               </Button>
-              <Button intent="secondary" onClick={testSmsConfig} disabled={isLoading || !status.sms.configured}>
+              <Button
+                intent="secondary"
+                onClick={testSmsConfig}
+                disabled={isLoading || !status.sms.configured}
+              >
                 Test SMS
               </Button>
             </div>

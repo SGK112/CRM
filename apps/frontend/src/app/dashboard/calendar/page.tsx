@@ -25,8 +25,8 @@ interface Appointment {
   _id: string;
   title: string;
   description?: string;
-  appointmentType: 'consultation' | 'site_visit' | 'meeting' | 'inspection' | 'other';
-  status: 'scheduled' | 'confirmed' | 'completed' | 'cancelled';
+  appointmentType: 'consultation' | 'site_visit' | 'meeting' | 'inspection' | 'other' | 'google_calendar';
+  status: 'scheduled' | 'confirmed' | 'completed' | 'cancelled' | 'confirmed';
   startDateTime: string;
   endDateTime: string;
   location?: {
@@ -38,6 +38,8 @@ interface Appointment {
     name: string;
     phone?: string;
   };
+  isGoogleEvent?: boolean;
+  googleEventId?: string;
 }
 
 export default function CalendarPage() {
@@ -51,108 +53,82 @@ export default function CalendarPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Enhanced mock data with more variety and detail
-    const mockAppointments: Appointment[] = [
-      {
-        _id: '1',
-        title: 'Kitchen Consultation - Smith Family',
-        description: 'Initial consultation for complete kitchen remodel including appliances and cabinetry',
-        appointmentType: 'consultation',
-        status: 'confirmed',
-        startDateTime: '2025-09-02T10:00:00Z',
-        endDateTime: '2025-09-02T11:30:00Z',
-        location: {
-          street: '123 Main St',
-          city: 'San Francisco',
-          state: 'CA'
-        },
-        client: {
-          name: 'John & Sarah Smith',
-          phone: '+1 (555) 123-4567'
+    const fetchCalendarEvents = async () => {
+      try {
+        const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+        if (!token) {
+          router.push('/auth/login');
+          return;
         }
-      },
-      {
-        _id: '2',
-        title: 'Site Visit - Johnson Bathroom',
-        description: 'Measure and assess bathroom space for renovation planning',
-        appointmentType: 'site_visit',
-        status: 'scheduled',
-        startDateTime: '2025-09-03T14:00:00Z',
-        endDateTime: '2025-09-03T15:30:00Z',
-        location: {
-          street: '456 Oak Ave',
-          city: 'Oakland',
-          state: 'CA'
-        },
-        client: {
-          name: 'Michael Johnson',
-          phone: '+1 (555) 987-6543'
+
+        const response = await fetch('/api/appointments/calendar', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const events = await response.json();
+          // Transform API events to frontend format
+          const transformedAppointments: Appointment[] = events.map((event: {
+            id: string;
+            title: string;
+            start: string;
+            end: string;
+            description?: string;
+            extendedProps: {
+              type: string;
+              status: string;
+              location?: string;
+              source?: string;
+              googleEventId?: string;
+            };
+          }) => ({
+            _id: event.id,
+            title: event.title,
+            description: event.description || '',
+            appointmentType: event.extendedProps.type === 'google_calendar' ? 'meeting' : (event.extendedProps.type as Appointment['appointmentType']),
+            status: (event.extendedProps.status || 'scheduled') as Appointment['status'],
+            startDateTime: event.start,
+            endDateTime: event.end,
+            location: event.extendedProps.location ? {
+              street: event.extendedProps.location,
+              city: '',
+              state: ''
+            } : undefined,
+            client: undefined, // Google events don't have client info
+            isGoogleEvent: event.extendedProps.source === 'google',
+            googleEventId: event.extendedProps.googleEventId,
+          }));
+          setAppointments(transformedAppointments);
+        } else {
+          // Handle error silently for better UX
+          setAppointments([]);
         }
-      },
-      {
-        _id: '3',
-        title: 'Final Inspection - Davis Project',
-        description: 'Final walkthrough and inspection of completed master bedroom renovation',
-        appointmentType: 'inspection',
-        status: 'completed',
-        startDateTime: '2025-08-30T16:00:00Z',
-        endDateTime: '2025-08-30T17:00:00Z',
-        location: {
-          street: '789 Pine Rd',
-          city: 'Berkeley',
-          state: 'CA'
-        },
-        client: {
-          name: 'Emma Davis',
-          phone: '+1 (555) 456-7890'
-        }
-      },
-      {
-        _id: '4',
-        title: 'Team Meeting - Weekly Planning',
-        description: 'Weekly team meeting to discuss ongoing projects and schedules',
-        appointmentType: 'meeting',
-        status: 'confirmed',
-        startDateTime: '2025-09-04T09:00:00Z',
-        endDateTime: '2025-09-04T10:00:00Z',
-        location: {
-          street: '123 Office Plaza',
-          city: 'San Francisco',
-          state: 'CA'
-        }
-      },
-      {
-        _id: '5',
-        title: 'Design Review - Wilson Living Room',
-        description: 'Present design concepts and material selections for living room renovation',
-        appointmentType: 'consultation',
-        status: 'scheduled',
-        startDateTime: '2025-09-05T11:00:00Z',
-        endDateTime: '2025-09-05T12:30:00Z',
-        location: {
-          street: '321 Elm Street',
-          city: 'Palo Alto',
-          state: 'CA'
-        },
-        client: {
-          name: 'Robert & Lisa Wilson',
-          phone: '+1 (555) 234-5678'
-        }
+      } catch (error) {
+        // Handle error silently for better UX
+        setAppointments([]);
+      } finally {
+        setLoading(false);
       }
-    ];
+    };
 
-    setAppointments(mockAppointments);
-    setLoading(false);
-  }, []);
+    fetchCalendarEvents();
+  }, [router]);
 
-  const getEventColor = (status: Appointment['status']) => {
+  const getEventColor = (appointment: Appointment) => {
+    // Google Calendar events use their own color
+    if (appointment.isGoogleEvent) {
+      return '#ea4335'; // Google Calendar red
+    }
+
     const colors = {
       confirmed: '#10b981', // Emerald-500
       scheduled: '#3b82f6', // Blue-500
       completed: '#6b7280', // Gray-500
       cancelled: '#ef4444'  // Red-500
     };
-    return colors[status] || colors.scheduled;
+    return colors[appointment.status as keyof typeof colors] || colors.scheduled;
   };
 
   const getStatusIcon = (status: Appointment['status']) => {
@@ -180,6 +156,8 @@ export default function CalendarPage() {
         return UserIcon;
       case 'inspection':
         return CheckCircleIcon;
+      case 'google_calendar':
+        return CalendarDaysIcon;
       default:
         return CalendarDaysIcon;
     }
@@ -189,20 +167,20 @@ export default function CalendarPage() {
     const matchesSearch = apt.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       apt.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       apt.client?.name?.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesStatus = statusFilter.length === 0 || statusFilter.includes(apt.status);
     const matchesType = typeFilter.length === 0 || typeFilter.includes(apt.appointmentType);
-    
+
     return matchesSearch && matchesStatus && matchesType;
   });
 
   const calendarEvents = filteredAppointments.map(appointment => ({
     id: appointment._id,
-    title: appointment.title,
+    title: appointment.isGoogleEvent ? `📅 ${appointment.title}` : appointment.title,
     start: appointment.startDateTime,
     end: appointment.endDateTime,
-    backgroundColor: getEventColor(appointment.status),
-    borderColor: getEventColor(appointment.status),
+    backgroundColor: getEventColor(appointment),
+    borderColor: getEventColor(appointment),
     textColor: '#ffffff',
     extendedProps: {
       appointment: appointment
@@ -211,7 +189,7 @@ export default function CalendarPage() {
 
   const today = new Date();
   const stats = {
-    today: appointments.filter(a => 
+    today: appointments.filter(a =>
       new Date(a.startDateTime).toDateString() === today.toDateString()
     ).length,
     thisWeek: appointments.filter(a => {
@@ -264,15 +242,15 @@ export default function CalendarPage() {
               <button
                 onClick={() => setShowFilters(!showFilters)}
                 className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                  showFilters 
-                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' 
+                  showFilters
+                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
                 }`}
               >
                 <FunnelIcon className="h-4 w-4" />
                 Filters
               </button>
-              
+
               <button
                 onClick={() => router.push('/dashboard/calendar/new')}
                 className="inline-flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105"
@@ -349,8 +327,8 @@ export default function CalendarPage() {
                     <button
                       key={status}
                       onClick={() => {
-                        setStatusFilter(prev => 
-                          prev.includes(status) 
+                        setStatusFilter(prev =>
+                          prev.includes(status)
                             ? prev.filter(s => s !== status)
                             : [...prev, status]
                         );
@@ -366,16 +344,16 @@ export default function CalendarPage() {
                   ))}
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Type</label>
                 <div className="flex flex-wrap gap-2">
-                  {['consultation', 'site_visit', 'meeting', 'inspection', 'other'].map(type => (
+                  {['consultation', 'site_visit', 'meeting', 'inspection', 'other', 'google_calendar'].map(type => (
                     <button
                       key={type}
                       onClick={() => {
-                        setTypeFilter(prev => 
-                          prev.includes(type) 
+                        setTypeFilter(prev =>
+                          prev.includes(type)
                             ? prev.filter(t => t !== type)
                             : [...prev, type]
                         );
@@ -386,13 +364,13 @@ export default function CalendarPage() {
                           : 'bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
                       }`}
                     >
-                      {type.replace('_', ' ').charAt(0).toUpperCase() + type.replace('_', ' ').slice(1)}
+                      {type === 'google_calendar' ? 'Google Calendar' : type.replace('_', ' ').charAt(0).toUpperCase() + type.replace('_', ' ').slice(1)}
                     </button>
                   ))}
                 </div>
               </div>
             </div>
-            
+
             {(statusFilter.length > 0 || typeFilter.length > 0) && (
               <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <button
@@ -476,7 +454,7 @@ export default function CalendarPage() {
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Upcoming Appointments</h2>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Next 5 scheduled appointments</p>
               </div>
-              
+
               <div className="p-6">
                 {upcomingAppointments.length > 0 ? (
                   <div className="space-y-4">
@@ -484,7 +462,7 @@ export default function CalendarPage() {
                       const StatusIcon = getStatusIcon(appointment.status);
                       const TypeIcon = getAppointmentTypeIcon(appointment.appointmentType);
                       const appointmentDate = new Date(appointment.startDateTime);
-                      
+
                       return (
                         <div
                           key={appointment._id}
@@ -507,39 +485,39 @@ export default function CalendarPage() {
                                 }`} />
                               </div>
                             </div>
-                            
+
                             <div className="flex-1 min-w-0">
                               <h3 className="font-semibold text-gray-900 dark:text-white text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">
                                 {appointment.title}
                               </h3>
-                              
+
                               <div className="flex items-center gap-2 mt-1">
                                 <TypeIcon className="h-3 w-3 text-gray-500 dark:text-gray-400" />
                                 <span className="text-xs text-gray-600 dark:text-gray-400 capitalize">
                                   {appointment.appointmentType.replace('_', ' ')}
                                 </span>
                               </div>
-                              
+
                               <div className="flex items-center gap-1 mt-2 text-xs text-gray-600 dark:text-gray-400">
                                 <ClockIcon className="h-3 w-3" />
                                 <span>
-                                  {appointmentDate.toLocaleDateString('en-US', { 
-                                    month: 'short', 
-                                    day: 'numeric' 
-                                  })} at {appointmentDate.toLocaleTimeString([], { 
-                                    hour: '2-digit', 
-                                    minute: '2-digit' 
+                                  {appointmentDate.toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric'
+                                  })} at {appointmentDate.toLocaleTimeString([], {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
                                   })}
                                 </span>
                               </div>
-                              
+
                               {appointment.client && (
                                 <div className="flex items-center gap-1 mt-1 text-xs text-gray-600 dark:text-gray-400">
                                   <UserIcon className="h-3 w-3" />
                                   <span className="truncate">{appointment.client.name}</span>
                                 </div>
                               )}
-                              
+
                               {appointment.location && (
                                 <div className="flex items-center gap-1 mt-1 text-xs text-gray-600 dark:text-gray-400">
                                   <MapPinIcon className="h-3 w-3" />
@@ -550,10 +528,10 @@ export default function CalendarPage() {
                               )}
                             </div>
                           </div>
-                          
+
                           <div className="mt-3 flex justify-between items-center">
                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              appointment.status === 'confirmed' 
+                              appointment.status === 'confirmed'
                                 ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'
                                 : appointment.status === 'scheduled'
                                 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'
@@ -563,7 +541,7 @@ export default function CalendarPage() {
                             }`}>
                               {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
                             </span>
-                            
+
                             <ChevronRightIcon className="h-4 w-4 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200" />
                           </div>
                         </div>

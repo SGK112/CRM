@@ -7,10 +7,11 @@ import { hasPermission } from './permissions.const';
 export class PermissionsGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
   canActivate(context: ExecutionContext): boolean {
-    const reqPerms: string[] = this.reflector.getAllAndOverride(PERMISSIONS_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]) || [];
+    const reqPerms: string[] =
+      this.reflector.getAllAndOverride(PERMISSIONS_KEY, [
+        context.getHandler(),
+        context.getClass(),
+      ]) || [];
     if (!reqPerms.length) return true;
     const req = context.switchToHttp().getRequest();
     const role: string | undefined = req.user?.role;

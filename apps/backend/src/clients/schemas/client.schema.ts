@@ -29,9 +29,9 @@ export class Client {
       country: String,
       coordinates: {
         lat: Number,
-        lng: Number
-      }
-    }
+        lng: Number,
+      },
+    },
   })
   address?: {
     street: string;
@@ -51,11 +51,13 @@ export class Client {
   @Prop([String])
   tags: string[];
 
-  @Prop([{
-    platform: String,
-    username: String,
-    url: String
-  }])
+  @Prop([
+    {
+      platform: String,
+      username: String,
+      url: String,
+    },
+  ])
   socialProfiles: {
     platform: string;
     username: string;
@@ -65,11 +67,11 @@ export class Client {
   @Prop([String])
   projects: string[];
 
-    @Prop({ default: 'lead' })
-    status: string;
+  @Prop({ default: 'lead' })
+  status: string;
 
-    @Prop()
-    source?: string;
+  @Prop()
+  source?: string;
 
   @Prop({ required: true })
   workspaceId: string;
@@ -82,7 +84,7 @@ export const ClientSchema = SchemaFactory.createForClass(Client);
 
 // At least one contact method validation
 // Use explicit this typing instead of suppressing with ts-ignore.
-ClientSchema.pre('validate', function(this: any, next) {
+ClientSchema.pre('validate', function (this: any, next) {
   if (!this.email && !this.phone) {
     // Provide synthesized email if phone exists (import path) was already handled upstream; keep defensive check
     return next(new Error('Either email or phone is required'));
@@ -100,18 +102,21 @@ ClientSchema.index({ source: 1, workspaceId: 1 });
 ClientSchema.index({ tags: 1, workspaceId: 1 });
 
 // Text index for full-text search
-ClientSchema.index({ 
-  firstName: 'text', 
-  lastName: 'text', 
-  email: 'text', 
-  company: 'text',
-  phone: 'text'
-}, { 
-  weights: { 
-    firstName: 10, 
-    lastName: 10, 
-    email: 5, 
-    company: 3,
-    phone: 1
-  } 
-});
+ClientSchema.index(
+  {
+    firstName: 'text',
+    lastName: 'text',
+    email: 'text',
+    company: 'text',
+    phone: 'text',
+  },
+  {
+    weights: {
+      firstName: 10,
+      lastName: 10,
+      email: 5,
+      company: 3,
+      phone: 1,
+    },
+  }
+);

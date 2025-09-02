@@ -25,7 +25,7 @@ export function AIProvider({ children }: { children: React.ReactNode }) {
 
       window.addEventListener('ai-enabled-changed', handleAIChange as EventListener);
       window.addEventListener('ai-state-change', handleAIChange as EventListener);
-      
+
       return () => {
         window.removeEventListener('ai-enabled-changed', handleAIChange as EventListener);
         window.removeEventListener('ai-state-change', handleAIChange as EventListener);
@@ -38,17 +38,15 @@ export function AIProvider({ children }: { children: React.ReactNode }) {
     if (typeof window !== 'undefined') {
       localStorage.setItem('global-ai-enabled', enabled.toString());
       // Dispatch event to notify other components
-      window.dispatchEvent(new CustomEvent('ai-enabled-changed', { 
-        detail: { enabled } 
-      }));
+      window.dispatchEvent(
+        new CustomEvent('ai-enabled-changed', {
+          detail: { enabled },
+        })
+      );
     }
   };
 
-  return (
-    <AIContext.Provider value={{ isAIEnabled, setAIEnabled }}>
-      {children}
-    </AIContext.Provider>
-  );
+  return <AIContext.Provider value={{ isAIEnabled, setAIEnabled }}>{children}</AIContext.Provider>;
 }
 
 export function useAI() {

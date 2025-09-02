@@ -1,14 +1,14 @@
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Patch, 
-  Delete, 
-  Param, 
-  Query, 
-  Body, 
-  Req, 
-  UseGuards 
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Param,
+  Query,
+  Body,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -54,7 +54,10 @@ export class InboxController {
   @ApiOperation({ summary: 'Get unread message count' })
   @ApiResponse({ status: 200, description: 'Unread count retrieved successfully' })
   @ApiQuery({ name: 'type', required: false, enum: ['email', 'notification', 'sms', 'system'] })
-  async getUnreadCount(@Req() req, @Query('type') type?: 'email' | 'notification' | 'sms' | 'system') {
+  async getUnreadCount(
+    @Req() req,
+    @Query('type') type?: 'email' | 'notification' | 'sms' | 'system'
+  ) {
     const workspaceId = req.user.workspaceId;
     const userId = req.user.sub || req.user._id;
 
@@ -149,7 +152,8 @@ export class InboxController {
   @ApiResponse({ status: 201, description: 'Message sent successfully' })
   async sendMessage(
     @Req() req,
-    @Body() messageData: {
+    @Body()
+    messageData: {
       type: 'email' | 'sms';
       subject: string;
       content: string;
@@ -161,16 +165,12 @@ export class InboxController {
     const workspaceId = req.user.workspaceId;
     const userId = req.user.sub || req.user._id;
 
-    const message = await this.inboxService.sendMessage(
-      workspaceId,
-      userId,
-      messageData
-    );
+    const message = await this.inboxService.sendMessage(workspaceId, userId, messageData);
 
-    return { 
-      success: true, 
+    return {
+      success: true,
       message: 'Message sent successfully',
-      messageId: message._id 
+      messageId: message._id,
     };
   }
 
@@ -178,8 +178,9 @@ export class InboxController {
   @ApiOperation({ summary: 'Mark all messages as read' })
   @ApiResponse({ status: 200, description: 'All messages marked as read' })
   async markAllAsRead(
-    @Req() req, 
-    @Body() body: { 
+    @Req() req,
+    @Body()
+    body: {
       type?: 'email' | 'notification' | 'sms' | 'system';
       isArchived?: boolean;
     } = {}
@@ -188,10 +189,10 @@ export class InboxController {
     const userId = req.user.sub || req.user._id;
 
     const count = await this.inboxService.markAllAsRead(workspaceId, userId, body);
-    return { 
-      success: true, 
+    return {
+      success: true,
       message: `${count} messages marked as read`,
-      count 
+      count,
     };
   }
 
@@ -200,7 +201,8 @@ export class InboxController {
   @ApiResponse({ status: 201, description: 'Notification created successfully' })
   async createNotification(
     @Req() req,
-    @Body() notificationData: {
+    @Body()
+    notificationData: {
       title: string;
       message: string;
       type: string;
@@ -221,10 +223,10 @@ export class InboxController {
       notificationData
     );
 
-    return { 
-      success: true, 
+    return {
+      success: true,
       message: 'Notification created successfully',
-      messageId: message._id 
+      messageId: message._id,
     };
   }
 }

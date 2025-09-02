@@ -26,7 +26,7 @@ export interface CreateTransactionDto {
 export class WalletService {
   constructor(
     @InjectModel(Wallet.name) private walletModel: Model<WalletDocument>,
-    @InjectModel(WalletTransaction.name) private transactionModel: Model<WalletTransactionDocument>,
+    @InjectModel(WalletTransaction.name) private transactionModel: Model<WalletTransactionDocument>
   ) {}
 
   async connectTonWallet(userId: string, walletAddress: string): Promise<Wallet> {
@@ -37,7 +37,7 @@ export class WalletService {
 
     // Check if wallet already exists
     let wallet = await this.walletModel.findOne({ userId });
-    
+
     if (wallet) {
       // Update existing wallet
       wallet.tonAddress = walletAddress;
@@ -51,7 +51,7 @@ export class WalletService {
         isConnected: true,
         lastConnected: new Date(),
         balance: '0',
-        network: 'mainnet'
+        network: 'mainnet',
       });
     }
 
@@ -84,10 +84,7 @@ export class WalletService {
   }
 
   async updateBalance(userId: string, balance: string): Promise<void> {
-    await this.walletModel.updateOne(
-      { userId },
-      { balance, lastBalanceUpdate: new Date() }
-    );
+    await this.walletModel.updateOne({ userId }, { balance, lastBalanceUpdate: new Date() });
   }
 
   async createTransaction(transactionData: CreateTransactionDto): Promise<WalletTransaction> {
@@ -95,22 +92,18 @@ export class WalletService {
       ...transactionData,
       status: 'pending',
       createdAt: new Date(),
-      txHash: null // Will be set when transaction is confirmed
+      txHash: null, // Will be set when transaction is confirmed
     });
 
     return await transaction.save();
   }
 
   async getTransactionHistory(userId: string, limit: number = 50): Promise<WalletTransaction[]> {
-    return await this.transactionModel
-      .find({ userId })
-      .sort({ createdAt: -1 })
-      .limit(limit)
-      .exec();
+    return await this.transactionModel.find({ userId }).sort({ createdAt: -1 }).limit(limit).exec();
   }
 
   async updateTransactionStatus(
-    transactionId: string, 
+    transactionId: string,
     status: 'pending' | 'confirmed' | 'failed',
     txHash?: string
   ): Promise<void> {
@@ -122,10 +115,7 @@ export class WalletService {
       updateData.confirmedAt = new Date();
     }
 
-    await this.transactionModel.updateOne(
-      { _id: transactionId },
-      updateData
-    );
+    await this.transactionModel.updateOne({ _id: transactionId }, updateData);
   }
 
   async processPayment(
@@ -145,7 +135,7 @@ export class WalletService {
       description,
       clientId,
       projectId,
-      invoiceId
+      invoiceId,
     });
 
     // In a real implementation, you would:
@@ -153,11 +143,15 @@ export class WalletService {
     // 2. Create a transaction on TON blockchain
     // 3. Return payment URL for user to complete transaction
 
-    const paymentUrl = this.generateTonPaymentUrl(amount, description, (transaction as any)._id.toString());
+    const paymentUrl = this.generateTonPaymentUrl(
+      amount,
+      description,
+      (transaction as any)._id.toString()
+    );
 
     return {
       transaction,
-      paymentUrl
+      paymentUrl,
     };
   }
 
@@ -168,14 +162,18 @@ export class WalletService {
     return tonAddressRegex.test(address.replace(/[^0-9a-fA-F]/g, ''));
   }
 
-  private generateTonPaymentUrl(amount: string, description: string, transactionId: string): string {
+  private generateTonPaymentUrl(
+    amount: string,
+    description: string,
+    transactionId: string
+  ): string {
     // Generate TON payment URL
     // In a real implementation, use TON Connect or similar
     const baseUrl = 'ton://transfer';
     const params = new URLSearchParams({
       amount: (parseFloat(amount) * 1e9).toString(), // Convert to nanotons
       text: description,
-      transaction_id: transactionId
+      transaction_id: transactionId,
     });
 
     return `${baseUrl}?${params.toString()}`;
@@ -188,7 +186,7 @@ export class WalletService {
     lastTransaction?: Date;
   }> {
     const transactions = await this.transactionModel.find({ userId });
-    
+
     let totalReceived = 0;
     let totalSent = 0;
     let lastTransaction: Date | undefined;
@@ -210,7 +208,7 @@ export class WalletService {
       totalReceived: totalReceived.toFixed(2),
       totalSent: totalSent.toFixed(2),
       transactionCount: transactions.length,
-      lastTransaction
+      lastTransaction,
     };
   }
 }

@@ -7,9 +7,7 @@ import * as stream from 'stream';
 
 @Injectable()
 export class ClientsService {
-  constructor(
-    @InjectModel(Client.name) private clientModel: Model<ClientDocument>,
-  ) {}
+  constructor(@InjectModel(Client.name) private clientModel: Model<ClientDocument>) {}
 
   async create(createClientDto: any, workspaceId: string): Promise<Client> {
     const client = new this.clientModel({
@@ -19,27 +17,30 @@ export class ClientsService {
     return client.save();
   }
 
-  async findAll(workspaceId: string, searchParams?: { 
-    search?: string; 
-    status?: string; 
-    source?: string; 
-    limit?: number; 
-    offset?: number; 
-  }): Promise<Client[]> {
+  async findAll(
+    workspaceId: string,
+    searchParams?: {
+      search?: string;
+      status?: string;
+      source?: string;
+      limit?: number;
+      offset?: number;
+    }
+  ): Promise<Client[]> {
     const query: any = { workspaceId, isActive: true };
-    
+
     // Add search functionality
     if (searchParams?.search) {
       const searchTerm = searchParams.search.trim();
-      
+
       // Try MongoDB text search first (if available)
       try {
         // Use text search for better performance and relevance
-        const textSearchQuery = { 
-          ...query, 
-          $text: { $search: searchTerm } 
+        const textSearchQuery = {
+          ...query,
+          $text: { $search: searchTerm },
         };
-        
+
         // Test if text search works by doing a count query
         const textCount = await this.clientModel.countDocuments(textSearchQuery);
         if (textCount >= 0) {
@@ -58,31 +59,31 @@ export class ClientsService {
           { phone: searchRegex },
           { company: searchRegex },
           { tags: { $in: [searchRegex] } },
-          { 
+          {
             $expr: {
               $regexMatch: {
                 input: { $concat: ['$firstName', ' ', '$lastName'] },
                 regex: searchTerm,
-                options: 'i'
-              }
-            }
-          }
+                options: 'i',
+              },
+            },
+          },
         ];
       }
     }
-    
+
     // Add status filter
     if (searchParams?.status && searchParams.status !== 'all') {
       query.status = searchParams.status;
     }
-    
+
     // Add source filter
     if (searchParams?.source && searchParams.source !== 'all') {
       query.source = searchParams.source;
     }
-    
+
     let queryBuilder = this.clientModel.find(query);
-    
+
     // Add pagination
     if (searchParams?.offset) {
       queryBuilder = queryBuilder.skip(searchParams.offset);
@@ -90,36 +91,43 @@ export class ClientsService {
     if (searchParams?.limit) {
       queryBuilder = queryBuilder.limit(searchParams.limit);
     }
-    
+
     // Sort by name for consistent results, or by text score if using text search
     if (query.$text) {
-      queryBuilder = queryBuilder.sort({ score: { $meta: 'textScore' }, lastName: 1, firstName: 1 });
+      queryBuilder = queryBuilder.sort({
+        score: { $meta: 'textScore' },
+        lastName: 1,
+        firstName: 1,
+      });
     } else {
       queryBuilder = queryBuilder.sort({ lastName: 1, firstName: 1 });
     }
-    
+
     return queryBuilder.exec();
   }
 
-  async count(workspaceId: string, searchParams?: { 
-    search?: string; 
-    status?: string; 
-    source?: string; 
-  }): Promise<number> {
+  async count(
+    workspaceId: string,
+    searchParams?: {
+      search?: string;
+      status?: string;
+      source?: string;
+    }
+  ): Promise<number> {
     const query: any = { workspaceId, isActive: true };
-    
+
     // Add search functionality (same logic as findAll)
     if (searchParams?.search) {
       const searchTerm = searchParams.search.trim();
-      
+
       // Try MongoDB text search first (if available)
       try {
         // Use text search for better performance and relevance
-        const textSearchQuery = { 
-          ...query, 
-          $text: { $search: searchTerm } 
+        const textSearchQuery = {
+          ...query,
+          $text: { $search: searchTerm },
         };
-        
+
         // Test if text search works by doing a simple count
         const textCount = await this.clientModel.countDocuments(textSearchQuery);
         if (textCount >= 0) {
@@ -138,29 +146,29 @@ export class ClientsService {
           { phone: searchRegex },
           { company: searchRegex },
           { tags: { $in: [searchRegex] } },
-          { 
+          {
             $expr: {
               $regexMatch: {
                 input: { $concat: ['$firstName', ' ', '$lastName'] },
                 regex: searchTerm,
-                options: 'i'
-              }
-            }
-          }
+                options: 'i',
+              },
+            },
+          },
         ];
       }
     }
-    
+
     // Add status filter
     if (searchParams?.status && searchParams.status !== 'all') {
       query.status = searchParams.status;
     }
-    
+
     // Add source filter
     if (searchParams?.source && searchParams.source !== 'all') {
       query.source = searchParams.source;
     }
-    
+
     return this.clientModel.countDocuments(query).exec();
   }
 
@@ -169,26 +177,27 @@ export class ClientsService {
   }
 
   async update(id: string, updateClientDto: any, workspaceId: string): Promise<Client> {
-    return this.clientModel.findOneAndUpdate(
-      { _id: id, workspaceId },
-      updateClientDto,
-      { new: true }
-    ).exec();
+    return this.clientModel
+      .findOneAndUpdate({ _id: id, workspaceId }, updateClientDto, { new: true })
+      .exec();
   }
 
   async remove(id: string, workspaceId: string): Promise<Client> {
-    return this.clientModel.findOneAndUpdate(
-      { _id: id, workspaceId },
-      { isActive: false },
-      { new: true }
-    ).exec();
+    return this.clientModel
+      .findOneAndUpdate({ _id: id, workspaceId }, { isActive: false }, { new: true })
+      .exec();
   }
 
   async importCsv(
     file: { buffer: Buffer; originalname?: string },
     workspaceId: string,
     dryRun = false,
-    options?: { allowEmailOnly?: boolean; allowPhoneOnly?: boolean; synthEmailFromPhone?: boolean; dedupeByPhone?: boolean }
+    options?: {
+      allowEmailOnly?: boolean;
+      allowPhoneOnly?: boolean;
+      synthEmailFromPhone?: boolean;
+      dedupeByPhone?: boolean;
+    }
   ) {
     if (!file?.buffer) throw new BadRequestException('File buffer missing');
     const rows: any[] = [];
@@ -199,19 +208,28 @@ export class ClientsService {
     return new Promise((resolve, reject) => {
       csvStream
         .pipe(parse({ headers: true, ignoreEmpty: true, trim: true }))
-        .on('error', (error) => reject(new BadRequestException(error.message)))
-        .on('data', (row) => rows.push(row))
+        .on('error', error => reject(new BadRequestException(error.message)))
+        .on('data', row => rows.push(row))
         .on('end', () => {
           const MAX_ROWS = 25000;
           if (rows.length > MAX_ROWS) {
-            return reject(new BadRequestException(`CSV exceeds maximum allowed rows (${MAX_ROWS})`));
+            return reject(
+              new BadRequestException(`CSV exceeds maximum allowed rows (${MAX_ROWS})`)
+            );
           }
 
           const skipReasonsCount: Record<string, number> = {};
-          const registerSkip = (reason: string) => { skipReasonsCount[reason] = (skipReasonsCount[reason] || 0) + 1; };
+          const registerSkip = (reason: string) => {
+            skipReasonsCount[reason] = (skipReasonsCount[reason] || 0) + 1;
+          };
 
-          const headerCanon = (key: string) => key.toLowerCase().replace(/^\uFEFF/, '').trim().replace(/\s+/g, '_');
-            const mappedRaw = rows.map(raw => {
+          const headerCanon = (key: string) =>
+            key
+              .toLowerCase()
+              .replace(/^\uFEFF/, '')
+              .trim()
+              .replace(/\s+/g, '_');
+          const mappedRaw = rows.map(raw => {
             const norm: any = {};
             for (const k of Object.keys(raw)) {
               if (!k) continue;
@@ -229,7 +247,7 @@ export class ClientsService {
             const rawPhoneCandidate =
               norm.phone_number ||
               norm.phone_number_1 ||
-              norm["phone_number1"] ||
+              norm['phone_number1'] ||
               norm.phone ||
               norm.phonenumber ||
               norm.phoneNumber ||
@@ -246,7 +264,8 @@ export class ClientsService {
             }
             const cleanPhone = phone ? String(phone).replace(/[^\d]/g, '') : '';
             const email = (norm.email || norm.mail || '').toString().trim();
-            const company = norm.company || norm.organization || norm.company_name || norm.organisation;
+            const company =
+              norm.company || norm.organization || norm.company_name || norm.organisation;
             // Capture notes plus optionally second contact name as appended note
             let notes = norm.notes || norm.note;
             if (norm.second_contact_name) {
@@ -255,7 +274,12 @@ export class ClientsService {
                 notes = (notes ? notes + '\n' : '') + `Second contact: ${sc}`;
               }
             }
-            const tags = norm.tags ? String(norm.tags).split(/[;,]/).map((t: string) => t.trim()).filter(Boolean) : [];
+            const tags = norm.tags
+              ? String(norm.tags)
+                  .split(/[;,]/)
+                  .map((t: string) => t.trim())
+                  .filter(Boolean)
+              : [];
             const statusRaw = (norm.status || norm.client_status || '').toString();
             let status = 'lead';
             if (/client/i.test(statusRaw)) status = 'client';
@@ -265,16 +289,44 @@ export class ClientsService {
             else if (/new\s*lead/i.test(statusRaw)) status = 'lead';
             else if (/contractor|ready\s*for\s*measure/i.test(statusRaw)) status = 'active';
             else if (/not\s*interested|inactive|closed/i.test(statusRaw)) status = 'inactive';
-            const source = (norm.source || norm.source_channel || norm.source_campaign || norm.how_did_you_hear_about_us) ?
-              (norm.source || norm.source_channel || norm.source_campaign || norm.how_did_you_hear_about_us).toString() : '';
-            return { firstName: firstName?.toString().trim(), lastName: (lastName?.toString().trim()) || '', email: email.toLowerCase(), phone: cleanPhone, company, notes, tags, status, source };
+            const source =
+              norm.source ||
+              norm.source_channel ||
+              norm.source_campaign ||
+              norm.how_did_you_hear_about_us
+                ? (
+                    norm.source ||
+                    norm.source_channel ||
+                    norm.source_campaign ||
+                    norm.how_did_you_hear_about_us
+                  ).toString()
+                : '';
+            return {
+              firstName: firstName?.toString().trim(),
+              lastName: lastName?.toString().trim() || '',
+              email: email.toLowerCase(),
+              phone: cleanPhone,
+              company,
+              notes,
+              tags,
+              status,
+              source,
+            };
           });
 
-          const { allowEmailOnly = false, allowPhoneOnly = true, synthEmailFromPhone = true, dedupeByPhone = true } = options || {};
+          const {
+            allowEmailOnly = false,
+            allowPhoneOnly = true,
+            synthEmailFromPhone = true,
+            dedupeByPhone = true,
+          } = options || {};
 
           const mapped: typeof mappedRaw = [];
           for (const m of mappedRaw) {
-            if (!m.firstName) { registerSkip('missing_first_name'); continue; }
+            if (!m.firstName) {
+              registerSkip('missing_first_name');
+              continue;
+            }
             if (!m.email) {
               if (m.phone && synthEmailFromPhone) {
                 m.email = `${m.phone}@import.local`;
@@ -285,15 +337,21 @@ export class ClientsService {
               }
             }
             if (!m.phone) {
-              if (!allowEmailOnly) { registerSkip('missing_phone'); continue; }
+              if (!allowEmailOnly) {
+                registerSkip('missing_phone');
+                continue;
+              }
             }
-            if (!m.email && !m.phone) { registerSkip('missing_core_fields'); continue; }
+            if (!m.email && !m.phone) {
+              registerSkip('missing_core_fields');
+              continue;
+            }
             if (!m.lastName) m.lastName = '-';
             mapped.push(m);
           }
 
-          const emailMap = new Map<string, typeof mapped[0]>();
-          const phoneMap = new Map<string, typeof mapped[0]>();
+          const emailMap = new Map<string, (typeof mapped)[0]>();
+          const phoneMap = new Map<string, (typeof mapped)[0]>();
           for (const m of mapped) {
             if (m.email && !emailMap.has(m.email)) emailMap.set(m.email, m);
             if (dedupeByPhone && m.phone) {
@@ -303,26 +361,34 @@ export class ClientsService {
           const unique: typeof mapped = Array.from(emailMap.values());
           if (dedupeByPhone) {
             for (const row of phoneMap.values()) {
-              if ((!row.email || !emailMap.has(row.email)) && !unique.includes(row)) unique.push(row);
+              if ((!row.email || !emailMap.has(row.email)) && !unique.includes(row))
+                unique.push(row);
             }
           }
 
-            const emails = unique.filter(u => u.email).map(u => u.email);
-            (async () => {
+          const emails = unique.filter(u => u.email).map(u => u.email);
+          (async () => {
             const phones = unique.filter(u => u.phone).map(u => u.phone);
             // Fetch existing by email OR phone
-            const existingList = await this.clientModel.find({
-              workspaceId,
-              $or: [
-                emails.length ? { email: { $in: emails } } : undefined,
-                phones.length ? { phone: { $in: phones } } : undefined
-              ].filter(Boolean)
-            }).select('_id email phone address');
-            const existingEmailMap = new Map(existingList.filter(e=>e.email).map(e => [e.email, e] as const));
-            const existingPhoneMap = new Map(existingList.filter(e=>e.phone).map(e => [e.phone, e] as const));
+            const existingList = await this.clientModel
+              .find({
+                workspaceId,
+                $or: [
+                  emails.length ? { email: { $in: emails } } : undefined,
+                  phones.length ? { phone: { $in: phones } } : undefined,
+                ].filter(Boolean),
+              })
+              .select('_id email phone address');
+            const existingEmailMap = new Map(
+              existingList.filter(e => e.email).map(e => [e.email, e] as const)
+            );
+            const existingPhoneMap = new Map(
+              existingList.filter(e => e.phone).map(e => [e.phone, e] as const)
+            );
 
             const bulkOps: any[] = [];
-            let createCount = 0; let updateCount = 0;
+            let createCount = 0;
+            let updateCount = 0;
             for (const u of unique) {
               const existingByEmail = u.email ? existingEmailMap.get(u.email) : undefined;
               const existingByPhone = u.phone ? existingPhoneMap.get(u.phone) : undefined;
@@ -332,7 +398,7 @@ export class ClientsService {
                 const update: any = {
                   firstName: u.firstName,
                   lastName: u.lastName,
-                  phone: u.phone || (target.phone || undefined),
+                  phone: u.phone || target.phone || undefined,
                   company: u.company || target.company || undefined,
                   notes: u.notes || target.notes || undefined,
                   workspaceId,
@@ -347,8 +413,8 @@ export class ClientsService {
                 bulkOps.push({
                   updateOne: {
                     filter: { _id: target._id },
-                    update: { $set: update, $addToSet: { tags: { $each: u.tags } } }
-                  }
+                    update: { $set: update, $addToSet: { tags: { $each: u.tags } } },
+                  },
                 });
                 updateCount++;
               } else {
@@ -366,8 +432,8 @@ export class ClientsService {
                       isActive: true,
                       status: u.status,
                       source: u.source,
-                    }
-                  }
+                    },
+                  },
                 });
                 createCount++;
               }
@@ -387,7 +453,7 @@ export class ClientsService {
               preview: mapped.slice(0, 5),
               dryRun,
               options: { allowEmailOnly, allowPhoneOnly, synthEmailFromPhone, dedupeByPhone },
-              remediation: this.buildRemediation(skipReasonsCount)
+              remediation: this.buildRemediation(skipReasonsCount),
             });
           })().catch(err => reject(new BadRequestException(err.message)));
         });
@@ -396,57 +462,98 @@ export class ClientsService {
 
   private buildRemediation(skipReasons: Record<string, number>) {
     const suggestions: { reason: string; suggestion: string }[] = [];
-    if (skipReasons.missing_phone) suggestions.push({ reason: 'missing_phone', suggestion: 'Provide a phone column or enable allowEmailOnly option.' });
-    if (skipReasons.missing_email) suggestions.push({ reason: 'missing_email', suggestion: 'Add email addresses or enable synthEmailFromPhone (requires phone).' });
-    if (skipReasons.synth_email) suggestions.push({ reason: 'synth_email', suggestion: 'Consider collecting real emails; synthesized values are placeholders.' });
-    if (skipReasons.missing_first_name) suggestions.push({ reason: 'missing_first_name', suggestion: 'Add first_name column or a full_name field that can be split.' });
-    if (skipReasons.missing_core_fields) suggestions.push({ reason: 'missing_core_fields', suggestion: 'Row lacks both email and phone; supply at least one identifier.' });
+    if (skipReasons.missing_phone)
+      suggestions.push({
+        reason: 'missing_phone',
+        suggestion: 'Provide a phone column or enable allowEmailOnly option.',
+      });
+    if (skipReasons.missing_email)
+      suggestions.push({
+        reason: 'missing_email',
+        suggestion: 'Add email addresses or enable synthEmailFromPhone (requires phone).',
+      });
+    if (skipReasons.synth_email)
+      suggestions.push({
+        reason: 'synth_email',
+        suggestion: 'Consider collecting real emails; synthesized values are placeholders.',
+      });
+    if (skipReasons.missing_first_name)
+      suggestions.push({
+        reason: 'missing_first_name',
+        suggestion: 'Add first_name column or a full_name field that can be split.',
+      });
+    if (skipReasons.missing_core_fields)
+      suggestions.push({
+        reason: 'missing_core_fields',
+        suggestion: 'Row lacks both email and phone; supply at least one identifier.',
+      });
     return suggestions;
   }
 
   async bulkJson(clients: any[], workspaceId: string) {
     if (!Array.isArray(clients)) throw new BadRequestException('clients must be array');
-    const sanitized = clients.map(c => {
-      const phoneRaw = c.phone?.toString() || '';
-      const phone = phoneRaw.replace(/[^\d]/g, '');
-      let email = c.email?.toString().trim().toLowerCase();
-      if ((!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) && phone) {
-        email = `${phone}@import.local`; // synthesize to satisfy schema requirement
-      }
-      // Address normalization: accept flat fields or nested address
-      const addrSource = c.address || {};
-      const street = c.street || addrSource.street;
-      const city = c.city || addrSource.city;
-      const state = c.state || addrSource.state;
-      const zip = c.zip || c.zipCode || addrSource.zipCode || addrSource.zip;
-      const country = c.country || c.country_name || addrSource.country;
-      const address = (street || city || state || zip || country) ? {
-        street: street || undefined,
-        city: city || undefined,
-        state: state || undefined,
-        zipCode: zip || undefined,
-        country: country || undefined,
-      } : undefined;
-      // Extended statuses support
-      const validStatuses = ['lead','prospect','active','inactive','churned','completed','client','dead_lead'];
-      const status = c.status && validStatuses.includes(c.status) ? c.status : 'lead';
-      return {
-        firstName: c.firstName?.toString().trim() || '',
-        lastName: c.lastName?.toString().trim() || '-',
-        email, // may be synthesized
-        phone,
-        company: c.company?.toString().trim() || undefined,
-        notes: c.notes,
-        tags: Array.isArray(c.tags) ? c.tags : (c.tags ? String(c.tags).split(/[,;]+/).map((t:string)=>t.trim()).filter(Boolean) : []),
-        status,
-        source: c.source || undefined
-        ,address
-      };
-    }).filter(c => c.firstName && (c.email || c.phone));
+    const sanitized = clients
+      .map(c => {
+        const phoneRaw = c.phone?.toString() || '';
+        const phone = phoneRaw.replace(/[^\d]/g, '');
+        let email = c.email?.toString().trim().toLowerCase();
+        if ((!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) && phone) {
+          email = `${phone}@import.local`; // synthesize to satisfy schema requirement
+        }
+        // Address normalization: accept flat fields or nested address
+        const addrSource = c.address || {};
+        const street = c.street || addrSource.street;
+        const city = c.city || addrSource.city;
+        const state = c.state || addrSource.state;
+        const zip = c.zip || c.zipCode || addrSource.zipCode || addrSource.zip;
+        const country = c.country || c.country_name || addrSource.country;
+        const address =
+          street || city || state || zip || country
+            ? {
+                street: street || undefined,
+                city: city || undefined,
+                state: state || undefined,
+                zipCode: zip || undefined,
+                country: country || undefined,
+              }
+            : undefined;
+        // Extended statuses support
+        const validStatuses = [
+          'lead',
+          'prospect',
+          'active',
+          'inactive',
+          'churned',
+          'completed',
+          'client',
+          'dead_lead',
+        ];
+        const status = c.status && validStatuses.includes(c.status) ? c.status : 'lead';
+        return {
+          firstName: c.firstName?.toString().trim() || '',
+          lastName: c.lastName?.toString().trim() || '-',
+          email, // may be synthesized
+          phone,
+          company: c.company?.toString().trim() || undefined,
+          notes: c.notes,
+          tags: Array.isArray(c.tags)
+            ? c.tags
+            : c.tags
+              ? String(c.tags)
+                  .split(/[,;]+/)
+                  .map((t: string) => t.trim())
+                  .filter(Boolean)
+              : [],
+          status,
+          source: c.source || undefined,
+          address,
+        };
+      })
+      .filter(c => c.firstName && (c.email || c.phone));
 
     // Deduplicate by email first, then by phone for those without distinct email
-    const emailMap = new Map<string, typeof sanitized[0]>();
-    const phoneMap = new Map<string, typeof sanitized[0]>();
+    const emailMap = new Map<string, (typeof sanitized)[0]>();
+    const phoneMap = new Map<string, (typeof sanitized)[0]>();
     for (const row of sanitized) {
       if (row.email && !emailMap.has(row.email)) emailMap.set(row.email, row);
       if (row.phone && !phoneMap.has(row.phone)) phoneMap.set(row.phone, row);
@@ -457,18 +564,28 @@ export class ClientsService {
     }
     const duplicatesCollapsed = sanitized.length - unique.length;
 
-    const existingEmails = unique.filter(c=>c.email).map(c=>c.email);
-    const existingPhones = unique.filter(c=>c.phone).map(c=>c.phone);
-    const existingDocs = (existingEmails.length || existingPhones.length) ? await this.clientModel.find({
-      workspaceId,
-      $or: [
-        existingEmails.length ? { email: { $in: existingEmails } } : undefined,
-        existingPhones.length ? { phone: { $in: existingPhones } } : undefined
-      ].filter(Boolean)
-    }).select('_id email phone address') : [];
-    const existingEmailMap = new Map(existingDocs.filter(d=>d.email).map(d => [d.email, d] as const));
-    const existingPhoneMap = new Map(existingDocs.filter(d=>d.phone).map(d => [d.phone, d] as const));
-    let created = 0, updated = 0;
+    const existingEmails = unique.filter(c => c.email).map(c => c.email);
+    const existingPhones = unique.filter(c => c.phone).map(c => c.phone);
+    const existingDocs =
+      existingEmails.length || existingPhones.length
+        ? await this.clientModel
+            .find({
+              workspaceId,
+              $or: [
+                existingEmails.length ? { email: { $in: existingEmails } } : undefined,
+                existingPhones.length ? { phone: { $in: existingPhones } } : undefined,
+              ].filter(Boolean),
+            })
+            .select('_id email phone address')
+        : [];
+    const existingEmailMap = new Map(
+      existingDocs.filter(d => d.email).map(d => [d.email, d] as const)
+    );
+    const existingPhoneMap = new Map(
+      existingDocs.filter(d => d.phone).map(d => [d.phone, d] as const)
+    );
+    let created = 0,
+      updated = 0;
     const ops: any[] = [];
     for (const c of unique) {
       const existingByEmail = c.email ? existingEmailMap.get(c.email) : undefined;
@@ -477,14 +594,19 @@ export class ClientsService {
       if (target) {
         const update: any = { ...c, workspaceId, isActive: true };
         // Preserve real email if replacing synthesized placeholder
-        if (c.email && target.email && /@import\.local$/.test(String(target.email)) && !/@import\.local$/.test(c.email)) {
+        if (
+          c.email &&
+          target.email &&
+          /@import\.local$/.test(String(target.email)) &&
+          !/@import\.local$/.test(c.email)
+        ) {
           update.email = c.email;
         }
         ops.push({
           updateOne: {
             filter: { _id: target._id },
-            update: { $set: update, $addToSet: { tags: { $each: c.tags } } }
-          }
+            update: { $set: update, $addToSet: { tags: { $each: c.tags } } },
+          },
         });
         updated++;
       } else {

@@ -13,23 +13,21 @@ interface InputGroupProps {
 export function InputGroup({ label, required, error, helpText, children }: InputGroupProps) {
   return (
     <div className="input-group">
-      <label className={required ? 'required' : ''}>
-        {label}
-      </label>
+      <label className={required ? 'required' : ''}>{label}</label>
       {children}
       {error && (
         <div className="error-message">
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            <path
+              fillRule="evenodd"
+              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+              clipRule="evenodd"
+            />
           </svg>
           {error}
         </div>
       )}
-      {helpText && !error && (
-        <div className="help-text">
-          {helpText}
-        </div>
-      )}
+      {helpText && !error && <div className="help-text">{helpText}</div>}
     </div>
   );
 }
@@ -45,9 +43,7 @@ export function FormSection({ title, description, children }: FormSectionProps) 
     <div className="form-section">
       <div className="form-section-header">
         <h3 className="form-section-title">{title}</h3>
-        {description && (
-          <p className="form-section-description">{description}</p>
-        )}
+        {description && <p className="form-section-description">{description}</p>}
       </div>
       {children}
     </div>
@@ -70,17 +66,26 @@ interface SelectFieldProps {
   helpText?: string;
 }
 
-export function SelectField({ label, value, onChange, options, placeholder, required, error, helpText }: SelectFieldProps) {
+export function SelectField({
+  label,
+  value,
+  onChange,
+  options,
+  placeholder,
+  required,
+  error,
+  helpText,
+}: SelectFieldProps) {
   return (
     <InputGroup label={label} required={required} error={error} helpText={helpText}>
       <select
         className={`input ${error ? 'error' : ''}`}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={e => onChange(e.target.value)}
         required={required}
       >
         {placeholder && <option value="">{placeholder}</option>}
-        {options.map((option) => (
+        {options.map(option => (
           <option key={option.value} value={option.value}>
             {option.label}
           </option>
@@ -102,16 +107,26 @@ interface TextFieldProps {
   size?: 'sm' | 'default' | 'lg';
 }
 
-export function TextField({ label, value, onChange, type = 'text', placeholder, required, error, helpText, size = 'default' }: TextFieldProps) {
+export function TextField({
+  label,
+  value,
+  onChange,
+  type = 'text',
+  placeholder,
+  required,
+  error,
+  helpText,
+  size = 'default',
+}: TextFieldProps) {
   const sizeClass = size === 'sm' ? 'input-sm' : size === 'lg' ? 'input-lg' : '';
-  
+
   return (
     <InputGroup label={label} required={required} error={error} helpText={helpText}>
       <input
         type={type}
         className={`input ${sizeClass} ${error ? 'error' : ''}`}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
         required={required}
       />
@@ -130,13 +145,22 @@ interface TextAreaFieldProps {
   rows?: number;
 }
 
-export function TextAreaField({ label, value, onChange, placeholder, required, error, helpText, rows = 4 }: TextAreaFieldProps) {
+export function TextAreaField({
+  label,
+  value,
+  onChange,
+  placeholder,
+  required,
+  error,
+  helpText,
+  rows = 4,
+}: TextAreaFieldProps) {
   return (
     <InputGroup label={label} required={required} error={error} helpText={helpText}>
       <textarea
         className={`input ${error ? 'error' : ''}`}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
         required={required}
         rows={rows}
@@ -159,7 +183,7 @@ export function CheckboxField({ label, checked, onChange, helpText }: CheckboxFi
         type="checkbox"
         className="checkbox"
         checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
+        onChange={e => onChange(e.target.checked)}
       />
       <div>
         <label>{label}</label>
@@ -188,14 +212,14 @@ export function RadioGroup({ label, value, onChange, options, required, error }:
   return (
     <InputGroup label={label} required={required} error={error}>
       <div className="radio-group">
-        {options.map((option) => (
+        {options.map(option => (
           <div key={option.value} className="radio-item">
             <input
               type="radio"
               className="radio"
               value={option.value}
               checked={value === option.value}
-              onChange={(e) => onChange(e.target.value)}
+              onChange={e => onChange(e.target.value)}
               required={required}
             />
             <div>
@@ -216,11 +240,7 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ status, children }: StatusBadgeProps) {
-  return (
-    <span className={`status-badge ${status}`}>
-      {children}
-    </span>
-  );
+  return <span className={`status-badge ${status}`}>{children}</span>;
 }
 
 // Professional Data Table Component
@@ -245,7 +265,7 @@ export function DataTable({ columns, data, onSort, sortKey, sortDirection }: Dat
       <table className="data-table">
         <thead>
           <tr>
-            {columns.map((column) => (
+            {columns.map(column => (
               <th
                 key={column.key}
                 className={column.sortable ? 'sortable' : ''}
@@ -254,9 +274,7 @@ export function DataTable({ columns, data, onSort, sortKey, sortDirection }: Dat
                 <div className="flex items-center justify-between">
                   {column.label}
                   {column.sortable && sortKey === column.key && (
-                    <span className="ml-1">
-                      {sortDirection === 'asc' ? '↑' : '↓'}
-                    </span>
+                    <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
                   )}
                 </div>
               </th>
@@ -266,7 +284,7 @@ export function DataTable({ columns, data, onSort, sortKey, sortDirection }: Dat
         <tbody>
           {data.map((row, index) => (
             <tr key={index}>
-              {columns.map((column) => (
+              {columns.map(column => (
                 <td key={column.key}>
                   {column.render ? column.render(row[column.key], row) : row[column.key]}
                 </td>

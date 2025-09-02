@@ -26,18 +26,35 @@ export class Appointment extends Document {
   @Prop({ required: true, min: 15, max: 480 })
   duration: number; // in minutes
 
-  @Prop({ 
-    required: true, 
+  @Prop({
+    required: true,
     enum: ['scheduled', 'confirmed', 'completed', 'cancelled', 'no-show', 'rescheduled'],
-    default: 'scheduled'
+    default: 'scheduled',
   })
   status: 'scheduled' | 'confirmed' | 'completed' | 'cancelled' | 'no-show' | 'rescheduled';
 
-  @Prop({ 
-    required: true, 
-    enum: ['consultation', 'estimate', 'follow_up', 'installation', 'inspection', 'site_visit', 'meeting', 'other'] 
+  @Prop({
+    required: true,
+    enum: [
+      'consultation',
+      'estimate',
+      'follow_up',
+      'installation',
+      'inspection',
+      'site_visit',
+      'meeting',
+      'other',
+    ],
   })
-  type: 'consultation' | 'estimate' | 'follow_up' | 'installation' | 'inspection' | 'site_visit' | 'meeting' | 'other';
+  type:
+    | 'consultation'
+    | 'estimate'
+    | 'follow_up'
+    | 'installation'
+    | 'inspection'
+    | 'site_visit'
+    | 'meeting'
+    | 'other';
 
   @Prop()
   location?: string;

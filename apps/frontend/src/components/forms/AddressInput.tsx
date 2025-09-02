@@ -43,7 +43,7 @@ interface AddressInputProps {
 export const AddressInput: React.FC<AddressInputProps> = ({
   address,
   onChange,
-  className = "",
+  className = '',
   required = false,
   disabled = false,
   showCoordinates = false,
@@ -146,7 +146,7 @@ export const AddressInput: React.FC<AddressInputProps> = ({
             // Parse address components
             addressComponents.forEach((component: any) => {
               const types = component.types;
-              
+
               if (types.includes('street_number')) {
                 newAddress.street = component.long_name + ' ';
               }
@@ -195,8 +195,12 @@ export const AddressInput: React.FC<AddressInputProps> = ({
   // Close suggestions when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node) &&
-          streetInputRef.current && !streetInputRef.current.contains(event.target as Node)) {
+      if (
+        suggestionsRef.current &&
+        !suggestionsRef.current.contains(event.target as Node) &&
+        streetInputRef.current &&
+        !streetInputRef.current.contains(event.target as Node)
+      ) {
         setShowSuggestions(false);
       }
     };
@@ -247,7 +251,9 @@ export const AddressInput: React.FC<AddressInputProps> = ({
                 className="w-full px-4 py-2 text-left hover:bg-gray-100 focus:bg-gray-100 focus:outline-none text-sm"
               >
                 <div className="font-medium">{suggestion.structured_formatting?.main_text}</div>
-                <div className="text-gray-500 text-xs">{suggestion.structured_formatting?.secondary_text}</div>
+                <div className="text-gray-500 text-xs">
+                  {suggestion.structured_formatting?.secondary_text}
+                </div>
               </button>
             ))}
           </div>
@@ -263,7 +269,7 @@ export const AddressInput: React.FC<AddressInputProps> = ({
           <input
             type="text"
             value={address.city || ''}
-            onChange={(e) => updateAddress({ city: e.target.value })}
+            onChange={e => updateAddress({ city: e.target.value })}
             placeholder="City"
             className="input"
             required={required}
@@ -311,7 +317,7 @@ export const AddressInput: React.FC<AddressInputProps> = ({
         <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
         <select
           value={address.country || 'US'}
-          onChange={(e) => updateAddress({ country: e.target.value })}
+          onChange={e => updateAddress({ country: e.target.value })}
           className="input"
           disabled={disabled}
           autoComplete="country"
@@ -324,7 +330,8 @@ export const AddressInput: React.FC<AddressInputProps> = ({
       {/* Coordinates (if enabled and available) */}
       {showCoordinates && address.latitude && address.longitude && (
         <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
-          <strong>Coordinates:</strong> {address.latitude.toFixed(6)}, {address.longitude.toFixed(6)}
+          <strong>Coordinates:</strong> {address.latitude.toFixed(6)},{' '}
+          {address.longitude.toFixed(6)}
         </div>
       )}
 

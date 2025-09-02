@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useRef, useCallback } from 'react';
-import { 
-  PhotoIcon, 
-  PlusIcon, 
-  XMarkIcon, 
+import {
+  PhotoIcon,
+  PlusIcon,
+  XMarkIcon,
   ArrowUpTrayIcon,
   EyeIcon,
   TrashIcon,
-  DocumentIcon
+  DocumentIcon,
 } from '@heroicons/react/24/outline';
 
 interface ImageFile {
@@ -37,7 +37,7 @@ export default function ImageUpload({
   maxFileSize = 10,
   allowedTypes = ['image/jpeg', 'image/png', 'image/webp'],
   categories = true,
-  className = ''
+  className = '',
 }: ImageUploadProps) {
   const [dragActive, setDragActive] = useState(false);
   const [selectedImage, setSelectedImage] = useState<ImageFile | null>(null);
@@ -84,7 +84,7 @@ export default function ImageUpload({
       id: Date.now() + Math.random().toString(),
       file,
       preview: URL.createObjectURL(file),
-      category: 'other'
+      category: 'other',
     }));
 
     onImagesChange([...images, ...newImages]);
@@ -99,15 +99,11 @@ export default function ImageUpload({
   };
 
   const updateImageCaption = (id: string, caption: string) => {
-    onImagesChange(images.map(img => 
-      img.id === id ? { ...img, caption } : img
-    ));
+    onImagesChange(images.map(img => (img.id === id ? { ...img, caption } : img)));
   };
 
   const updateImageCategory = (id: string, category: ImageFile['category']) => {
-    onImagesChange(images.map(img => 
-      img.id === id ? { ...img, category } : img
-    ));
+    onImagesChange(images.map(img => (img.id === id ? { ...img, category } : img)));
   };
 
   const categoryColors = {
@@ -116,7 +112,7 @@ export default function ImageUpload({
     after: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
     reference: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
     damage: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
-    other: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+    other: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400',
   };
 
   return (
@@ -124,8 +120,8 @@ export default function ImageUpload({
       {/* Upload Area */}
       <div
         className={`relative border-2 border-dashed rounded-lg p-6 transition-colors ${
-          dragActive 
-            ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/20' 
+          dragActive
+            ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/20'
             : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
         }`}
         onDragEnter={handleDrag}
@@ -149,13 +145,13 @@ export default function ImageUpload({
             </p>
           </div>
         </div>
-        
+
         <input
           ref={fileInputRef}
           type="file"
           multiple
           accept={allowedTypes.join(',')}
-          onChange={(e) => handleFiles(Array.from(e.target.files || []))}
+          onChange={e => handleFiles(Array.from(e.target.files || []))}
           className="hidden"
         />
       </div>
@@ -163,7 +159,7 @@ export default function ImageUpload({
       {/* Image Grid */}
       {images.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {images.map((image) => (
+          {images.map(image => (
             <div key={image.id} className="relative group">
               <div className="aspect-square bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
                 <img
@@ -171,7 +167,7 @@ export default function ImageUpload({
                   alt={image.caption || 'Project image'}
                   className="w-full h-full object-cover"
                 />
-                
+
                 {/* Overlay */}
                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 flex items-center justify-center">
                   <div className="opacity-0 group-hover:opacity-100 flex gap-2">
@@ -193,9 +189,11 @@ export default function ImageUpload({
 
               {/* Category Badge */}
               {categories && image.category && (
-                <div className={`absolute top-2 left-2 px-2 py-1 rounded-full text-xs font-medium ${
-                  categoryColors[image.category]
-                }`}>
+                <div
+                  className={`absolute top-2 left-2 px-2 py-1 rounded-full text-xs font-medium ${
+                    categoryColors[image.category]
+                  }`}
+                >
                   {image.category}
                 </div>
               )}
@@ -205,7 +203,7 @@ export default function ImageUpload({
                 type="text"
                 placeholder="Add caption..."
                 value={image.caption || ''}
-                onChange={(e) => updateImageCaption(image.id, e.target.value)}
+                onChange={e => updateImageCaption(image.id, e.target.value)}
                 className="mt-2 w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
 
@@ -213,7 +211,9 @@ export default function ImageUpload({
               {categories && (
                 <select
                   value={image.category}
-                  onChange={(e) => updateImageCategory(image.id, e.target.value as ImageFile['category'])}
+                  onChange={e =>
+                    updateImageCategory(image.id, e.target.value as ImageFile['category'])
+                  }
                   className="mt-1 w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
                   <option value="before">Before</option>
@@ -231,7 +231,10 @@ export default function ImageUpload({
 
       {/* Image Preview Modal */}
       {selectedImage && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50" onClick={() => setSelectedImage(null)}>
+        <div
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+          onClick={() => setSelectedImage(null)}
+        >
           <div className="relative max-w-4xl max-h-[90vh] p-4">
             <img
               src={selectedImage.preview}

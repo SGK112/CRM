@@ -22,7 +22,7 @@ export class BillingWebhookController {
   async handleWebhook(
     @Req() req: Request,
     @Res() res: Response,
-    @Headers('stripe-signature') signature: string,
+    @Headers('stripe-signature') signature: string
   ) {
     if (!this.stripe) {
       this.logger.warn('Stripe not configured, ignoring webhook');
@@ -30,7 +30,8 @@ export class BillingWebhookController {
     }
     let event: Stripe.Event;
     try {
-  const rawBody = (req as any).body instanceof Buffer ? (req as any).body : (req as any).rawBody;
+      const rawBody =
+        (req as any).body instanceof Buffer ? (req as any).body : (req as any).rawBody;
       if (!this.webhookSecret) {
         this.logger.error('Missing STRIPE_WEBHOOK_SECRET');
         return res.status(400).send('Missing webhook secret');
@@ -58,7 +59,9 @@ export class BillingWebhookController {
               const priceId = sub.items.data[0]?.price?.id;
               plan = this.billingService.resolvePlanFromPrice(priceId);
             } catch (e) {
-              this.logger.warn(`Could not retrieve subscription for plan mapping: ${subscriptionId}`);
+              this.logger.warn(
+                `Could not retrieve subscription for plan mapping: ${subscriptionId}`
+              );
             }
           }
           if (email) {
@@ -89,7 +92,9 @@ export class BillingWebhookController {
               const priceId = sub.items.data[0]?.price?.id;
               plan = this.billingService.resolvePlanFromPrice(priceId);
             } catch (e) {
-              this.logger.warn(`Could not retrieve subscription for plan mapping: ${subscriptionId}`);
+              this.logger.warn(
+                `Could not retrieve subscription for plan mapping: ${subscriptionId}`
+              );
             }
           }
           if (email) {
@@ -112,11 +117,13 @@ export class BillingWebhookController {
         this.logger.log(`Subscription event: ${event.type} ${sub.id}`);
         try {
           const email = (sub as any).customer_email; // may not be present
-      if (email) {
+          if (email) {
             await this.billingService.attachSubscriptionToUser(email, {
               stripeCustomerId: sub.customer as string,
               stripeSubscriptionId: sub.id,
-        subscriptionPlan: this.billingService.resolvePlanFromPrice(sub.items.data[0]?.price?.id),
+              subscriptionPlan: this.billingService.resolvePlanFromPrice(
+                sub.items.data[0]?.price?.id
+              ),
               subscriptionStatus: sub.status,
               trialEndsAt: sub.trial_end ? new Date(sub.trial_end * 1000) : undefined,
             });

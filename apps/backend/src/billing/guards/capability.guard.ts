@@ -8,17 +8,20 @@ export class CapabilityGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const required = this.reflector.getAllAndOverride<string[]>(FEATURES_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]) || [];
+    const required =
+      this.reflector.getAllAndOverride<string[]>(FEATURES_KEY, [
+        context.getHandler(),
+        context.getClass(),
+      ]) || [];
     if (!required.length) return true;
     const req = context.switchToHttp().getRequest();
     const plan: string | undefined = req.user?.subscriptionPlan;
     const caps = capabilitiesForPlan(plan);
     const missing = required.filter(r => !caps.has(r));
     if (missing.length) {
-      throw new ForbiddenException(`Plan '${plan || 'free'}' missing features: ${missing.join(', ')}`);
+      throw new ForbiddenException(
+        `Plan '${plan || 'free'}' missing features: ${missing.join(', ')}`
+      );
     }
     return true;
   }

@@ -28,5 +28,5 @@ export function MobileSearch({ onClose }: MobileSearchProps) {
 // Export as default
 export default {
   MobileNav,
-  MobileSearch
+  MobileSearch,
 };

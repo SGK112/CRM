@@ -1,161 +1,200 @@
 {
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "label": "Start CRM Development Server",
-      "type": "shell",
-      "command": "./start-dev-robust.sh",
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "new",
-        "showReuseMessage": true,
-        "clear": false
-      },
-      "isBackground": true,
-      "problemMatcher": [
-        {
-          "pattern": [
-            {
-              "regexp": ".",
-              "file": 1,
-              "location": 2,
-              "message": 3
-            }
-          ],
-          "background": {
-            "activeOnStart": true,
-            "beginsPattern": "Starting Nest application",
-            "endsPattern": "(Backend server running|Ready in \\d+ms)"
-          }
-        }
-      ]
-    },
-    {
-      "label": "Monitor CRM Servers",
-      "type": "shell",
-      "command": "./monitor-dev.sh",
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "new",
-        "showReuseMessage": true,
-        "clear": false
-      },
-      "isBackground": true
-    },
-    {
-      "label": "Stop All CRM Servers",
-      "type": "shell",
-      "command": "pkill -f 'npm run dev' && lsof -ti:3000,3001 | xargs kill -9 2>/dev/null || true",
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "new"
-      }
-    },
-    {
-      "label": "Check Server Status",
-      "type": "shell",
-      "command": "echo '=== Port Status ===' && lsof -i:3000,3001 && echo '\\n=== Process Status ===' && ps aux | grep -E '(nest|3000|3001)' | grep -v grep",
-      "group": "test",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": true,
-        "panel": "new"
-      }
-    },
-    {
-      "label": "Frontend Only",
-      "type": "shell",
-      "command": "npm run frontend:dev",
-      "group": "build",
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "new"
-      },
-      "isBackground": true
-    },
-    {
-      "label": "Backend Only",
-      "type": "shell",
-      "command": "npm run backend:dev",
-      "group": "build",
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "new"
-      },
-      "isBackground": true
-    },
-    {
-      "label": "🧹 Clean & Restart",
-      "type": "shell",
-      "command": "pkill -f 'npm run dev' 2>/dev/null || true && rm -rf apps/frontend/.next/cache && echo '✅ Cleaned cache' && ./start-dev-robust.sh",
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "new"
-      },
-      "isBackground": true
-    },
-    {
-      "label": "📦 Fresh Install",
-      "type": "shell",
-      "command": "rm -rf node_modules apps/*/node_modules packages/*/node_modules && npm install",
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": true,
-        "panel": "new"
-      }
-    },
-    {
-      "label": "🔍 Lint All",
-      "type": "shell",
-      "command": "npm run lint",
-      "group": "test",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared"
-      },
-      "problemMatcher": ["$eslint-stylish"]
-    },
-    {
-      "label": "🎯 Format Code",
-      "type": "shell",
-      "command": "npx prettier --write 'apps/**/*.{js,jsx,ts,tsx,json,css,md}' 'packages/**/*.{js,jsx,ts,tsx,json}'",
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "silent",
-        "focus": false,
-        "panel": "shared"
-      }
-    }
-  ]
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Start CRM Development Server",
+			"type": "shell",
+			"command": "./start-dev-robust.sh",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "new",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"isBackground": true,
+			"problemMatcher": [
+				{
+					"pattern": [
+						{
+							"regexp": ".",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					],
+					"background": {
+						"activeOnStart": true,
+						"beginsPattern": "Starting Nest application",
+						"endsPattern": "(Backend server running|Ready in \\d+ms)"
+					}
+				}
+			]
+		},
+		{
+			"label": "Monitor CRM Servers",
+			"type": "shell",
+			"command": "./monitor-dev.sh",
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "new",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"isBackground": true
+		},
+		{
+			"label": "Stop All CRM Servers",
+			"type": "shell",
+			"command": "pkill -f 'npm run dev' && lsof -ti:3000,3001 | xargs kill -9 2>/dev/null || true",
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "new"
+			}
+		},
+		{
+			"label": "Check Server Status",
+			"type": "shell",
+			"command": "echo '=== Port Status ===' && lsof -i:3000,3001 && echo '\\n=== Process Status ===' && ps aux | grep -E '(nest|3000|3001)' | grep -v grep",
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "new"
+			}
+		},
+		{
+			"label": "Frontend Only",
+			"type": "shell",
+			"command": "npm run frontend:dev",
+			"group": "build",
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "new"
+			},
+			"isBackground": true
+		},
+		{
+			"label": "Backend Only",
+			"type": "shell",
+			"command": "npm run backend:dev",
+			"group": "build",
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "new"
+			},
+			"isBackground": true
+		},
+		{
+			"label": "🧹 Clean & Restart",
+			"type": "shell",
+			"command": "pkill -f 'npm run dev' 2>/dev/null || true && rm -rf apps/frontend/.next/cache && echo '✅ Cleaned cache' && ./start-dev-robust.sh",
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "new"
+			},
+			"isBackground": true
+		},
+		{
+			"label": "📦 Fresh Install",
+			"type": "shell",
+			"command": "rm -rf node_modules apps/*/node_modules packages/*/node_modules && npm install",
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "new"
+			}
+		},
+		{
+			"label": "🔍 Lint All",
+			"type": "shell",
+			"command": "npm run lint",
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			},
+			"problemMatcher": [
+				"$eslint-stylish"
+			]
+		},
+		{
+			"label": "🎯 Format Code",
+			"type": "shell",
+			"command": "npx prettier --write 'apps/**/*.{js,jsx,ts,tsx,json,css,md}' 'packages/**/*.{js,jsx,ts,tsx,json}'",
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "silent",
+				"focus": false,
+				"panel": "shared"
+			}
+		},
+		{
+			"label": "Quick Status",
+			"type": "shell",
+			"command": "echo \"=== Ports ===\" && lsof -nP -iTCP:3001,3005 -sTCP:LISTEN || true && echo \"\\n=== HTTP checks ===\" && curl -sSf http://localhost:3001/api/health && echo && curl -sSf http://localhost:3005/api/health || true",
+			"group": "test"
+		},
+		{
+			"label": "Reload Inbox Health",
+			"type": "shell",
+			"command": "echo \"=== HTTP checks ===\" && curl -sSf http://localhost:3001/api/health && echo && curl -sSf http://localhost:3005/dashboard/inbox | head -n 3 || true",
+			"group": "test"
+		},
+		{
+			"label": "Check Server Status",
+			"type": "shell",
+			"command": "echo '=== Port Status ===' && lsof -i:3000,3001 && echo '\\n=== Process Status ===' && ps aux | grep -E '(nest|3000|3001)' | grep -v grep",
+			"group": "test"
+		},
+		{
+			"label": "Check Frontend Health and Inbox JSON",
+			"type": "shell",
+			"command": "echo '=== Frontend Health ===' && curl -sSf http://localhost:3005/api/health && echo '\\n=== Inbox API (unauth should 401) ===' && curl -s -i http://localhost:3005/api/inbox | head -n 10 || true",
+			"group": "test"
+		},
+		{
+			"label": "Reload Frontend Bundle (touch)",
+			"type": "shell",
+			"command": "/usr/bin/env bash -lc 'date > /Users/homepc/CRM-5/apps/frontend/.next/cache/force-reload.txt 2>/dev/null || true; echo done'",
+			"group": "build"
+		},
+		{
+			"label": "Clean Next Cache and Restart Dev",
+			"type": "shell",
+			"command": "pkill -f 'npm run dev' 2>/dev/null || true && rm -rf apps/frontend/.next/cache && echo '✅ Cleaned cache' && ./start-dev-robust.sh",
+			"isBackground": true,
+			"group": "build"
+		}
+	]
 }

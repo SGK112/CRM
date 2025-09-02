@@ -32,20 +32,20 @@
   --warning: #d97706;
   --error: #dc2626;
   --info: #0284c7;
-  
+
   /* Safe area insets for mobile devices */
   --safe-area-inset-top: env(safe-area-inset-top);
   --safe-area-inset-right: env(safe-area-inset-right);
   --safe-area-inset-bottom: env(safe-area-inset-bottom);
   --safe-area-inset-left: env(safe-area-inset-left);
-  
+
   /* Enhanced shadows for depth */
   --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.15);
   --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.15), 0 1px 2px -1px rgba(0, 0, 0, 0.15);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -2px rgba(0, 0, 0, 0.15);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.15), 0 4px 6px -4px rgba(0, 0, 0, 0.15);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.15);
-  
+
   /* Premium glass effects */
   --glass-bg: rgba(255, 255, 255, 0.85);
   --glass-border: rgba(203, 213, 225, 0.5);
@@ -90,7 +90,7 @@
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
-  
+
   /* Premium glass effects for dark */
   --glass-bg: rgba(30, 41, 59, 0.85);
   --glass-border: rgba(100, 116, 139, 0.5);
@@ -110,7 +110,7 @@ body {
   overflow-x: hidden;
   background-color: var(--bg);
   color: var(--text);
-  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
               color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   scroll-behavior: smooth;
 }
@@ -246,15 +246,15 @@ p, div, span, label {
 }
 
 /* Override any gray text classes with proper contrast */
-.text-muted, 
-.text-gray-500, 
+.text-muted,
+.text-gray-500,
 .text-gray-600,
 [class*="text-gray-5"],
 [class*="text-gray-6"] {
   color: var(--text-muted) !important;
 }
 
-.text-faint, 
+.text-faint,
 .text-gray-400,
 [class*="text-gray-4"] {
   color: var(--text-faint) !important;
@@ -314,8 +314,8 @@ button.btn-primary:hover {
   letter-spacing: 0.025em;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, 
-    var(--surface-2) 0%, 
+  background: linear-gradient(135deg,
+    var(--surface-2) 0%,
     var(--surface-3) 100%);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
@@ -328,9 +328,9 @@ button.btn-primary:hover {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    rgba(255, 255, 255, 0.2) 50%, 
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 50%,
     transparent 100%);
   animation: shimmer-status 2s infinite;
 }
@@ -341,24 +341,24 @@ button.btn-primary:hover {
 }
 
 .status-success {
-  background: linear-gradient(135deg, 
-    rgba(34, 197, 94, 0.1) 0%, 
+  background: linear-gradient(135deg,
+    rgba(34, 197, 94, 0.1) 0%,
     rgba(34, 197, 94, 0.05) 100%);
   color: #15803d;
   border-color: rgba(34, 197, 94, 0.2);
 }
 
 .status-warning {
-  background: linear-gradient(135deg, 
-    rgba(251, 191, 36, 0.1) 0%, 
+  background: linear-gradient(135deg,
+    rgba(251, 191, 36, 0.1) 0%,
     rgba(251, 191, 36, 0.05) 100%);
   color: #d97706;
   border-color: rgba(251, 191, 36, 0.2);
 }
 
 .status-error {
-  background: linear-gradient(135deg, 
-    rgba(239, 68, 68, 0.1) 0%, 
+  background: linear-gradient(135deg,
+    rgba(239, 68, 68, 0.1) 0%,
     rgba(239, 68, 68, 0.05) 100%);
   color: #dc2626;
   border-color: rgba(239, 68, 68, 0.2);
@@ -369,8 +369,8 @@ button.btn-primary:hover {
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.2;
-  background: linear-gradient(135deg, 
-    var(--text) 0%, 
+  background: linear-gradient(135deg,
+    var(--text) 0%,
     var(--text-muted) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -420,8 +420,8 @@ button.btn-primary:hover {
 }
 
 .premium-table th {
-  background: linear-gradient(135deg, 
-    var(--surface-2) 0%, 
+  background: linear-gradient(135deg,
+    var(--surface-2) 0%,
     var(--surface-3) 100%);
   padding: 1rem 1.5rem;
   text-align: left;
@@ -441,9 +441,9 @@ button.btn-primary:hover {
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    var(--accent) 50%, 
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--accent) 50%,
     transparent 100%);
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -561,9 +561,9 @@ button.btn-primary:hover {
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, 
-    var(--accent) 0%, 
-    var(--accent-hover) 50%, 
+  background: linear-gradient(90deg,
+    var(--accent) 0%,
+    var(--accent-hover) 50%,
     var(--accent) 100%);
   border-radius: 1.5rem 1.5rem 0 0;
 }
@@ -699,9 +699,9 @@ button:active {
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    var(--accent) 50%, 
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--accent) 50%,
     transparent 100%);
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -744,9 +744,9 @@ button:active {
   right: 0;
   bottom: 0;
   border-radius: inherit;
-  background: linear-gradient(135deg, 
-    rgba(230, 81, 0, 0.02) 0%, 
-    transparent 50%, 
+  background: linear-gradient(135deg,
+    rgba(230, 81, 0, 0.02) 0%,
+    transparent 50%,
     rgba(230, 81, 0, 0.01) 100%);
   pointer-events: none;
 }
@@ -780,7 +780,7 @@ input:hover, textarea:hover, select:hover {
 input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--input-border-focus);
-  box-shadow: 
+  box-shadow:
     var(--shadow-md),
     0 0 0 3px rgba(230, 81, 0, 0.08);
   transform: translateY(-1px);
@@ -821,10 +821,10 @@ input:focus::placeholder, textarea:focus::placeholder {
 /* Premium select styling */
 select {
   appearance: none;
-  background-image: 
+  background-image:
     linear-gradient(45deg, transparent 50%, var(--text-faint) 50%),
     linear-gradient(135deg, var(--text-faint) 50%, transparent 50%);
-  background-position: 
+  background-position:
     calc(100% - 20px) calc(1em + 2px),
     calc(100% - 15px) calc(1em + 2px);
   background-size: 5px 5px, 5px 5px;
@@ -850,9 +850,9 @@ nav::before, .menu::before {
   right: 0;
   bottom: 0;
   border-radius: inherit;
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.1) 0%, 
-    transparent 50%, 
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    transparent 50%,
     rgba(255, 255, 255, 0.05) 100%);
   pointer-events: none;
 }
@@ -875,8 +875,8 @@ nav::before, .menu::before {
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, 
-    rgba(230, 81, 0, 0.03) 0%, 
+  background: radial-gradient(circle,
+    rgba(230, 81, 0, 0.03) 0%,
     transparent 70%);
   animation: subtle-rotate 20s linear infinite;
   pointer-events: none;
@@ -889,8 +889,8 @@ nav::before, .menu::before {
 
 /* Premium dashboard cards */
 .dashboard-card {
-  background: linear-gradient(135deg, 
-    var(--surface-1) 0%, 
+  background: linear-gradient(135deg,
+    var(--surface-1) 0%,
     var(--surface-2) 100%);
   border-radius: 1rem;
   padding: 2rem;
@@ -913,9 +913,9 @@ nav::before, .menu::before {
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, 
-    var(--accent) 0%, 
-    var(--accent-hover) 50%, 
+  background: linear-gradient(90deg,
+    var(--accent) 0%,
+    var(--accent-hover) 50%,
     var(--accent) 100%);
   border-radius: 1rem 1rem 0 0;
   opacity: 0;
@@ -1273,11 +1273,11 @@ textarea.input {
   width: 100%;
   height: 100%;
   background: linear-gradient(
-    90deg, 
-    transparent 0%, 
-    rgba(255, 255, 255, 0.1) 30%, 
-    rgba(255, 255, 255, 0.2) 50%, 
-    rgba(255, 255, 255, 0.1) 70%, 
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 30%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.1) 70%,
     transparent 100%
   );
   transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1291,7 +1291,7 @@ textarea.input {
 
 .shine:hover,
 .professional-shine:hover {
-  box-shadow: 
+  box-shadow:
     0 4px 20px rgba(217, 119, 6, 0.3),
     0 0 40px rgba(245, 158, 11, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
@@ -1300,13 +1300,13 @@ textarea.input {
 
 /* Enhanced shadow utilities */
 .shadow-soft {
-  box-shadow: 
+  box-shadow:
     0 2px 8px rgba(0, 0, 0, 0.08),
     0 1px 4px rgba(0, 0, 0, 0.05);
 }
 
 .shadow-glow {
-  box-shadow: 
+  box-shadow:
     0 4px 20px rgba(217, 119, 6, 0.15),
     0 2px 8px rgba(0, 0, 0, 0.1);
 }
@@ -1354,7 +1354,7 @@ textarea.input {
 
 .card-hover:hover {
   transform: translateY(-2px);
-  box-shadow: 
+  box-shadow:
     0 10px 25px rgba(0, 0, 0, 0.1),
     0 4px 10px rgba(0, 0, 0, 0.05);
 }
@@ -1425,7 +1425,7 @@ html {
 
 /* Premium shadows for professional design */
 .shadow-premium {
-  box-shadow: 
+  box-shadow:
     0 4px 16px rgba(0, 0, 0, 0.08),
     0 2px 8px rgba(0, 0, 0, 0.04),
     0 1px 4px rgba(0, 0, 0, 0.02);
@@ -1876,9 +1876,9 @@ html {
 
 /* Content Highlight Effects */
 .content-highlight {
-  background: linear-gradient(135deg, 
-    rgba(245, 158, 11, 0.08) 0%, 
-    rgba(251, 191, 36, 0.04) 50%, 
+  background: linear-gradient(135deg,
+    rgba(245, 158, 11, 0.08) 0%,
+    rgba(251, 191, 36, 0.04) 50%,
     rgba(245, 158, 11, 0.08) 100%);
   border-left: 3px solid rgba(245, 158, 11, 0.5);
   padding-left: 1rem;
@@ -1925,7 +1925,7 @@ html {
 
 .card-hover:hover {
   transform: translateY(-2px);
-  box-shadow: 
+  box-shadow:
     0 20px 25px -5px rgba(0, 0, 0, 0.1),
     0 10px 10px -5px rgba(0, 0, 0, 0.04),
     0 0 0 1px rgba(245, 158, 11, 0.1);
@@ -1960,13 +1960,13 @@ html {
 }
 
 .interactive-highlight:hover {
-  background: linear-gradient(135deg, 
-    rgba(245, 158, 11, 0.05) 0%, 
-    rgba(251, 191, 36, 0.02) 50%, 
+  background: linear-gradient(135deg,
+    rgba(245, 158, 11, 0.05) 0%,
+    rgba(251, 191, 36, 0.02) 50%,
     rgba(245, 158, 11, 0.05) 100%);
   border-color: rgba(245, 158, 11, 0.3);
   transform: translateY(-1px);
-  box-shadow: 
+  box-shadow:
     0 10px 15px -3px rgba(245, 158, 11, 0.1),
     0 4px 6px -2px rgba(245, 158, 11, 0.05);
 }
@@ -1979,7 +1979,7 @@ html {
 
 .magnetic-hover:hover {
   transform: translateY(-3px) scale(1.02);
-  box-shadow: 
+  box-shadow:
     0 25px 50px -12px rgba(245, 158, 11, 0.25),
     0 0 0 1px rgba(245, 158, 11, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -2319,12 +2319,12 @@ html {
   .no-print {
     display: none !important;
   }
-  
+
   body {
     background: white !important;
     color: black !important;
   }
-  
+
   .card, .stat-block {
     box-shadow: none !important;
     border: 1px solid #ccc !important;
@@ -2337,15 +2337,15 @@ html {
     padding: 1rem 0.75rem;
     margin: 0.25rem 0.25rem;
   }
-  
+
   .card {
     padding: 1rem;
   }
-  
+
   .stat-block {
     padding: 1rem;
   }
-  
+
   .btn {
     padding: 0.625rem 1.25rem;
   }

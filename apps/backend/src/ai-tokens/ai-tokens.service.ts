@@ -19,7 +19,13 @@ export class AiTokensService {
   async balance(workspaceId: string) {
     const doc = await this.getOrCreate(workspaceId);
     const available = doc.purchased + doc.bonus - doc.consumed - doc.reserved;
-    return { available, purchased: doc.purchased, consumed: doc.consumed, bonus: doc.bonus, reserved: doc.reserved };
+    return {
+      available,
+      purchased: doc.purchased,
+      consumed: doc.consumed,
+      bonus: doc.bonus,
+      reserved: doc.reserved,
+    };
   }
 
   async purchase(workspaceId: string, quantity: number, _paymentIntentId?: string) {
@@ -30,7 +36,11 @@ export class AiTokensService {
     return this.balance(workspaceId);
   }
 
-  async consume(workspaceId: string, quantity: number, _meta?: { reason?: string; referenceId?: string }) {
+  async consume(
+    workspaceId: string,
+    quantity: number,
+    _meta?: { reason?: string; referenceId?: string }
+  ) {
     if (quantity <= 0) throw new BadRequestException('Quantity must be positive');
     const doc = await this.getOrCreate(workspaceId);
     const available = doc.purchased + doc.bonus - doc.consumed - doc.reserved;

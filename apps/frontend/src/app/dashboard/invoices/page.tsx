@@ -12,14 +12,14 @@ export default function InvoicesPage(){
   const [loading,setLoading]=useState(true);
   const [error, setError] = useState<string | null>(null);
   const token = (typeof window!=='undefined') ? localStorage.getItem('accessToken') : '';
-  
+
   const fetchList = async () => {
     setLoading(true);
     const res = await fetch(`${API_BASE}/invoices`, { headers:{ Authorization:`Bearer ${token}` }});
     if(res.ok) setList(await res.json());
     setLoading(false);
   };
-  
+
   useEffect(()=>{ fetchList(); },[]);
 
   // PDF download handlers
@@ -111,7 +111,7 @@ export default function InvoicesPage(){
                 <Download className="w-4 h-4" />
                 PDF
               </button>
-              
+
               <button
                 onClick={() => handleBulkDownload('csv')}
                 className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
@@ -120,7 +120,7 @@ export default function InvoicesPage(){
                 <Download className="w-4 h-4" />
                 CSV
               </button>
-              
+
               <button className='pill pill-tint-green sm' onClick={()=>{
                 const params = new URLSearchParams(typeof window!=='undefined' ? window.location.search : '');
                 const clientId = params.get('clientId');
@@ -174,7 +174,7 @@ export default function InvoicesPage(){
                       >
                         PDF
                       </button>
-                      <button 
+                      <button
                         onClick={() => window.location.href = `/dashboard/invoices/${inv._id}`}
                         className='text-xs text-blue-600 hover:text-blue-800 hover:underline'
                       >
@@ -194,13 +194,13 @@ export default function InvoicesPage(){
             </tbody>
           </table>
         </div>
-        
+
         {/* Error Display */}
         {error && (
           <div className="fixed bottom-4 right-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg shadow-lg">
             <div className="flex items-center gap-2">
               <span>{error}</span>
-              <button 
+              <button
                 onClick={() => setError(null)}
                 className="ml-2 text-red-500 hover:text-red-700"
               >

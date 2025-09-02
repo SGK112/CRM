@@ -36,7 +36,7 @@ export default function AnalyticsPage() {
   useEffect(() => {
     const loadAnalytics = async () => {
       setLoading(true);
-      
+
       // Mock data - replace with actual API calls
       setTimeout(() => {
         setStats({
@@ -45,7 +45,7 @@ export default function AnalyticsPage() {
           totalClients: 45,
           completionRate: 87
         });
-        
+
         setRecentActivity([
           {
             id: '1',
@@ -72,7 +72,7 @@ export default function AnalyticsPage() {
             timestamp: '2 days ago'
           }
         ]);
-        
+
         setLoading(false);
       }, 1000);
     };
@@ -115,7 +115,7 @@ export default function AnalyticsPage() {
             <div className={simple.text.small()}>Total Revenue</div>
           </div>
         </div>
-        
+
         <div className={simple.card('text-center')}>
           <div className={simple.section()}>
             <div className="flex items-center justify-center mb-2">
@@ -127,7 +127,7 @@ export default function AnalyticsPage() {
             <div className={simple.text.small()}>Total Projects</div>
           </div>
         </div>
-        
+
         <div className={simple.card('text-center')}>
           <div className={simple.section()}>
             <div className="flex items-center justify-center mb-2">
@@ -139,7 +139,7 @@ export default function AnalyticsPage() {
             <div className={simple.text.small()}>Total Clients</div>
           </div>
         </div>
-        
+
         <div className={simple.card('text-center')}>
           <div className={simple.section()}>
             <div className="flex items-center justify-center mb-2">
@@ -159,7 +159,7 @@ export default function AnalyticsPage() {
           <h2 className={simple.text.subtitle('mb-4')}>
             Recent Activity
           </h2>
-          
+
           <div className="space-y-3">
             {recentActivity.map((activity) => (
               <div

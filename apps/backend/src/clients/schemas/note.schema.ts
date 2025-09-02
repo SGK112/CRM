@@ -29,7 +29,10 @@ export class Note {
   @Prop({ required: true })
   content: string;
 
-  @Prop({ required: true, enum: ['call_note', 'meeting_note', 'follow_up', 'general', 'voice_agent', 'system'] })
+  @Prop({
+    required: true,
+    enum: ['call_note', 'meeting_note', 'follow_up', 'general', 'voice_agent', 'system'],
+  })
   type: 'call_note' | 'meeting_note' | 'follow_up' | 'general' | 'voice_agent' | 'system';
 
   @Prop()
@@ -64,10 +67,13 @@ NoteSchema.index({ workspaceId: 1, tags: 1 });
 NoteSchema.index({ workspaceId: 1, priority: 1 });
 
 // Text search index
-NoteSchema.index({ 
-  content: 'text' 
-}, { 
-  weights: { 
-    content: 1
-  } 
-});
+NoteSchema.index(
+  {
+    content: 'text',
+  },
+  {
+    weights: {
+      content: 1,
+    },
+  }
+);

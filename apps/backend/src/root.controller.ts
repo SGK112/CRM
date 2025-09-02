@@ -13,9 +13,9 @@ export class RootController {
       version: '1.0',
       endpoints: {
         api: '/api',
-        health: '/api/health', 
-        docs: '/api/docs'
-      }
+        health: '/api/health',
+        docs: '/api/docs',
+      },
     };
   }
 

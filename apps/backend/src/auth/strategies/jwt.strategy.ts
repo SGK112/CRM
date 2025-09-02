@@ -8,7 +8,7 @@ import { AuthService } from '../auth.service';
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private configService: ConfigService,
-    private authService: AuthService,
+    private authService: AuthService
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -36,7 +36,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     // Dev-only testing override for demo account
     try {
-      const allowOverride = (process.env.NODE_ENV !== 'production') || process.env.ALLOW_DEMO_OVERRIDE === '1';
+      const allowOverride =
+        process.env.NODE_ENV !== 'production' || process.env.ALLOW_DEMO_OVERRIDE === '1';
       if (allowOverride && user.email?.toLowerCase() === 'demo@test.com') {
         user.subscriptionPlan = 'growth';
         user.subscriptionStatus = 'active';

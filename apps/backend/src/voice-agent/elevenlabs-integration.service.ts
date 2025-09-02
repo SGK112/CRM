@@ -36,7 +36,7 @@ export class ElevenLabsIntegrationService {
     if (!apiKey || !agentId) {
       return {
         success: false,
-        error: 'ElevenLabs API key or agent ID not configured'
+        error: 'ElevenLabs API key or agent ID not configured',
       };
     }
 
@@ -53,10 +53,10 @@ export class ElevenLabsIntegrationService {
             purpose: request.purpose,
             context: request.context,
             source: 'remodely_crm',
-            created_at: new Date().toISOString()
-          }
-        }
-      ]
+            created_at: new Date().toISOString(),
+          },
+        },
+      ],
     };
 
     return {
@@ -82,7 +82,7 @@ export class ElevenLabsIntegrationService {
 
 This will initiate a high-quality ElevenLabs call with Sarah's voice and personality.
       `,
-      callId: `crm_call_${Date.now()}`
+      callId: `crm_call_${Date.now()}`,
     };
   }
 
@@ -96,7 +96,7 @@ This will initiate a high-quality ElevenLabs call with Sarah's voice and persona
     return {
       success: false,
       error: 'Direct API calling not available - use batch calling interface',
-      instructions: 'Use the prepareElevenLabsCall method for batch calling setup'
+      instructions: 'Use the prepareElevenLabsCall method for batch calling setup',
     };
   }
 
@@ -111,7 +111,7 @@ This will initiate a high-quality ElevenLabs call with Sarah's voice and persona
       req.clientId,
       req.workspaceId,
       req.purpose,
-      req.context || ''
+      req.context || '',
     ]);
 
     return [headers, ...rows].map(row => row.join(',')).join('\n');

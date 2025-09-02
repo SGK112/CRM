@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { InboxMessage, InboxMessageDocument } from './schemas/inbox-message.schema';
+import { NotificationsService } from '../notifications/notifications.service';
 
 export interface CreateInboxMessageDto {
   type: 'email' | 'notification' | 'sms' | 'system';
@@ -38,7 +39,8 @@ export class InboxService {
   private readonly logger = new Logger('InboxService');
 
   constructor(
-    @InjectModel(InboxMessage.name) private inboxMessageModel: Model<InboxMessageDocument>
+    @InjectModel(InboxMessage.name) private inboxMessageModel: Model<InboxMessageDocument>,
+    private notificationsService: NotificationsService
   ) {}
 
   async createMessage(
@@ -56,11 +58,7 @@ export class InboxService {
     return await message.save();
   }
 
-  async getMessages(
-    workspaceId: string,
-    userId: string,
-    options: InboxFilterOptions = {}
-  ) {
+  async getMessages(workspaceId: string, userId: string, options: InboxFilterOptions = {}) {
     const {
       type,
       isRead,
@@ -75,7 +73,7 @@ export class InboxService {
       limit = 50,
     } = options;
 
-    // Build filter query
+    // Get inbox messages
     const filter: Record<string, unknown> = {
       workspaceId,
       userId,
@@ -88,7 +86,7 @@ export class InboxService {
     if (typeof isStarred === 'boolean') filter.isStarred = isStarred;
     if (priority) filter.priority = priority;
     if (relatedEntityType) filter.relatedEntityType = relatedEntityType;
-    
+
     if (dateFrom || dateTo) {
       filter.createdAt = {};
       if (dateFrom) (filter.createdAt as Record<string, unknown>).$gte = dateFrom;
@@ -106,18 +104,52 @@ export class InboxService {
 
     const skip = (page - 1) * limit;
 
-    const [messages, total] = await Promise.all([
-      this.inboxMessageModel
-        .find(filter)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .exec(),
-      this.inboxMessageModel.countDocuments(filter),
+    // Get both inbox messages and notifications
+    const [inboxMessages, notifications] = await Promise.all([
+      this.inboxMessageModel.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).exec(),
+      this.notificationsService.getForUser(userId, workspaceId, limit),
     ]);
 
+    // Convert notifications to inbox message format
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const convertedNotifications = notifications.map((notification: any) => ({
+      _id: notification._id,
+      workspaceId: notification.workspaceId,
+      userId: notification.userId,
+      type: 'notification',
+      subject: notification.title,
+      content: notification.message,
+      sender: 'System',
+      senderName: 'Remodely CRM',
+      isRead: notification.read || false,
+      isStarred: false,
+      isArchived: false,
+      isDeleted: false,
+      priority: 'normal',
+      createdAt: notification.createdAt,
+      updatedAt: notification.updatedAt,
+      lastActivity: notification.updatedAt || notification.createdAt,
+      metadata: {
+        actionUrl: notification.relatedId
+          ? `/dashboard/${notification.relatedType}s/${notification.relatedId}`
+          : undefined,
+        actionLabel: notification.relatedId ? `View ${notification.relatedType}` : undefined,
+      },
+    }));
+
+    // Combine and sort by creation date
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const allMessages = [...inboxMessages, ...convertedNotifications]
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, limit);
+
+    const totalInbox = await this.inboxMessageModel.countDocuments(filter);
+    const totalNotifications = notifications.length;
+    const total = totalInbox + totalNotifications;
+
     return {
-      messages,
+      messages: allMessages,
       pagination: {
         page,
         limit,
@@ -142,15 +174,11 @@ export class InboxService {
       .exec();
   }
 
-  async markAsRead(
-    messageId: string,
-    workspaceId: string,
-    userId: string
-  ): Promise<boolean> {
+  async markAsRead(messageId: string, workspaceId: string, userId: string): Promise<boolean> {
     const result = await this.inboxMessageModel
       .updateOne(
         { _id: messageId, workspaceId, userId, isDeleted: false },
-        { 
+        {
           isRead: true,
           lastActivity: new Date(),
         }
@@ -160,15 +188,11 @@ export class InboxService {
     return result.modifiedCount > 0;
   }
 
-  async markAsUnread(
-    messageId: string,
-    workspaceId: string,
-    userId: string
-  ): Promise<boolean> {
+  async markAsUnread(messageId: string, workspaceId: string, userId: string): Promise<boolean> {
     const result = await this.inboxMessageModel
       .updateOne(
         { _id: messageId, workspaceId, userId, isDeleted: false },
-        { 
+        {
           isRead: false,
           lastActivity: new Date(),
         }
@@ -178,18 +202,14 @@ export class InboxService {
     return result.modifiedCount > 0;
   }
 
-  async toggleStar(
-    messageId: string,
-    workspaceId: string,
-    userId: string
-  ): Promise<boolean> {
+  async toggleStar(messageId: string, workspaceId: string, userId: string): Promise<boolean> {
     const message = await this.getMessage(messageId, workspaceId, userId);
     if (!message) return false;
 
     const result = await this.inboxMessageModel
       .updateOne(
         { _id: messageId, workspaceId, userId, isDeleted: false },
-        { 
+        {
           isStarred: !message.isStarred,
           lastActivity: new Date(),
         }
@@ -199,15 +219,11 @@ export class InboxService {
     return result.modifiedCount > 0;
   }
 
-  async archiveMessage(
-    messageId: string,
-    workspaceId: string,
-    userId: string
-  ): Promise<boolean> {
+  async archiveMessage(messageId: string, workspaceId: string, userId: string): Promise<boolean> {
     const result = await this.inboxMessageModel
       .updateOne(
         { _id: messageId, workspaceId, userId, isDeleted: false },
-        { 
+        {
           isArchived: true,
           lastActivity: new Date(),
         }
@@ -217,15 +233,11 @@ export class InboxService {
     return result.modifiedCount > 0;
   }
 
-  async deleteMessage(
-    messageId: string,
-    workspaceId: string,
-    userId: string
-  ): Promise<boolean> {
+  async deleteMessage(messageId: string, workspaceId: string, userId: string): Promise<boolean> {
     const result = await this.inboxMessageModel
       .updateOne(
         { _id: messageId, workspaceId, userId, isDeleted: false },
-        { 
+        {
           isDeleted: true,
           lastActivity: new Date(),
         }
@@ -251,7 +263,7 @@ export class InboxService {
     if (filter.isArchived !== undefined) updateFilter.isArchived = filter.isArchived;
 
     const result = await this.inboxMessageModel
-      .updateMany(updateFilter, { 
+      .updateMany(updateFilter, {
         isRead: true,
         lastActivity: new Date(),
       })
@@ -421,50 +433,63 @@ export class InboxService {
   }> {
     const baseFilter = { workspaceId, userId, isDeleted: false };
 
-    const [
-      total,
-      unread,
-      starred,
-      archived,
-      emailCount,
-      notificationCount,
-      smsCount,
-      systemCount,
-      urgentCount,
-      highCount,
-      normalCount,
-      lowCount,
-    ] = await Promise.all([
-      this.inboxMessageModel.countDocuments(baseFilter),
-      this.inboxMessageModel.countDocuments({ ...baseFilter, isRead: false }),
-      this.inboxMessageModel.countDocuments({ ...baseFilter, isStarred: true }),
-      this.inboxMessageModel.countDocuments({ ...baseFilter, isArchived: true }),
-      this.inboxMessageModel.countDocuments({ ...baseFilter, type: 'email' }),
-      this.inboxMessageModel.countDocuments({ ...baseFilter, type: 'notification' }),
-      this.inboxMessageModel.countDocuments({ ...baseFilter, type: 'sms' }),
-      this.inboxMessageModel.countDocuments({ ...baseFilter, type: 'system' }),
-      this.inboxMessageModel.countDocuments({ ...baseFilter, priority: 'urgent' }),
-      this.inboxMessageModel.countDocuments({ ...baseFilter, priority: 'high' }),
-      this.inboxMessageModel.countDocuments({ ...baseFilter, priority: 'normal' }),
-      this.inboxMessageModel.countDocuments({ ...baseFilter, priority: 'low' }),
+    const [inboxStats, notificationStats] = await Promise.all([
+      // Get inbox message stats
+      Promise.all([
+        this.inboxMessageModel.countDocuments(baseFilter),
+        this.inboxMessageModel.countDocuments({ ...baseFilter, isRead: false }),
+        this.inboxMessageModel.countDocuments({ ...baseFilter, isStarred: true }),
+        this.inboxMessageModel.countDocuments({ ...baseFilter, isArchived: true }),
+        this.inboxMessageModel.countDocuments({ ...baseFilter, type: 'email' }),
+        this.inboxMessageModel.countDocuments({ ...baseFilter, type: 'notification' }),
+        this.inboxMessageModel.countDocuments({ ...baseFilter, type: 'sms' }),
+        this.inboxMessageModel.countDocuments({ ...baseFilter, type: 'system' }),
+        this.inboxMessageModel.countDocuments({ ...baseFilter, priority: 'urgent' }),
+        this.inboxMessageModel.countDocuments({ ...baseFilter, priority: 'high' }),
+        this.inboxMessageModel.countDocuments({ ...baseFilter, priority: 'normal' }),
+        this.inboxMessageModel.countDocuments({ ...baseFilter, priority: 'low' }),
+      ]),
+      // Get notification stats
+      this.notificationsService.getUnreadCount(userId, workspaceId).then(count =>
+        this.notificationsService.getForUser(userId, workspaceId).then(notifications => ({
+          total: notifications.length,
+          unread: count,
+          read: notifications.filter((n: any) => n.read).length,
+        }))
+      ),
     ]);
 
+    const [
+      inboxTotal,
+      inboxUnread,
+      inboxStarred,
+      inboxArchived,
+      inboxEmailCount,
+      inboxNotificationCount,
+      inboxSmsCount,
+      inboxSystemCount,
+      inboxUrgentCount,
+      inboxHighCount,
+      inboxNormalCount,
+      inboxLowCount,
+    ] = inboxStats;
+
     return {
-      total,
-      unread,
-      starred,
-      archived,
+      total: inboxTotal + notificationStats.total,
+      unread: inboxUnread + notificationStats.unread,
+      starred: inboxStarred, // Notifications don't have starring
+      archived: inboxArchived, // Notifications don't have archiving
       byType: {
-        email: emailCount,
-        notification: notificationCount,
-        sms: smsCount,
-        system: systemCount,
+        email: inboxEmailCount,
+        notification: inboxNotificationCount + notificationStats.total,
+        sms: inboxSmsCount,
+        system: inboxSystemCount,
       },
       byPriority: {
-        urgent: urgentCount,
-        high: highCount,
-        normal: normalCount,
-        low: lowCount,
+        urgent: inboxUrgentCount,
+        high: inboxHighCount,
+        normal: inboxNormalCount + notificationStats.total, // Most notifications are normal priority
+        low: inboxLowCount,
       },
     };
   }
@@ -502,7 +527,7 @@ export class InboxService {
         to: messageData.recipient,
         sentAt: new Date(),
         direction: 'outbound',
-        status: 'sent'
+        status: 'sent',
       },
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -513,9 +538,9 @@ export class InboxService {
     // In a real implementation, you would integrate with email/SMS services here:
     // - For emails: SendGrid, AWS SES, Mailgun, etc.
     // - For SMS: Twilio, AWS SNS, etc.
-    
+
     this.logger.log(`${messageData.type} message sent successfully with ID: ${message._id}`);
-    
+
     return message;
   }
 }

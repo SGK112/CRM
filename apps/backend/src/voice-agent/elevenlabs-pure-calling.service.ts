@@ -33,7 +33,8 @@ export class ElevenLabsPureCallingService {
 
   constructor(private config: ConfigService) {
     this.apiKey = this.config.get('ELEVENLABS_API_KEY');
-    this.defaultAgentId = this.config.get('ELEVENLABS_AGENT_ID') || 'agent_5401k1we1dkbf1mvt22mme8wz82a';
+    this.defaultAgentId =
+      this.config.get('ELEVENLABS_AGENT_ID') || 'agent_5401k1we1dkbf1mvt22mme8wz82a';
   }
 
   /**
@@ -41,14 +42,7 @@ export class ElevenLabsPureCallingService {
    * This bypasses Twilio entirely to get the actual ElevenLabs voice quality
    */
   async initiatePureElevenLabsCall(data: any) {
-    const {
-      phoneNumber,
-      clientId,
-      clientName,
-      workspaceId,
-      purpose,
-      context
-    } = data;
+    const { phoneNumber, clientId, clientName, workspaceId, purpose, context } = data;
 
     // Log the call initiation
     console.log(`🎯 PURE ELEVENLABS CALL INITIATED`);
@@ -65,7 +59,7 @@ export class ElevenLabsPureCallingService {
       purpose,
       context,
       clientId,
-      workspaceId
+      workspaceId,
     });
 
     console.log(`📊 API Result:`, JSON.stringify(apiResult, null, 2));
@@ -82,49 +76,46 @@ export class ElevenLabsPureCallingService {
         message: '🎉 ElevenLabs call initiated directly through API!',
         benefits: [
           '✓ 100% ElevenLabs premium voice synthesis',
-          '✓ Natural, human-like conversation', 
+          '✓ Natural, human-like conversation',
           '✓ Direct API integration',
           '✓ Real-time call status',
-          '✓ CRM integration'
-        ]
+          '✓ CRM integration',
+        ],
       };
     }
 
-        // If direct API call failed, provide manual batch calling instructions
-    const instructions = this.generateBatchCallingInstructions(
-      phoneNumber, 
-      this.defaultAgentId, 
-      {
-        phoneNumber,
-        clientId,
-        clientName,
-        workspaceId,
-        purpose,
-        context
-      } as any
-    );
+    // If direct API call failed, provide manual batch calling instructions
+    const instructions = this.generateBatchCallingInstructions(phoneNumber, this.defaultAgentId, {
+      phoneNumber,
+      clientId,
+      clientName,
+      workspaceId,
+      purpose,
+      context,
+    } as any);
 
     return {
       success: true,
       callType: 'elevenlabs_pure_natural',
       voiceProvider: 'ElevenLabs Premium (Manual Setup)',
-      warning: '⚠️  Direct API not available. Use manual batch calling for ACTUAL ElevenLabs natural voices.',
+      warning:
+        '⚠️  Direct API not available. Use manual batch calling for ACTUAL ElevenLabs natural voices.',
       setup: instructions,
       quickAction: {
         step1: 'Click this link: https://elevenlabs.io/app/conversational-ai/batch-calling/create',
         step2: `Select agent: ${this.defaultAgentId}`,
         step3: `Add contact: ${clientName || 'Customer'} - ${phoneNumber}`,
         step4: `Purpose: ${purpose}`,
-        step5: 'Click "Start Batch Call" for natural ElevenLabs voice'
+        step5: 'Click "Start Batch Call" for natural ElevenLabs voice',
       },
       apiAttempt: apiResult,
       benefits: [
         '✓ 100% ElevenLabs premium voice synthesis',
-        '✓ Natural, human-like conversation', 
+        '✓ Natural, human-like conversation',
         '✓ NO robotic Twilio voices',
         '✓ Sarah granite expertise',
-        '✓ Higher conversion rates'
-      ]
+        '✓ Higher conversion rates',
+      ],
     };
   }
 
@@ -140,7 +131,7 @@ export class ElevenLabsPureCallingService {
       return {
         success: false,
         error: 'ElevenLabs API key not configured',
-        method: 'api_key_missing'
+        method: 'api_key_missing',
       };
     }
 
@@ -163,9 +154,9 @@ export class ElevenLabsPureCallingService {
             purpose: purpose,
             context: context,
             source: 'remodely_crm',
-            timestamp: new Date().toISOString()
-          }
-        }
+            timestamp: new Date().toISOString(),
+          },
+        },
       },
       {
         name: 'Phone Conversation',
@@ -174,8 +165,8 @@ export class ElevenLabsPureCallingService {
         payload: {
           agent_id: agentId,
           customer_phone_number: phoneNumber,
-          customer_name: clientName || 'Customer'
-        }
+          customer_name: clientName || 'Customer',
+        },
       },
       {
         name: 'Direct Conversations',
@@ -188,17 +179,17 @@ export class ElevenLabsPureCallingService {
           customer_data: {
             name: clientName || 'Customer',
             phone: phoneNumber,
-            metadata: { purpose, context, clientId, workspaceId }
-          }
-        }
-      }
+            metadata: { purpose, context, clientId, workspaceId },
+          },
+        },
+      },
     ];
 
     // Try each endpoint
     for (const endpoint of endpoints) {
       try {
         console.log(`🔄 Trying ${endpoint.name} endpoint...`);
-        
+
         const response = await axios({
           method: endpoint.method,
           url: endpoint.url,
@@ -207,7 +198,7 @@ export class ElevenLabsPureCallingService {
             'xi-api-key': apiKey,
             'Content-Type': 'application/json',
           },
-          timeout: 10000 // 10 second timeout
+          timeout: 10000, // 10 second timeout
         });
 
         console.log(`✅ ${endpoint.name} SUCCESS:`, response.data);
@@ -219,9 +210,8 @@ export class ElevenLabsPureCallingService {
           callId: response.data.call_id,
           status: response.data.status || 'initiated',
           data: response.data,
-          method: 'direct_api'
+          method: 'direct_api',
         };
-
       } catch (error: any) {
         console.log(`❌ ${endpoint.name} failed:`, error.response?.data || error.message);
         continue; // Try next endpoint
@@ -233,7 +223,7 @@ export class ElevenLabsPureCallingService {
       success: false,
       error: 'All ElevenLabs API endpoints failed',
       method: 'api_endpoints_failed',
-      attemptedEndpoints: endpoints.length
+      attemptedEndpoints: endpoints.length,
     };
   }
 
@@ -241,11 +231,10 @@ export class ElevenLabsPureCallingService {
    * Generate manual batch calling instructions (always works)
    */
   private generateBatchCallingInstructions(
-    phoneNumber: string, 
-    agentId: string, 
+    phoneNumber: string,
+    agentId: string,
     request: ElevenLabsPureCallRequest
   ): ElevenLabsPureCallResponse {
-    
     const batchId = `batch_${Date.now()}`;
     const instructions = `
 🎯 **ElevenLabs PURE Voice Call Setup**
@@ -293,8 +282,8 @@ export class ElevenLabsPureCallingService {
       instructions,
       directLinks: {
         batchCall: 'https://elevenlabs.io/app/conversational-ai/batch-calling/create',
-        agentDirect: `https://elevenlabs.io/app/talk-to?agent_id=${agentId}`
-      }
+        agentDirect: `https://elevenlabs.io/app/talk-to?agent_id=${agentId}`,
+      },
     };
   }
 
@@ -303,7 +292,7 @@ export class ElevenLabsPureCallingService {
    */
   async getAgentInfo(agentId?: string): Promise<any> {
     const actualAgentId = agentId || this.defaultAgentId;
-    
+
     try {
       const response = await axios.get(
         `https://api.elevenlabs.io/v1/convai/agents/${actualAgentId}`,
@@ -313,14 +302,14 @@ export class ElevenLabsPureCallingService {
           },
         }
       );
-      
+
       return response.data;
     } catch (error: any) {
       this.logger.warn('Could not fetch agent info:', error.response?.data || error.message);
       return {
         agent_id: actualAgentId,
         name: 'Sarah - Surprise Granite Specialist',
-        description: 'Granite countertop expert with natural conversation abilities'
+        description: 'Granite countertop expert with natural conversation abilities',
       };
     }
   }

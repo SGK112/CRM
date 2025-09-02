@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query, Request, UseGuards, ForbiddenException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Query,
+  Request,
+  UseGuards,
+  ForbiddenException,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -14,8 +26,9 @@ export class AdminController {
 
   private async checkAdminAccess(req: any) {
     const user = req.user;
-    const isAdmin = user.role === 'owner' || user.role === 'admin' || user.email === 'help.remodely@gmail.com';
-    
+    const isAdmin =
+      user.role === 'owner' || user.role === 'admin' || user.email === 'help.remodely@gmail.com';
+
     if (!isAdmin) {
       throw new ForbiddenException('Admin access required');
     }
@@ -27,15 +40,23 @@ export class AdminController {
   @ApiQuery({ name: 'limit', required: false, description: 'Items per page (default: 20)' })
   @ApiQuery({ name: 'search', required: false, description: 'Search by name or email' })
   @ApiQuery({ name: 'role', required: false, description: 'Filter by role' })
-  @ApiQuery({ name: 'subscriptionStatus', required: false, description: 'Filter by subscription status' })
+  @ApiQuery({
+    name: 'subscriptionStatus',
+    required: false,
+    description: 'Filter by subscription status',
+  })
   @ApiResponse({ status: 200, description: 'Users retrieved successfully' })
-  async getUsers(@Request() req, @Query() query: {
-    page?: string;
-    limit?: string;
-    search?: string;
-    role?: string;
-    subscriptionStatus?: string;
-  }) {
+  async getUsers(
+    @Request() req,
+    @Query()
+    query: {
+      page?: string;
+      limit?: string;
+      search?: string;
+      role?: string;
+      subscriptionStatus?: string;
+    }
+  ) {
     await this.checkAdminAccess(req);
     return await this.adminService.getUsers(query);
   }
@@ -54,7 +75,8 @@ export class AdminController {
   async updateUser(
     @Request() req,
     @Param('id') userId: string,
-    @Body() updateData: {
+    @Body()
+    updateData: {
       firstName?: string;
       lastName?: string;
       email?: string;
@@ -117,12 +139,16 @@ export class AdminController {
   @ApiQuery({ name: 'userId', required: false, description: 'Filter by user ID' })
   @ApiQuery({ name: 'action', required: false, description: 'Filter by action type' })
   @ApiResponse({ status: 200, description: 'Activity logs retrieved successfully' })
-  async getActivityLogs(@Request() req, @Query() query: {
-    page?: string;
-    limit?: string;
-    userId?: string;
-    action?: string;
-  }) {
+  async getActivityLogs(
+    @Request() req,
+    @Query()
+    query: {
+      page?: string;
+      limit?: string;
+      userId?: string;
+      action?: string;
+    }
+  ) {
     await this.checkAdminAccess(req);
     return await this.adminService.getActivityLogs(query);
   }
@@ -132,7 +158,8 @@ export class AdminController {
   @ApiResponse({ status: 200, description: 'Notification sent successfully' })
   async sendNotification(
     @Request() req,
-    @Body() notificationData: {
+    @Body()
+    notificationData: {
       userIds?: string[];
       type: 'email' | 'sms' | 'push' | 'all';
       subject: string;
@@ -157,7 +184,8 @@ export class AdminController {
   @ApiResponse({ status: 200, description: 'Bulk action completed successfully' })
   async performBulkAction(
     @Request() req,
-    @Body() actionData: {
+    @Body()
+    actionData: {
       userIds: string[];
       action: 'suspend' | 'activate' | 'delete' | 'update-plan';
       data?: any;

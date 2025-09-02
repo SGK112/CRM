@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Param, Query, Patch, Delete, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Query,
+  Patch,
+  Delete,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { DesignsService } from './designs.service';
@@ -19,7 +30,11 @@ export class DesignsController {
   @Get('design-templates/:id') getTemplate(@Param('id') id: string, @Request() req) {
     return this.designs.getTemplate(id, req.user.workspaceId);
   }
-  @Patch('design-templates/:id') updateTemplate(@Param('id') id: string, @Body() dto: any, @Request() req) {
+  @Patch('design-templates/:id') updateTemplate(
+    @Param('id') id: string,
+    @Body() dto: any,
+    @Request() req
+  ) {
     return this.designs.updateTemplate(id, dto, req.user.workspaceId);
   }
   @Delete('design-templates/:id') deleteTemplate(@Param('id') id: string, @Request() req) {
@@ -42,16 +57,28 @@ export class DesignsController {
     return this.designs.archiveDesign(id, req.user.workspaceId);
   }
 
-  @Post('designs/:id/revisions') createRevision(@Param('id') id: string, @Body() dto: any, @Request() req) {
+  @Post('designs/:id/revisions') createRevision(
+    @Param('id') id: string,
+    @Body() dto: any,
+    @Request() req
+  ) {
     return this.designs.createRevision(id, dto, req.user);
   }
   @Get('designs/:id/revisions') listRevisions(@Param('id') id: string, @Request() req) {
     return this.designs.listRevisions(id, req.user.workspaceId);
   }
-  @Get('designs/:id/revisions/:revId') getRevision(@Param('id') id: string, @Param('revId') revId: string, @Request() req) {
+  @Get('designs/:id/revisions/:revId') getRevision(
+    @Param('id') id: string,
+    @Param('revId') revId: string,
+    @Request() req
+  ) {
     return this.designs.getRevision(id, revId, req.user.workspaceId);
   }
-  @Post('designs/:id/restore/:revId') restoreRevision(@Param('id') id: string, @Param('revId') revId: string, @Request() req) {
+  @Post('designs/:id/restore/:revId') restoreRevision(
+    @Param('id') id: string,
+    @Param('revId') revId: string,
+    @Request() req
+  ) {
     return this.designs.restoreRevision(id, revId, req.user);
   }
 }

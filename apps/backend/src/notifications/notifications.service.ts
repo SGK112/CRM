@@ -17,7 +17,7 @@ export class NotificationsService {
     message: string;
     relatedId?: string;
     relatedType?: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }) {
     const notification = new this.notificationModel(data);
     return notification.save();
@@ -33,31 +33,27 @@ export class NotificationsService {
 
   async markAsRead(id: string, userId: string, workspaceId: string) {
     return this.notificationModel
-      .findOneAndUpdate(
-        { _id: id, userId, workspaceId },
-        { read: true },
-        { new: true }
-      )
+      .findOneAndUpdate({ _id: id, userId, workspaceId }, { read: true }, { new: true })
       .exec();
   }
 
   async markAllAsRead(userId: string, workspaceId: string) {
     return this.notificationModel
-      .updateMany(
-        { userId, workspaceId, read: false },
-        { read: true }
-      )
+      .updateMany({ userId, workspaceId, read: false }, { read: true })
       .exec();
   }
 
   async getUnreadCount(userId: string, workspaceId: string) {
-    return this.notificationModel
-      .countDocuments({ userId, workspaceId, read: false })
-      .exec();
+    return this.notificationModel.countDocuments({ userId, workspaceId, read: false }).exec();
   }
 
   // Helper methods for common notifications
-  async notifyEstimateViewed(workspaceId: string, userId: string, estimateId: string, clientName: string) {
+  async notifyEstimateViewed(
+    workspaceId: string,
+    userId: string,
+    estimateId: string,
+    clientName: string
+  ) {
     return this.create({
       workspaceId,
       userId,
@@ -65,11 +61,16 @@ export class NotificationsService {
       title: 'Estimate Viewed',
       message: `${clientName} viewed estimate`,
       relatedId: estimateId,
-      relatedType: 'estimate'
+      relatedType: 'estimate',
     });
   }
 
-  async notifyPaymentReceived(workspaceId: string, userId: string, invoiceId: string, amount: number) {
+  async notifyPaymentReceived(
+    workspaceId: string,
+    userId: string,
+    invoiceId: string,
+    amount: number
+  ) {
     return this.create({
       workspaceId,
       userId,
@@ -77,7 +78,7 @@ export class NotificationsService {
       title: 'Payment Received',
       message: `Received payment of $${amount.toFixed(2)}`,
       relatedId: invoiceId,
-      relatedType: 'invoice'
+      relatedType: 'invoice',
     });
   }
 
@@ -88,7 +89,7 @@ export class NotificationsService {
       type: 'new_lead',
       title: 'New Lead',
       message: `New lead: ${leadName}`,
-      relatedType: 'client'
+      relatedType: 'client',
     });
   }
 }

@@ -1,44 +1,44 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { ChatBubbleLeftRightIcon, XMarkIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline'
+import { useState } from 'react';
+import { ChatBubbleLeftRightIcon, XMarkIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline';
 
 interface QuickContactWidgetProps {
-  page?: string
-  primaryEmail?: string
-  primaryLabel?: string
+  page?: string;
+  primaryEmail?: string;
+  primaryLabel?: string;
 }
 
-export default function QuickContactWidget({ 
+export default function QuickContactWidget({
   page = 'unknown',
   primaryEmail = 'hello@remodely.com',
-  primaryLabel = 'Quick Question'
+  primaryLabel = 'Quick Question',
 }: QuickContactWidgetProps) {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    message: ''
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitSuccess, setSubmitSuccess] = useState(false)
-  const [submitError, setSubmitError] = useState('')
+    message: '',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    setSubmitError('')
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitError('');
 
     try {
       const response = await fetch('/api/contact', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           firstName: formData.name.split(' ')[0] || formData.name,
@@ -47,28 +47,28 @@ export default function QuickContactWidget({
           inquiryType: 'other',
           message: formData.message,
           source: 'quick_contact_widget',
-          page: page
-        })
-      })
+          page: page,
+        }),
+      });
 
-      const result = await response.json()
+      const result = await response.json();
 
       if (response.ok) {
-        setSubmitSuccess(true)
-        setFormData({ name: '', email: '', message: '' })
+        setSubmitSuccess(true);
+        setFormData({ name: '', email: '', message: '' });
         setTimeout(() => {
-          setSubmitSuccess(false)
-          setIsOpen(false)
-        }, 3000)
+          setSubmitSuccess(false);
+          setIsOpen(false);
+        }, 3000);
       } else {
-        setSubmitError(result.message || 'Failed to send message. Please try again.')
+        setSubmitError(result.message || 'Failed to send message. Please try again.');
       }
     } catch (error) {
-      setSubmitError('Network error. Please check your connection and try again.')
+      setSubmitError('Network error. Please check your connection and try again.');
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <>
@@ -106,8 +106,18 @@ export default function QuickContactWidget({
               {submitSuccess ? (
                 <div className="text-center py-8">
                   <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    <svg
+                      className="w-8 h-8 text-green-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
                     </svg>
                   </div>
                   <h4 className="text-lg font-semibold text-white mb-2">Message Sent!</h4>
@@ -211,5 +221,5 @@ export default function QuickContactWidget({
         </div>
       )}
     </>
-  )
+  );
 }

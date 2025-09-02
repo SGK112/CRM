@@ -85,9 +85,9 @@ export class AIEstimateController {
         recommendations: [
           'Consider value-engineering options for cost-conscious clients',
           'Premium appliances add significant resale value',
-          'Timeline may be extended due to high contractor demand'
-        ]
-      }
+          'Timeline may be extended due to high contractor demand',
+        ],
+      },
     };
   }
 
@@ -100,12 +100,13 @@ export class AIEstimateController {
     @Body() dto: { projectType: string; projectScope: string; totalAmount: number },
     @Request() req: any
   ): Promise<{ timeline: any }> {
-    const complexity = dto.totalAmount > 50000 ? 'high' : dto.totalAmount > 25000 ? 'medium' : 'low';
-    
+    const complexity =
+      dto.totalAmount > 50000 ? 'high' : dto.totalAmount > 25000 ? 'medium' : 'low';
+
     const baseWeeks = {
       low: { optimistic: 2, realistic: 3, pessimistic: 5 },
       medium: { optimistic: 4, realistic: 6, pessimistic: 10 },
-      high: { optimistic: 8, realistic: 12, pessimistic: 18 }
+      high: { optimistic: 8, realistic: 12, pessimistic: 18 },
     };
 
     return {
@@ -117,15 +118,15 @@ export class AIEstimateController {
           { name: 'Demolition', duration: 1, dependencies: ['Planning & Permits'] },
           { name: 'Rough Work', duration: 2, dependencies: ['Demolition'] },
           { name: 'Finish Work', duration: 2, dependencies: ['Rough Work'] },
-          { name: 'Final Details', duration: 1, dependencies: ['Finish Work'] }
+          { name: 'Final Details', duration: 1, dependencies: ['Finish Work'] },
         ],
         riskFactors: [
           'Permit approval delays',
           'Material availability',
           'Weather conditions',
-          'Change orders'
-        ]
-      }
+          'Change orders',
+        ],
+      },
     };
   }
 }

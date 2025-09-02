@@ -41,14 +41,14 @@ export class PricingService {
           upsert: true,
         },
       }));
-    if (!ops.length) return { matched:0, upserted:0, modified:0 };
-    const res:any = await this.priceModel.bulkWrite(ops);
+    if (!ops.length) return { matched: 0, upserted: 0, modified: 0 };
+    const res: any = await this.priceModel.bulkWrite(ops);
     return { matched: res.nMatched, upserted: res.nUpserted, modified: res.nModified };
   }
 
   findAll(workspaceId: string, options?: SearchOptions | string) {
-    const q:any = { workspaceId };
-    
+    const q: any = { workspaceId };
+
     // Handle legacy string parameter for backward compatibility
     if (typeof options === 'string') {
       if (options) q.vendorId = options;
@@ -61,7 +61,7 @@ export class PricingService {
       q.$or = [
         { name: { $regex: options.search, $options: 'i' } },
         { sku: { $regex: options.search, $options: 'i' } },
-        { description: { $regex: options.search, $options: 'i' } }
+        { description: { $regex: options.search, $options: 'i' } },
       ];
     }
     if (options?.tags && options.tags.length > 0) {
@@ -73,12 +73,12 @@ export class PricingService {
 
   async searchItems(workspaceId: string, query?: string, limit: number = 50) {
     const q: any = { workspaceId };
-    
+
     if (query) {
       q.$or = [
         { name: { $regex: query, $options: 'i' } },
         { sku: { $regex: query, $options: 'i' } },
-        { description: { $regex: query, $options: 'i' } }
+        { description: { $regex: query, $options: 'i' } },
       ];
     }
 
@@ -93,31 +93,35 @@ export class PricingService {
   async importPriceList(file: any, importData: ImportPriceListData, workspaceId: string) {
     try {
       const items = await this.parseCsvFile(file.buffer, importData.mapping);
-      
+
       // Transform parsed data to PriceItem format
-      const priceItems = items.map(item => ({
-        sku: item[importData.mapping.skuColumn],
-        name: item[importData.mapping.nameColumn],
-        description: importData.mapping.descriptionColumn ? item[importData.mapping.descriptionColumn] : '',
-        baseCost: parseFloat(item[importData.mapping.priceColumn]) || 0,
-        unit: importData.mapping.unitColumn ? item[importData.mapping.unitColumn] : 'ea',
-        vendorId: importData.vendorId,
-        workspaceId,
-        defaultMarginPct: 50, // Default margin
-        tags: ['imported', importData.name.toLowerCase().replace(/\s+/g, '-')]
-      })).filter(item => item.sku && item.name && item.baseCost > 0);
+      const priceItems = items
+        .map(item => ({
+          sku: item[importData.mapping.skuColumn],
+          name: item[importData.mapping.nameColumn],
+          description: importData.mapping.descriptionColumn
+            ? item[importData.mapping.descriptionColumn]
+            : '',
+          baseCost: parseFloat(item[importData.mapping.priceColumn]) || 0,
+          unit: importData.mapping.unitColumn ? item[importData.mapping.unitColumn] : 'ea',
+          vendorId: importData.vendorId,
+          workspaceId,
+          defaultMarginPct: 50, // Default margin
+          tags: ['imported', importData.name.toLowerCase().replace(/\s+/g, '-')],
+        }))
+        .filter(item => item.sku && item.name && item.baseCost > 0);
 
       if (priceItems.length === 0) {
         throw new BadRequestException('No valid items found in the uploaded file');
       }
 
       const result = await this.upsertMany(priceItems, workspaceId);
-      
+
       return {
         success: true,
         imported: priceItems.length,
         result,
-        message: `Successfully imported ${priceItems.length} items from ${importData.name}`
+        message: `Successfully imported ${priceItems.length} items from ${importData.name}`,
       };
     } catch (error) {
       throw new BadRequestException(`Failed to import price list: ${error.message}`);
@@ -131,31 +135,28 @@ export class PricingService {
 
       stream
         .pipe(csv())
-        .on('data', (data) => {
+        .on('data', data => {
           // Validate required columns exist
           if (data[mapping.skuColumn] && data[mapping.nameColumn] && data[mapping.priceColumn]) {
             results.push(data);
           }
         })
         .on('end', () => resolve(results))
-        .on('error', (error) => reject(error));
+        .on('error', error => reject(error));
     });
   }
 
   async getVendorItems(workspaceId: string, vendorId: string, search?: string) {
     const q: any = { workspaceId, vendorId };
-    
+
     if (search) {
       q.$or = [
         { name: { $regex: search, $options: 'i' } },
-        { sku: { $regex: search, $options: 'i' } }
+        { sku: { $regex: search, $options: 'i' } },
       ];
     }
 
-    return this.priceModel
-      .find(q)
-      .sort({ name: 1 })
-      .lean();
+    return this.priceModel.find(q).sort({ name: 1 }).lean();
   }
 
   async getPopularItems(workspaceId: string, limit: number = 20) {

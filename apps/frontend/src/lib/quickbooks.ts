@@ -161,17 +161,17 @@ export class QuickBooksService {
       SalesItemLineDetail: {
         ItemRef: {
           value: item.qbItemId || 'GENERAL_SERVICE', // Fallback to general service item
-          name: item.description
+          name: item.description,
         },
         Qty: item.quantity,
-        UnitPrice: item.unitCost
-      }
+        UnitPrice: item.unitCost,
+      },
     }));
 
     return {
       CustomerRef: {
         value: customerRef,
-        name: estimate.clientName
+        name: estimate.clientName,
       },
       Line: lines,
       TotalAmt: estimate.totalAmount,
@@ -179,8 +179,8 @@ export class QuickBooksService {
       ExpirationDate: estimate.validUntil.toISOString().split('T')[0],
       PrivateNote: estimate.notes,
       CustomerMemo: {
-        value: estimate.projectScope
-      }
+        value: estimate.projectScope,
+      },
     };
   }
 
@@ -193,17 +193,17 @@ export class QuickBooksService {
       SalesItemLineDetail: {
         ItemRef: {
           value: item.qbItemId || 'GENERAL_SERVICE',
-          name: item.description
+          name: item.description,
         },
         Qty: item.quantity,
-        UnitPrice: item.unitCost
-      }
+        UnitPrice: item.unitCost,
+      },
     }));
 
     return {
       CustomerRef: {
         value: customerRef,
-        name: invoice.clientName
+        name: invoice.clientName,
       },
       Line: lines,
       TotalAmt: invoice.total,
@@ -211,8 +211,8 @@ export class QuickBooksService {
       DueDate: invoice.dueDate?.toISOString().split('T')[0],
       PrivateNote: invoice.notes,
       CustomerMemo: {
-        value: invoice.description || ''
-      }
+        value: invoice.description || '',
+      },
     };
   }
 
@@ -234,8 +234,8 @@ export class QuickBooksService {
         quantity: line.SalesItemLineDetail.Qty || 1,
         unitCost: line.SalesItemLineDetail.UnitPrice || 0,
         totalCost: line.Amount,
-        qbItemId: line.SalesItemLineDetail.ItemRef.value
-      }))
+        qbItemId: line.SalesItemLineDetail.ItemRef.value,
+      })),
     };
   }
 
@@ -258,8 +258,8 @@ export class QuickBooksService {
         quantity: line.SalesItemLineDetail.Qty || 1,
         unitCost: line.SalesItemLineDetail.UnitPrice || 0,
         totalCost: line.Amount,
-        qbItemId: line.SalesItemLineDetail.ItemRef.value
-      }))
+        qbItemId: line.SalesItemLineDetail.ItemRef.value,
+      })),
     };
   }
 
@@ -281,7 +281,7 @@ export class QuickBooksService {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -302,7 +302,7 @@ export class QuickBooksService {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 }
@@ -316,11 +316,11 @@ export const quickBooksAPI = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
-        body: JSON.stringify(config)
+        body: JSON.stringify(config),
       });
-      
+
       const result = await response.json();
       return result.success;
     } catch (error) {
@@ -335,24 +335,24 @@ export const quickBooksAPI = {
       const response = await fetch(`/api/quickbooks/sync/estimate/${estimateId}`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
       });
-      
+
       const result = await response.json();
       return {
         success: result.success,
         message: result.message,
         data: result.data,
         errors: result.errors,
-        syncedAt: new Date()
+        syncedAt: new Date(),
       };
     } catch (error) {
       return {
         success: false,
         message: 'Failed to sync estimate to QuickBooks',
         errors: [error instanceof Error ? error.message : 'Unknown error'],
-        syncedAt: new Date()
+        syncedAt: new Date(),
       };
     }
   },
@@ -363,45 +363,47 @@ export const quickBooksAPI = {
       const response = await fetch(`/api/quickbooks/sync/invoice/${invoiceId}`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
       });
-      
+
       const result = await response.json();
       return {
         success: result.success,
         message: result.message,
         data: result.data,
         errors: result.errors,
-        syncedAt: new Date()
+        syncedAt: new Date(),
       };
     } catch (error) {
       return {
         success: false,
         message: 'Failed to sync invoice to QuickBooks',
         errors: [error instanceof Error ? error.message : 'Unknown error'],
-        syncedAt: new Date()
+        syncedAt: new Date(),
       };
     }
   },
 
   // Convert estimate to invoice
-  async convertEstimateToInvoice(estimateId: string): Promise<{ success: boolean; invoiceId?: string; message: string }> {
+  async convertEstimateToInvoice(
+    estimateId: string
+  ): Promise<{ success: boolean; invoiceId?: string; message: string }> {
     try {
       const response = await fetch(`/api/estimates/${estimateId}/convert`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
       });
-      
+
       const result = await response.json();
       return result;
     } catch (error) {
       return {
         success: false,
-        message: 'Failed to convert estimate to invoice'
+        message: 'Failed to convert estimate to invoice',
       };
     }
-  }
+  },
 };

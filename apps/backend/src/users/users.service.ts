@@ -6,9 +6,7 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @InjectModel(User.name) private userModel: Model<UserDocument>,
-  ) {}
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async findById(id: string): Promise<User | null> {
     try {
@@ -18,20 +16,22 @@ export class UsersService {
     }
   }
 
-  async updateProfile(userId: string, updateData: {
-    firstName?: string;
-    lastName?: string;
-    phone?: string;
-  avatar?: string;
-  emailSignatureHtml?: string;
-  emailSignatureText?: string;
-  }): Promise<User> {
+  async updateProfile(
+    userId: string,
+    updateData: {
+      firstName?: string;
+      lastName?: string;
+      phone?: string;
+      avatar?: string;
+      emailSignatureHtml?: string;
+      emailSignatureText?: string;
+    }
+  ): Promise<User> {
     try {
-      const updatedUser = await this.userModel.findByIdAndUpdate(
-        userId,
-        { $set: updateData },
-        { new: true }
-      ).select('-password').exec();
+      const updatedUser = await this.userModel
+        .findByIdAndUpdate(userId, { $set: updateData }, { new: true })
+        .select('-password')
+        .exec();
 
       if (!updatedUser) {
         throw new NotFoundException('User not found');
@@ -43,7 +43,11 @@ export class UsersService {
     }
   }
 
-  async updatePassword(userId: string, currentPassword: string, newPassword: string): Promise<boolean> {
+  async updatePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string
+  ): Promise<boolean> {
     try {
       const user = await this.userModel.findById(userId);
       if (!user) {
@@ -67,18 +71,24 @@ export class UsersService {
     }
   }
 
-  async updateNotificationPreferences(userId: string, preferences: {
-    email?: boolean;
-    sms?: boolean;
-    push?: boolean;
-    marketing?: boolean;
-  }): Promise<User> {
+  async updateNotificationPreferences(
+    userId: string,
+    preferences: {
+      email?: boolean;
+      sms?: boolean;
+      push?: boolean;
+      marketing?: boolean;
+    }
+  ): Promise<User> {
     try {
-      const updatedUser = await this.userModel.findByIdAndUpdate(
-        userId,
-        { $set: { notificationPreferences: preferences } },
-        { new: true }
-      ).select('-password').exec();
+      const updatedUser = await this.userModel
+        .findByIdAndUpdate(
+          userId,
+          { $set: { notificationPreferences: preferences } },
+          { new: true }
+        )
+        .select('-password')
+        .exec();
 
       if (!updatedUser) {
         throw new NotFoundException('User not found');

@@ -11,15 +11,33 @@ export interface CreateEstimateDto {
   number?: string;
   clientId: string;
   projectId?: string;
-  items: { priceItemId?: string; name?: string; description?: string; quantity?: number; baseCost?: number; marginPct?: number; taxable?: boolean; sku?: string; }[];
-  discountType?: 'percent'|'fixed';
+  items: {
+    priceItemId?: string;
+    name?: string;
+    description?: string;
+    quantity?: number;
+    baseCost?: number;
+    marginPct?: number;
+    taxable?: boolean;
+    sku?: string;
+  }[];
+  discountType?: 'percent' | 'fixed';
   discountValue?: number;
   taxRate?: number;
   notes?: string;
 }
 export interface UpdateEstimateDto {
-  items?: { priceItemId?: string; name?: string; description?: string; quantity?: number; baseCost?: number; marginPct?: number; taxable?: boolean; sku?: string; }[];
-  discountType?: 'percent'|'fixed';
+  items?: {
+    priceItemId?: string;
+    name?: string;
+    description?: string;
+    quantity?: number;
+    baseCost?: number;
+    marginPct?: number;
+    taxable?: boolean;
+    sku?: string;
+  }[];
+  discountType?: 'percent' | 'fixed';
   discountValue?: number;
   taxRate?: number;
   notes?: string;
@@ -30,12 +48,15 @@ export class EstimatesService {
   constructor(
     @InjectModel(Estimate.name) private estimateModel: Model<EstimateDocument>,
     @InjectModel(PriceItem.name) private priceModel: Model<PriceItemDocument>,
-  @InjectModel(Client.name) private clientModel: Model<ClientDocument>,
-    private emailService: EmailService,
+    @InjectModel(Client.name) private clientModel: Model<ClientDocument>,
+    private emailService: EmailService
     // Optionally inject ClientsService if needed for more client info
   ) {}
 
-  private async generateEstimatePDF(estimate: EstimateDocument, client: { firstName: string; lastName: string; email?: string; company?: string }): Promise<Buffer> {
+  private async generateEstimatePDF(
+    estimate: EstimateDocument,
+    client: { firstName: string; lastName: string; email?: string; company?: string }
+  ): Promise<Buffer> {
     const doc = new PDFDocument();
     const buffers: Buffer[] = [];
     doc.on('data', buffers.push.bind(buffers));
@@ -49,14 +70,20 @@ export class EstimatesService {
     if (client.company) doc.text(`Company: ${client.company}`);
     doc.moveDown();
     doc.text('Items:');
-    estimate.items.forEach((item: { name: string; quantity: number; sellPrice?: number }, idx: number) => {
-      doc.text(`${idx + 1}. ${item.name} - Qty: ${item.quantity} - $${item.sellPrice?.toFixed(2)}`);
-    });
+    estimate.items.forEach(
+      (item: { name: string; quantity: number; sellPrice?: number }, idx: number) => {
+        doc.text(
+          `${idx + 1}. ${item.name} - Qty: ${item.quantity} - $${item.sellPrice?.toFixed(2)}`
+        );
+      }
+    );
     doc.moveDown();
-  if (typeof estimate.subtotalSell === 'number') doc.text(`Subtotal: $${estimate.subtotalSell.toFixed(2)}`);
-  if (typeof estimate.discountAmount === 'number') doc.text(`Discount: $${estimate.discountAmount.toFixed(2)}`);
-  if (typeof estimate.taxAmount === 'number') doc.text(`Tax: $${estimate.taxAmount.toFixed(2)}`);
-  if (typeof estimate.total === 'number') doc.text(`Total: $${estimate.total.toFixed(2)}`);
+    if (typeof estimate.subtotalSell === 'number')
+      doc.text(`Subtotal: $${estimate.subtotalSell.toFixed(2)}`);
+    if (typeof estimate.discountAmount === 'number')
+      doc.text(`Discount: $${estimate.discountAmount.toFixed(2)}`);
+    if (typeof estimate.taxAmount === 'number') doc.text(`Tax: $${estimate.taxAmount.toFixed(2)}`);
+    if (typeof estimate.total === 'number') doc.text(`Total: $${estimate.total.toFixed(2)}`);
     doc.end();
     return await new Promise((resolve, reject) => {
       doc.on('end', () => {
@@ -67,11 +94,13 @@ export class EstimatesService {
   }
 
   private computeTotals(doc: EstimateDocument) {
-    let subtotalCost = 0; let subtotalSell = 0; let totalMargin = 0;
+    let subtotalCost = 0;
+    let subtotalSell = 0;
+    let totalMargin = 0;
     doc.items.forEach(li => {
       const unitCost = li.baseCost || 0;
       const quantity = li.quantity || 1;
-      const unitSellPrice = unitCost * (1 + (li.marginPct||0)/100);
+      const unitSellPrice = unitCost * (1 + (li.marginPct || 0) / 100);
       li.sellPrice = unitSellPrice; // Store per-unit sell price
 
       const totalCost = unitCost * quantity;
@@ -79,7 +108,7 @@ export class EstimatesService {
 
       subtotalCost += totalCost;
       subtotalSell += totalSell;
-      totalMargin += (totalSell - totalCost);
+      totalMargin += totalSell - totalCost;
     });
     doc.subtotalCost = subtotalCost;
     doc.subtotalSell = subtotalSell;
@@ -87,14 +116,15 @@ export class EstimatesService {
     // discount
     let discountAmount = 0;
     if (doc.discountType === 'percent') {
-      discountAmount = (doc.discountValue||0) > 0 ? subtotalSell * (doc.discountValue||0)/100 : 0;
+      discountAmount =
+        (doc.discountValue || 0) > 0 ? (subtotalSell * (doc.discountValue || 0)) / 100 : 0;
     } else if (doc.discountType === 'fixed') {
-      discountAmount = doc.discountValue||0;
+      discountAmount = doc.discountValue || 0;
     }
     doc.discountAmount = discountAmount;
     const afterDiscount = Math.max(0, subtotalSell - discountAmount);
     // tax
-    const taxAmount = (doc.taxRate||0) > 0 ? afterDiscount * (doc.taxRate||0)/100 : 0;
+    const taxAmount = (doc.taxRate || 0) > 0 ? (afterDiscount * (doc.taxRate || 0)) / 100 : 0;
     doc.taxAmount = taxAmount;
     doc.total = afterDiscount + taxAmount;
   }
@@ -103,12 +133,21 @@ export class EstimatesService {
     // generate number if not provided
     if (!dto.number) {
       const count = await this.estimateModel.countDocuments({ workspaceId });
-      dto.number = `EST-${(1000 + count + 1)}`;
+      dto.number = `EST-${1000 + count + 1}`;
     }
     // Build line items, enriching from price items if provided
-  const items: Array<{ priceItemId?: string; name?: string; description?: string; quantity?: number; baseCost?: number; marginPct?: number; taxable?: boolean; sku?: string }> = [];
+    const items: Array<{
+      priceItemId?: string;
+      name?: string;
+      description?: string;
+      quantity?: number;
+      baseCost?: number;
+      marginPct?: number;
+      taxable?: boolean;
+      sku?: string;
+    }> = [];
     for (const input of dto.items || []) {
-  const li = { ...input };
+      const li = { ...input };
       if (input.priceItemId) {
         const pi = await this.priceModel.findOne({ _id: input.priceItemId, workspaceId });
         if (pi) {
@@ -136,7 +175,7 @@ export class EstimatesService {
       taxRate: dto.taxRate || 0,
       notes: dto.notes,
     });
-  this.computeTotals(doc);
+    this.computeTotals(doc);
     await doc.save();
     return doc;
   }
@@ -144,7 +183,7 @@ export class EstimatesService {
   async recalc(id: string, workspaceId: string) {
     const doc = await this.estimateModel.findOne({ _id: id, workspaceId });
     if (!doc) return null;
-  this.computeTotals(doc);
+    this.computeTotals(doc);
     await doc.save();
     return doc;
   }
@@ -164,8 +203,8 @@ export class EstimatesService {
       doc.status = 'sent';
       await doc.save();
     }
-  // Fetch client info
-  const client = await this.clientModel.findOne({ _id: doc.clientId, workspaceId });
+    // Fetch client info
+    const client = await this.clientModel.findOne({ _id: doc.clientId, workspaceId });
     if (!client || !client.email) return doc; // Can't send without client email
 
     // Generate PDF
@@ -209,26 +248,34 @@ export class EstimatesService {
         sellPrice: 0,
         taxable: !!li.taxable,
         sku: li.sku,
-  }));
+      }));
     }
     if (dto.discountType) doc.discountType = dto.discountType;
     if (dto.discountValue !== undefined) doc.discountValue = dto.discountValue;
     if (dto.taxRate !== undefined) doc.taxRate = dto.taxRate;
     if (dto.notes !== undefined) doc.notes = dto.notes;
-  this.computeTotals(doc);
+    this.computeTotals(doc);
     await doc.save();
     return doc;
   }
 
   // Generate a PDF buffer for a given estimate id in the workspace
-  async getPdf(id: string, workspaceId: string): Promise<{ buffer: Buffer; filename: string } | null> {
+  async getPdf(
+    id: string,
+    workspaceId: string
+  ): Promise<{ buffer: Buffer; filename: string } | null> {
     const doc = await this.estimateModel.findOne({ _id: id, workspaceId });
     if (!doc) return null;
     // Ensure totals are up to date before generating
     this.computeTotals(doc);
     const client = await this.clientModel.findOne({ _id: doc.clientId, workspaceId });
     const clientInfo = client
-      ? { firstName: client.firstName, lastName: client.lastName, email: client.email, company: client.company }
+      ? {
+          firstName: client.firstName,
+          lastName: client.lastName,
+          email: client.email,
+          company: client.company,
+        }
       : { firstName: 'Client', lastName: '', email: undefined, company: undefined };
     const buffer = await this.generateEstimatePDF(doc, clientInfo);
     const filename = `Estimate-${doc.number || id}.pdf`;

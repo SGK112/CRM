@@ -1,14 +1,4 @@
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Put, 
-  Body, 
-  Param, 
-  Query,
-  UseGuards,
-  Req 
-} from '@nestjs/common';
+import { Controller, Get, Post, Put, Body, Param, Query, UseGuards, Req } from '@nestjs/common';
 import { WalletService, CreateTransactionDto } from './wallet.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
@@ -54,20 +44,24 @@ export class WalletController {
   async getTransactions(@Query('limit') limit: string, @Req() req) {
     const userId = req.user.id;
     const transactions = await this.walletService.getTransactionHistory(
-      userId, 
+      userId,
       limit ? parseInt(limit) : 50
     );
     return transactions;
   }
 
   @Post('payment')
-  async createPayment(@Body() body: {
-    amount: string;
-    description: string;
-    clientId?: string;
-    projectId?: string;
-    invoiceId?: string;
-  }, @Req() req) {
+  async createPayment(
+    @Body()
+    body: {
+      amount: string;
+      description: string;
+      clientId?: string;
+      projectId?: string;
+      invoiceId?: string;
+    },
+    @Req() req
+  ) {
     const userId = req.user.id;
     return await this.walletService.processPayment(
       userId,
@@ -95,11 +89,14 @@ export class WalletController {
   }
 
   @Post('transaction')
-  async createTransaction(@Body() transactionData: Omit<CreateTransactionDto, 'userId'>, @Req() req) {
+  async createTransaction(
+    @Body() transactionData: Omit<CreateTransactionDto, 'userId'>,
+    @Req() req
+  ) {
     const userId = req.user.id;
     return await this.walletService.createTransaction({
       ...transactionData,
-      userId
+      userId,
     });
   }
 }

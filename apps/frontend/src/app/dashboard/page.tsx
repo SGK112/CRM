@@ -97,7 +97,7 @@ export default function DashboardPage() {
   const getGreeting = () => {
     const hour = new Date().getHours();
     const firstName = user?.firstName || 'there';
-    
+
     if (hour < 12) return `Good morning, ${firstName}!`;
     if (hour < 17) return `Good afternoon, ${firstName}!`;
     return `Good evening, ${firstName}!`;
@@ -146,7 +146,7 @@ export default function DashboardPage() {
             <CurrencyDollarIcon className="h-8 w-8 text-blue-600 opacity-80" />
           </div>
         </div>
-        
+
         <div className={simple.card()}>
           <div className={simple.section('flex items-center justify-between')}>
             <div>
@@ -156,7 +156,7 @@ export default function DashboardPage() {
             <ClipboardDocumentListIcon className="h-8 w-8 text-blue-600 opacity-80" />
           </div>
         </div>
-        
+
         <div className={simple.card()}>
           <div className={simple.section('flex items-center justify-between')}>
             <div>
@@ -166,7 +166,7 @@ export default function DashboardPage() {
             <UserGroupIcon className="h-8 w-8 text-blue-600 opacity-80" />
           </div>
         </div>
-        
+
         <div className={simple.card()}>
           <div className={simple.section('flex items-center justify-between')}>
             <div>
@@ -190,7 +190,7 @@ export default function DashboardPage() {
               View All
             </Link>
           </div>
-          
+
           <div className={simple.spacing.sm}>
             {recentProjects.map((project) => (
               <div
@@ -208,12 +208,12 @@ export default function DashboardPage() {
                     ${(project.budget / 1000).toFixed(0)}K
                   </span>
                 </div>
-                
+
                 <div className="flex items-center justify-between mb-3">
                   <span className={simple.text.small()}>{project.client}</span>
                   <span className={simple.text.small()}>{project.progress}% complete</span>
                 </div>
-                
+
                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                   <div
                     className="bg-blue-600 h-2 rounded-full transition-all duration-300"

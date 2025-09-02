@@ -23,7 +23,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
-  
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -298,7 +298,7 @@ export default function SettingsPage() {
       <div>
         <h3 className="text-lg font-medium text-gray-900 dark:text-[var(--text)] mb-4">Appearance</h3>
         <ThemeSettingsSection />
-        
+
         {/* Colors Link */}
         <div className="mt-4 p-4 border border-gray-200 dark:border-token rounded-lg bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20">
           <div className="flex items-center justify-between">
@@ -532,25 +532,25 @@ export default function SettingsPage() {
               ) : (
                 renderTabContent()
               )}
-              
+
               {message && (
                 <div className={`mt-4 p-4 rounded-lg ${
-                  message.type === 'success' 
-                    ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-700' 
+                  message.type === 'success'
+                    ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-700'
                     : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-700'
                 }`}>
                   {message.text}
                 </div>
               )}
-              
+
               <div className="mt-8 pt-6 border-t border-gray-200 dark:border-token flex justify-end space-x-3">
-                <button 
+                <button
                   type="button"
                   className="px-4 py-2 border border-gray-300 dark:border-token text-gray-700 dark:text-[var(--text)] rounded-lg hover:bg-gray-50 dark:hover:bg-[var(--surface-2)] transition-colors"
                 >
                   Cancel
                 </button>
-                <button 
+                <button
                   type="button"
                   onClick={() => {
                     if (activeTab === 'general') {

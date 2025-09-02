@@ -12,5 +12,8 @@ export interface ProviderMetadata {
 export interface ChatProvider {
   meta: ProviderMetadata;
   isEnabled(): boolean;
-  chat(messages: ChatMessage[], opts: { temperature?: number; maxTokens?: number }): Promise<ChatResponse>;
+  chat(
+    messages: ChatMessage[],
+    opts: { temperature?: number; maxTokens?: number }
+  ): Promise<ChatResponse>;
 }

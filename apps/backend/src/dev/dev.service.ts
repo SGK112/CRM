@@ -34,7 +34,7 @@ export class DevService {
     @InjectModel(Invitation.name) private invitationModel: Model<Invitation>,
     @InjectModel(ShareLink.name) private shareLinkModel: Model<ShareLink>,
     @InjectModel(VoiceCall.name) private voiceCallModel: Model<VoiceCall>,
-    @InjectModel(AiTokenBalance.name) private aiTokenBalanceModel: Model<AiTokenBalance>,
+    @InjectModel(AiTokenBalance.name) private aiTokenBalanceModel: Model<AiTokenBalance>
   ) {}
 
   async setupSuperAdminAccount(email: string) {
@@ -49,7 +49,7 @@ export class DevService {
           trialEndsAt: null,
           isActive: true,
           isEmailVerified: true,
-        }
+        },
       },
       { new: true, upsert: false }
     );
@@ -74,13 +74,13 @@ export class DevService {
         subscriptionStatus: updatedUser.subscriptionStatus,
         isActive: updatedUser.isActive,
         isEmailVerified: updatedUser.isEmailVerified,
-      }
+      },
     };
   }
 
   async verifyUserAccess(user: any) {
     const fullUser = await this.userModel.findById(user.sub).lean();
-    
+
     return {
       userId: fullUser._id,
       email: fullUser.email,
@@ -129,12 +129,12 @@ export class DevService {
       ];
 
       // Delete all non-admin users
-      const deletedUsersResult = await this.userModel.deleteMany({ 
-        _id: { $ne: adminUser._id } 
+      const deletedUsersResult = await this.userModel.deleteMany({
+        _id: { $ne: adminUser._id },
       });
       results.push({
         collection: 'Users (except admin)',
-        deletedCount: deletedUsersResult.deletedCount
+        deletedCount: deletedUsersResult.deletedCount,
       });
 
       // Delete all other collections completely
@@ -143,13 +143,13 @@ export class DevService {
           const result = await (collection.model as any).deleteMany({});
           results.push({
             collection: collection.name,
-            deletedCount: result.deletedCount
+            deletedCount: result.deletedCount,
           });
         } catch (error) {
           results.push({
             collection: collection.name,
             error: error.message,
-            deletedCount: 0
+            deletedCount: 0,
           });
         }
       }
@@ -164,21 +164,20 @@ export class DevService {
         preservedAdminUser: {
           id: adminUser._id,
           email: adminUser.email,
-          role: adminUser.role
+          role: adminUser.role,
         },
         results,
         duration: `${duration}ms`,
         resetAt: resetEndTime.toISOString(),
-        totalItemsDeleted: results.reduce((sum, r) => sum + (r.deletedCount || 0), 0)
+        totalItemsDeleted: results.reduce((sum, r) => sum + (r.deletedCount || 0), 0),
       };
-
     } catch (error) {
       return {
         success: false,
         message: 'Failed to reset data',
         error: error.message,
         results,
-        resetAt: new Date().toISOString()
+        resetAt: new Date().toISOString(),
       };
     }
   }

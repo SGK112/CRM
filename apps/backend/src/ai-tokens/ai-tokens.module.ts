@@ -5,7 +5,9 @@ import { AiTokensService } from './ai-tokens.service';
 import { AiTokensController } from './ai-tokens.controller';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: AiTokenBalance.name, schema: AiTokenBalanceSchema }])],
+  imports: [
+    MongooseModule.forFeature([{ name: AiTokenBalance.name, schema: AiTokenBalanceSchema }]),
+  ],
   providers: [AiTokensService],
   controllers: [AiTokensController],
   exports: [AiTokensService],

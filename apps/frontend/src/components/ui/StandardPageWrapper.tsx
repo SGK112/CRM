@@ -22,10 +22,10 @@ export function StandardPageWrapper({
   subtitle,
   icon,
   headerActions,
-  className = ''
+  className = '',
 }: StandardPageWrapperProps) {
   return (
-    <div 
+    <div
       className={`
         min-h-screen flex flex-col
         transition-all duration-300 ease-in-out
@@ -38,7 +38,7 @@ export function StandardPageWrapper({
     >
       {/* Header */}
       {(title || headerActions) && (
-        <header 
+        <header
           className="sticky top-0 z-10"
           style={{
             backgroundColor: 'var(--surface-1)',
@@ -51,7 +51,7 @@ export function StandardPageWrapper({
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center space-x-4">
                 {icon && (
-                  <div 
+                  <div
                     className="w-8 h-8 flex items-center justify-center rounded-lg"
                     style={{
                       backgroundColor: 'var(--accent)',
@@ -63,7 +63,7 @@ export function StandardPageWrapper({
                 )}
                 <div>
                   {title && (
-                    <h1 
+                    <h1
                       className="text-2xl font-bold tracking-tight"
                       style={{ color: 'var(--text)' }}
                     >
@@ -71,20 +71,13 @@ export function StandardPageWrapper({
                     </h1>
                   )}
                   {subtitle && (
-                    <p 
-                      className="text-sm mt-1"
-                      style={{ color: 'var(--text-muted)' }}
-                    >
+                    <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
                       {subtitle}
                     </p>
                   )}
                 </div>
               </div>
-              {headerActions && (
-                <div className="flex items-center space-x-3">
-                  {headerActions}
-                </div>
-              )}
+              {headerActions && <div className="flex items-center space-x-3">{headerActions}</div>}
             </div>
           </div>
         </header>
@@ -92,9 +85,7 @@ export function StandardPageWrapper({
 
       {/* Main Content */}
       <main className="flex-1">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {children}
-        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">{children}</div>
       </main>
     </div>
   );
@@ -118,10 +109,10 @@ export function StandardSection({
   title,
   subtitle,
   actions,
-  headerActions
+  headerActions,
 }: StandardSectionProps) {
   return (
-    <div 
+    <div
       className={`
         mb-8 last:mb-0
         ${className}
@@ -129,25 +120,19 @@ export function StandardSection({
       style={{
         backgroundColor: 'var(--bg)',
         color: 'var(--text)',
-        minHeight: 'calc(100vh - 140px)'
+        minHeight: 'calc(100vh - 140px)',
       }}
     >
       {(title || subtitle || actions || headerActions) && (
         <div className="flex items-center justify-between mb-6">
           <div>
             {title && (
-              <h2 
-                className="text-xl font-semibold"
-                style={{ color: 'var(--text)' }}
-              >
+              <h2 className="text-xl font-semibold" style={{ color: 'var(--text)' }}>
                 {title}
               </h2>
             )}
             {subtitle && (
-              <p 
-                className="text-sm mt-1"
-                style={{ color: 'var(--text-muted)' }}
-              >
+              <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
                 {subtitle}
               </p>
             )}
@@ -181,14 +166,14 @@ export function StandardCard({
   className = '',
   padding = 'lg',
   hover = true,
-  gradient = false
+  gradient = false,
 }: StandardCardProps) {
   const paddingClasses = {
-    'none': '',
-    'sm': 'p-3',
-    'md': 'p-4',
-    'lg': 'p-6',
-    'xl': 'p-8'
+    none: '',
+    sm: 'p-3',
+    md: 'p-4',
+    lg: 'p-6',
+    xl: 'p-8',
   };
 
   return (
@@ -204,24 +189,32 @@ export function StandardCard({
         backgroundColor: 'var(--surface-1)',
         color: 'var(--text)',
         border: '2px solid var(--border)',
-        boxShadow: 'var(--shadow-sm)'
+        boxShadow: 'var(--shadow-sm)',
       }}
-      onMouseEnter={hover ? (e) => {
-        e.currentTarget.style.borderColor = 'var(--accent)';
-        e.currentTarget.style.boxShadow = 'var(--shadow-xl)';
-        e.currentTarget.style.transform = 'scale(1.02) translateY(-2px)';
-      } : undefined}
-      onMouseLeave={hover ? (e) => {
-        e.currentTarget.style.borderColor = 'var(--border)';
-        e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
-        e.currentTarget.style.transform = 'scale(1) translateY(0)';
-      } : undefined}
+      onMouseEnter={
+        hover
+          ? e => {
+              e.currentTarget.style.borderColor = 'var(--accent)';
+              e.currentTarget.style.boxShadow = 'var(--shadow-xl)';
+              e.currentTarget.style.transform = 'scale(1.02) translateY(-2px)';
+            }
+          : undefined
+      }
+      onMouseLeave={
+        hover
+          ? e => {
+              e.currentTarget.style.borderColor = 'var(--border)';
+              e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
+              e.currentTarget.style.transform = 'scale(1) translateY(0)';
+            }
+          : undefined
+      }
     >
       {gradient && (
         <div
           className="absolute inset-0 opacity-10"
           style={{
-            background: 'linear-gradient(135deg, var(--accent) 0%, transparent 70%)'
+            background: 'linear-gradient(135deg, var(--accent) 0%, transparent 70%)',
           }}
         />
       )}
@@ -244,7 +237,7 @@ export function StandardGrid({
   children,
   cols = 3,
   gap = 'md',
-  className = ''
+  className = '',
 }: StandardGridProps) {
   const gridClasses = {
     1: 'grid-cols-1',
@@ -252,20 +245,18 @@ export function StandardGrid({
     3: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
     4: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4',
     5: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5',
-    6: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6'
+    6: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6',
   };
 
   const gapClasses = {
-    'sm': 'gap-3',
-    'md': 'gap-4',
-    'lg': 'gap-6',
-    'xl': 'gap-8'
+    sm: 'gap-3',
+    md: 'gap-4',
+    lg: 'gap-6',
+    xl: 'gap-8',
   };
 
   return (
-    <div className={`grid ${gridClasses[cols]} ${gapClasses[gap]} ${className}`}>
-      {children}
-    </div>
+    <div className={`grid ${gridClasses[cols]} ${gapClasses[gap]} ${className}`}>{children}</div>
   );
 }
 
@@ -306,13 +297,15 @@ export function StandardButton({
   `;
 
   const sizeClasses = {
-    'sm': 'px-3 py-1.5 text-sm',
-    'md': 'px-4 py-2 text-sm',
-    'lg': 'px-6 py-3 text-base'
+    sm: 'px-3 py-1.5 text-sm',
+    md: 'px-4 py-2 text-sm',
+    lg: 'px-6 py-3 text-base',
   };
 
   const Component = as || (href ? Link : 'button');
-  const componentProps = href ? { href, ...props } : { onClick: disabled ? undefined : onClick, ...props };
+  const componentProps = href
+    ? { href, ...props }
+    : { onClick: disabled ? undefined : onClick, ...props };
 
   const getVariantStyles = () => {
     switch (variant) {
@@ -321,27 +314,27 @@ export function StandardButton({
           background: 'linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%)',
           color: 'white',
           border: '1px solid var(--accent)',
-          boxShadow: 'var(--shadow-sm)'
+          boxShadow: 'var(--shadow-sm)',
         };
       case 'secondary':
         return {
           backgroundColor: 'var(--surface-1)',
           color: 'var(--text)',
           border: '1px solid var(--border)',
-          boxShadow: 'var(--shadow-sm)'
+          boxShadow: 'var(--shadow-sm)',
         };
       case 'ghost':
         return {
           backgroundColor: 'transparent',
           color: 'var(--text-muted)',
-          border: '1px solid transparent'
+          border: '1px solid transparent',
         };
       case 'danger':
         return {
           backgroundColor: 'var(--error)',
           color: 'white',
           border: '1px solid var(--error)',
-          boxShadow: 'var(--shadow-sm)'
+          boxShadow: 'var(--shadow-sm)',
         };
       default:
         return {};
@@ -406,12 +399,12 @@ export function StandardStat({
   trend = 'neutral',
   color,
   icon,
-  className = ''
+  className = '',
 }: StandardStatProps) {
   const trendColors = {
     up: 'var(--success)',
     down: 'var(--error)',
-    neutral: 'var(--text-muted)'
+    neutral: 'var(--text-muted)',
   };
 
   return (
@@ -423,17 +416,17 @@ export function StandardStat({
       <div className="relative z-10">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>
+            <p
+              className="text-sm font-semibold uppercase tracking-wide"
+              style={{ color: 'var(--text-muted)' }}
+            >
               {label}
             </p>
             <p className="text-3xl font-bold mt-2 mb-1" style={{ color: 'white' }}>
               {value}
             </p>
             {change && (
-              <div 
-                className="text-xs mt-1"
-                style={{ color: trendColors[trend] }}
-              >
+              <div className="text-xs mt-1" style={{ color: trendColors[trend] }}>
                 {change}
               </div>
             )}
@@ -465,12 +458,12 @@ export function StandardBadge({
   children,
   variant = 'default',
   size = 'md',
-  className = ''
+  className = '',
 }: StandardBadgeProps) {
   const sizeClasses = {
-    'sm': 'px-2 py-1 text-xs',
-    'md': 'px-3 py-1 text-sm',
-    'lg': 'px-4 py-2 text-base'
+    sm: 'px-2 py-1 text-xs',
+    md: 'px-3 py-1 text-sm',
+    lg: 'px-4 py-2 text-base',
   };
 
   const getVariantStyles = () => {
@@ -479,31 +472,31 @@ export function StandardBadge({
         return {
           backgroundColor: 'rgba(16, 185, 129, 0.1)',
           color: 'var(--success)',
-          border: '1px solid rgba(16, 185, 129, 0.2)'
+          border: '1px solid rgba(16, 185, 129, 0.2)',
         };
       case 'warning':
         return {
           backgroundColor: 'rgba(245, 158, 11, 0.1)',
           color: 'var(--warning)',
-          border: '1px solid rgba(245, 158, 11, 0.2)'
+          border: '1px solid rgba(245, 158, 11, 0.2)',
         };
       case 'error':
         return {
           backgroundColor: 'rgba(239, 68, 68, 0.1)',
           color: 'var(--error)',
-          border: '1px solid rgba(239, 68, 68, 0.2)'
+          border: '1px solid rgba(239, 68, 68, 0.2)',
         };
       case 'info':
         return {
           backgroundColor: 'rgba(2, 132, 199, 0.1)',
           color: 'var(--info)',
-          border: '1px solid rgba(2, 132, 199, 0.2)'
+          border: '1px solid rgba(2, 132, 199, 0.2)',
         };
       default:
         return {
           backgroundColor: 'var(--surface-2)',
           color: 'var(--text)',
-          border: '1px solid var(--border)'
+          border: '1px solid var(--border)',
         };
     }
   };

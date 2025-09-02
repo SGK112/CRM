@@ -1,12 +1,17 @@
-import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Appointment, AppointmentDocument } from './schemas/appointment.schema';
 import { EmailService } from '../services/email.service';
 import { TwilioService } from '../services/twilio.service';
-import { 
-  CreateAppointmentDto, 
-  UpdateAppointmentDto, 
+import {
+  CreateAppointmentDto,
+  UpdateAppointmentDto,
   AvailabilityCheckDto,
   CalendarEventDto,
   AppointmentStatus,
@@ -14,7 +19,7 @@ import {
   AppointmentFilters,
   PaginationOptions,
   AppointmentStats,
-  ConflictCheckResult
+  ConflictCheckResult,
 } from './dto/appointment.dto';
 
 @Injectable()
@@ -22,7 +27,7 @@ export class AppointmentsService {
   constructor(
     @InjectModel(Appointment.name) private appointmentModel: Model<AppointmentDocument>,
     private emailService: EmailService,
-    private twilioService: TwilioService,
+    private twilioService: TwilioService
   ) {}
 
   // Create a new appointment
@@ -51,7 +56,7 @@ export class AppointmentsService {
         preferredContactMethod: createAppointmentDto.preferredContactMethod || 'email',
         estimateId: createAppointmentDto.estimateId,
         invoiceId: createAppointmentDto.invoiceId,
-      }
+      },
     };
 
     const appointment = new this.appointmentModel(appointmentData);
@@ -89,7 +94,7 @@ export class AppointmentsService {
     if (filters.search) {
       query.$or = [
         { title: { $regex: filters.search, $options: 'i' } },
-        { description: { $regex: filters.search, $options: 'i' } }
+        { description: { $regex: filters.search, $options: 'i' } },
       ];
     }
 
@@ -113,7 +118,7 @@ export class AppointmentsService {
     const appointments = await this.appointmentModel
       .find({
         workspaceId,
-        scheduledDate: { $gte: startDate, $lte: endDate }
+        scheduledDate: { $gte: startDate, $lte: endDate },
       })
       .sort({ scheduledDate: 1 })
       .exec();
@@ -122,7 +127,9 @@ export class AppointmentsService {
       id: appointment._id.toString(),
       title: appointment.title,
       start: appointment.scheduledDate.toISOString(),
-      end: new Date(appointment.scheduledDate.getTime() + appointment.duration * 60000).toISOString(),
+      end: new Date(
+        appointment.scheduledDate.getTime() + appointment.duration * 60000
+      ).toISOString(),
       description: appointment.description,
       backgroundColor: this.getStatusColor(appointment.status),
       borderColor: this.getStatusColor(appointment.status),
@@ -134,7 +141,7 @@ export class AppointmentsService {
         clientId: appointment.clientId,
         location: appointment.location,
         assignedTo: appointment.assignedTo,
-      }
+      },
     }));
   }
 
@@ -159,10 +166,7 @@ export class AppointmentsService {
   }
 
   // Get upcoming appointments
-  async getUpcomingAppointments(
-    workspaceId: string,
-    days: number = 7
-  ): Promise<Appointment[]> {
+  async getUpcomingAppointments(workspaceId: string, days: number = 7): Promise<Appointment[]> {
     const now = new Date();
     const futureDate = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
 
@@ -170,7 +174,7 @@ export class AppointmentsService {
       .find({
         workspaceId,
         scheduledDate: { $gte: now, $lte: futureDate },
-        status: { $nin: ['cancelled', 'completed'] }
+        status: { $nin: ['cancelled', 'completed'] },
       })
       .sort({ scheduledDate: 1 })
       .exec();
@@ -191,39 +195,39 @@ export class AppointmentsService {
       weekCount,
       monthCount,
       upcomingCount,
-      overdueCount
+      overdueCount,
     ] = await Promise.all([
       this.appointmentModel.countDocuments({ workspaceId }),
       this.appointmentModel.aggregate([
         { $match: { workspaceId } },
-        { $group: { _id: '$status', count: { $sum: 1 } } }
+        { $group: { _id: '$status', count: { $sum: 1 } } },
       ]),
       this.appointmentModel.aggregate([
         { $match: { workspaceId } },
-        { $group: { _id: '$type', count: { $sum: 1 } } }
+        { $group: { _id: '$type', count: { $sum: 1 } } },
       ]),
       this.appointmentModel.countDocuments({
         workspaceId,
-        scheduledDate: { $gte: today, $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000) }
+        scheduledDate: { $gte: today, $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000) },
       }),
       this.appointmentModel.countDocuments({
         workspaceId,
-        scheduledDate: { $gte: thisWeek }
+        scheduledDate: { $gte: thisWeek },
       }),
       this.appointmentModel.countDocuments({
         workspaceId,
-        scheduledDate: { $gte: thisMonth }
+        scheduledDate: { $gte: thisMonth },
       }),
       this.appointmentModel.countDocuments({
         workspaceId,
         scheduledDate: { $gte: now },
-        status: { $nin: ['cancelled', 'completed'] }
+        status: { $nin: ['cancelled', 'completed'] },
       }),
       this.appointmentModel.countDocuments({
         workspaceId,
         scheduledDate: { $lt: now },
-        status: { $nin: ['cancelled', 'completed'] }
-      })
+        status: { $nin: ['cancelled', 'completed'] },
+      }),
     ]);
 
     const byStatus: Record<string, number> = {};
@@ -244,7 +248,7 @@ export class AppointmentsService {
       thisWeek: weekCount,
       thisMonth: monthCount,
       upcoming: upcomingCount,
-      overdue: overdueCount
+      overdue: overdueCount,
     };
   }
 
@@ -253,23 +257,20 @@ export class AppointmentsService {
     const appointments = await this.appointmentModel
       .find({
         workspaceId,
-        status: { $nin: ['cancelled', 'completed'] }
+        status: { $nin: ['cancelled', 'completed'] },
       })
       .sort({ scheduledDate: 1 })
       .exec();
 
     const conflicts: Appointment[] = [];
-    
+
     for (let i = 0; i < appointments.length - 1; i++) {
       const current = appointments[i];
       const next = appointments[i + 1];
-      
+
       const currentEnd = new Date(current.scheduledDate.getTime() + current.duration * 60000);
-      
-      if (
-        current.assignedTo === next.assignedTo &&
-        currentEnd > next.scheduledDate
-      ) {
+
+      if (current.assignedTo === next.assignedTo && currentEnd > next.scheduledDate) {
         if (!conflicts.find(a => (a as any)._id.equals((current as any)._id))) {
           conflicts.push(current);
         }
@@ -300,7 +301,7 @@ export class AppointmentsService {
 
     // Check for conflicts if rescheduling
     if (updateAppointmentDto.scheduledDate || updateAppointmentDto.duration) {
-      const newDate = updateAppointmentDto.scheduledDate 
+      const newDate = updateAppointmentDto.scheduledDate
         ? new Date(updateAppointmentDto.scheduledDate)
         : appointment.scheduledDate;
       const newDuration = updateAppointmentDto.duration || appointment.duration;
@@ -325,24 +326,30 @@ export class AppointmentsService {
     }
 
     // Update metadata
-    if (updateAppointmentDto.priority || updateAppointmentDto.followUpRequired || 
-        updateAppointmentDto.preferredContactMethod || updateAppointmentDto.estimateId || 
-        updateAppointmentDto.invoiceId) {
+    if (
+      updateAppointmentDto.priority ||
+      updateAppointmentDto.followUpRequired ||
+      updateAppointmentDto.preferredContactMethod ||
+      updateAppointmentDto.estimateId ||
+      updateAppointmentDto.invoiceId
+    ) {
       updateData.metadata = {
         ...appointment.metadata,
         ...(updateAppointmentDto.priority && { priority: updateAppointmentDto.priority }),
-        ...(updateAppointmentDto.followUpRequired !== undefined && { followUpRequired: updateAppointmentDto.followUpRequired }),
-        ...(updateAppointmentDto.preferredContactMethod && { preferredContactMethod: updateAppointmentDto.preferredContactMethod }),
+        ...(updateAppointmentDto.followUpRequired !== undefined && {
+          followUpRequired: updateAppointmentDto.followUpRequired,
+        }),
+        ...(updateAppointmentDto.preferredContactMethod && {
+          preferredContactMethod: updateAppointmentDto.preferredContactMethod,
+        }),
         ...(updateAppointmentDto.estimateId && { estimateId: updateAppointmentDto.estimateId }),
         ...(updateAppointmentDto.invoiceId && { invoiceId: updateAppointmentDto.invoiceId }),
       };
     }
 
-    const updated = await this.appointmentModel.findOneAndUpdate(
-      { _id: id, workspaceId },
-      updateData,
-      { new: true }
-    ).exec();
+    const updated = await this.appointmentModel
+      .findOneAndUpdate({ _id: id, workspaceId }, updateData, { new: true })
+      .exec();
 
     if (!updated) {
       throw new NotFoundException('Appointment not found');
@@ -363,11 +370,9 @@ export class AppointmentsService {
       updateData.notes = notes;
     }
 
-    const updated = await this.appointmentModel.findOneAndUpdate(
-      { _id: id, workspaceId },
-      updateData,
-      { new: true }
-    ).exec();
+    const updated = await this.appointmentModel
+      .findOneAndUpdate({ _id: id, workspaceId }, updateData, { new: true })
+      .exec();
 
     if (!updated) {
       throw new NotFoundException('Appointment not found');
@@ -398,20 +403,24 @@ export class AppointmentsService {
     );
 
     if (conflictCheck.hasConflict) {
-      throw new ConflictException('New time slot is already booked. Please choose a different time.');
+      throw new ConflictException(
+        'New time slot is already booked. Please choose a different time.'
+      );
     }
 
-    const updated = await this.appointmentModel.findOneAndUpdate(
-      { _id: id, workspaceId },
-      {
-        scheduledDate: newDate,
-        status: AppointmentStatus.SCHEDULED,
-        reminderSent: false,
-        confirmationSent: false,
-        ...(notes && { notes })
-      },
-      { new: true }
-    ).exec();
+    const updated = await this.appointmentModel
+      .findOneAndUpdate(
+        { _id: id, workspaceId },
+        {
+          scheduledDate: newDate,
+          status: AppointmentStatus.SCHEDULED,
+          reminderSent: false,
+          confirmationSent: false,
+          ...(notes && { notes }),
+        },
+        { new: true }
+      )
+      .exec();
 
     if (!updated) {
       throw new NotFoundException('Appointment not found');
@@ -425,11 +434,13 @@ export class AppointmentsService {
 
   // Confirm appointment
   async confirmAppointment(id: string, workspaceId: string): Promise<Appointment> {
-    const updated = await this.appointmentModel.findOneAndUpdate(
-      { _id: id, workspaceId },
-      { status: AppointmentStatus.CONFIRMED, confirmationSent: true },
-      { new: true }
-    ).exec();
+    const updated = await this.appointmentModel
+      .findOneAndUpdate(
+        { _id: id, workspaceId },
+        { status: AppointmentStatus.CONFIRMED, confirmationSent: true },
+        { new: true }
+      )
+      .exec();
 
     if (!updated) {
       throw new NotFoundException('Appointment not found');
@@ -439,7 +450,10 @@ export class AppointmentsService {
   }
 
   // Send reminder
-  async sendReminder(id: string, workspaceId: string): Promise<{ success: boolean; message: string }> {
+  async sendReminder(
+    id: string,
+    workspaceId: string
+  ): Promise<{ success: boolean; message: string }> {
     const appointment = await this.appointmentModel.findOne({ _id: id, workspaceId });
     if (!appointment) {
       throw new NotFoundException('Appointment not found');
@@ -447,7 +461,7 @@ export class AppointmentsService {
 
     try {
       await this.sendReminderNotification(appointment);
-      
+
       await this.appointmentModel.findOneAndUpdate(
         { _id: id, workspaceId },
         { reminderSent: true }
@@ -488,8 +502,10 @@ export class AppointmentsService {
       appointment.location ? `LOCATION:${appointment.location}` : '',
       `STATUS:${appointment.status.toUpperCase()}`,
       'END:VEVENT',
-      'END:VCALENDAR'
-    ].filter(line => line !== '').join('\r\n');
+      'END:VCALENDAR',
+    ]
+      .filter(line => line !== '')
+      .join('\r\n');
 
     return icsContent;
   }
@@ -548,18 +564,20 @@ export class AppointmentsService {
       $or: [
         // Appointment starts during this time slot
         {
-          scheduledDate: { $gte: startTime, $lt: endTime }
+          scheduledDate: { $gte: startTime, $lt: endTime },
         },
         // Appointment ends during this time slot
         {
           $expr: {
             $and: [
               { $lt: ['$scheduledDate', endTime] },
-              { $gt: [{ $add: ['$scheduledDate', { $multiply: ['$duration', 60000] }] }, startTime] }
-            ]
-          }
-        }
-      ]
+              {
+                $gt: [{ $add: ['$scheduledDate', { $multiply: ['$duration', 60000] }] }, startTime],
+              },
+            ],
+          },
+        },
+      ],
     };
 
     if (assignedTo) {
@@ -574,7 +592,8 @@ export class AppointmentsService {
 
     return {
       hasConflict: conflictingAppointments.length > 0,
-      conflictingAppointments: conflictingAppointments.length > 0 ? conflictingAppointments : undefined
+      conflictingAppointments:
+        conflictingAppointments.length > 0 ? conflictingAppointments : undefined,
     };
   }
 
@@ -585,13 +604,16 @@ export class AppointmentsService {
       completed: '#6b7280', // Gray
       cancelled: '#ef4444', // Red
       'no-show': '#f59e0b', // Amber
-      rescheduled: '#8b5cf6' // Purple
+      rescheduled: '#8b5cf6', // Purple
     };
     return colors[status as keyof typeof colors] || colors.scheduled;
   }
 
   private formatDateForICS(date: Date): string {
-    return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    return date
+      .toISOString()
+      .replace(/[-:]/g, '')
+      .replace(/\.\d{3}/, '');
   }
 
   public async sendConfirmationEmail(appointment: Appointment): Promise<void> {
@@ -611,7 +633,11 @@ export class AppointmentsService {
   }
 
   // Legacy methods for backward compatibility
-  async sendReminderSMS(appointmentId: string, clientPhone: string, clientName: string): Promise<boolean> {
+  async sendReminderSMS(
+    appointmentId: string,
+    clientPhone: string,
+    clientName: string
+  ): Promise<boolean> {
     try {
       // Implementation with TwilioService
       return true;
@@ -641,7 +667,7 @@ export class AppointmentsService {
       notes: callData.notes,
       createdBy: 'voice_agent',
       priority: 'medium' as any,
-      preferredContactMethod: 'phone'
+      preferredContactMethod: 'phone',
     };
 
     return this.create(createDto);
@@ -649,13 +675,13 @@ export class AppointmentsService {
 
   private mapStringToAppointmentType(typeString: string): AppointmentType {
     const mapping: Record<string, AppointmentType> = {
-      'consultation': AppointmentType.CONSULTATION,
-      'estimate': AppointmentType.ESTIMATE,
-      'follow_up': AppointmentType.FOLLOW_UP,
-      'installation': AppointmentType.INSTALLATION,
-      'inspection': AppointmentType.INSPECTION,
-      'site_visit': AppointmentType.SITE_VISIT,
-      'meeting': AppointmentType.MEETING
+      consultation: AppointmentType.CONSULTATION,
+      estimate: AppointmentType.ESTIMATE,
+      follow_up: AppointmentType.FOLLOW_UP,
+      installation: AppointmentType.INSTALLATION,
+      inspection: AppointmentType.INSPECTION,
+      site_visit: AppointmentType.SITE_VISIT,
+      meeting: AppointmentType.MEETING,
     };
     return mapping[typeString.toLowerCase()] || AppointmentType.OTHER;
   }

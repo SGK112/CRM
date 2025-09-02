@@ -18,7 +18,11 @@ interface ElevenLabsCallProps {
   onCallInitiated?: (callInfo: any) => void;
 }
 
-export function ElevenLabsCallComponent({ client, workspaceId, onCallInitiated }: ElevenLabsCallProps) {
+export function ElevenLabsCallComponent({
+  client,
+  workspaceId,
+  onCallInitiated,
+}: ElevenLabsCallProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [callResult, setCallResult] = useState<any>(null);
   const [purpose, setPurpose] = useState('');
@@ -30,7 +34,7 @@ export function ElevenLabsCallComponent({ client, workspaceId, onCallInitiated }
     'Follow up on quote request',
     'Discuss installation timeline',
     'Quality check and satisfaction survey',
-    'Schedule follow-up appointment'
+    'Schedule follow-up appointment',
   ];
 
   const handleInitiateCall = async () => {
@@ -40,23 +44,22 @@ export function ElevenLabsCallComponent({ client, workspaceId, onCallInitiated }
     }
 
     setIsLoading(true);
-    
+
     try {
       console.log('Initiating call for client:', client.name);
       console.log('Purpose:', purpose);
-      
+
       // Simulated call result
       const mockResult = {
         success: true,
         callId: `call_${Date.now()}`,
         status: 'initiated',
         url: `https://call.elevenlabs.io/demo/${client.id}`,
-        message: `Call initiated successfully for ${client.name}`
+        message: `Call initiated successfully for ${client.name}`,
       };
-      
+
       setCallResult(mockResult);
       onCallInitiated?.(mockResult);
-      
     } catch (error: any) {
       console.error('Call initiation failed:', error);
       alert('Failed to setup ElevenLabs call: ' + (error.message || 'Unknown error'));
@@ -80,9 +83,7 @@ export function ElevenLabsCallComponent({ client, workspaceId, onCallInitiated }
       {/* Setup Card */}
       <div className="bg-white rounded-lg shadow p-6">
         <div className="mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Voice Call Setup
-          </h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Voice Call Setup</h3>
           <p className="text-sm text-gray-600">
             Initiate an AI-powered voice call with {client.name}
           </p>
@@ -90,9 +91,7 @@ export function ElevenLabsCallComponent({ client, workspaceId, onCallInitiated }
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Client Phone
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Client Phone</label>
             <input
               type="tel"
               value={client.phone}
@@ -102,9 +101,7 @@ export function ElevenLabsCallComponent({ client, workspaceId, onCallInitiated }
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email (optional)
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email (optional)</label>
             <input
               type="email"
               value={client.email || ''}
@@ -114,9 +111,7 @@ export function ElevenLabsCallComponent({ client, workspaceId, onCallInitiated }
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Call Purpose
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Call Purpose</label>
             <div className="space-y-2">
               {defaultPurposes.map((defaultPurpose, index) => (
                 <button
@@ -135,7 +130,7 @@ export function ElevenLabsCallComponent({ client, workspaceId, onCallInitiated }
             <input
               type="text"
               value={purpose}
-              onChange={(e) => setPurpose(e.target.value)}
+              onChange={e => setPurpose(e.target.value)}
               placeholder="Or enter custom purpose..."
               className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
@@ -147,7 +142,7 @@ export function ElevenLabsCallComponent({ client, workspaceId, onCallInitiated }
             </label>
             <textarea
               value={context}
-              onChange={(e) => setContext(e.target.value)}
+              onChange={e => setContext(e.target.value)}
               rows={3}
               placeholder="Any additional context or notes for the AI assistant..."
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -169,12 +164,8 @@ export function ElevenLabsCallComponent({ client, workspaceId, onCallInitiated }
       {callResult && (
         <div className="bg-white rounded-lg shadow p-6">
           <div className="mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Call Status
-            </h3>
-            <p className="text-sm text-gray-600">
-              Your ElevenLabs call has been initiated
-            </p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Call Status</h3>
+            <p className="text-sm text-gray-600">Your ElevenLabs call has been initiated</p>
           </div>
 
           <div className="space-y-4">
@@ -192,7 +183,11 @@ export function ElevenLabsCallComponent({ client, workspaceId, onCallInitiated }
                     onClick={() => copyToClipboard(callResult.callId)}
                     className="text-gray-400 hover:text-gray-600"
                   >
-                    {copied ? <CheckCircle className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                    {copied ? (
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -217,7 +212,11 @@ export function ElevenLabsCallComponent({ client, workspaceId, onCallInitiated }
               onClick={() => copyToClipboard(callResult.url)}
               className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
             >
-              {copied ? <CheckCircle className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+              {copied ? (
+                <CheckCircle className="h-4 w-4 text-green-500" />
+              ) : (
+                <Copy className="h-4 w-4" />
+              )}
               Copy Call URL
             </button>
           </div>

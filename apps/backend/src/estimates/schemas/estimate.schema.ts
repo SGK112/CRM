@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
-@Schema({_id: false})
+@Schema({ _id: false })
 class EstimateLineItem {
   @Prop({ type: Types.ObjectId, ref: 'PriceItem' })
   priceItemId?: string;
@@ -47,7 +47,10 @@ export class Estimate {
   @Prop()
   projectId?: string;
 
-  @Prop({ default: 'draft', enum: ['draft','sent','accepted','rejected','expired','converted'] })
+  @Prop({
+    default: 'draft',
+    enum: ['draft', 'sent', 'accepted', 'rejected', 'expired', 'converted'],
+  })
   status: string;
 
   @Prop({ type: [EstimateLineItemSchema], default: [] })

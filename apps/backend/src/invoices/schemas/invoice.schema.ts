@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
-@Schema({_id:false})
+@Schema({ _id: false })
 class InvoiceLineItem {
   @Prop() name: string;
   @Prop() description?: string;
@@ -18,7 +18,7 @@ export class Invoice {
   @Prop({ required: true }) number: string; // INV-1001
   @Prop({ required: true }) clientId: string;
   @Prop() projectId?: string;
-  @Prop({ default: 'draft', enum: ['draft','sent','partial','paid','void'] }) status: string;
+  @Prop({ default: 'draft', enum: ['draft', 'sent', 'partial', 'paid', 'void'] }) status: string;
   @Prop({ type: [InvoiceLineItemSchema], default: [] }) items: InvoiceLineItem[];
   @Prop({ default: 0 }) subtotal: number;
   @Prop({ default: 0 }) taxRate: number;
@@ -31,4 +31,4 @@ export class Invoice {
 }
 export type InvoiceDocument = Invoice & Document;
 export const InvoiceSchema = SchemaFactory.createForClass(Invoice);
-InvoiceSchema.index({ workspaceId:1, number:1 }, { unique: true });
+InvoiceSchema.index({ workspaceId: 1, number: 1 }, { unique: true });

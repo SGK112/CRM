@@ -29,7 +29,7 @@ export default function ClientsPage() {
   useEffect(() => {
     const loadClients = async () => {
       setLoading(true);
-      
+
       // Mock data - replace with actual API calls
       setTimeout(() => {
         setClients([
@@ -118,7 +118,7 @@ export default function ClientsPage() {
             <UserGroupIcon className="h-8 w-8 text-blue-600 opacity-80" />
           </div>
         </div>
-        
+
         <div className={simple.card()}>
           <div className={simple.section('flex items-center justify-between')}>
             <div>
@@ -130,7 +130,7 @@ export default function ClientsPage() {
             </div>
           </div>
         </div>
-        
+
         <div className={simple.card()}>
           <div className={simple.section('flex items-center justify-between')}>
             <div>
@@ -142,7 +142,7 @@ export default function ClientsPage() {
             </div>
           </div>
         </div>
-        
+
         <div className={simple.card()}>
           <div className={simple.section('flex items-center justify-between')}>
             <div>
@@ -184,14 +184,14 @@ export default function ClientsPage() {
                   <div>
                     <h3 className={simple.text.subtitle('mb-1')}>{client.name}</h3>
                     <span className={simple.badge(
-                      client.status === 'active' ? 'success' : 
+                      client.status === 'active' ? 'success' :
                       client.status === 'lead' ? 'warning' : 'neutral'
                     )}>
                       {client.status}
                     </span>
                   </div>
                 </div>
-                
+
                 <div className={`${simple.spacing.xs} mb-4`}>
                   <div className="flex items-center gap-2">
                     <EnvelopeIcon className="h-4 w-4 text-gray-400" />

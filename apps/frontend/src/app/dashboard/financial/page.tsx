@@ -150,7 +150,7 @@ export default function SimplifiedFinancialHub() {
           <h1 className={simple.text.title()}>Sales</h1>
           <p className={simple.text.body()}>All your monetization tools in one place</p>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <Link
             href="/dashboard/estimates/new"
@@ -183,7 +183,7 @@ export default function SimplifiedFinancialHub() {
           </div>
           </div>
         </div>
-        
+
         <div className={simple.card()}>
           <div className={simple.section('py-4 sm:py-5')}>
           <div className="flex items-center gap-3">
@@ -196,7 +196,7 @@ export default function SimplifiedFinancialHub() {
           </div>
           </div>
         </div>
-        
+
         <div className={simple.card()}>
           <div className={simple.section('py-4 sm:py-5')}>
           <div className="flex items-center gap-3">
@@ -209,7 +209,7 @@ export default function SimplifiedFinancialHub() {
           </div>
           </div>
         </div>
-        
+
         <div className={simple.card()}>
           <div className={simple.section('py-4 sm:py-5')}>
           <div className="flex items-center gap-3">
@@ -326,7 +326,7 @@ export default function SimplifiedFinancialHub() {
                     <p className={simple.text.small()}>Generate professional estimates</p>
                   </div>
                 </Link>
-                
+
                 <Link
                   href="/dashboard/invoices/new"
                   className={simple.card('hover:scale-[1.02] transition-transform text-center')}
@@ -337,7 +337,7 @@ export default function SimplifiedFinancialHub() {
                     <p className={simple.text.small()}>Send invoices to clients</p>
                   </div>
                 </Link>
-                
+
                 <Link
                   href="/dashboard/catalog"
                   className={simple.card('hover:scale-[1.02] transition-transform text-center')}
@@ -394,7 +394,7 @@ export default function SimplifiedFinancialHub() {
                       <p className={simple.text.small()}>Created: {item.createdAt}</p>
                     </div>
                   </div>
-                  
+
                   <div className="text-right">
                     {item.amount && (
                       <p className="font-medium text-gray-900 dark:text-white mb-1">
@@ -422,7 +422,7 @@ export default function SimplifiedFinancialHub() {
                   </div>
                 </Link>
               ))}
-              
+
               {filteredItems.length === 0 && (
                 <div className="text-center py-12">
                   <div className="mx-auto h-12 w-12 text-gray-400 mb-4">

@@ -6,10 +6,12 @@ import { User, UserSchema } from '../users/schemas/user.schema';
 import { Workspace, WorkspaceSchema } from './schemas/workspace.schema';
 
 @Module({
-  imports: [MongooseModule.forFeature([
-    { name: User.name, schema: UserSchema },
-    { name: Workspace.name, schema: WorkspaceSchema }
-  ])],
+  imports: [
+    MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema },
+      { name: Workspace.name, schema: WorkspaceSchema },
+    ]),
+  ],
   providers: [WorkspaceUsageService],
   controllers: [WorkspaceController],
   exports: [WorkspaceUsageService],

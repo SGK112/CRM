@@ -1,11 +1,11 @@
 import { Controller, Get, Post, Body, Param, UseGuards, Request } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { QuickBooksService } from './quickbooks.service';
-import { 
-  QuickBooksConfig, 
-  SyncEstimateDto, 
-  SyncInvoiceDto, 
-  TestConnectionDto 
+import {
+  QuickBooksConfig,
+  SyncEstimateDto,
+  SyncInvoiceDto,
+  TestConnectionDto,
 } from './dto/quickbooks.dto';
 
 @Controller('quickbooks')
@@ -20,13 +20,13 @@ export class QuickBooksController {
       return {
         success: true,
         message: 'QuickBooks connection successful',
-        data: result
+        data: result,
       };
     } catch (error) {
       return {
         success: false,
         message: 'QuickBooks connection failed',
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -38,14 +38,14 @@ export class QuickBooksController {
       return {
         success: true,
         message: 'Estimate synced to QuickBooks successfully',
-        data: result
+        data: result,
       };
     } catch (error) {
       return {
         success: false,
         message: 'Failed to sync estimate to QuickBooks',
         error: error.message,
-        errors: [error.message]
+        errors: [error.message],
       };
     }
   }
@@ -57,14 +57,14 @@ export class QuickBooksController {
       return {
         success: true,
         message: 'Invoice synced to QuickBooks successfully',
-        data: result
+        data: result,
       };
     } catch (error) {
       return {
         success: false,
         message: 'Failed to sync invoice to QuickBooks',
         error: error.message,
-        errors: [error.message]
+        errors: [error.message],
       };
     }
   }
@@ -75,13 +75,13 @@ export class QuickBooksController {
       const customers = await this.quickbooksService.getCustomers(req.user.workspaceId);
       return {
         success: true,
-        data: customers
+        data: customers,
       };
     } catch (error) {
       return {
         success: false,
         message: 'Failed to fetch QuickBooks customers',
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -92,13 +92,13 @@ export class QuickBooksController {
       const items = await this.quickbooksService.getItems(req.user.workspaceId);
       return {
         success: true,
-        data: items
+        data: items,
       };
     } catch (error) {
       return {
         success: false,
         message: 'Failed to fetch QuickBooks items',
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -110,13 +110,13 @@ export class QuickBooksController {
       return {
         success: true,
         message: 'Full sync completed successfully',
-        data: result
+        data: result,
       };
     } catch (error) {
       return {
         success: false,
         message: 'Full sync failed',
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -127,13 +127,13 @@ export class QuickBooksController {
       const status = await this.quickbooksService.getSyncStatus(req.user.workspaceId);
       return {
         success: true,
-        data: status
+        data: status,
       };
     } catch (error) {
       return {
         success: false,
         message: 'Failed to get sync status',
-        error: error.message
+        error: error.message,
       };
     }
   }

@@ -1,0 +1,794 @@
+'use client';
+
+import { useEffect, useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import {
+  PlusIcon,
+  XMarkIcon,
+  DocumentTextIcon,
+  CurrencyDollarIcon,
+  WrenchScrewdriverIcon,
+  ShoppingBagIcon,
+  TrashIcon,
+} from '@heroicons/react/24/outline';
+import { Trash2 } from 'lucide-react';
+import ClientSelector from '../../../../components/ClientSelector';
+import ImageUpload from '../../../../components/forms/ImageUpload';
+import Notes from '../../../../components/forms/Notes';
+import AIWritingAssistant from '../../../../components/AIWritingAssistant';
+import { useAI } from '../../../../hooks/useAI';
+
+interface Client {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  company?: string;
+  email?: string;
+  phone?: string;
+}
+
+interface Project {
+  _id: string;
+  title: string;
+  clientId?: string;
+  status?: string;
+}
+
+interface LineItem {
+  priceItemId?: string;
+  name: string;
+  description?: string;
+  quantity: number;
+  baseCost: number;
+  marginPct: number;
+  taxable: boolean;
+  sku?: string;
+  sellPrice?: number;
+  category?: string;
+}
+
+export default function NewInvoice() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { isAIEnabled } = useAI(); // Use global AI state
+  const [clients, setClients] = useState<Client[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [selectedClientId, setSelectedClientId] = useState<string>('');
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('');
+  const [projectType, setProjectType] = useState<string>('kitchen');
+  const [items, setItems] = useState<LineItem[]>([
+    {
+      name: '',
+      quantity: 1,
+      baseCost: 0,
+      marginPct: 50,
+      taxable: true,
+      category: 'Materials',
+    },
+  ]);
+  const [discountType, setDiscountType] = useState<'percent' | 'fixed'>('percent');
+  const [discountValue, setDiscountValue] = useState<number>(0);
+  const [taxRate, setTaxRate] = useState<number>(0);
+  const [notes, setNotes] = useState<string>('');
+  const [error, setError] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [refreshClients, setRefreshClients] = useState(0);
+  const [images, setImages] = useState<any[]>([]);
+  const [invoiceNotes, setInvoiceNotes] = useState<any[]>([]);
+  const [categories, setCategories] = useState<string[]>([
+    'Materials',
+    'Labor',
+    'Equipment',
+    'Permits',
+    'Overhead',
+    'Other',
+  ]);
+  const [showNewCategoryInput, setShowNewCategoryInput] = useState<{ [key: number]: boolean }>({});
+  const [newCategoryInput, setNewCategoryInput] = useState<{ [key: number]: string }>({});
+  const token =
+    typeof window !== 'undefined'
+      ? localStorage.getItem('accessToken') || localStorage.getItem('token')
+      : '';
+
+  // Pre-fill from URL params
+  useEffect(() => {
+    const clientId = searchParams?.get('clientId');
+    const projectId = searchParams?.get('projectId');
+    const fromEstimate = searchParams?.get('fromEstimate');
+
+    if (clientId) setSelectedClientId(clientId);
+    if (projectId) setSelectedProjectId(projectId);
+
+    // If coming from estimate, fetch estimate data
+    if (fromEstimate) {
+      fetchEstimateData(fromEstimate);
+    }
+  }, [searchParams]);
+
+  const fetchEstimateData = async (estimateId: string) => {
+    if (!token) return;
+    try {
+      const res = await fetch(`/api/estimates/${estimateId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const estimate = await res.json();
+        setSelectedClientId(estimate.clientId);
+        setSelectedProjectId(estimate.projectId || '');
+        setProjectType(estimate.projectType || 'kitchen');
+        setItems(estimate.items || []);
+        setTaxRate(estimate.taxRate || 0);
+        setNotes(estimate.notes || '');
+      }
+    } catch (err) {
+      console.error('Failed to fetch estimate data:', err);
+    }
+  };
+
+  // Fetch initial data
+  useEffect(() => {
+    fetchClients();
+    fetchProjects();
+  }, [token, refreshClients]);
+
+  const fetchClients = async () => {
+    if (!token) return;
+    try {
+      const clientsRes = await fetch('/api/clients', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (clientsRes.ok) {
+        const clientsData = await clientsRes.json();
+        setClients(
+          clientsData.map((c: any) => ({
+            ...c,
+            name: `${c.firstName} ${c.lastName}`.trim(),
+          }))
+        );
+      }
+    } catch (err) {
+      console.error('Failed to fetch clients:', err);
+    }
+  };
+
+  const fetchProjects = async () => {
+    if (!token) return;
+    try {
+      const projectsRes = await fetch('/api/projects', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (projectsRes.ok) {
+        const projectsData = await projectsRes.json();
+        setProjects(projectsData);
+      }
+    } catch (err) {
+      console.error('Failed to fetch projects:', err);
+    }
+  };
+
+  // Filter projects by selected client
+  const clientProjects = projects.filter(p => p.clientId === selectedClientId);
+
+  const addItem = () => {
+    setItems([
+      ...items,
+      {
+        name: '',
+        description: '',
+        quantity: 1,
+        baseCost: 0,
+        marginPct: 50,
+        taxable: true,
+        category: 'Materials',
+      },
+    ]);
+  };
+
+  const removeItem = (index: number) => {
+    if (items.length > 1) {
+      setItems(items.filter((_, i) => i !== index));
+    }
+  };
+
+  const updateItem = (index: number, field: keyof LineItem, value: any) => {
+    const newItems = [...items];
+    newItems[index] = { ...newItems[index], [field]: value };
+
+    // Auto-calculate sell price
+    if (field === 'baseCost' || field === 'marginPct' || field === 'quantity') {
+      const item = newItems[index];
+      const cost = item.baseCost || 0;
+      const margin = item.marginPct || 0;
+      item.sellPrice = cost * (1 + margin / 100);
+    }
+
+    setItems(newItems);
+  };
+
+  // Category management functions
+  const addNewCategory = (itemIndex: number) => {
+    const categoryName = newCategoryInput[itemIndex]?.trim();
+    if (categoryName && !categories.includes(categoryName)) {
+      setCategories([...categories, categoryName]);
+      updateItem(itemIndex, 'category', categoryName);
+      setNewCategoryInput({ ...newCategoryInput, [itemIndex]: '' });
+      setShowNewCategoryInput({ ...showNewCategoryInput, [itemIndex]: false });
+    }
+  };
+
+  const handleCategoryKeyDown = (e: React.KeyboardEvent, itemIndex: number) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addNewCategory(itemIndex);
+    } else if (e.key === 'Escape') {
+      setShowNewCategoryInput({ ...showNewCategoryInput, [itemIndex]: false });
+      setNewCategoryInput({ ...newCategoryInput, [itemIndex]: '' });
+    }
+  };
+
+  // Calculate totals
+  const calculateTotals = () => {
+    const subtotalCost = items.reduce((sum, item) => sum + item.baseCost * item.quantity, 0);
+    const subtotalSell = items.reduce((sum, item) => {
+      const sellPrice = item.baseCost * (1 + item.marginPct / 100);
+      return sum + sellPrice * item.quantity;
+    }, 0);
+
+    let discountAmount = 0;
+    if (discountType === 'percent') {
+      discountAmount = subtotalSell * (discountValue / 100);
+    } else {
+      discountAmount = discountValue;
+    }
+
+    const afterDiscount = Math.max(0, subtotalSell - discountAmount);
+    const taxAmount = afterDiscount * (taxRate / 100);
+    const total = afterDiscount + taxAmount;
+    const totalMargin = subtotalSell - subtotalCost;
+
+    return {
+      subtotalCost,
+      subtotalSell,
+      discountAmount,
+      taxAmount,
+      total,
+      totalMargin,
+      marginPercent: subtotalSell > 0 ? (totalMargin / subtotalSell) * 100 : 0,
+    };
+  };
+
+  const totals = calculateTotals();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!selectedClientId) {
+      setError('Please select a client');
+      return;
+    }
+
+    if (!token) {
+      setError('Authentication required');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const invoiceData = {
+        clientId: selectedClientId,
+        projectId: selectedProjectId || undefined,
+        projectType,
+        items: items.map(item => ({
+          priceItemId: item.priceItemId,
+          name: item.name,
+          description: item.description,
+          quantity: item.quantity,
+          baseCost: item.baseCost,
+          marginPct: item.marginPct,
+          taxable: item.taxable,
+          sku: item.sku,
+        })),
+        discountType,
+        discountValue,
+        taxRate,
+        notes,
+      };
+
+      const res = await fetch('/api/invoices', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(invoiceData),
+      });
+
+      if (res.ok) {
+        const created = await res.json();
+        router.push(`/dashboard/invoices/${created._id}`);
+      } else {
+        const errorText = await res.text();
+        setError(`Failed to create invoice: ${res.status} ${errorText}`);
+      }
+    } catch (err) {
+      setError('Failed to create invoice');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6 p-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold">New Invoice</h1>
+          <p className="text-sm text-[var(--text-dim)] mt-1">
+            {isAIEnabled
+              ? 'Create a professional invoice with AI-powered smart pricing and suggestions'
+              : 'Create a professional invoice with standard pricing tools'}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <button onClick={() => router.back()} className="pill pill-ghost sm">
+            Cancel
+          </button>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {error && (
+          <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
+          </div>
+        )}
+
+        {/* Client & Project Selection */}
+        <div className="surface-solid p-6">
+          <h2 className="text-lg font-medium mb-4">Client & Project</h2>
+          <div className="grid md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-[var(--text)] mb-2">
+                Select Client *
+              </label>
+              <ClientSelector
+                selectedClientId={selectedClientId}
+                onClientSelect={clientId => {
+                  setSelectedClientId(clientId);
+                  setSelectedProjectId('');
+                }}
+                clients={clients}
+                onRefreshClients={() => setRefreshClients(prev => prev + 1)}
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-[var(--text)] mb-2">
+                Project (Optional)
+              </label>
+              <select
+                value={selectedProjectId}
+                onChange={e => setSelectedProjectId(e.target.value)}
+                className="w-full p-3 bg-[var(--input-bg)] border border-[var(--border)] rounded-lg text-[var(--text)] focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent"
+                disabled={!selectedClientId}
+              >
+                <option value="">No project selected</option>
+                {clientProjects.map(project => (
+                  <option key={project._id} value={project._id}>
+                    {project.title} ({project.status})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-[var(--text)] mb-2">
+                Project Type *
+              </label>
+              <select
+                value={projectType}
+                onChange={e => setProjectType(e.target.value)}
+                className="w-full p-3 bg-[var(--input-bg)] border border-[var(--border)] rounded-lg text-[var(--text)] focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent"
+                required
+              >
+                <option value="kitchen">Kitchen</option>
+                <option value="bathroom">Bathroom</option>
+                <option value="full-house">Full House</option>
+                <option value="addition">Addition</option>
+                <option value="exterior">Exterior</option>
+                <option value="commercial">Commercial</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Line Items */}
+        <div className="surface-solid p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <h2 className="text-lg font-medium">Line Items</h2>
+              {isAIEnabled && (
+                <div className="flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-full border border-gray-200 dark:border-gray-700">
+                  <svg
+                    className="w-3 h-3 text-gray-700 dark:text-gray-300"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                  <span className="text-xs text-gray-700 dark:text-gray-300 font-medium">
+                    AI Enhanced
+                  </span>
+                </div>
+              )}
+            </div>
+            <button type="button" onClick={addItem} className="pill pill-tint-green sm">
+              <PlusIcon className="h-4 w-4 mr-1" />
+              Add Custom Item
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            {!isAIEnabled && (
+              <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+                <p className="text-sm text-gray-700 dark:text-gray-300">
+                  <strong>Basic Mode:</strong> Standard description fields without AI suggestions.
+                  Toggle AI Enhanced mode for smart suggestions and automated descriptions.
+                </p>
+              </div>
+            )}
+            {items.map((item, index) => {
+              const sellPrice = item.baseCost * (1 + item.marginPct / 100);
+              const lineTotal = sellPrice * item.quantity;
+
+              return (
+                <div key={index} className="border border-[var(--border)] rounded-lg p-4">
+                  {/* Category at the top with custom option */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2 flex-1">
+                      <label className="text-sm font-medium text-[var(--text)] min-w-fit">
+                        Category:
+                      </label>
+                      {showNewCategoryInput[index] ? (
+                        <div className="flex items-center gap-2 flex-1">
+                          <input
+                            type="text"
+                            value={newCategoryInput[index] || ''}
+                            onChange={e =>
+                              setNewCategoryInput({
+                                ...newCategoryInput,
+                                [index]: e.target.value,
+                              })
+                            }
+                            onKeyDown={e => handleCategoryKeyDown(e, index)}
+                            placeholder="Enter new category"
+                            className="flex-1 p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                            autoFocus
+                          />
+                          <button
+                            type="button"
+                            onClick={() => addNewCategory(index)}
+                            className="px-3 py-2 bg-brand-600 text-white rounded text-sm font-medium hover:bg-brand-700 transition-colors"
+                          >
+                            Add
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowNewCategoryInput({ ...showNewCategoryInput, [index]: false });
+                              setNewCategoryInput({ ...newCategoryInput, [index]: '' });
+                            }}
+                            className="px-3 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded text-sm hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 flex-1">
+                          <select
+                            value={item.category || 'Materials'}
+                            onChange={e => updateItem(index, 'category', e.target.value)}
+                            className="flex-1 p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                          >
+                            {categories.map(cat => (
+                              <option key={cat} value={cat}>
+                                {cat}
+                              </option>
+                            ))}
+                          </select>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setShowNewCategoryInput({ ...showNewCategoryInput, [index]: true })
+                            }
+                            className="flex items-center justify-center w-8 h-8 bg-brand-50 hover:bg-brand-100 dark:bg-brand-900/20 dark:hover:bg-brand-900/40 border border-brand-200 dark:border-brand-700 rounded text-brand-600 dark:text-brand-400 transition-colors"
+                            title="Add new category"
+                          >
+                            <PlusIcon className="h-4 w-4" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Item total and remove button */}
+                    <div className="flex items-center gap-2 ml-4">
+                      <span className="text-sm font-medium text-brand-600 dark:text-brand-400 min-w-fit">
+                        ${lineTotal.toFixed(2)}
+                      </span>
+                      {items.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeItem(index)}
+                          className="flex items-center justify-center w-8 h-8 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                          title="Remove item"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-[var(--text)] mb-1">
+                        Item Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={item.name}
+                        onChange={e => updateItem(index, 'name', e.target.value)}
+                        placeholder="Enter item name..."
+                        className="w-full p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-[var(--text)] mb-1">
+                        Quantity *
+                      </label>
+                      <input
+                        type="number"
+                        value={item.quantity}
+                        onChange={e => updateItem(index, 'quantity', Number(e.target.value))}
+                        className="w-full p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                        min="0.01"
+                        step="0.01"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-[var(--text)] mb-1">
+                        Unit Cost ($) *
+                      </label>
+                      <input
+                        type="number"
+                        value={item.baseCost}
+                        onChange={e => updateItem(index, 'baseCost', Number(e.target.value))}
+                        className="w-full p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                        min="0"
+                        step="0.01"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-[var(--text)] mb-1">
+                        Margin % *
+                      </label>
+                      <input
+                        type="number"
+                        value={item.marginPct}
+                        onChange={e => updateItem(index, 'marginPct', Number(e.target.value))}
+                        className="w-full p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                        min="0"
+                        step="0.1"
+                        required
+                      />
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-[var(--text)] mb-1">
+                        Description
+                      </label>
+                      {isAIEnabled ? (
+                        <AIWritingAssistant
+                          value={item.description || ''}
+                          onChange={value => updateItem(index, 'description', value)}
+                          placeholder="AI will suggest detailed descriptions..."
+                          itemName={item.name}
+                          category={item.category}
+                          className="text-sm"
+                        />
+                      ) : (
+                        <textarea
+                          value={item.description || ''}
+                          onChange={e => updateItem(index, 'description', e.target.value)}
+                          placeholder="Enter item description..."
+                          className="w-full p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent min-h-[80px] resize-y"
+                          rows={3}
+                        />
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-[var(--text)] mb-1">
+                        SKU
+                      </label>
+                      <input
+                        type="text"
+                        value={item.sku || ''}
+                        onChange={e => updateItem(index, 'sku', e.target.value)}
+                        placeholder="Optional SKU"
+                        className="w-full p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                      />
+                    </div>
+
+                    <div className="flex items-center">
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          checked={item.taxable}
+                          onChange={e => updateItem(index, 'taxable', e.target.checked)}
+                          className="rounded border-[var(--border)] text-brand-600 focus:ring-brand-500"
+                        />
+                        <span className="text-sm text-[var(--text)]">Taxable</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Price breakdown */}
+                  <div className="mt-3 pt-3 border-t border-[var(--border)] text-xs text-[var(--text-muted)]">
+                    <div className="flex gap-6">
+                      <span>Unit Price: ${sellPrice.toFixed(2)}</span>
+                      <span>Line Total: ${lineTotal.toFixed(2)}</span>
+                      <span>
+                        Line Margin: ${((sellPrice - item.baseCost) * item.quantity).toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Pricing & Tax */}
+        <div className="surface-solid p-6">
+          <h2 className="text-lg font-medium mb-4">Pricing & Tax</h2>
+          <div className="grid md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-[var(--text)] mb-1">
+                Discount Type
+              </label>
+              <select
+                value={discountType}
+                onChange={e => setDiscountType(e.target.value as 'percent' | 'fixed')}
+                className="w-full p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm"
+              >
+                <option value="percent">Percentage</option>
+                <option value="fixed">Fixed Amount</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-[var(--text)] mb-1">
+                Discount Value
+              </label>
+              <input
+                type="number"
+                value={discountValue}
+                onChange={e => setDiscountValue(Number(e.target.value))}
+                className="w-full p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm"
+                min="0"
+                step="0.01"
+                placeholder={discountType === 'percent' ? '0-100' : '$0.00'}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-[var(--text)] mb-1">
+                Tax Rate (%)
+              </label>
+              <input
+                type="number"
+                value={taxRate}
+                onChange={e => setTaxRate(Number(e.target.value))}
+                className="w-full p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm"
+                min="0"
+                max="100"
+                step="0.1"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Invoice Summary */}
+        <div className="surface-solid p-6">
+          <h2 className="text-lg font-medium mb-4">Invoice Summary</h2>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span>Subtotal (Cost):</span>
+                <span>${totals.subtotalCost.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Subtotal (Sell):</span>
+                <span>${totals.subtotalSell.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-green-600">
+                <span>Total Margin:</span>
+                <span>
+                  ${totals.totalMargin.toFixed(2)} ({totals.marginPercent.toFixed(1)}%)
+                </span>
+              </div>
+            </div>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span>Discount:</span>
+                <span>-${totals.discountAmount.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Tax ({taxRate}%):</span>
+                <span>${totals.taxAmount.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between font-bold text-lg pt-2 border-t border-[var(--border)]">
+                <span>Total:</span>
+                <span>${totals.total.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Images & Project Documentation */}
+        <div className="surface-solid p-6">
+          <h2 className="text-lg font-medium mb-4">Project Images</h2>
+          <p className="text-sm text-[var(--text-dim)] mb-4">
+            Add reference images, progress photos, or before/after shots to support your invoice
+          </p>
+          <ImageUpload
+            images={images}
+            onImagesChange={setImages}
+            maxImages={10}
+            allowedTypes={['image/jpeg', 'image/png', 'image/webp']}
+            categories={true}
+          />
+        </div>
+
+        {/* Project Notes & Documentation */}
+        <div className="surface-solid p-6">
+          <h2 className="text-lg font-medium mb-4">Project Notes</h2>
+          <p className="text-sm text-[var(--text-dim)] mb-4">
+            Document project details, client requirements, or special considerations
+          </p>
+          <Notes
+            notes={invoiceNotes}
+            onNotesChange={setInvoiceNotes}
+            allowPrivate={true}
+            categories={true}
+            currentUser={{ id: 'current-user', name: 'Current User' }}
+          />
+        </div>
+
+        {/* Submit */}
+        <div className="flex items-center justify-end space-x-4">
+          <button type="button" onClick={() => router.back()} className="pill pill-ghost">
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="pill pill-tint-green disabled:opacity-50"
+          >
+            {loading ? 'Creating...' : `Create Invoice ($${totals.total.toFixed(2)})`}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}

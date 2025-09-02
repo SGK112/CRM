@@ -7,7 +7,7 @@ import {
   PaperAirplaneIcon,
   SparklesIcon,
   UserIcon,
-  WrenchScrewdriverIcon
+  WrenchScrewdriverIcon,
 } from '@heroicons/react/24/outline';
 
 interface Message {
@@ -23,17 +23,18 @@ export default function ChatBot() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      content: "Hi! I'm your construction CRM assistant. I can help you with project management, client communications, scheduling, and more. What would you like to do today?",
+      content:
+        "Hi! I'm your construction CRM assistant. I can help you with project management, client communications, scheduling, and more. What would you like to do today?",
       sender: 'bot',
       timestamp: new Date(),
       suggestions: [
-        "Create a new project",
-        "Schedule a client meeting",
-        "Check project status",
-        "Generate invoice",
-        "Find client contact"
-      ]
-    }
+        'Create a new project',
+        'Schedule a client meeting',
+        'Check project status',
+        'Generate invoice',
+        'Find client contact',
+      ],
+    },
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -54,7 +55,7 @@ export default function ChatBot() {
       id: Date.now().toString(),
       content: message,
       sender: 'user',
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     setMessages(prev => [...prev, userMessage]);
@@ -72,99 +73,90 @@ export default function ChatBot() {
     setIsTyping(true);
 
     // Simulate bot response
-    setTimeout(() => {
-      const botResponse = generateBotResponse(message);
-      setMessages(prev => [...prev, botResponse]);
-      setIsTyping(false);
-    }, 1000 + Math.random() * 1000);
+    setTimeout(
+      () => {
+        const botResponse = generateBotResponse(message);
+        setMessages(prev => [...prev, botResponse]);
+        setIsTyping(false);
+      },
+      1000 + Math.random() * 1000
+    );
   };
 
   const generateBotResponse = (userMessage: string): Message => {
     const lowerMessage = userMessage.toLowerCase();
-    
+
     let response = '';
     let suggestions: string[] = [];
 
     if (lowerMessage.includes('project') && lowerMessage.includes('create')) {
-      response = "I'll help you create a new project! To get started, I'll need some basic information. Would you like me to open the new project form, or would you prefer to provide the details here?";
+      response =
+        "I'll help you create a new project! To get started, I'll need some basic information. Would you like me to open the new project form, or would you prefer to provide the details here?";
       suggestions = [
-        "Open project form",
-        "Provide details here",
-        "Show project templates",
-        "View existing projects"
+        'Open project form',
+        'Provide details here',
+        'Show project templates',
+        'View existing projects',
       ];
-    } else if (lowerMessage.includes('client') && (lowerMessage.includes('meeting') || lowerMessage.includes('schedule'))) {
-      response = "I can help you schedule a client meeting. I'll check your calendar availability and send them a meeting invitation. Which client would you like to meet with?";
+    } else if (
+      lowerMessage.includes('client') &&
+      (lowerMessage.includes('meeting') || lowerMessage.includes('schedule'))
+    ) {
+      response =
+        "I can help you schedule a client meeting. I'll check your calendar availability and send them a meeting invitation. Which client would you like to meet with?";
       suggestions = [
-        "Show client list",
-        "Check my calendar",
-        "Send meeting invite",
-        "View upcoming meetings"
+        'Show client list',
+        'Check my calendar',
+        'Send meeting invite',
+        'View upcoming meetings',
       ];
     } else if (lowerMessage.includes('status') || lowerMessage.includes('progress')) {
-      response = "I can show you the status of your projects. You currently have 12 active projects. Would you like to see a detailed breakdown or specific project information?";
+      response =
+        'I can show you the status of your projects. You currently have 12 active projects. Would you like to see a detailed breakdown or specific project information?';
       suggestions = [
-        "Show all projects",
-        "Projects by status",
-        "Overdue projects",
-        "This week's deadlines"
+        'Show all projects',
+        'Projects by status',
+        'Overdue projects',
+        "This week's deadlines",
       ];
     } else if (lowerMessage.includes('invoice')) {
-      response = "I can help you generate an invoice. Would you like to create a new invoice for a completed project or milestone, or do you need to review existing invoices?";
+      response =
+        'I can help you generate an invoice. Would you like to create a new invoice for a completed project or milestone, or do you need to review existing invoices?';
       suggestions = [
-        "Create new invoice",
-        "View pending invoices",
-        "Invoice templates",
-        "Payment status"
+        'Create new invoice',
+        'View pending invoices',
+        'Invoice templates',
+        'Payment status',
       ];
     } else if (lowerMessage.includes('contact') || lowerMessage.includes('client')) {
-      response = "I can help you find client contact information. You have 48 clients in your system. Would you like me to search for a specific client or show you the client directory?";
-      suggestions = [
-        "Search clients",
-        "Show all clients",
-        "Recent clients",
-        "Add new client"
-      ];
+      response =
+        'I can help you find client contact information. You have 48 clients in your system. Would you like me to search for a specific client or show you the client directory?';
+      suggestions = ['Search clients', 'Show all clients', 'Recent clients', 'Add new client'];
     } else if (lowerMessage.includes('calendar') || lowerMessage.includes('appointment')) {
-      response = "I can help with your calendar and appointments. You have 3 upcoming appointments this week. Would you like to view your schedule or book a new appointment?";
-      suggestions = [
-        "View this week",
-        "Book appointment",
-        "Reschedule meeting",
-        "Send reminders"
-      ];
+      response =
+        'I can help with your calendar and appointments. You have 3 upcoming appointments this week. Would you like to view your schedule or book a new appointment?';
+      suggestions = ['View this week', 'Book appointment', 'Reschedule meeting', 'Send reminders'];
     } else if (lowerMessage.includes('document') || lowerMessage.includes('file')) {
-      response = "I can help you manage documents and files. You can upload blueprints, contracts, permits, and other project documents. What type of document are you looking for?";
-      suggestions = [
-        "Upload blueprint",
-        "Find contract",
-        "Project documents",
-        "Client files"
-      ];
+      response =
+        'I can help you manage documents and files. You can upload blueprints, contracts, permits, and other project documents. What type of document are you looking for?';
+      suggestions = ['Upload blueprint', 'Find contract', 'Project documents', 'Client files'];
     } else if (lowerMessage.includes('blueprint') || lowerMessage.includes('design')) {
-      response = "For design and blueprints, I can connect you with our integrated designer tool. You can create floor plans, upload CAD files, or collaborate with architects. What would you like to do?";
-      suggestions = [
-        "Open designer",
-        "Upload CAD file",
-        "View blueprints",
-        "Share designs"
-      ];
+      response =
+        'For design and blueprints, I can connect you with our integrated designer tool. You can create floor plans, upload CAD files, or collaborate with architects. What would you like to do?';
+      suggestions = ['Open designer', 'Upload CAD file', 'View blueprints', 'Share designs'];
     } else if (lowerMessage.includes('payment') || lowerMessage.includes('billing')) {
-      response = "I can help with payments and billing. You can process payments, send invoices, track expenses, and manage your financial overview. What do you need assistance with?";
-      suggestions = [
-        "Process payment",
-        "Send invoice",
-        "Track expenses",
-        "Financial report"
-      ];
+      response =
+        'I can help with payments and billing. You can process payments, send invoices, track expenses, and manage your financial overview. What do you need assistance with?';
+      suggestions = ['Process payment', 'Send invoice', 'Track expenses', 'Financial report'];
     } else {
-      response = "I'm here to help with your construction business! I can assist with projects, clients, scheduling, invoicing, document management, and more. What would you like to do?";
+      response =
+        "I'm here to help with your construction business! I can assist with projects, clients, scheduling, invoicing, document management, and more. What would you like to do?";
       suggestions = [
-        "Manage projects",
-        "Handle clients",
-        "Schedule appointments",
-        "Generate reports",
-        "Upload documents"
+        'Manage projects',
+        'Handle clients',
+        'Schedule appointments',
+        'Generate reports',
+        'Upload documents',
       ];
     }
 
@@ -173,7 +165,7 @@ export default function ChatBot() {
       content: response,
       sender: 'bot',
       timestamp: new Date(),
-      suggestions
+      suggestions,
     };
   };
 
@@ -222,12 +214,14 @@ export default function ChatBot() {
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages.map((message) => (
+            {messages.map(message => (
               <div
                 key={message.id}
                 className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                <div className={`max-w-[280px] ${message.sender === 'user' ? 'order-2' : 'order-1'}`}>
+                <div
+                  className={`max-w-[280px] ${message.sender === 'user' ? 'order-2' : 'order-1'}`}
+                >
                   <div
                     className={`px-3 py-2 rounded-lg ${
                       message.sender === 'user'
@@ -237,10 +231,8 @@ export default function ChatBot() {
                   >
                     <p className="text-sm">{message.content}</p>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1 px-3">
-                    {formatTime(message.timestamp)}
-                  </p>
-                  
+                  <p className="text-xs text-gray-500 mt-1 px-3">{formatTime(message.timestamp)}</p>
+
                   {/* Suggestions */}
                   {message.suggestions && message.sender === 'bot' && (
                     <div className="mt-2 space-y-1">
@@ -256,14 +248,16 @@ export default function ChatBot() {
                     </div>
                   )}
                 </div>
-                
+
                 {/* Avatar */}
-                <div className={`flex-shrink-0 ${message.sender === 'user' ? 'order-1 ml-2' : 'order-2 mr-2'}`}>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    message.sender === 'user' 
-                      ? 'bg-blue-100' 
-                      : 'bg-orange-100'
-                  }`}>
+                <div
+                  className={`flex-shrink-0 ${message.sender === 'user' ? 'order-1 ml-2' : 'order-2 mr-2'}`}
+                >
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      message.sender === 'user' ? 'bg-blue-100' : 'bg-orange-100'
+                    }`}
+                  >
                     {message.sender === 'user' ? (
                       <UserIcon className="h-5 w-5 text-blue-600" />
                     ) : (
@@ -285,13 +279,19 @@ export default function ChatBot() {
                 <div className="bg-gray-100 rounded-lg px-3 py-2">
                   <div className="flex space-x-1">
                     <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div
+                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                      style={{ animationDelay: '0.1s' }}
+                    ></div>
+                    <div
+                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                      style={{ animationDelay: '0.2s' }}
+                    ></div>
                   </div>
                 </div>
               </div>
             )}
-            
+
             <div ref={messagesEndRef} />
           </div>
 
@@ -301,7 +301,7 @@ export default function ChatBot() {
               <input
                 type="text"
                 value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
+                onChange={e => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Ask me anything about your business..."
                 className="input flex-1"

@@ -31,7 +31,7 @@ export class PriceItem {
 
   @Prop({ type: [String], default: [] })
   tags: string[];
-  
+
   @Prop({ default: 0 })
   inventoryQty: number; // optional current on-hand quantity
 }

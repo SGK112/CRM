@@ -2,21 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
-import {
-  Elements,
-  CardElement,
-  useStripe,
-  useElements
-} from '@stripe/react-stripe-js';
-import { 
-  CreditCardIcon,
-  CheckIcon,
-  StarIcon,
-  SparklesIcon
-} from '@heroicons/react/24/outline';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { CreditCardIcon, CheckIcon, StarIcon, SparklesIcon } from '@heroicons/react/24/outline';
 
 // Initialize Stripe with fallback
-const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY 
+const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
   ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
   : Promise.resolve(null);
 
@@ -60,12 +50,12 @@ function PaymentForm({ plan, onSuccess }: { plan: Plan; onSuccess: () => void })
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${localStorage.getItem('accessToken') || localStorage.getItem('token')}`,
         },
         body: JSON.stringify({
           planId: plan.id,
-          trialDays: 14
-        })
+          trialDays: 14,
+        }),
       });
 
       const data = await response.json();
@@ -76,13 +66,12 @@ function PaymentForm({ plan, onSuccess }: { plan: Plan; onSuccess: () => void })
 
       // Redirect to Stripe Checkout
       const { error } = await stripe.redirectToCheckout({
-        sessionId: data.sessionId
+        sessionId: data.sessionId,
       });
 
       if (error) {
         throw new Error(error.message);
       }
-
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -95,7 +84,8 @@ function PaymentForm({ plan, onSuccess }: { plan: Plan; onSuccess: () => void })
       <div className="p-4 border border-gray-200 rounded-lg">
         <h3 className="text-lg font-semibold mb-4">Subscribe to {plan.name}</h3>
         <div className="text-3xl font-bold text-blue-600 mb-2">
-          ${plan.price}<span className="text-sm font-normal text-gray-500">/{plan.interval}</span>
+          ${plan.price}
+          <span className="text-sm font-normal text-gray-500">/{plan.interval}</span>
         </div>
         <p className="text-gray-600 mb-4">{plan.description}</p>
         <ul className="space-y-2">
@@ -130,7 +120,11 @@ function PaymentForm({ plan, onSuccess }: { plan: Plan; onSuccess: () => void })
 }
 
 // One-time payment form component
-function OneTimePaymentForm({ amount, description, onSuccess }: {
+function OneTimePaymentForm({
+  amount,
+  description,
+  onSuccess,
+}: {
   amount: number;
   description: string;
   onSuccess: () => void;
@@ -161,13 +155,13 @@ function OneTimePaymentForm({ amount, description, onSuccess }: {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${localStorage.getItem('accessToken') || localStorage.getItem('token')}`,
         },
         body: JSON.stringify({
           amount,
           description,
-          currency: 'usd'
-        })
+          currency: 'usd',
+        }),
       });
 
       const data = await response.json();
@@ -179,8 +173,8 @@ function OneTimePaymentForm({ amount, description, onSuccess }: {
       // Confirm payment
       const { error, paymentIntent } = await stripe.confirmCardPayment(data.clientSecret, {
         payment_method: {
-          card: cardElement
-        }
+          card: cardElement,
+        },
       });
 
       if (error) {
@@ -190,7 +184,6 @@ function OneTimePaymentForm({ amount, description, onSuccess }: {
       if (paymentIntent?.status === 'succeeded') {
         onSuccess();
       }
-
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -202,16 +195,12 @@ function OneTimePaymentForm({ amount, description, onSuccess }: {
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="p-4 border border-gray-200 rounded-lg">
         <h3 className="text-lg font-semibold mb-2">Payment Details</h3>
-        <div className="text-2xl font-bold text-blue-600 mb-2">
-          ${amount.toFixed(2)}
-        </div>
+        <div className="text-2xl font-bold text-blue-600 mb-2">${amount.toFixed(2)}</div>
         <p className="text-gray-600 mb-4">{description}</p>
       </div>
 
       <div className="p-4 border border-gray-200 rounded-lg">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Card Information
-        </label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Card Information</label>
         <CardElement
           options={{
             style: {
@@ -245,7 +234,10 @@ function OneTimePaymentForm({ amount, description, onSuccess }: {
 }
 
 // Main subscription component
-export default function SubscriptionPage({ currentPlan, onSubscriptionSuccess }: SubscriptionPageProps) {
+export default function SubscriptionPage({
+  currentPlan,
+  onSubscriptionSuccess,
+}: SubscriptionPageProps) {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [loading, setLoading] = useState(true);
@@ -267,7 +259,7 @@ export default function SubscriptionPage({ currentPlan, onSubscriptionSuccess }:
     try {
       const response = await fetch('/api/billing/plans');
       const data = await response.json();
-      
+
       if (data.success) {
         setPlans(data.plans);
       }
@@ -314,12 +306,9 @@ export default function SubscriptionPage({ currentPlan, onSubscriptionSuccess }:
   return (
     <div className="max-w-6xl mx-auto p-6">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          Choose Your Plan
-        </h1>
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">Choose Your Plan</h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Select the perfect plan for your business. Start with a 14-day free trial, 
-          cancel anytime.
+          Select the perfect plan for your business. Start with a 14-day free trial, cancel anytime.
         </p>
       </div>
 
@@ -327,9 +316,7 @@ export default function SubscriptionPage({ currentPlan, onSubscriptionSuccess }:
         <div className="mb-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
           <div className="flex">
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-yellow-800">
-                Payment System Notice
-              </h3>
+              <h3 className="text-sm font-medium text-yellow-800">Payment System Notice</h3>
               <div className="mt-2 text-sm text-yellow-700">
                 <p>{stripeError}</p>
               </div>
@@ -342,13 +329,11 @@ export default function SubscriptionPage({ currentPlan, onSubscriptionSuccess }:
         <>
           {/* Subscription Plans */}
           <div className="grid md:grid-cols-3 gap-8 mb-12">
-            {plans.map((plan) => (
+            {plans.map(plan => (
               <div
                 key={plan.id}
                 className={`relative bg-white rounded-2xl shadow-lg border-2 p-8 ${
-                  plan.recommended 
-                    ? 'border-blue-500 ring-2 ring-blue-200' 
-                    : 'border-gray-200'
+                  plan.recommended ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200'
                 }`}
               >
                 {plan.recommended && (
@@ -361,15 +346,11 @@ export default function SubscriptionPage({ currentPlan, onSubscriptionSuccess }:
                 )}
 
                 <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                    {plan.name}
-                  </h3>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
                   <p className="text-gray-600 mb-4">{plan.description}</p>
                   <div className="text-4xl font-bold text-blue-600 mb-2">
                     ${plan.price}
-                    <span className="text-lg font-normal text-gray-500">
-                      /{plan.interval}
-                    </span>
+                    <span className="text-lg font-normal text-gray-500">/{plan.interval}</span>
                   </div>
                 </div>
 
@@ -388,11 +369,7 @@ export default function SubscriptionPage({ currentPlan, onSubscriptionSuccess }:
                     plan.recommended
                       ? 'bg-blue-600 text-white hover:bg-blue-700'
                       : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
-                  } ${
-                    currentPlan === plan.id 
-                      ? 'opacity-50 cursor-not-allowed' 
-                      : ''
-                  }`}
+                  } ${currentPlan === plan.id ? 'opacity-50 cursor-not-allowed' : ''}`}
                   disabled={currentPlan === plan.id}
                 >
                   {currentPlan === plan.id ? 'Current Plan' : 'Start Free Trial'}
@@ -404,35 +381,29 @@ export default function SubscriptionPage({ currentPlan, onSubscriptionSuccess }:
           {/* One-time Payment Option */}
           <div className="bg-gray-50 rounded-2xl p-8 text-center">
             <SparklesIcon className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              One-Time Payment
-            </h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">One-Time Payment</h3>
             <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-              Need a custom solution or want to make a one-time payment? 
-              We accept payments for custom projects, additional services, or premium features.
+              Need a custom solution or want to make a one-time payment? We accept payments for
+              custom projects, additional services, or premium features.
             </p>
-            
+
             <div className="flex items-center justify-center space-x-4 mb-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Amount ($)
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Amount ($)</label>
                 <input
                   type="number"
                   value={oneTimeAmount}
-                  onChange={(e) => setOneTimeAmount(Number(e.target.value))}
+                  onChange={e => setOneTimeAmount(Number(e.target.value))}
                   className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   min="1"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
                 <input
                   type="text"
                   value={oneTimeDescription}
-                  onChange={(e) => setOneTimeDescription(e.target.value)}
+                  onChange={e => setOneTimeDescription(e.target.value)}
                   className="w-64 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="What is this payment for?"
                 />
@@ -460,10 +431,7 @@ export default function SubscriptionPage({ currentPlan, onSubscriptionSuccess }:
               </button>
 
               {paymentMode === 'subscription' && selectedPlan ? (
-                <PaymentForm
-                  plan={selectedPlan}
-                  onSuccess={handlePaymentSuccess}
-                />
+                <PaymentForm plan={selectedPlan} onSuccess={handlePaymentSuccess} />
               ) : (
                 <OneTimePaymentForm
                   amount={oneTimeAmount}
@@ -478,9 +446,7 @@ export default function SubscriptionPage({ currentPlan, onSubscriptionSuccess }:
 
       {/* Trust indicators */}
       <div className="mt-12 text-center">
-        <p className="text-sm text-gray-500 mb-4">
-          Trusted by thousands of businesses worldwide
-        </p>
+        <p className="text-sm text-gray-500 mb-4">Trusted by thousands of businesses worldwide</p>
         <div className="flex items-center justify-center space-x-6 text-gray-400">
           <div className="flex items-center">
             <CreditCardIcon className="h-6 w-6 mr-2" />

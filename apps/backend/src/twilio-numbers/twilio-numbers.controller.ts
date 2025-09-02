@@ -1,6 +1,20 @@
-import { Controller, Get, Post, Delete, Param, Body, Query, Request, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Param,
+  Body,
+  Query,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { TwilioNumbersService, AvailablePhoneNumber, PurchasePhoneNumberDto } from './twilio-numbers.service';
+import {
+  TwilioNumbersService,
+  AvailablePhoneNumber,
+  PurchasePhoneNumberDto,
+} from './twilio-numbers.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Twilio Phone Numbers')
@@ -21,9 +35,9 @@ export class TwilioNumbersController {
   ): Promise<AvailablePhoneNumber[]> {
     const workspaceId = req.user.workspaceId || req.user.sub;
     return this.twilioNumbersService.searchAvailableNumbers(
-      workspaceId, 
-      areaCode, 
-      contains, 
+      workspaceId,
+      areaCode,
+      contains,
       limit ? parseInt(limit.toString()) : 20
     );
   }
@@ -37,7 +51,7 @@ export class TwilioNumbersController {
   }
 
   @Get('my-numbers')
-  @ApiOperation({ summary: 'Get user\'s purchased phone numbers' })
+  @ApiOperation({ summary: "Get user's purchased phone numbers" })
   @ApiResponse({ status: 200, description: 'Phone numbers retrieved successfully' })
   async getUserPhoneNumbers(@Request() req) {
     const workspaceId = req.user.workspaceId || req.user.sub;
@@ -65,7 +79,7 @@ export class TwilioNumbersController {
   @ApiOperation({ summary: 'Get phone number usage statistics' })
   @ApiResponse({ status: 200, description: 'Usage statistics retrieved successfully' })
   async getPhoneNumberUsage(
-    @Request() req, 
+    @Request() req,
     @Param('id') id: string,
     @Query('month') month?: string
   ) {

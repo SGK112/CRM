@@ -19,22 +19,42 @@ export class XAIProvider implements ChatProvider {
     };
   }
 
-  isEnabled() { return !!this.apiKey; }
+  isEnabled() {
+    return !!this.apiKey;
+  }
 
-  async chat(messages: ChatMessage[], opts: { temperature?: number; maxTokens?: number }): Promise<ChatResponse> {
+  async chat(
+    messages: ChatMessage[],
+    opts: { temperature?: number; maxTokens?: number }
+  ): Promise<ChatResponse> {
     if (!this.apiKey) throw new Error('XAI API key missing');
-    const system = messages.find(m=> m.role==='system');
-    const rest = messages.filter(m=> m.role!=='system');
+    const system = messages.find(m => m.role === 'system');
+    const rest = messages.filter(m => m.role !== 'system');
     try {
-      const resp = await axios.post('https://api.x.ai/v1/chat/completions', {
-        model: this.meta.model,
-        messages: [ system ? { role: 'system', content: system.content } : undefined, ...rest ].filter(Boolean),
-        temperature: opts.temperature ?? 0.6,
-        max_tokens: opts.maxTokens ?? 512,
-      }, { headers: { Authorization: `Bearer ${this.apiKey}`, 'Content-Type':'application/json' } });
+      const resp = await axios.post(
+        'https://api.x.ai/v1/chat/completions',
+        {
+          model: this.meta.model,
+          messages: [
+            system ? { role: 'system', content: system.content } : undefined,
+            ...rest,
+          ].filter(Boolean),
+          temperature: opts.temperature ?? 0.6,
+          max_tokens: opts.maxTokens ?? 512,
+        },
+        { headers: { Authorization: `Bearer ${this.apiKey}`, 'Content-Type': 'application/json' } }
+      );
       const text = resp.data?.choices?.[0]?.message?.content || 'No reply.';
-      return { reply: text, model: this.meta.model, usage: { inputTokens: resp.data?.usage?.prompt_tokens, outputTokens: resp.data?.usage?.completion_tokens }, provider: this.meta.name };
-    } catch (e:any) {
+      return {
+        reply: text,
+        model: this.meta.model,
+        usage: {
+          inputTokens: resp.data?.usage?.prompt_tokens,
+          outputTokens: resp.data?.usage?.completion_tokens,
+        },
+        provider: this.meta.name,
+      };
+    } catch (e: any) {
       throw new Error('XAI chat error: ' + (e.response?.data?.error?.message || e.message));
     }
   }

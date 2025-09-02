@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
 interface SubscriptionInfo {
@@ -21,24 +21,32 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
   function getEmailFromToken(): string | null {
     try {
-      const token = (typeof window !== 'undefined') ? (localStorage.getItem('accessToken') || localStorage.getItem('token')) : null;
+      const token =
+        typeof window !== 'undefined'
+          ? localStorage.getItem('accessToken') || localStorage.getItem('token')
+          : null;
       if (!token) return null;
       const parts = token.split('.');
       if (parts.length < 2) return null;
       const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
       return payload?.email || payload?.user?.email || payload?.upn || null;
-    } catch { return null; }
+    } catch {
+      return null;
+    }
   }
 
   const load = async () => {
     if (typeof window === 'undefined') return;
     const token = localStorage.getItem('accessToken');
-    if (!token) { setLoading(false); return; }
+    if (!token) {
+      setLoading(false);
+      return;
+    }
     try {
       setError(null);
-  const res = await fetch(`/api/billing/me`, {
+      const res = await fetch(`/api/billing/me`, {
         headers: { Authorization: `Bearer ${token}` },
-        cache: 'no-store'
+        cache: 'no-store',
       });
       if (!res.ok) throw new Error('Failed subscription fetch');
       const data = await res.json();
@@ -60,15 +68,21 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
           setStatus('trial');
           setTrialEndsAt('2099-12-31T23:59:59.000Z');
         }
-      } catch {/* no-op */}
+      } catch {
+        /* no-op */
+      }
       setLoading(false);
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   return (
-    <SubscriptionContext.Provider value={{ plan, status, trialEndsAt, loading, error, refresh: load }}>
+    <SubscriptionContext.Provider
+      value={{ plan, status, trialEndsAt, loading, error, refresh: load }}
+    >
       {children}
     </SubscriptionContext.Provider>
   );

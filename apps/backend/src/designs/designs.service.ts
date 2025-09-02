@@ -10,7 +10,7 @@ export class DesignsService {
   constructor(
     @InjectModel(Design.name) private designModel: Model<DesignDocument>,
     @InjectModel(DesignTemplate.name) private templateModel: Model<DesignTemplateDocument>,
-    @InjectModel(DesignRevision.name) private revisionModel: Model<DesignRevisionDocument>,
+    @InjectModel(DesignRevision.name) private revisionModel: Model<DesignRevisionDocument>
   ) {}
 
   createTemplate(dto: any, workspaceId: string) {
@@ -32,18 +32,29 @@ export class DesignsService {
     return this.templateModel.findOneAndUpdate({ _id: id, workspaceId }, dto, { new: true });
   }
   deleteTemplate(id: string, workspaceId: string) {
-    return this.templateModel.findOneAndUpdate({ _id: id, workspaceId }, { isActive: false }, { new: true });
+    return this.templateModel.findOneAndUpdate(
+      { _id: id, workspaceId },
+      { isActive: false },
+      { new: true }
+    );
   }
 
   async createDesign(dto: any, user: any) {
     const { templateId, title, baseData: directBaseData } = dto;
     let baseData: any = directBaseData || {};
     if (templateId) {
-      const template = await this.templateModel.findOne({ _id: templateId, workspaceId: user.workspaceId, isActive: true });
+      const template = await this.templateModel.findOne({
+        _id: templateId,
+        workspaceId: user.workspaceId,
+        isActive: true,
+      });
       if (!template) throw new BadRequestException('Invalid template');
       // Merge template baseData over provided directBaseData only if not present
       baseData = { ...(template.baseData || {}), ...baseData };
-      await this.templateModel.updateOne({ _id: templateId }, { $inc: { usesCount: 1 }, lastUsedAt: new Date() });
+      await this.templateModel.updateOne(
+        { _id: templateId },
+        { $inc: { usesCount: 1 }, lastUsedAt: new Date() }
+      );
     }
     const design = await this.designModel.create({
       title: title || 'Untitled Design',
@@ -78,7 +89,9 @@ export class DesignsService {
   async getDesign(id: string, workspaceId: string) {
     const d = await this.designModel.findOne({ _id: id, workspaceId, isActive: true });
     if (!d) throw new NotFoundException('Design not found');
-    const revision = d.currentRevisionId ? await this.revisionModel.findById(d.currentRevisionId) : null;
+    const revision = d.currentRevisionId
+      ? await this.revisionModel.findById(d.currentRevisionId)
+      : null;
     return { design: d, revision };
   }
 
@@ -86,11 +99,19 @@ export class DesignsService {
     return this.designModel.findOneAndUpdate({ _id: id, workspaceId }, dto, { new: true });
   }
   archiveDesign(id: string, workspaceId: string) {
-    return this.designModel.findOneAndUpdate({ _id: id, workspaceId }, { isActive: false, status: 'archived' }, { new: true });
+    return this.designModel.findOneAndUpdate(
+      { _id: id, workspaceId },
+      { isActive: false, status: 'archived' },
+      { new: true }
+    );
   }
 
   async createRevision(designId: string, dto: any, user: any) {
-    const design = await this.designModel.findOne({ _id: designId, workspaceId: user.workspaceId, isActive: true });
+    const design = await this.designModel.findOne({
+      _id: designId,
+      workspaceId: user.workspaceId,
+      isActive: true,
+    });
     if (!design) throw new NotFoundException('Design not found');
     const latest = await this.revisionModel.find({ designId }).sort({ index: -1 }).limit(1);
     const nextIndex = latest.length ? latest[0].index + 1 : 1;
@@ -103,10 +124,16 @@ export class DesignsService {
       workspaceId: user.workspaceId,
     });
     if (!dto.autosave) {
-      await this.designModel.updateOne({ _id: designId }, { currentRevisionId: revision._id, updatedAt: new Date() });
+      await this.designModel.updateOne(
+        { _id: designId },
+        { currentRevisionId: revision._id, updatedAt: new Date() }
+      );
     } else {
       await this.designModel.updateOne({ _id: designId }, { currentRevisionId: revision._id });
-      const autosaves = await this.revisionModel.find({ designId, autosave: true }).sort({ createdAt: -1 }).skip(10);
+      const autosaves = await this.revisionModel
+        .find({ designId, autosave: true })
+        .sort({ createdAt: -1 })
+        .skip(10);
       const pruneIds = autosaves.map(a => a._id);
       if (pruneIds.length) await this.revisionModel.deleteMany({ _id: { $in: pruneIds } });
     }

@@ -13,8 +13,7 @@ export class IntegrationsService {
   getGoogleConfig(): IntegrationConfig {
     return {
       enabled: !!(
-        this.configService.get('GOOGLE_CLIENT_ID') &&
-        this.configService.get('GOOGLE_CLIENT_SECRET')
+        this.configService.get('GOOGLE_CLIENT_ID') && this.configService.get('GOOGLE_CLIENT_SECRET')
       ),
       credentials: {
         clientId: this.configService.get('GOOGLE_CLIENT_ID', ''),
@@ -41,8 +40,7 @@ export class IntegrationsService {
   getTwilioConfig(): IntegrationConfig {
     return {
       enabled: !!(
-        this.configService.get('TWILIO_ACCOUNT_SID') &&
-        this.configService.get('TWILIO_AUTH_TOKEN')
+        this.configService.get('TWILIO_ACCOUNT_SID') && this.configService.get('TWILIO_AUTH_TOKEN')
       ),
       credentials: {
         accountSid: this.configService.get('TWILIO_ACCOUNT_SID', ''),

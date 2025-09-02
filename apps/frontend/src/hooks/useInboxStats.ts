@@ -23,7 +23,7 @@ export function useInboxStats() {
 
       const response = await fetch('http://localhost:3001/api/notifications/count', {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
@@ -34,7 +34,7 @@ export function useInboxStats() {
           total: data.count || 0,
           unread: data.count || 0,
           starred: 0,
-          archived: 0
+          archived: 0,
         });
       }
     } catch (error) {
@@ -46,7 +46,7 @@ export function useInboxStats() {
 
   useEffect(() => {
     fetchStats();
-    
+
     // Refresh stats every 30 seconds
     const interval = setInterval(fetchStats, 30000);
     return () => clearInterval(interval);

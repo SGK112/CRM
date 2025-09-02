@@ -17,10 +17,10 @@ export class User {
   @Prop({ required: true })
   lastName: string;
 
-  @Prop({ 
-    type: String, 
+  @Prop({
+    type: String,
     enum: ['owner', 'admin', 'sales_associate', 'project_manager', 'team_member', 'client'],
-    default: 'team_member'
+    default: 'team_member',
   })
   role: string;
 
@@ -66,7 +66,7 @@ export class User {
       scope: String,
       tokenType: String,
       expiryDate: Number,
-    }
+    },
   })
   googleAuth?: {
     accessToken?: string;
@@ -102,8 +102,8 @@ export class User {
       smtpPassword: String,
       fromEmail: String,
       fromName: String,
-      secure: { type: Boolean, default: true }
-    }
+      secure: { type: Boolean, default: true },
+    },
   })
   emailConfig?: {
     provider?: string;
@@ -121,8 +121,8 @@ export class User {
       accountSid: String,
       authToken: String,
       phoneNumber: String,
-      webhookUrl: String
-    }
+      webhookUrl: String,
+    },
   })
   twilioConfig?: {
     accountSid?: string;

@@ -30,10 +30,15 @@ export interface PurchasePhoneNumberDto {
 export class TwilioNumbersService {
   constructor(
     @InjectModel(TwilioPhoneNumber.name) private phoneNumberModel: Model<TwilioPhoneNumberDocument>,
-    private readonly twilioService: TwilioService,
+    private readonly twilioService: TwilioService
   ) {}
 
-  async searchAvailableNumbers(workspaceId: string, areaCode?: string, contains?: string, limit = 20): Promise<AvailablePhoneNumber[]> {
+  async searchAvailableNumbers(
+    workspaceId: string,
+    areaCode?: string,
+    contains?: string,
+    limit = 20
+  ): Promise<AvailablePhoneNumber[]> {
     try {
       // This would integrate with Twilio's API to search for available numbers
       // For now, returning mock data with realistic phone numbers
@@ -51,18 +56,21 @@ export class TwilioNumbersService {
             voice: true,
             sms: true,
             mms: true,
-            fax: false
-          }
-        }
+            fax: false,
+          },
+        },
         // Generate more mock numbers...
       ];
 
       for (let i = 1; i < limit; i++) {
-        const randomAreaCode = areaCode || ['555', '415', '510', '650', '925'][Math.floor(Math.random() * 5)];
+        const randomAreaCode =
+          areaCode || ['555', '415', '510', '650', '925'][Math.floor(Math.random() * 5)];
         mockNumbers.push({
           phoneNumber: '+1' + randomAreaCode + Math.random().toString().slice(2, 9),
           friendlyName: `(${randomAreaCode}) ${Math.random().toString().slice(2, 5)}-${Math.random().toString().slice(2, 6)}`,
-          locality: ['San Francisco', 'Oakland', 'San Jose', 'Palo Alto', 'Berkeley'][Math.floor(Math.random() * 5)],
+          locality: ['San Francisco', 'Oakland', 'San Jose', 'Palo Alto', 'Berkeley'][
+            Math.floor(Math.random() * 5)
+          ],
           region: 'CA',
           postalCode: '9410' + Math.floor(Math.random() * 10),
           isoCountry: 'US',
@@ -72,25 +80,26 @@ export class TwilioNumbersService {
             voice: true,
             sms: true,
             mms: Math.random() > 0.3,
-            fax: Math.random() > 0.7
-          }
+            fax: Math.random() > 0.7,
+          },
         });
       }
 
-      return mockNumbers.filter(num => 
-        !contains || num.phoneNumber.includes(contains)
-      );
+      return mockNumbers.filter(num => !contains || num.phoneNumber.includes(contains));
     } catch (error) {
       console.error('Error searching available numbers:', error);
       throw new InternalServerErrorException('Failed to search available phone numbers');
     }
   }
 
-  async purchasePhoneNumber(workspaceId: string, dto: PurchasePhoneNumberDto): Promise<TwilioPhoneNumber> {
+  async purchasePhoneNumber(
+    workspaceId: string,
+    dto: PurchasePhoneNumberDto
+  ): Promise<TwilioPhoneNumber> {
     try {
       // Check if phone number is already purchased
-      const existing = await this.phoneNumberModel.findOne({ 
-        phoneNumber: dto.phoneNumber 
+      const existing = await this.phoneNumberModel.findOne({
+        phoneNumber: dto.phoneNumber,
       });
 
       if (existing) {
@@ -99,7 +108,7 @@ export class TwilioNumbersService {
 
       // Mock Twilio purchase - in production, call Twilio API
       const mockTwilioSid = 'PN' + Math.random().toString(36).substring(2, 15);
-      
+
       // Calculate monthly fee (mock pricing)
       const monthlyFee = 100; // $1.00 in cents
 
@@ -121,8 +130,8 @@ export class TwilioNumbersService {
           voice: true,
           sms: true,
           mms: true,
-          fax: false
-        }
+          fax: false,
+        },
       });
 
       // If setting as default, update other numbers
@@ -145,15 +154,17 @@ export class TwilioNumbersService {
   }
 
   async getUserPhoneNumbers(workspaceId: string): Promise<TwilioPhoneNumber[]> {
-    return this.phoneNumberModel.find({ workspaceId, status: 'active' }).sort({ isDefault: -1, purchasedAt: -1 });
+    return this.phoneNumberModel
+      .find({ workspaceId, status: 'active' })
+      .sort({ isDefault: -1, purchasedAt: -1 });
   }
 
-  async setDefaultPhoneNumber(workspaceId: string, phoneNumberId: string): Promise<TwilioPhoneNumber> {
+  async setDefaultPhoneNumber(
+    workspaceId: string,
+    phoneNumberId: string
+  ): Promise<TwilioPhoneNumber> {
     // Remove default from all numbers
-    await this.phoneNumberModel.updateMany(
-      { workspaceId, isDefault: true },
-      { isDefault: false }
-    );
+    await this.phoneNumberModel.updateMany({ workspaceId, isDefault: true }, { isDefault: false });
 
     // Set new default
     const phoneNumber = await this.phoneNumberModel.findOneAndUpdate(
@@ -170,9 +181,9 @@ export class TwilioNumbersService {
   }
 
   async cancelPhoneNumber(workspaceId: string, phoneNumberId: string): Promise<void> {
-    const phoneNumber = await this.phoneNumberModel.findOne({ 
-      _id: phoneNumberId, 
-      workspaceId 
+    const phoneNumber = await this.phoneNumberModel.findOne({
+      _id: phoneNumberId,
+      workspaceId,
     });
 
     if (!phoneNumber) {
@@ -188,7 +199,11 @@ export class TwilioNumbersService {
     await phoneNumber.save();
   }
 
-  async getPhoneNumberUsage(workspaceId: string, phoneNumberId: string, month?: string): Promise<any> {
+  async getPhoneNumberUsage(
+    workspaceId: string,
+    phoneNumberId: string,
+    month?: string
+  ): Promise<any> {
     // Mock usage data - in production, get from Twilio
     return {
       phoneNumberId,

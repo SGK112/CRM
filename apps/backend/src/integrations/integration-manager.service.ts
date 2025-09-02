@@ -23,46 +23,51 @@ export class IntegrationManagerService {
   async getAvailableIntegrations(userId: string) {
     // Return user-friendly integrations that don't require technical setup
     const userIntegrations = await this.getUserIntegrations(userId);
-    
+
     return [
       {
         name: 'Gmail',
         type: 'email',
         isConfigured: userIntegrations.email?.provider === 'gmail',
         requiresUserAuth: true,
-        setupInstructions: 'Send professional emails directly from your existing Gmail account. One-click connection - no passwords or technical setup required.',
-        connectUrl: '/api/integrations/email/connect/gmail'
+        setupInstructions:
+          'Send professional emails directly from your existing Gmail account. One-click connection - no passwords or technical setup required.',
+        connectUrl: '/api/integrations/email/connect/gmail',
       },
       {
         name: 'Outlook',
-        type: 'email', 
+        type: 'email',
         isConfigured: userIntegrations.email?.provider === 'outlook',
         requiresUserAuth: true,
-        setupInstructions: 'Send emails through your Outlook account directly from the CRM. Simple one-click authorization.',
-        connectUrl: '/api/integrations/email/connect/outlook'
+        setupInstructions:
+          'Send emails through your Outlook account directly from the CRM. Simple one-click authorization.',
+        connectUrl: '/api/integrations/email/connect/outlook',
       },
       {
         name: 'Text Messaging',
         type: 'sms',
         isConfigured: true, // We handle this with master account - always available
         requiresUserAuth: false,
-        setupInstructions: 'Send appointment reminders and updates via text message. Ready to use immediately - no setup required!',
+        setupInstructions:
+          'Send appointment reminders and updates via text message. Ready to use immediately - no setup required!',
       },
       {
-        name: 'Credit Card Processing', 
+        name: 'Credit Card Processing',
         type: 'payment',
         isConfigured: userIntegrations.payment?.provider === 'stripe',
         requiresUserAuth: true,
-        setupInstructions: 'Accept credit card payments directly through the CRM. Connect your business bank account in one step.',
-        connectUrl: '/api/integrations/stripe/connect'
+        setupInstructions:
+          'Accept credit card payments directly through the CRM. Connect your business bank account in one step.',
+        connectUrl: '/api/integrations/stripe/connect',
       },
       {
         name: 'Project Photos',
         type: 'storage',
         isConfigured: true, // We handle this with master account - always available
         requiresUserAuth: false,
-        setupInstructions: 'Store unlimited project photos securely in the cloud. Ready to use immediately - no setup required!',
-      }
+        setupInstructions:
+          'Store unlimited project photos securely in the cloud. Ready to use immediately - no setup required!',
+      },
     ];
   }
 
@@ -75,20 +80,20 @@ export class IntegrationManagerService {
     return {
       email: {
         isConfigured: false,
-        provider: null
+        provider: null,
       },
       payment: {
         isConfigured: false,
-        provider: null
+        provider: null,
       },
       storage: {
         isConfigured: true, // We provide this via master account
-        provider: 'cloudinary'
+        provider: 'cloudinary',
       },
       sms: {
         isConfigured: true, // We provide this via master account
-        provider: 'twilio'
-      }
+        provider: 'twilio',
+      },
     };
   }
 
@@ -105,14 +110,14 @@ export class IntegrationManagerService {
       email: {
         available: userEmailConfig.isConfigured || systemEmailConfig.isConfigured,
         method: userEmailConfig.isConfigured ? 'user_account' : 'system_account',
-        provider: userEmailConfig.provider || 'system'
+        provider: userEmailConfig.provider || 'system',
       },
       sms: {
         available: smsConfig.isConfigured,
         method: 'system_account',
-        provider: 'twilio'
+        provider: 'twilio',
       },
-      recommendedSetup: this.getRecommendedSetup(userEmailConfig, systemEmailConfig, smsConfig)
+      recommendedSetup: this.getRecommendedSetup(userEmailConfig, systemEmailConfig, smsConfig),
     };
   }
 
@@ -120,29 +125,29 @@ export class IntegrationManagerService {
     // TODO: Check if user has connected Gmail/Outlook
     return {
       isConfigured: false,
-      provider: null
+      provider: null,
     };
   }
 
   private getSystemEmailConfig() {
     // Check if the CRM has system-wide email configured
-    const hasSystemEmail = this.configService.get('SMTP_HOST') && 
-                          this.configService.get('SMTP_USER');
-    
+    const hasSystemEmail =
+      this.configService.get('SMTP_HOST') && this.configService.get('SMTP_USER');
+
     return {
       isConfigured: hasSystemEmail,
-      provider: hasSystemEmail ? 'system_smtp' : null
+      provider: hasSystemEmail ? 'system_smtp' : null,
     };
   }
 
   private getSystemSmsConfig() {
     // Check if the CRM has system-wide SMS configured
-    const hasSystemSms = this.configService.get('TWILIO_ACCOUNT_SID') && 
-                        this.configService.get('TWILIO_AUTH_TOKEN');
-    
+    const hasSystemSms =
+      this.configService.get('TWILIO_ACCOUNT_SID') && this.configService.get('TWILIO_AUTH_TOKEN');
+
     return {
       isConfigured: hasSystemSms,
-      provider: hasSystemSms ? 'twilio' : null
+      provider: hasSystemSms ? 'twilio' : null,
     };
   }
 
@@ -156,7 +161,7 @@ export class IntegrationManagerService {
         title: 'Connect your email',
         description: 'Connect Gmail or Outlook to send professional emails to clients',
         action: 'Connect Email Account',
-        actionUrl: '/integrations/email/connect'
+        actionUrl: '/integrations/email/connect',
       });
     }
 
@@ -167,7 +172,7 @@ export class IntegrationManagerService {
         title: 'Enable text messaging',
         description: 'Send appointment reminders and updates via text',
         action: 'Contact Support',
-        actionUrl: '/support/sms-setup'
+        actionUrl: '/support/sms-setup',
       });
     }
 
@@ -179,7 +184,7 @@ export class IntegrationManagerService {
    */
   async handleEmailOAuthCallback(provider: 'gmail' | 'outlook', code: string, userId: string) {
     this.logger.log(`Handling ${provider} OAuth callback for user ${userId}`);
-    
+
     try {
       switch (provider) {
         case 'gmail':
@@ -200,12 +205,12 @@ export class IntegrationManagerService {
     // 1. Exchange code for access token
     // 2. Store encrypted tokens in user record
     // 3. Validate connection by sending test email
-    
+
     this.logger.log(`Gmail connection simulated for user ${userId}`);
     return {
       success: true,
       provider: 'gmail',
-      message: 'Gmail connected successfully'
+      message: 'Gmail connected successfully',
     };
   }
 
@@ -214,12 +219,12 @@ export class IntegrationManagerService {
     // 1. Exchange code for access token
     // 2. Store encrypted tokens in user record
     // 3. Validate connection by sending test email
-    
+
     this.logger.log(`Outlook connection simulated for user ${userId}`);
     return {
       success: true,
       provider: 'outlook',
-      message: 'Outlook connected successfully'
+      message: 'Outlook connected successfully',
     };
   }
 }

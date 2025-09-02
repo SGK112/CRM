@@ -22,11 +22,11 @@ interface AIWritingAssistantProps {
 export default function AIWritingAssistant({
   value,
   onChange,
-  placeholder = "Enter description...",
-  itemName = "",
-  category = "",
-  className = "",
-  disabled = false
+  placeholder = 'Enter description...',
+  itemName = '',
+  category = '',
+  className = '',
+  disabled = false,
 }: AIWritingAssistantProps) {
   const [suggestion, setSuggestion] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
@@ -49,24 +49,25 @@ export default function AIWritingAssistant({
     if (lowerText.length === 0 && lowerName.length > 2) {
       // Simple category-based suggestions
       const categoryTemplates = {
-        labor: "Professional installation with skilled craftsmanship and quality workmanship",
-        materials: "High-quality materials with manufacturer warranty and professional installation",
-        permits: "Required permits and inspections for code compliance",
-        equipment: "Professional-grade equipment rental for efficient installation",
-        overhead: "Project management and administrative costs",
-        other: "Additional services and materials for project completion"
+        labor: 'Professional installation with skilled craftsmanship and quality workmanship',
+        materials:
+          'High-quality materials with manufacturer warranty and professional installation',
+        permits: 'Required permits and inspections for code compliance',
+        equipment: 'Professional-grade equipment rental for efficient installation',
+        overhead: 'Project management and administrative costs',
+        other: 'Additional services and materials for project completion',
       };
 
       // Simple name-based suggestions
       const nameKeywords = {
-        cabinet: "Custom cabinet installation with precision hardware and finishing",
-        countertop: "Professional countertop fabrication and installation",
-        flooring: "Expert flooring installation with proper preparation",
-        tile: "Precision tile installation with professional finishing",
-        plumbing: "Licensed plumbing work with code-compliant installation",
-        electrical: "Licensed electrical work meeting current safety codes",
-        paint: "Professional painting with surface preparation and quality finish",
-        drywall: "Expert drywall installation with smooth finishing"
+        cabinet: 'Custom cabinet installation with precision hardware and finishing',
+        countertop: 'Professional countertop fabrication and installation',
+        flooring: 'Expert flooring installation with proper preparation',
+        tile: 'Precision tile installation with professional finishing',
+        plumbing: 'Licensed plumbing work with code-compliant installation',
+        electrical: 'Licensed electrical work meeting current safety codes',
+        paint: 'Professional painting with surface preparation and quality finish',
+        drywall: 'Expert drywall installation with smooth finishing',
       };
 
       // Try name-based suggestions first
@@ -75,7 +76,7 @@ export default function AIWritingAssistant({
           return template;
         }
       }
-      
+
       // Fall back to category-based suggestions
       if (lowerCat && categoryTemplates[lowerCat as keyof typeof categoryTemplates]) {
         return categoryTemplates[lowerCat as keyof typeof categoryTemplates];
@@ -85,14 +86,16 @@ export default function AIWritingAssistant({
     // Only complete if user has started typing something meaningful
     if (lowerText.length >= 3 && lowerText.length <= 20) {
       const simpleCompletions = [
-        " with professional installation and warranty",
-        " including all materials and labor",
-        " with expert craftsmanship and quality finishing"
+        ' with professional installation and warranty',
+        ' including all materials and labor',
+        ' with expert craftsmanship and quality finishing',
       ];
 
       for (const completion of simpleCompletions) {
-        if (!lowerText.includes(completion.toLowerCase()) && 
-            lowerText.length + completion.length < 80) {
+        if (
+          !lowerText.includes(completion.toLowerCase()) &&
+          lowerText.length + completion.length < 80
+        ) {
           return text + completion;
         }
       }
@@ -103,21 +106,25 @@ export default function AIWritingAssistant({
 
   const fetchSuggestion = async (text: string) => {
     setIsLoading(true);
-    
+
     // Very quick AI processing for discreet UX
     await new Promise(resolve => setTimeout(resolve, 50));
-    
+
     const newSuggestion = generateSuggestion(text, itemName, category);
-    
+
     // Clear suggestion if it's no longer relevant to current text
-    if (newSuggestion && text.length > 0 && !newSuggestion.toLowerCase().startsWith(text.toLowerCase())) {
+    if (
+      newSuggestion &&
+      text.length > 0 &&
+      !newSuggestion.toLowerCase().startsWith(text.toLowerCase())
+    ) {
       setSuggestion('');
       setShowSuggestion(false);
     } else {
       setSuggestion(newSuggestion);
       setShowSuggestion(newSuggestion.length > 0 && newSuggestion !== text);
     }
-    
+
     setIsLoading(false);
   };
 
@@ -158,19 +165,19 @@ export default function AIWritingAssistant({
     if (!suggestion || suggestion === value) {
       return '';
     }
-    
+
     // Clear suggestion if user has typed past it or it no longer matches
     if (value.length > 0 && !suggestion.toLowerCase().startsWith(value.toLowerCase())) {
       setSuggestion('');
       setShowSuggestion(false);
       return '';
     }
-    
+
     // If suggestion starts with the current value, show the remainder
     if (suggestion.toLowerCase().startsWith(value.toLowerCase())) {
       return suggestion.slice(value.length);
     }
-    
+
     return '';
   };
 
@@ -180,7 +187,7 @@ export default function AIWritingAssistant({
     <div className="relative">
       <div className="relative">
         {/* Hidden div to measure text dimensions */}
-        <div 
+        <div
           ref={ghostRef}
           className="absolute opacity-0 pointer-events-none whitespace-pre-wrap break-words"
           style={{
@@ -189,7 +196,7 @@ export default function AIWritingAssistant({
             lineHeight: 'inherit',
             padding: '8px',
             border: '1px solid transparent',
-            width: '100%'
+            width: '100%',
           }}
           aria-hidden="true"
         >
@@ -200,7 +207,7 @@ export default function AIWritingAssistant({
         <textarea
           ref={inputRef}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={e => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           disabled={disabled}
@@ -210,7 +217,7 @@ export default function AIWritingAssistant({
 
         {/* Subtle ghost text overlay - very discreet */}
         {ghostText && (
-          <div 
+          <div
             className="absolute top-0 left-0 p-2 pr-20 pb-4 text-sm pointer-events-none whitespace-pre-wrap break-words z-5"
             style={{
               fontSize: 'inherit',
@@ -222,14 +229,13 @@ export default function AIWritingAssistant({
             <span className="opacity-0">{value}</span>
             {/* Very subtle suggestion text */}
             <span className="text-brand-400 dark:text-brand-600 opacity-40">
-              {suggestion.toLowerCase().startsWith(value.toLowerCase()) 
+              {suggestion.toLowerCase().startsWith(value.toLowerCase())
                 ? suggestion.slice(value.length)
-                : suggestion
-              }
+                : suggestion}
             </span>
           </div>
         )}
-        
+
         {/* Very discreet AI Indicator */}
         <div className="absolute top-2 right-2 flex items-center gap-1">
           {isLoading ? (

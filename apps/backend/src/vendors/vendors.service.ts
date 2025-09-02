@@ -20,6 +20,10 @@ export class VendorsService {
   }
 
   async update(id: string, dto: Partial<Vendor>, workspaceId: string) {
-    return this.vendorModel.findOneAndUpdate({ _id: id, workspaceId }, { $set: dto }, { new: true });
+    return this.vendorModel.findOneAndUpdate(
+      { _id: id, workspaceId },
+      { $set: dto },
+      { new: true }
+    );
   }
 }

@@ -11,17 +11,17 @@ export class Project {
   @Prop()
   description?: string;
 
-  @Prop({ 
-    type: String, 
+  @Prop({
+    type: String,
     enum: ['lead', 'proposal', 'approved', 'in_progress', 'on_hold', 'completed', 'cancelled'],
-    default: 'lead'
+    default: 'lead',
   })
   status: string;
 
-  @Prop({ 
-    type: String, 
+  @Prop({
+    type: String,
     enum: ['low', 'medium', 'high', 'urgent'],
-    default: 'medium'
+    default: 'medium',
   })
   priority: string;
 
@@ -52,9 +52,9 @@ export class Project {
       country: String,
       coordinates: {
         lat: Number,
-        lng: Number
-      }
-    }
+        lng: Number,
+      },
+    },
   })
   address?: {
     street: string;

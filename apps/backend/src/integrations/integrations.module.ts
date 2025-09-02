@@ -8,10 +8,7 @@ import { GoogleCalendarService } from './google-calendar.service';
 import { User, UserSchema } from '../users/schemas/user.schema';
 
 @Module({
-  imports: [
-    ConfigModule,
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-  ],
+  imports: [ConfigModule, MongooseModule.forFeature([{ name: User.name, schema: UserSchema }])],
   controllers: [IntegrationsController],
   providers: [IntegrationsService, IntegrationManagerService, GoogleCalendarService],
   exports: [IntegrationsService, IntegrationManagerService, GoogleCalendarService],

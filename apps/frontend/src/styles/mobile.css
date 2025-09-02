@@ -126,12 +126,12 @@
     font-size: 1.5rem;
     line-height: 2rem;
   }
-  
+
   .mobile-subtitle {
     font-size: 0.875rem;
     line-height: 1.25rem;
   }
-  
+
   .mobile-body {
     font-size: 0.875rem;
     line-height: 1.5rem;
@@ -164,7 +164,7 @@
   .mobile-button {
     transition: none;
   }
-  
+
   .mobile-card:active,
   .mobile-button:active {
     transform: none;
@@ -176,7 +176,7 @@
   .mobile-card {
     border-color: rgba(55, 65, 81, 0.5);
   }
-  
+
   .mobile-nav {
     background: rgba(17, 24, 39, 0.9);
   }
@@ -188,7 +188,7 @@
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
   }
-  
+
   .mobile-spacing {
     padding: 0.75rem;
   }
@@ -222,7 +222,7 @@
   .mobile-card-content {
     padding: 0.75rem;
   }
-  
+
   .mobile-card-title {
     font-size: 0.875rem;
   }

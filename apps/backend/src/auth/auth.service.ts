@@ -41,7 +41,7 @@ export class AuthService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     public jwtService: JwtService,
-    private twilioService: TwilioService,
+    private twilioService: TwilioService
   ) {
     // Initialize demo users only when explicitly enabled
     if (this.useDemoUsers) {
@@ -75,14 +75,16 @@ export class AuthService {
     });
   }
 
-  async register(createUserDto: RegisterDto): Promise<{ message: string; user: any; token?: string }> {
+  async register(
+    createUserDto: RegisterDto
+  ): Promise<{ message: string; user: any; token?: string }> {
     console.log('🔵 Registration attempt for:', createUserDto.email);
-    
+
     try {
       // Check if user already exists
       const existingUser = await this.userModel.findOne({ email: createUserDto.email }).exec();
       console.log('🔍 Existing user check:', existingUser ? 'Found' : 'Not found');
-      
+
       if (existingUser) {
         console.log('❌ User already exists:', createUserDto.email);
         throw new BadRequestException('User with this email already exists');
@@ -135,16 +137,15 @@ export class AuthService {
         trialEndsAt: savedUser.trialEndsAt,
         isEmailVerified: savedUser.isEmailVerified,
         isActive: savedUser.isActive,
-        createdAt: (savedUser as any).createdAt
+        createdAt: (savedUser as any).createdAt,
       };
 
       console.log('✅ Registration successful for:', createUserDto.email);
 
       return {
         message: 'User registered successfully. Please check your email to verify your account.',
-        user: responseUser
+        user: responseUser,
       };
-
     } catch (error) {
       console.error('❌ Registration error:', error);
       if (error instanceof BadRequestException) {
@@ -157,9 +158,9 @@ export class AuthService {
   async login(loginDto: LoginDto): Promise<any> {
     const { email, password } = loginDto;
 
-  // First check demo users when enabled
-  const demoUser = this.useDemoUsers ? demoUsers.get(email) : undefined;
-  if (demoUser) {
+    // First check demo users when enabled
+    const demoUser = this.useDemoUsers ? demoUsers.get(email) : undefined;
+    if (demoUser) {
       const isPasswordValid = await bcrypt.compare(password, demoUser.password);
       if (!isPasswordValid) {
         throw new UnauthorizedException('Invalid credentials');
@@ -173,7 +174,11 @@ export class AuthService {
       demoUser.lastLoginAt = new Date();
 
       // Generate JWT token
-      const payload = { email: demoUser.email, sub: demoUser.id, workspaceId: demoUser.workspaceId };
+      const payload = {
+        email: demoUser.email,
+        sub: demoUser.id,
+        workspaceId: demoUser.workspaceId,
+      };
       const accessToken = this.jwtService.sign(payload);
 
       return {
@@ -214,7 +219,9 @@ export class AuthService {
 
       // Check if email is verified
       if (!user.isEmailVerified) {
-        throw new UnauthorizedException('Please verify your email address before logging in. Check your inbox for a verification email.');
+        throw new UnauthorizedException(
+          'Please verify your email address before logging in. Check your inbox for a verification email.'
+        );
       }
 
       // Update last login
@@ -247,9 +254,9 @@ export class AuthService {
   }
 
   async validateUser(email: string, password: string): Promise<any> {
-  // Check demo users first when enabled
-  const demoUser = this.useDemoUsers ? demoUsers.get(email) : undefined;
-  if (demoUser && await bcrypt.compare(password, demoUser.password)) {
+    // Check demo users first when enabled
+    const demoUser = this.useDemoUsers ? demoUsers.get(email) : undefined;
+    if (demoUser && (await bcrypt.compare(password, demoUser.password))) {
       const { password: _, ...result } = demoUser;
       return result;
     }
@@ -257,7 +264,7 @@ export class AuthService {
     // Fall back to database
     try {
       const user = await this.userModel.findOne({ email });
-      if (user && await bcrypt.compare(password, user.password)) {
+      if (user && (await bcrypt.compare(password, user.password))) {
         const { password, ...result } = user.toObject();
         return result;
       }
@@ -293,13 +300,15 @@ export class AuthService {
     }
     try {
       return this.userModel.findOne({ email }).select('-password');
-    } catch { return null; }
+    } catch {
+      return null;
+    }
   }
 
   // Google OAuth Methods
   async findOrCreateGoogleUser(googleUser: any): Promise<any> {
-  // Check demo users first when enabled
-  const existingDemoUser = this.useDemoUsers ? demoUsers.get(googleUser.email) : undefined;
+    // Check demo users first when enabled
+    const existingDemoUser = this.useDemoUsers ? demoUsers.get(googleUser.email) : undefined;
     if (existingDemoUser) {
       // Special handling for super admin
       if (googleUser.email === 'help.remodely@gmail.com') {
@@ -319,13 +328,14 @@ export class AuthService {
       console.log('Database check failed');
     }
 
-  if (!user) {
+    if (!user) {
       // Create new user in demo store
-      const workspaceId = googleUser.email === 'help.remodely@gmail.com' 
-        ? 'super_admin_workspace' 
-        : `ws_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const workspaceId =
+        googleUser.email === 'help.remodely@gmail.com'
+          ? 'super_admin_workspace'
+          : `ws_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
+
       const newUser = {
         id: userId,
         email: googleUser.email,
@@ -367,7 +377,7 @@ export class AuthService {
           googleAuth: {
             accessToken: googleUser.accessToken,
             refreshToken: googleUser.refreshToken,
-          }
+          },
         });
         await user.save();
       } catch (error) {
@@ -410,7 +420,7 @@ export class AuthService {
   async sendPasswordResetSMS(phoneNumber: string): Promise<{ success: boolean; message: string }> {
     try {
       console.log(`🔄 Password reset request for phone: ${phoneNumber}`);
-      
+
       // Find user by phone number in demo users when enabled
       let user = null;
       if (this.useDemoUsers) {
@@ -453,10 +463,13 @@ export class AuthService {
 
       // Send SMS
       const sent = await this.twilioService.sendPasswordResetCode(phoneNumber, code);
-      
+
       if (sent) {
         console.log(`✅ Reset SMS sent successfully to ${phoneNumber}`);
-        return { success: true, message: 'Reset code sent to your phone. Check your SMS messages.' };
+        return {
+          success: true,
+          message: 'Reset code sent to your phone. Check your SMS messages.',
+        };
       } else {
         console.log(`❌ Failed to send SMS to ${phoneNumber}`);
         return { success: false, message: 'Failed to send reset code. Please try again.' };
@@ -467,7 +480,10 @@ export class AuthService {
     }
   }
 
-  async verifyPasswordResetCode(phoneNumber: string, code: string): Promise<{ success: boolean; message: string; token?: string }> {
+  async verifyPasswordResetCode(
+    phoneNumber: string,
+    code: string
+  ): Promise<{ success: boolean; message: string; token?: string }> {
     const resetData = this.passwordResetCodes.get(phoneNumber);
 
     if (!resetData) {
@@ -492,23 +508,26 @@ export class AuthService {
     // Clean up the code
     this.passwordResetCodes.delete(phoneNumber);
 
-    return { 
-      success: true, 
+    return {
+      success: true,
       message: 'Code verified successfully',
-      token: resetToken 
+      token: resetToken,
     };
   }
 
-  async resetPasswordWithToken(token: string, newPassword: string): Promise<{ success: boolean; message: string }> {
+  async resetPasswordWithToken(
+    token: string,
+    newPassword: string
+  ): Promise<{ success: boolean; message: string }> {
     try {
       const decoded = this.jwtService.verify(token);
-      
+
       if (decoded.type !== 'password_reset') {
         return { success: false, message: 'Invalid reset token' };
       }
 
       const hashedPassword = await bcrypt.hash(newPassword, 12);
-      
+
       // Update demo user if exists (when enabled)
       if (this.useDemoUsers) {
         for (const [email, user] of demoUsers.entries()) {

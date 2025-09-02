@@ -41,7 +41,7 @@ export default function PricingSelector({
   selectedItems = [],
   className = '',
   placeholder = 'Search and select items...',
-  showVendorFilter = true
+  showVendorFilter = true,
 }: PricingSelectorProps) {
   const [items, setItems] = useState<PriceItem[]>([]);
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -51,7 +51,7 @@ export default function PricingSelector({
   const [selected, setSelected] = useState<PriceItem | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const token = (typeof window !== 'undefined') ? localStorage.getItem('accessToken') : '';
+  const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : '';
 
   useEffect(() => {
     fetchData();
@@ -65,12 +65,12 @@ export default function PricingSelector({
     setLoading(true);
     try {
       const [itemsRes, vendorsRes] = await Promise.all([
-        fetch(`${API_BASE}/pricing/items`, { 
-          headers: { Authorization: `Bearer ${token}` } 
+        fetch(`${API_BASE}/pricing/items`, {
+          headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch(`${API_BASE}/vendors`, { 
-          headers: { Authorization: `Bearer ${token}` } 
-        })
+        fetch(`${API_BASE}/vendors`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
       ]);
 
       if (itemsRes.ok) {
@@ -100,11 +100,12 @@ export default function PricingSelector({
     // Filter by search query
     if (query.trim()) {
       const searchTerm = query.toLowerCase();
-      filtered = filtered.filter(item =>
-        item.name.toLowerCase().includes(searchTerm) ||
-        item.sku.toLowerCase().includes(searchTerm) ||
-        item.description?.toLowerCase().includes(searchTerm) ||
-        (item.tags || []).some(tag => tag.toLowerCase().includes(searchTerm))
+      filtered = filtered.filter(
+        item =>
+          item.name.toLowerCase().includes(searchTerm) ||
+          item.sku.toLowerCase().includes(searchTerm) ||
+          item.description?.toLowerCase().includes(searchTerm) ||
+          (item.tags || []).some(tag => tag.toLowerCase().includes(searchTerm))
       );
     }
 
@@ -118,7 +119,7 @@ export default function PricingSelector({
   const handleSelectItem = (item: PriceItem) => {
     const selectedItem: SelectedItem = {
       ...item,
-      quantity: 1
+      quantity: 1,
     };
     onItemSelect(selectedItem);
     setSelected(null);
@@ -137,11 +138,13 @@ export default function PricingSelector({
           <select
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
             value={selectedVendor}
-            onChange={(e) => setSelectedVendor(e.target.value)}
+            onChange={e => setSelectedVendor(e.target.value)}
           >
             <option value="all">All Vendors</option>
             {vendors.map(vendor => (
-              <option key={vendor._id} value={vendor._id}>{vendor.name}</option>
+              <option key={vendor._id} value={vendor._id}>
+                {vendor.name}
+              </option>
             ))}
           </select>
         </div>
@@ -154,18 +157,15 @@ export default function PricingSelector({
             <Combobox.Input
               className="w-full border-none py-2 pl-10 pr-10 text-sm leading-5 text-gray-900 dark:text-white bg-transparent focus:ring-0 focus:outline-none"
               displayValue={(item: PriceItem | null) => item?.name || ''}
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={event => setQuery(event.target.value)}
               placeholder={placeholder}
             />
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-              <ChevronUpDownIcon
-                className="h-5 w-5 text-gray-400"
-                aria-hidden="true"
-              />
+              <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
             </Combobox.Button>
           </div>
-          
+
           <Transition
             as={Fragment}
             leave="transition ease-in duration-100"
@@ -179,53 +179,60 @@ export default function PricingSelector({
                   Loading items...
                 </div>
               )}
-              
+
               {!loading && filteredItems.length === 0 && query !== '' && (
                 <div className="relative cursor-default select-none py-2 px-4 text-gray-700 dark:text-gray-300">
                   No items found.
                 </div>
               )}
-              
-              {!loading && filteredItems.map((item) => (
-                <Combobox.Option
-                  key={item._id}
-                  className={({ active }) =>
-                    `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                      active ? 'bg-blue-600 text-white' : 'text-gray-900 dark:text-white'
-                    }`
-                  }
-                  value={item}
-                >
-                  {({ selected, active }) => (
-                    <>
-                      <div className="flex justify-between">
-                        <div className="flex-1">
-                          <div className={`block truncate font-medium ${selected ? 'font-medium' : 'font-normal'}`}>
-                            {item.name}
+
+              {!loading &&
+                filteredItems.map(item => (
+                  <Combobox.Option
+                    key={item._id}
+                    className={({ active }) =>
+                      `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                        active ? 'bg-blue-600 text-white' : 'text-gray-900 dark:text-white'
+                      }`
+                    }
+                    value={item}
+                  >
+                    {({ selected, active }) => (
+                      <>
+                        <div className="flex justify-between">
+                          <div className="flex-1">
+                            <div
+                              className={`block truncate font-medium ${selected ? 'font-medium' : 'font-normal'}`}
+                            >
+                              {item.name}
+                            </div>
+                            <div
+                              className={`text-xs ${active ? 'text-blue-200' : 'text-gray-500 dark:text-gray-400'}`}
+                            >
+                              SKU: {item.sku} • {item.unit}
+                              {item.description && ` • ${item.description}`}
+                            </div>
                           </div>
-                          <div className={`text-xs ${active ? 'text-blue-200' : 'text-gray-500 dark:text-gray-400'}`}>
-                            SKU: {item.sku} • {item.unit}
-                            {item.description && ` • ${item.description}`}
+                          <div
+                            className={`text-sm ${active ? 'text-white' : 'text-gray-700 dark:text-gray-300'}`}
+                          >
+                            ${calculateSellPrice(item).toFixed(2)}
                           </div>
                         </div>
-                        <div className={`text-sm ${active ? 'text-white' : 'text-gray-700 dark:text-gray-300'}`}>
-                          ${calculateSellPrice(item).toFixed(2)}
-                        </div>
-                      </div>
-                      
-                      {selected ? (
-                        <span
-                          className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
-                            active ? 'text-white' : 'text-blue-600'
-                          }`}
-                        >
-                          <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                        </span>
-                      ) : null}
-                    </>
-                  )}
-                </Combobox.Option>
-              ))}
+
+                        {selected ? (
+                          <span
+                            className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
+                              active ? 'text-white' : 'text-blue-600'
+                            }`}
+                          >
+                            <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                          </span>
+                        ) : null}
+                      </>
+                    )}
+                  </Combobox.Option>
+                ))}
             </Combobox.Options>
           </Transition>
         </div>
@@ -238,7 +245,7 @@ export default function PricingSelector({
             Selected Items ({selectedItems.length})
           </h4>
           <div className="space-y-2">
-            {selectedItems.slice(0, 3).map((item) => (
+            {selectedItems.slice(0, 3).map(item => (
               <div key={item._id} className="flex justify-between items-center text-sm">
                 <span className="text-gray-900 dark:text-white">
                   {item.quantity}× {item.name}
@@ -258,9 +265,14 @@ export default function PricingSelector({
             <div className="flex justify-between items-center text-sm font-medium">
               <span className="text-gray-900 dark:text-white">Total:</span>
               <span className="text-gray-900 dark:text-white">
-                ${selectedItems.reduce((sum, item) => 
-                  sum + (item.customPrice || calculateSellPrice(item)) * item.quantity, 0
-                ).toFixed(2)}
+                $
+                {selectedItems
+                  .reduce(
+                    (sum, item) =>
+                      sum + (item.customPrice || calculateSellPrice(item)) * item.quantity,
+                    0
+                  )
+                  .toFixed(2)}
               </span>
             </div>
           </div>

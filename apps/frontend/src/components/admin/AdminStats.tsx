@@ -36,10 +36,10 @@ export default function AdminStats() {
   const fetchStats = async () => {
     try {
       const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
-      
+
       const response = await fetch('/api/admin/dashboard/stats', {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -103,12 +103,7 @@ export default function AdminStats() {
     <div className="space-y-6">
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="Total Users"
-          value={overview.totalUsers}
-          icon="👥"
-          color="bg-blue-500"
-        />
+        <StatCard title="Total Users" value={overview.totalUsers} icon="👥" color="bg-blue-500" />
         <StatCard
           title="Active Users"
           value={overview.activeUsers}
@@ -122,12 +117,7 @@ export default function AdminStats() {
           icon="📈"
           color="bg-purple-500"
         />
-        <StatCard
-          title="Suspended"
-          value={overview.suspendedUsers}
-          icon="⚠️"
-          color="bg-red-500"
-        />
+        <StatCard title="Suspended" value={overview.suspendedUsers} icon="⚠️" color="bg-red-500" />
       </div>
 
       {/* Charts Row */}
@@ -139,18 +129,22 @@ export default function AdminStats() {
             {subscriptionDistribution.map((sub, index) => (
               <div key={index} className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <div className={`w-3 h-3 rounded-full mr-3 ${
-                    index === 0 ? 'bg-blue-500' :
-                    index === 1 ? 'bg-green-500' :
-                    index === 2 ? 'bg-purple-500' : 'bg-gray-500'
-                  }`}></div>
+                  <div
+                    className={`w-3 h-3 rounded-full mr-3 ${
+                      index === 0
+                        ? 'bg-blue-500'
+                        : index === 1
+                          ? 'bg-green-500'
+                          : index === 2
+                            ? 'bg-purple-500'
+                            : 'bg-gray-500'
+                    }`}
+                  ></div>
                   <span className="text-sm font-medium text-gray-700 capitalize">
                     {sub._id || 'No Plan'}
                   </span>
                 </div>
-                <div className="text-sm text-gray-600">
-                  {sub.count} users
-                </div>
+                <div className="text-sm text-gray-600">{sub.count} users</div>
               </div>
             ))}
             {subscriptionDistribution.length === 0 && (
@@ -170,16 +164,14 @@ export default function AdminStats() {
                 </span>
                 <div className="flex items-center">
                   <div className="w-32 bg-gray-200 rounded-full h-2 mr-3">
-                    <div 
+                    <div
                       className="bg-blue-500 h-2 rounded-full"
-                      style={{ 
-                        width: `${Math.min((growth.count / Math.max(...userGrowth.map(g => g.count))) * 100, 100)}%` 
+                      style={{
+                        width: `${Math.min((growth.count / Math.max(...userGrowth.map(g => g.count))) * 100, 100)}%`,
                       }}
                     ></div>
                   </div>
-                  <span className="text-sm font-medium text-gray-900 w-8">
-                    {growth.count}
-                  </span>
+                  <span className="text-sm font-medium text-gray-900 w-8">{growth.count}</span>
                 </div>
               </div>
             ))}
@@ -210,15 +202,11 @@ function StatCard({ title, value, icon, color, subtitle }: StatCardProps) {
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex items-center">
-        <div className={`${color} rounded-lg p-3 text-white text-xl mr-4`}>
-          {icon}
-        </div>
+        <div className={`${color} rounded-lg p-3 text-white text-xl mr-4`}>{icon}</div>
         <div>
           <p className="text-sm font-medium text-gray-600">{title}</p>
           <p className="text-2xl font-bold text-gray-900">{value.toLocaleString()}</p>
-          {subtitle && (
-            <p className="text-xs text-gray-500 mt-1">{subtitle}</p>
-          )}
+          {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
         </div>
       </div>
     </div>

@@ -8,7 +8,7 @@ import {
   CogIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
-  XCircleIcon
+  XCircleIcon,
 } from '@heroicons/react/24/outline';
 
 interface Subscription {
@@ -51,7 +51,9 @@ interface Invoice {
 }
 
 export default function CustomerPortal() {
-  const [activeTab, setActiveTab] = useState<'subscription' | 'billing' | 'invoices'>('subscription');
+  const [activeTab, setActiveTab] = useState<'subscription' | 'billing' | 'invoices'>(
+    'subscription'
+  );
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -65,12 +67,12 @@ export default function CustomerPortal() {
   const fetchPortalData = async () => {
     try {
       setLoading(true);
-      
+
       // Fetch subscription data
       const subResponse = await fetch('/api/billing/subscription', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem('accessToken') || localStorage.getItem('token')}`,
+        },
       });
       const subData = await subResponse.json();
       if (subData.success) {
@@ -80,8 +82,8 @@ export default function CustomerPortal() {
       // Fetch payment methods
       const pmResponse = await fetch('/api/billing/payment-methods', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem('accessToken') || localStorage.getItem('token')}`,
+        },
       });
       const pmData = await pmResponse.json();
       if (pmData.success) {
@@ -91,14 +93,13 @@ export default function CustomerPortal() {
       // Fetch invoices
       const invResponse = await fetch('/api/billing/invoices', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem('accessToken') || localStorage.getItem('token')}`,
+        },
       });
       const invData = await invResponse.json();
       if (invData.success) {
         setInvoices(invData.invoices);
       }
-
     } catch (error) {
       console.error('Error fetching portal data:', error);
     } finally {
@@ -107,7 +108,12 @@ export default function CustomerPortal() {
   };
 
   const handleCancelSubscription = async () => {
-    if (!subscription || !confirm('Are you sure you want to cancel your subscription? This will take effect at the end of your current billing period.')) {
+    if (
+      !subscription ||
+      !confirm(
+        'Are you sure you want to cancel your subscription? This will take effect at the end of your current billing period.'
+      )
+    ) {
       return;
     }
 
@@ -116,8 +122,8 @@ export default function CustomerPortal() {
       const response = await fetch('/api/billing/cancel-subscription', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem('accessToken') || localStorage.getItem('token')}`,
+        },
       });
 
       const data = await response.json();
@@ -142,8 +148,8 @@ export default function CustomerPortal() {
       const response = await fetch('/api/billing/reactivate-subscription', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem('accessToken') || localStorage.getItem('token')}`,
+        },
       });
 
       const data = await response.json();
@@ -166,8 +172,8 @@ export default function CustomerPortal() {
       const response = await fetch('/api/billing/customer-portal', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem('accessToken') || localStorage.getItem('token')}`,
+        },
       });
 
       const data = await response.json();
@@ -186,11 +192,16 @@ export default function CustomerPortal() {
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'active': return 'text-green-600 bg-green-100';
-      case 'trialing': return 'text-blue-600 bg-blue-100';
-      case 'canceled': return 'text-red-600 bg-red-100';
-      case 'past_due': return 'text-orange-600 bg-orange-100';
-      default: return 'text-gray-600 bg-gray-100';
+      case 'active':
+        return 'text-green-600 bg-green-100';
+      case 'trialing':
+        return 'text-blue-600 bg-blue-100';
+      case 'canceled':
+        return 'text-red-600 bg-red-100';
+      case 'past_due':
+        return 'text-orange-600 bg-orange-100';
+      default:
+        return 'text-gray-600 bg-gray-100';
     }
   };
 
@@ -198,14 +209,14 @@ export default function CustomerPortal() {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
   };
 
   const formatCurrency = (amount: number, currency: string = 'usd') => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: currency.toUpperCase()
+      currency: currency.toUpperCase(),
     }).format(amount / 100);
   };
 
@@ -221,7 +232,9 @@ export default function CustomerPortal() {
     <div className="max-w-4xl mx-auto p-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Billing & Subscription</h1>
-        <p className="text-gray-600 mt-2">Manage your subscription, payment methods, and billing history</p>
+        <p className="text-gray-600 mt-2">
+          Manage your subscription, payment methods, and billing history
+        </p>
       </div>
 
       {/* Tab Navigation */}
@@ -230,8 +243,8 @@ export default function CustomerPortal() {
           {[
             { id: 'subscription', label: 'Subscription', icon: CreditCardIcon },
             { id: 'billing', label: 'Payment Methods', icon: CogIcon },
-            { id: 'invoices', label: 'Invoices', icon: DocumentTextIcon }
-          ].map((tab) => (
+            { id: 'invoices', label: 'Invoices', icon: DocumentTextIcon },
+          ].map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
@@ -257,7 +270,9 @@ export default function CustomerPortal() {
               <div className="bg-white border border-gray-200 rounded-lg p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-semibold">Current Subscription</h2>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(subscription.status)}`}>
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(subscription.status)}`}
+                  >
                     {subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1)}
                   </span>
                 </div>
@@ -271,7 +286,7 @@ export default function CustomerPortal() {
                         /{subscription.plan.interval}
                       </span>
                     </div>
-                    
+
                     {subscription.trialEnd && new Date(subscription.trialEnd) > new Date() && (
                       <div className="flex items-center text-sm text-blue-600 mb-2">
                         <CheckCircleIcon className="h-4 w-4 mr-1" />
@@ -321,7 +336,9 @@ export default function CustomerPortal() {
                       disabled={actionLoading === 'reactivate'}
                       className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 disabled:opacity-50"
                     >
-                      {actionLoading === 'reactivate' ? 'Reactivating...' : 'Reactivate Subscription'}
+                      {actionLoading === 'reactivate'
+                        ? 'Reactivating...'
+                        : 'Reactivate Subscription'}
                     </button>
                   ) : (
                     <button
@@ -363,7 +380,7 @@ export default function CustomerPortal() {
 
           {paymentMethods.length > 0 ? (
             <div className="space-y-4">
-              {paymentMethods.map((pm) => (
+              {paymentMethods.map(pm => (
                 <div key={pm.id} className="bg-white border border-gray-200 rounded-lg p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
@@ -426,7 +443,7 @@ export default function CustomerPortal() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {invoices.map((invoice) => (
+                  {invoices.map(invoice => (
                     <tr key={invoice.id}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {invoice.number}
@@ -438,7 +455,9 @@ export default function CustomerPortal() {
                         {formatCurrency(invoice.amount, invoice.currency)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(invoice.status)}`}>
+                        <span
+                          className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(invoice.status)}`}
+                        >
                           {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
                         </span>
                       </td>

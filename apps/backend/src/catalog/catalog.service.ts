@@ -15,7 +15,7 @@ interface CatalogQuery {
 export class CatalogService {
   constructor(
     @InjectModel(Vendor.name) private vendorModel: Model<VendorDocument>,
-    @InjectModel(PriceItem.name) private priceModel: Model<PriceItemDocument>,
+    @InjectModel(PriceItem.name) private priceModel: Model<PriceItemDocument>
   ) {}
 
   async search(workspaceId: string, params: CatalogQuery) {
@@ -25,27 +25,32 @@ export class CatalogService {
     if (vendorId) priceQuery.vendorId = vendorId;
     if (tag) priceQuery.tags = tag;
     if (q) {
-      const regex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'i');
-      priceQuery.$or = [
-        { sku: regex },
-        { name: regex },
-        { description: regex },
-      ];
+      const regex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+      priceQuery.$or = [{ sku: regex }, { name: regex }, { description: regex }];
     }
     const items = await this.priceModel.find(priceQuery).limit(limit).lean();
-    const vendorIds = Array.from(new Set(items.filter(i=>i.vendorId).map(i=> i.vendorId!.toString())));
+    const vendorIds = Array.from(
+      new Set(items.filter(i => i.vendorId).map(i => i.vendorId!.toString()))
+    );
     const vendors = await this.vendorModel.find({ _id: { $in: vendorIds } }).lean();
-    const vendorMap = new Map(vendors.map(v=> [v._id.toString(), v]));
+    const vendorMap = new Map(vendors.map(v => [v._id.toString(), v]));
     const enriched = items.map(it => ({
       ...it,
       vendorName: it.vendorId ? vendorMap.get(it.vendorId.toString())?.name : undefined,
-      sellPrice: (it.baseCost || 0) * (1 + (it.defaultMarginPct||0)/100),
+      sellPrice: (it.baseCost || 0) * (1 + (it.defaultMarginPct || 0) / 100),
     }));
     const agg = {
       count: enriched.length,
-      minCost: enriched.reduce((m,i)=> i.baseCost < m ? i.baseCost : m, enriched[0]?.baseCost ?? 0),
-      maxCost: enriched.reduce((m,i)=> i.baseCost > m ? i.baseCost : m, enriched[0]?.baseCost ?? 0),
-      avgMarginPct: enriched.reduce((s,i)=> s + (i.defaultMarginPct||0), 0) / (enriched.length||1),
+      minCost: enriched.reduce(
+        (m, i) => (i.baseCost < m ? i.baseCost : m),
+        enriched[0]?.baseCost ?? 0
+      ),
+      maxCost: enriched.reduce(
+        (m, i) => (i.baseCost > m ? i.baseCost : m),
+        enriched[0]?.baseCost ?? 0
+      ),
+      avgMarginPct:
+        enriched.reduce((s, i) => s + (i.defaultMarginPct || 0), 0) / (enriched.length || 1),
       vendors: vendors.length,
     };
     return { items: enriched, aggregates: agg };

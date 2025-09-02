@@ -12,7 +12,7 @@ import { DesignRevision, DesignRevisionSchema } from './schemas/design-revision.
       { name: Design.name, schema: DesignSchema },
       { name: DesignTemplate.name, schema: DesignTemplateSchema },
       { name: DesignRevision.name, schema: DesignRevisionSchema },
-    ])
+    ]),
   ],
   controllers: [DesignsController],
   providers: [DesignsService],

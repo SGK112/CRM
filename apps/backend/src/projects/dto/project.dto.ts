@@ -7,12 +7,17 @@ export class CreateProjectDto {
   @IsString()
   title: string;
 
-  @ApiProperty({ example: 'Complete kitchen renovation including new cabinets, countertops, and appliances' })
+  @ApiProperty({
+    example: 'Complete kitchen renovation including new cabinets, countertops, and appliances',
+  })
   @IsOptional()
   @IsString()
   description?: string;
 
-  @ApiProperty({ example: 'lead', enum: ['lead', 'proposal', 'approved', 'in_progress', 'on_hold', 'completed', 'cancelled'] })
+  @ApiProperty({
+    example: 'lead',
+    enum: ['lead', 'proposal', 'approved', 'in_progress', 'on_hold', 'completed', 'cancelled'],
+  })
   @IsOptional()
   @IsEnum(['lead', 'proposal', 'approved', 'in_progress', 'on_hold', 'completed', 'cancelled'])
   status?: string;
@@ -47,13 +52,15 @@ export class CreateProjectDto {
   @Type(() => Number)
   budget?: number;
 
-  @ApiProperty({ example: {
-    street: '123 Main St',
-    city: 'Anytown',
-    state: 'CA',
-    zipCode: '12345',
-    country: 'USA'
-  }})
+  @ApiProperty({
+    example: {
+      street: '123 Main St',
+      city: 'Anytown',
+      state: 'CA',
+      zipCode: '12345',
+      country: 'USA',
+    },
+  })
   @IsOptional()
   address?: {
     street: string;
@@ -79,7 +86,10 @@ export class UpdateProjectDto {
   @IsString()
   description?: string;
 
-  @ApiProperty({ example: 'in_progress', enum: ['lead', 'proposal', 'approved', 'in_progress', 'on_hold', 'completed', 'cancelled'] })
+  @ApiProperty({
+    example: 'in_progress',
+    enum: ['lead', 'proposal', 'approved', 'in_progress', 'on_hold', 'completed', 'cancelled'],
+  })
   @IsOptional()
   @IsEnum(['lead', 'proposal', 'approved', 'in_progress', 'on_hold', 'completed', 'cancelled'])
   status?: string;
@@ -116,13 +126,15 @@ export class UpdateProjectDto {
   @Type(() => Number)
   actualCost?: number;
 
-  @ApiProperty({ example: {
-    street: '123 Main St',
-    city: 'Anytown',
-    state: 'CA',
-    zipCode: '12345',
-    country: 'USA'
-  }})
+  @ApiProperty({
+    example: {
+      street: '123 Main St',
+      city: 'Anytown',
+      state: 'CA',
+      zipCode: '12345',
+      country: 'USA',
+    },
+  })
   @IsOptional()
   address?: {
     street: string;

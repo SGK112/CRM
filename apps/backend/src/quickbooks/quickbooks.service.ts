@@ -43,25 +43,27 @@ interface Invoice {
 export class QuickBooksService {
   private readonly logger = new Logger(QuickBooksService.name);
 
-  constructor(
-    // In a real implementation, inject your actual models
-    // @InjectModel('Estimate') private estimateModel: Model<Estimate>,
-    // @InjectModel('Invoice') private invoiceModel: Model<Invoice>,
-    // @InjectModel('QuickBooksConfig') private qbConfigModel: Model<QuickBooksConfig>,
-  ) {}
+  constructor() // In a real implementation, inject your actual models
+  // @InjectModel('Estimate') private estimateModel: Model<Estimate>,
+  // @InjectModel('Invoice') private invoiceModel: Model<Invoice>,
+  // @InjectModel('QuickBooksConfig') private qbConfigModel: Model<QuickBooksConfig>,
+  {}
 
   async testConnection(config: TestConnectionDto, workspaceId: string): Promise<any> {
     try {
-      const response = await axios.get(`${config.baseUrl || 'https://sandbox-quickbooks.api.intuit.com'}/v3/company/${config.realmId}/companyinfo/${config.realmId}`, {
-        headers: {
-          'Authorization': `Bearer ${config.accessToken}`,
-          'Accept': 'application/json'
+      const response = await axios.get(
+        `${config.baseUrl || 'https://sandbox-quickbooks.api.intuit.com'}/v3/company/${config.realmId}/companyinfo/${config.realmId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${config.accessToken}`,
+            Accept: 'application/json',
+          },
         }
-      });
+      );
 
       return {
         success: true,
-        companyInfo: response.data
+        companyInfo: response.data,
       };
     } catch (error) {
       this.logger.error('QuickBooks connection test failed', error);
@@ -83,14 +85,14 @@ export class QuickBooksService {
             description: 'Test Item',
             quantity: 1,
             unitCost: 5000,
-            totalCost: 5000
-          }
+            totalCost: 5000,
+          },
         ],
         notes: 'Test estimate for sync',
         projectScope: 'Test project',
         status: 'pending',
         createdAt: new Date(),
-        validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
+        validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
       };
 
       const config = await this.getQuickBooksConfig(workspaceId);
@@ -102,7 +104,7 @@ export class QuickBooksService {
       const qbEstimate = {
         CustomerRef: {
           value: '1', // Mock customer ID
-          name: estimate.clientName
+          name: estimate.clientName,
         },
         Line: estimate.items.map((item, index) => ({
           LineNum: index + 1,
@@ -111,19 +113,19 @@ export class QuickBooksService {
           SalesItemLineDetail: {
             ItemRef: {
               value: '1', // Mock item ID
-              name: item.description
+              name: item.description,
             },
             Qty: item.quantity,
-            UnitPrice: item.unitCost
-          }
+            UnitPrice: item.unitCost,
+          },
         })),
         TotalAmt: estimate.totalAmount,
         TxnDate: estimate.createdAt.toISOString().split('T')[0],
         ExpirationDate: estimate.validUntil.toISOString().split('T')[0],
         PrivateNote: estimate.notes,
         CustomerMemo: {
-          value: estimate.projectScope
-        }
+          value: estimate.projectScope,
+        },
       };
 
       // Send to QuickBooks
@@ -132,10 +134,10 @@ export class QuickBooksService {
         qbEstimate,
         {
           headers: {
-            'Authorization': `Bearer ${config.accessToken}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          }
+            Authorization: `Bearer ${config.accessToken}`,
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
         }
       );
 
@@ -146,7 +148,10 @@ export class QuickBooksService {
     } catch (error) {
       this.logger.error('Failed to sync estimate to QuickBooks', error);
       // In real implementation: await this.estimateModel.findByIdAndUpdate(estimateId, { qbSyncStatus: 'error' });
-      throw new HttpException('Failed to sync estimate to QuickBooks', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        'Failed to sync estimate to QuickBooks',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 
@@ -165,13 +170,13 @@ export class QuickBooksService {
             description: 'Test Item',
             quantity: 1,
             unitCost: 5000,
-            totalCost: 5000
-          }
+            totalCost: 5000,
+          },
         ],
         notes: 'Test invoice for sync',
         status: 'sent',
         createdAt: new Date(),
-        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
       };
 
       const config = await this.getQuickBooksConfig(workspaceId);
@@ -183,7 +188,7 @@ export class QuickBooksService {
       const qbInvoice = {
         CustomerRef: {
           value: '1', // Mock customer ID
-          name: invoice.clientName
+          name: invoice.clientName,
         },
         Line: invoice.items.map((item, index) => ({
           LineNum: index + 1,
@@ -192,16 +197,16 @@ export class QuickBooksService {
           SalesItemLineDetail: {
             ItemRef: {
               value: '1', // Mock item ID
-              name: item.description
+              name: item.description,
             },
             Qty: item.quantity,
-            UnitPrice: item.unitCost
-          }
+            UnitPrice: item.unitCost,
+          },
         })),
         TotalAmt: invoice.total,
         TxnDate: invoice.createdAt.toISOString().split('T')[0],
         DueDate: invoice.dueDate.toISOString().split('T')[0],
-        PrivateNote: invoice.notes
+        PrivateNote: invoice.notes,
       };
 
       // Send to QuickBooks
@@ -210,10 +215,10 @@ export class QuickBooksService {
         qbInvoice,
         {
           headers: {
-            'Authorization': `Bearer ${config.accessToken}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          }
+            Authorization: `Bearer ${config.accessToken}`,
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
         }
       );
 
@@ -224,7 +229,10 @@ export class QuickBooksService {
     } catch (error) {
       this.logger.error('Failed to sync invoice to QuickBooks', error);
       // In real implementation: await this.invoiceModel.findByIdAndUpdate(invoiceId, { qbSyncStatus: 'error' });
-      throw new HttpException('Failed to sync invoice to QuickBooks', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        'Failed to sync invoice to QuickBooks',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 
@@ -239,16 +247,19 @@ export class QuickBooksService {
         `${config.baseUrl}/v3/company/${config.realmId}/query?query=SELECT * FROM Customer`,
         {
           headers: {
-            'Authorization': `Bearer ${config.accessToken}`,
-            'Accept': 'application/json'
-          }
+            Authorization: `Bearer ${config.accessToken}`,
+            Accept: 'application/json',
+          },
         }
       );
 
       return response.data.QueryResponse?.Customer || [];
     } catch (error) {
       this.logger.error('Failed to fetch QuickBooks customers', error);
-      throw new HttpException('Failed to fetch QuickBooks customers', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        'Failed to fetch QuickBooks customers',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 
@@ -263,9 +274,9 @@ export class QuickBooksService {
         `${config.baseUrl}/v3/company/${config.realmId}/query?query=SELECT * FROM Item`,
         {
           headers: {
-            'Authorization': `Bearer ${config.accessToken}`,
-            'Accept': 'application/json'
-          }
+            Authorization: `Bearer ${config.accessToken}`,
+            Accept: 'application/json',
+          },
         }
       );
 
@@ -288,7 +299,7 @@ export class QuickBooksService {
         items: 0,
         estimates: 0,
         invoices: 0,
-        errors: []
+        errors: [],
       };
 
       // Sync customers
@@ -317,7 +328,7 @@ export class QuickBooksService {
   async getSyncStatus(workspaceId: string): Promise<any> {
     try {
       const config = await this.getQuickBooksConfig(workspaceId);
-      
+
       return {
         enabled: config?.enabled || false,
         lastSyncDate: config?.lastSyncDate || null,
@@ -327,8 +338,8 @@ export class QuickBooksService {
           items: false,
           estimates: false,
           invoices: false,
-          payments: false
-        }
+          payments: false,
+        },
       };
     } catch (error) {
       this.logger.error('Failed to get sync status', error);
@@ -339,7 +350,7 @@ export class QuickBooksService {
   private async getQuickBooksConfig(workspaceId: string): Promise<QuickBooksConfig | null> {
     // Mock implementation - in real app, fetch from database
     // return await this.qbConfigModel.findOne({ workspaceId });
-    
+
     // For now, return a mock configuration
     return {
       enabled: true,
@@ -354,8 +365,8 @@ export class QuickBooksService {
         items: true,
         estimates: true,
         invoices: true,
-        payments: true
-      }
+        payments: true,
+      },
     };
   }
 }

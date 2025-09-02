@@ -18,7 +18,7 @@ export default function FloatingAIButton() {
       >
         <SparklesIcon className="h-6 w-6" />
         <span className="absolute -top-2 -left-2 h-3 w-3 bg-green-400 rounded-full animate-pulse"></span>
-        
+
         {/* Tooltip */}
         <div className="absolute bottom-full right-0 mb-2 px-3 py-1 bg-gray-900/95 text-white text-[11px] font-medium rounded-md shadow-lg opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-150 whitespace-nowrap">
           Open Assistant
@@ -27,10 +27,7 @@ export default function FloatingAIButton() {
       </button>
 
       {/* AI Assistant Modal */}
-      <AIAssistant 
-        isOpen={isAIOpen} 
-        onClose={() => setIsAIOpen(false)} 
-      />
+      <AIAssistant isOpen={isAIOpen} onClose={() => setIsAIOpen(false)} />
     </>
   );
 }

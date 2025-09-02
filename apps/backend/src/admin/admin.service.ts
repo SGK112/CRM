@@ -5,9 +5,7 @@ import { User, UserDocument } from '../users/schemas/user.schema';
 
 @Injectable()
 export class AdminService {
-  constructor(
-    @InjectModel(User.name) private userModel: Model<UserDocument>,
-  ) {}
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async getUsers(query: {
     page?: string;
@@ -22,22 +20,22 @@ export class AdminService {
 
     // Build search filter
     const filter: any = {};
-    
+
     if (query.search) {
       const searchRegex = new RegExp(query.search, 'i');
       filter.$or = [
         { firstName: searchRegex },
         { lastName: searchRegex },
         { email: searchRegex },
-        { 
-          $expr: { 
-            $regexMatch: { 
-              input: { $concat: ['$firstName', ' ', '$lastName'] }, 
-              regex: query.search, 
-              options: 'i' 
-            } 
-          } 
-        }
+        {
+          $expr: {
+            $regexMatch: {
+              input: { $concat: ['$firstName', ' ', '$lastName'] },
+              regex: query.search,
+              options: 'i',
+            },
+          },
+        },
       ];
     }
 
@@ -57,7 +55,7 @@ export class AdminService {
         .skip(skip)
         .limit(limit)
         .exec(),
-      this.userModel.countDocuments(filter)
+      this.userModel.countDocuments(filter),
     ]);
 
     return {
@@ -68,14 +66,14 @@ export class AdminService {
         total,
         pages: Math.ceil(total / limit),
         hasNext: page < Math.ceil(total / limit),
-        hasPrev: page > 1
-      }
+        hasPrev: page > 1,
+      },
     };
   }
 
   async getUserById(userId: string) {
     const user = await this.userModel.findById(userId).select('-password').exec();
-    
+
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -83,45 +81,49 @@ export class AdminService {
     // Get additional user statistics
     const stats = {
       totalProjects: 0, // You can implement this based on your projects collection
-      totalClients: 0,  // You can implement this based on your clients collection
+      totalClients: 0, // You can implement this based on your clients collection
       totalEstimates: 0, // You can implement this based on your estimates collection
       lastLoginAt: user.lastLoginAt || null,
-      accountAge: (user as any).createdAt ? Math.floor((Date.now() - (user as any).createdAt.getTime()) / (1000 * 60 * 60 * 24)) : 0
+      accountAge: (user as any).createdAt
+        ? Math.floor((Date.now() - (user as any).createdAt.getTime()) / (1000 * 60 * 60 * 24))
+        : 0,
     };
 
     return {
       user,
-      stats
+      stats,
     };
   }
 
-  async updateUser(userId: string, updateData: {
-    firstName?: string;
-    lastName?: string;
-    email?: string;
-    phone?: string;
-    role?: string;
-    isActive?: boolean;
-    subscriptionStatus?: string;
-    subscriptionPlan?: string;
-  }) {
+  async updateUser(
+    userId: string,
+    updateData: {
+      firstName?: string;
+      lastName?: string;
+      email?: string;
+      phone?: string;
+      role?: string;
+      isActive?: boolean;
+      subscriptionStatus?: string;
+      subscriptionPlan?: string;
+    }
+  ) {
     // Validate email uniqueness if email is being updated
     if (updateData.email) {
-      const existingUser = await this.userModel.findOne({ 
+      const existingUser = await this.userModel.findOne({
         email: updateData.email,
-        _id: { $ne: userId }
+        _id: { $ne: userId },
       });
-      
+
       if (existingUser) {
         throw new BadRequestException('Email already exists');
       }
     }
 
-    const updatedUser = await this.userModel.findByIdAndUpdate(
-      userId,
-      { $set: updateData },
-      { new: true }
-    ).select('-password').exec();
+    const updatedUser = await this.userModel
+      .findByIdAndUpdate(userId, { $set: updateData }, { new: true })
+      .select('-password')
+      .exec();
 
     if (!updatedUser) {
       throw new NotFoundException('User not found');
@@ -130,13 +132,13 @@ export class AdminService {
     return {
       success: true,
       message: 'User updated successfully',
-      user: updatedUser
+      user: updatedUser,
     };
   }
 
   async deleteUser(userId: string) {
     const user = await this.userModel.findById(userId);
-    
+
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -150,16 +152,19 @@ export class AdminService {
 
     return {
       success: true,
-      message: 'User deleted successfully'
+      message: 'User deleted successfully',
     };
   }
 
   async suspendUser(userId: string) {
-    const updatedUser = await this.userModel.findByIdAndUpdate(
-      userId,
-      { $set: { isActive: false, suspendedAt: new Date() } },
-      { new: true }
-    ).select('-password').exec();
+    const updatedUser = await this.userModel
+      .findByIdAndUpdate(
+        userId,
+        { $set: { isActive: false, suspendedAt: new Date() } },
+        { new: true }
+      )
+      .select('-password')
+      .exec();
 
     if (!updatedUser) {
       throw new NotFoundException('User not found');
@@ -168,19 +173,22 @@ export class AdminService {
     return {
       success: true,
       message: 'User suspended successfully',
-      user: updatedUser
+      user: updatedUser,
     };
   }
 
   async activateUser(userId: string) {
-    const updatedUser = await this.userModel.findByIdAndUpdate(
-      userId,
-      { 
-        $set: { isActive: true },
-        $unset: { suspendedAt: 1 }
-      },
-      { new: true }
-    ).select('-password').exec();
+    const updatedUser = await this.userModel
+      .findByIdAndUpdate(
+        userId,
+        {
+          $set: { isActive: true },
+          $unset: { suspendedAt: 1 },
+        },
+        { new: true }
+      )
+      .select('-password')
+      .exec();
 
     if (!updatedUser) {
       throw new NotFoundException('User not found');
@@ -189,23 +197,18 @@ export class AdminService {
     return {
       success: true,
       message: 'User activated successfully',
-      user: updatedUser
+      user: updatedUser,
     };
   }
 
   async getDashboardStats() {
-    const [
-      totalUsers,
-      activeUsers,
-      newUsersThisMonth,
-      suspendedUsers
-    ] = await Promise.all([
+    const [totalUsers, activeUsers, newUsersThisMonth, suspendedUsers] = await Promise.all([
       this.userModel.countDocuments(),
       this.userModel.countDocuments({ isActive: true }),
       this.userModel.countDocuments({
-        createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }
+        createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
       }),
-      this.userModel.countDocuments({ isActive: false })
+      this.userModel.countDocuments({ isActive: false }),
     ]);
 
     // Get subscription stats
@@ -213,9 +216,9 @@ export class AdminService {
       {
         $group: {
           _id: '$subscriptionPlan',
-          count: { $sum: 1 }
-        }
-      }
+          count: { $sum: 1 },
+        },
+      },
     ]);
 
     // Get user growth over last 12 months
@@ -225,21 +228,21 @@ export class AdminService {
     const userGrowth = await this.userModel.aggregate([
       {
         $match: {
-          createdAt: { $gte: oneYearAgo }
-        }
+          createdAt: { $gte: oneYearAgo },
+        },
       },
       {
         $group: {
           _id: {
             year: { $year: '$createdAt' },
-            month: { $month: '$createdAt' }
+            month: { $month: '$createdAt' },
           },
-          count: { $sum: 1 }
-        }
+          count: { $sum: 1 },
+        },
       },
       {
-        $sort: { '_id.year': 1, '_id.month': 1 }
-      }
+        $sort: { '_id.year': 1, '_id.month': 1 },
+      },
     ]);
 
     return {
@@ -248,17 +251,17 @@ export class AdminService {
         activeUsers,
         newUsersThisMonth,
         suspendedUsers,
-        retentionRate: totalUsers > 0 ? Math.round((activeUsers / totalUsers) * 100) : 0
+        retentionRate: totalUsers > 0 ? Math.round((activeUsers / totalUsers) * 100) : 0,
       },
       subscriptionDistribution: subscriptionStats,
       userGrowth,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
   }
 
   async getSubscriptionAnalytics(period: string = '30d') {
     let dateFilter: Date;
-    
+
     switch (period) {
       case '7d':
         dateFilter = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
@@ -276,30 +279,30 @@ export class AdminService {
     const analytics = await this.userModel.aggregate([
       {
         $match: {
-          createdAt: { $gte: dateFilter }
-        }
+          createdAt: { $gte: dateFilter },
+        },
       },
       {
         $group: {
           _id: {
             plan: '$subscriptionPlan',
-            status: '$subscriptionStatus'
+            status: '$subscriptionStatus',
           },
           count: { $sum: 1 },
-          revenue: { 
-            $sum: { 
+          revenue: {
+            $sum: {
               $switch: {
                 branches: [
                   { case: { $eq: ['$subscriptionPlan', 'basic'] }, then: 29 },
                   { case: { $eq: ['$subscriptionPlan', 'professional'] }, then: 99 },
-                  { case: { $eq: ['$subscriptionPlan', 'enterprise'] }, then: 299 }
+                  { case: { $eq: ['$subscriptionPlan', 'enterprise'] }, then: 299 },
                 ],
-                default: 0
-              }
-            }
-          }
-        }
-      }
+                default: 0,
+              },
+            },
+          },
+        },
+      },
     ]);
 
     return {
@@ -307,8 +310,8 @@ export class AdminService {
       analytics,
       summary: {
         totalRevenue: analytics.reduce((sum, item) => sum + item.revenue, 0),
-        totalSubscriptions: analytics.reduce((sum, item) => sum + item.count, 0)
-      }
+        totalSubscriptions: analytics.reduce((sum, item) => sum + item.count, 0),
+      },
     };
   }
 
@@ -340,7 +343,7 @@ export class AdminService {
     // Transform user data into activity log format
     const activities = users.flatMap(user => {
       const logs = [];
-      
+
       if ((user as any).createdAt) {
         logs.push({
           id: `${user._id}_created`,
@@ -349,7 +352,7 @@ export class AdminService {
           userName: `${user.firstName} ${user.lastName}`,
           action: 'user_created',
           timestamp: (user as any).createdAt,
-          details: 'User account created'
+          details: 'User account created',
         });
       }
 
@@ -361,7 +364,7 @@ export class AdminService {
           userName: `${user.firstName} ${user.lastName}`,
           action: 'user_login',
           timestamp: user.lastLoginAt,
-          details: 'User logged in'
+          details: 'User logged in',
         });
       }
 
@@ -378,8 +381,8 @@ export class AdminService {
         limit,
         total: activities.length,
         hasNext: activities.length > limit,
-        hasPrev: page > 1
-      }
+        hasPrev: page > 1,
+      },
     };
   }
 
@@ -392,7 +395,7 @@ export class AdminService {
   }) {
     // This would integrate with your notification service
     // For now, we'll just return a success response
-    
+
     let targetUsers;
     if (notificationData.userIds && notificationData.userIds.length > 0) {
       targetUsers = await this.userModel
@@ -412,20 +415,22 @@ export class AdminService {
       type: notificationData.type,
       subject: notificationData.subject,
       recipientCount: targetUsers.length,
-      priority: notificationData.priority || 'normal'
+      priority: notificationData.priority || 'normal',
     });
 
     return {
       success: true,
       message: `Notification sent successfully to ${targetUsers.length} users`,
       recipientCount: targetUsers.length,
-      notificationId: `admin_${Date.now()}` // Mock notification ID
+      notificationId: `admin_${Date.now()}`, // Mock notification ID
     };
   }
 
   async getSystemHealth() {
     // Check database connection
-    const dbStatus = await this.userModel.db.db.admin().ping()
+    const dbStatus = await this.userModel.db.db
+      .admin()
+      .ping()
       .then(() => 'healthy')
       .catch(() => 'unhealthy');
 
@@ -434,17 +439,17 @@ export class AdminService {
       database: {
         status: dbStatus,
         totalUsers: await this.userModel.countDocuments(),
-        activeConnections: this.userModel.db.readyState
+        activeConnections: this.userModel.db.readyState,
       },
       server: {
         uptime: process.uptime(),
         memory: {
           used: process.memoryUsage().heapUsed / 1024 / 1024, // MB
-          total: process.memoryUsage().heapTotal / 1024 / 1024 // MB
+          total: process.memoryUsage().heapTotal / 1024 / 1024, // MB
         },
-        nodeVersion: process.version
+        nodeVersion: process.version,
       },
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     return metrics;
@@ -456,7 +461,7 @@ export class AdminService {
     data?: any;
   }) {
     const { userIds, action, data } = actionData;
-    
+
     if (!userIds || userIds.length === 0) {
       throw new BadRequestException('No user IDs provided');
     }
@@ -485,17 +490,17 @@ export class AdminService {
           default:
             throw new BadRequestException(`Unsupported action: ${action}`);
         }
-        
+
         results.push({
           userId,
           success: true,
-          message: result.message
+          message: result.message,
         });
       } catch (error) {
         results.push({
           userId,
           success: false,
-          error: error.message
+          error: error.message,
         });
       }
     }
@@ -510,8 +515,8 @@ export class AdminService {
       summary: {
         total: userIds.length,
         successful: successCount,
-        failed: failureCount
-      }
+        failed: failureCount,
+      },
     };
   }
 }

@@ -1,4 +1,14 @@
-import { IsEmail, IsOptional, IsString, IsBoolean, IsDateString, IsNumber, Min, ValidateNested, IsArray } from 'class-validator';
+import {
+  IsEmail,
+  IsOptional,
+  IsString,
+  IsBoolean,
+  IsDateString,
+  IsNumber,
+  Min,
+  ValidateNested,
+  IsArray,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 class AddressDto {
@@ -65,10 +75,26 @@ export class CreateEmployeeDto {
   @IsOptional() @ValidateNested() @Type(() => AddressDto) address?: AddressDto;
   @IsOptional() @ValidateNested() @Type(() => InsuranceDto) insurance?: InsuranceDto;
 
-  @IsOptional() @IsArray() @ValidateNested({ each: true }) @Type(() => CertificationDto) certifications?: CertificationDto[];
-  @IsOptional() @IsArray() @ValidateNested({ each: true }) @Type(() => TrainingDto) trainings?: TrainingDto[];
-  @IsOptional() @IsArray() @ValidateNested({ each: true }) @Type(() => DisciplinaryActionDto) disciplinaryActions?: DisciplinaryActionDto[];
-  @IsOptional() @IsArray() @ValidateNested({ each: true }) @Type(() => TimeEntryDto) timeEntries?: TimeEntryDto[];
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CertificationDto)
+  certifications?: CertificationDto[];
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => TrainingDto)
+  trainings?: TrainingDto[];
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => DisciplinaryActionDto)
+  disciplinaryActions?: DisciplinaryActionDto[];
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => TimeEntryDto)
+  timeEntries?: TimeEntryDto[];
 
   @IsOptional() @IsNumber() @Min(0) hourlyRate?: number;
   @IsOptional() @IsNumber() @Min(0) salaryAnnual?: number;

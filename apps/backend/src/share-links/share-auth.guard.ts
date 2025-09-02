@@ -17,6 +17,8 @@ export class ShareAuthGuard implements CanActivate {
       // attach minimal workspace context for downstream queries
       if (!req.user) req.user = { workspaceId: decoded.workspaceId, role: 'client' };
       return true;
-    } catch { return false; }
+    } catch {
+      return false;
+    }
   }
 }

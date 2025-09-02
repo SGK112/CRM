@@ -1,39 +1,39 @@
-'use client'
+'use client';
 
-import { useState, useRef } from 'react'
-import { XMarkIcon, DocumentArrowUpIcon, PaperClipIcon } from '@heroicons/react/24/outline'
+import { useState, useRef } from 'react';
+import { XMarkIcon, DocumentArrowUpIcon, PaperClipIcon } from '@heroicons/react/24/outline';
 
 interface JobApplicationModalProps {
-  isOpen: boolean
-  onClose: () => void
-  jobTitle: string
-  jobDepartment: string
-  jobLocation: string
+  isOpen: boolean;
+  onClose: () => void;
+  jobTitle: string;
+  jobDepartment: string;
+  jobLocation: string;
 }
 
 interface ApplicationData {
-  firstName: string
-  lastName: string
-  email: string
-  phone: string
-  location: string
-  linkedIn: string
-  portfolio: string
-  experience: string
-  motivation: string
-  availability: string
-  salary: string
-  referral: string
-  additional: string
-  coverLetter: string
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  location: string;
+  linkedIn: string;
+  portfolio: string;
+  experience: string;
+  motivation: string;
+  availability: string;
+  salary: string;
+  referral: string;
+  additional: string;
+  coverLetter: string;
 }
 
-export default function JobApplicationModal({ 
-  isOpen, 
-  onClose, 
-  jobTitle, 
-  jobDepartment, 
-  jobLocation 
+export default function JobApplicationModal({
+  isOpen,
+  onClose,
+  jobTitle,
+  jobDepartment,
+  jobLocation,
 }: JobApplicationModalProps) {
   const [formData, setFormData] = useState<ApplicationData>({
     firstName: '',
@@ -49,118 +49,124 @@ export default function JobApplicationModal({
     salary: '',
     referral: '',
     additional: '',
-    coverLetter: ''
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [resumeFile, setResumeFile] = useState<File | null>(null)
-  const [portfolioFiles, setPortfolioFiles] = useState<File[]>([])
-  const [submitSuccess, setSubmitSuccess] = useState(false)
-  const [submitError, setSubmitError] = useState('')
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const portfolioInputRef = useRef<HTMLInputElement>(null)
+    coverLetter: '',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [portfolioFiles, setPortfolioFiles] = useState<File[]>([]);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const portfolioInputRef = useRef<HTMLInputElement>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-  }
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   const handleResumeUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
       // Validate file type and size
-      const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
-      const maxSize = 10 * 1024 * 1024 // 10MB
-      
+      const allowedTypes = [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      ];
+      const maxSize = 10 * 1024 * 1024; // 10MB
+
       if (!allowedTypes.includes(file.type)) {
-        setSubmitError('Please upload a PDF or Word document for your resume.')
-        return
+        setSubmitError('Please upload a PDF or Word document for your resume.');
+        return;
       }
-      
+
       if (file.size > maxSize) {
-        setSubmitError('Resume file must be less than 10MB.')
-        return
+        setSubmitError('Resume file must be less than 10MB.');
+        return;
       }
-      
-      setResumeFile(file)
-      setSubmitError('')
+
+      setResumeFile(file);
+      setSubmitError('');
     }
-  }
+  };
 
   const handlePortfolioUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || [])
+    const files = Array.from(e.target.files || []);
     if (files.length > 0) {
-      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif']
-      const maxSize = 10 * 1024 * 1024 // 10MB per file
-      const maxFiles = 5
+      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif'];
+      const maxSize = 10 * 1024 * 1024; // 10MB per file
+      const maxFiles = 5;
 
       const validFiles = files.filter(file => {
         if (!allowedTypes.includes(file.type)) {
-          setSubmitError('Portfolio files must be PDF, JPEG, PNG, or GIF.')
-          return false
+          setSubmitError('Portfolio files must be PDF, JPEG, PNG, or GIF.');
+          return false;
         }
         if (file.size > maxSize) {
-          setSubmitError('Each portfolio file must be less than 10MB.')
-          return false
+          setSubmitError('Each portfolio file must be less than 10MB.');
+          return false;
         }
-        return true
-      })
+        return true;
+      });
 
       if (portfolioFiles.length + validFiles.length > maxFiles) {
-        setSubmitError(`You can upload a maximum of ${maxFiles} portfolio files.`)
-        return
+        setSubmitError(`You can upload a maximum of ${maxFiles} portfolio files.`);
+        return;
       }
 
-      setPortfolioFiles(prev => [...prev, ...validFiles])
-      setSubmitError('')
+      setPortfolioFiles(prev => [...prev, ...validFiles]);
+      setSubmitError('');
     }
-  }
+  };
 
   const removePortfolioFile = (index: number) => {
-    setPortfolioFiles(prev => prev.filter((_, i) => i !== index))
-  }
+    setPortfolioFiles(prev => prev.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    setSubmitError('')
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitError('');
 
     try {
       // Create FormData for file upload
-      const submitData = new FormData()
-      
+      const submitData = new FormData();
+
       // Add form fields
       Object.entries(formData).forEach(([key, value]) => {
-        submitData.append(key, value)
-      })
-      
+        submitData.append(key, value);
+      });
+
       // Add job information
-      submitData.append('jobTitle', jobTitle)
-      submitData.append('jobDepartment', jobDepartment)
-      submitData.append('jobLocation', jobLocation)
-      
+      submitData.append('jobTitle', jobTitle);
+      submitData.append('jobDepartment', jobDepartment);
+      submitData.append('jobLocation', jobLocation);
+
       // Add resume file
       if (resumeFile) {
-        submitData.append('resume', resumeFile)
+        submitData.append('resume', resumeFile);
       }
-      
+
       // Add portfolio files
       portfolioFiles.forEach((file, index) => {
-        submitData.append(`portfolio_${index}`, file)
-      })
+        submitData.append(`portfolio_${index}`, file);
+      });
 
       const response = await fetch('/api/careers/apply', {
         method: 'POST',
-        body: submitData
-      })
+        body: submitData,
+      });
 
-      const result = await response.json()
+      const result = await response.json();
 
       if (response.ok) {
-        setSubmitSuccess(true)
+        setSubmitSuccess(true);
         // Reset form after successful submission
         setTimeout(() => {
-          onClose()
-          setSubmitSuccess(false)
+          onClose();
+          setSubmitSuccess(false);
           setFormData({
             firstName: '',
             lastName: '',
@@ -175,39 +181,50 @@ export default function JobApplicationModal({
             salary: '',
             referral: '',
             additional: '',
-            coverLetter: ''
-          })
-          setResumeFile(null)
-          setPortfolioFiles([])
-        }, 2000)
+            coverLetter: '',
+          });
+          setResumeFile(null);
+          setPortfolioFiles([]);
+        }, 2000);
       } else {
-        setSubmitError(result.message || 'Failed to submit application. Please try again.')
+        setSubmitError(result.message || 'Failed to submit application. Please try again.');
       }
     } catch (error) {
-      setSubmitError('Network error. Please check your connection and try again.')
+      setSubmitError('Network error. Please check your connection and try again.');
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   if (submitSuccess) {
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
         <div className="bg-slate-900 rounded-xl border border-slate-700 p-8 max-w-md w-full text-center">
           <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            <svg
+              className="w-8 h-8 text-green-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
             </svg>
           </div>
           <h3 className="text-xl font-semibold text-white mb-2">Application Submitted!</h3>
           <p className="text-slate-400">
-            Thank you for your interest in the {jobTitle} position. We'll review your application and get back to you within 5-7 business days.
+            Thank you for your interest in the {jobTitle} position. We'll review your application
+            and get back to you within 5-7 business days.
           </p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -240,7 +257,7 @@ export default function JobApplicationModal({
           {/* Personal Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-white">Personal Information</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
@@ -322,7 +339,7 @@ export default function JobApplicationModal({
           {/* Professional Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-white">Professional Information</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
@@ -377,7 +394,7 @@ export default function JobApplicationModal({
           {/* Resume Upload */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-white">Resume & Documents</h3>
-            
+
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
                 Resume <span className="text-red-400">*</span>
@@ -446,11 +463,14 @@ export default function JobApplicationModal({
                   className="hidden"
                 />
               </div>
-              
+
               {portfolioFiles.length > 0 && (
                 <div className="mt-3 space-y-2">
                   {portfolioFiles.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between bg-slate-800 rounded-md p-2">
+                    <div
+                      key={index}
+                      className="flex items-center justify-between bg-slate-800 rounded-md p-2"
+                    >
                       <div className="flex items-center gap-2">
                         <PaperClipIcon className="w-4 h-4 text-purple-400" />
                         <span className="text-sm text-slate-300">{file.name}</span>
@@ -472,7 +492,7 @@ export default function JobApplicationModal({
           {/* Cover Letter & Questions */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-white">Application Questions</h3>
-            
+
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
                 Cover Letter <span className="text-red-400">*</span>
@@ -594,5 +614,5 @@ export default function JobApplicationModal({
         </form>
       </div>
     </div>
-  )
+  );
 }

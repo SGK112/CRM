@@ -8,6 +8,6 @@ import { PriceItem, PriceItemSchema } from './schemas/price-item.schema';
   imports: [MongooseModule.forFeature([{ name: PriceItem.name, schema: PriceItemSchema }])],
   providers: [PricingService],
   controllers: [PricingController],
-  exports: [PricingService]
+  exports: [PricingService],
 })
 export class PricingModule {}

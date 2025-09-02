@@ -1,5 +1,12 @@
-"use client";
-import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
+'use client';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+  useCallback,
+} from 'react';
 
 type Theme = 'light' | 'dark';
 
@@ -12,7 +19,9 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
-interface Props { children: ReactNode }
+interface Props {
+  children: ReactNode;
+}
 
 const THEME_KEY = 'crm.theme';
 
@@ -40,7 +49,7 @@ export function ThemeProvider({ children }: Props) {
     if (typeof window === 'undefined') return;
     const stored = localStorage.getItem(THEME_KEY) as Theme | null;
     // Prefer stored choice; otherwise, default to dark for landing/marketing pages
-    let initial: Theme = stored || 'dark';
+    const initial: Theme = stored || 'dark';
     setThemeState(initial);
     applyThemeClass(initial);
   }, [applyThemeClass]);

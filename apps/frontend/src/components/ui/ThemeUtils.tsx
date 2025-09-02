@@ -57,31 +57,31 @@ export function ThemeTag({ children, variant = 'default', className = '' }: Them
         return {
           backgroundColor: 'rgba(16, 185, 129, 0.1)',
           color: 'var(--success)',
-          border: '1px solid rgba(16, 185, 129, 0.2)'
+          border: '1px solid rgba(16, 185, 129, 0.2)',
         };
       case 'warning':
         return {
           backgroundColor: 'rgba(245, 158, 11, 0.1)',
           color: 'var(--warning)',
-          border: '1px solid rgba(245, 158, 11, 0.2)'
+          border: '1px solid rgba(245, 158, 11, 0.2)',
         };
       case 'error':
         return {
           backgroundColor: 'rgba(239, 68, 68, 0.1)',
           color: 'var(--error)',
-          border: '1px solid rgba(239, 68, 68, 0.2)'
+          border: '1px solid rgba(239, 68, 68, 0.2)',
         };
       case 'info':
         return {
           backgroundColor: 'rgba(2, 132, 199, 0.1)',
           color: 'var(--info)',
-          border: '1px solid rgba(2, 132, 199, 0.2)'
+          border: '1px solid rgba(2, 132, 199, 0.2)',
         };
       default:
         return {
           backgroundColor: 'var(--surface-2)',
           color: 'var(--text)',
-          border: '1px solid var(--border)'
+          border: '1px solid var(--border)',
         };
     }
   };
@@ -120,7 +120,7 @@ export function ThemeBorder({ children, className = '', variant = 'default' }: T
       <div
         className={`${className}`}
         style={{
-          borderColor: getBorderColor()
+          borderColor: getBorderColor(),
         }}
       >
         {children}
@@ -142,11 +142,11 @@ interface ThemeTextProps {
   as?: 'span' | 'div' | 'p' | 'small';
 }
 
-export function ThemeText({ 
-  children, 
-  variant = 'default', 
-  className = '', 
-  as = 'span' 
+export function ThemeText({
+  children,
+  variant = 'default',
+  className = '',
+  as = 'span',
 }: ThemeTextProps) {
   const getTextColor = () => {
     switch (variant) {
@@ -168,10 +168,7 @@ export function ThemeText({
   const Component = as;
 
   return (
-    <Component
-      className={className}
-      style={{ color: getTextColor() }}
-    >
+    <Component className={className} style={{ color: getTextColor() }}>
       {children}
     </Component>
   );
@@ -186,10 +183,10 @@ interface ThemeBackgroundProps {
   className?: string;
 }
 
-export function ThemeBackground({ 
-  children, 
-  variant = 'default', 
-  className = '' 
+export function ThemeBackground({
+  children,
+  variant = 'default',
+  className = '',
 }: ThemeBackgroundProps) {
   const getBackgroundColor = () => {
     switch (variant) {
@@ -207,9 +204,9 @@ export function ThemeBackground({
   return (
     <div
       className={className}
-      style={{ 
+      style={{
         backgroundColor: getBackgroundColor(),
-        color: 'var(--text)'
+        color: 'var(--text)',
       }}
     >
       {children}
@@ -229,23 +226,23 @@ export const themeClasses = {
     success: { color: 'var(--success)' },
     warning: { color: 'var(--warning)' },
     error: { color: 'var(--error)' },
-    info: { color: 'var(--info)' }
+    info: { color: 'var(--info)' },
   },
-  
-  // Background colors  
+
+  // Background colors
   bg: {
     default: { backgroundColor: 'var(--bg)' },
     surface1: { backgroundColor: 'var(--surface-1)' },
     surface2: { backgroundColor: 'var(--surface-2)' },
-    surface3: { backgroundColor: 'var(--surface-3)' }
+    surface3: { backgroundColor: 'var(--surface-3)' },
   },
-  
+
   // Border colors
   border: {
     default: { borderColor: 'var(--border)' },
     light: { borderColor: 'var(--border-light)' },
-    focus: { borderColor: 'var(--border-focus)' }
-  }
+    focus: { borderColor: 'var(--border-focus)' },
+  },
 };
 
 /**
@@ -253,7 +250,7 @@ export const themeClasses = {
  */
 export function getThemeStyles(classes: string): React.CSSProperties {
   const styles: React.CSSProperties = {};
-  
+
   // Handle common gray text classes
   if (classes.includes('text-gray-500') || classes.includes('text-gray-600')) {
     styles.color = 'var(--text-muted)';
@@ -262,7 +259,7 @@ export function getThemeStyles(classes: string): React.CSSProperties {
   } else if (classes.includes('text-gray-700') || classes.includes('text-gray-800')) {
     styles.color = 'var(--text)';
   }
-  
+
   // Handle background classes
   if (classes.includes('bg-gray-100') || classes.includes('bg-gray-50')) {
     styles.backgroundColor = 'var(--surface-2)';
@@ -271,13 +268,13 @@ export function getThemeStyles(classes: string): React.CSSProperties {
   } else if (classes.includes('bg-gray-800') || classes.includes('bg-gray-900')) {
     styles.backgroundColor = 'var(--surface-1)';
   }
-  
+
   // Handle border classes
   if (classes.includes('border-gray-200') || classes.includes('border-gray-300')) {
     styles.borderColor = 'var(--border)';
   } else if (classes.includes('border-gray-700') || classes.includes('border-gray-600')) {
     styles.borderColor = 'var(--border)';
   }
-  
+
   return styles;
 }

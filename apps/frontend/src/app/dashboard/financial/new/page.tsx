@@ -1,16 +1,16 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Plus, 
-  Trash2, 
-  Calculator, 
-  Receipt, 
-  Save, 
-  Send, 
+import {
+  Plus,
+  Trash2,
+  Calculator,
+  Receipt,
+  Save,
+  Send,
   Bot,
   Zap,
-  ArrowLeft 
+  ArrowLeft
 } from 'lucide-react';
 import EstimateInvoiceToggle from '../../../../components/EstimateInvoiceToggle';
 // import AIWritingAssistant from '../../../components/AIWritingAssistant';
@@ -92,7 +92,7 @@ export default function NewFinancialDocumentPage() {
     const today = new Date();
     const validUntil = new Date();
     validUntil.setDate(today.getDate() + 30);
-    
+
     const dueDate = new Date();
     dueDate.setDate(today.getDate() + 30);
 
@@ -102,7 +102,7 @@ export default function NewFinancialDocumentPage() {
       dueDate: dueDate.toISOString().split('T')[0],
       invoiceNumber: mode === 'invoice' ? `INV-${Date.now()}` : '',
       title: mode === 'estimate' ? 'New Estimate' : 'New Invoice',
-      terms: mode === 'estimate' 
+      terms: mode === 'estimate'
         ? 'Payment: 50% deposit, 25% at rough-in, 25% on completion. All materials guaranteed.'
         : 'Net 30 payment terms. Late fees apply after 30 days.'
     }));
@@ -114,12 +114,12 @@ export default function NewFinancialDocumentPage() {
       const lineTotal = Number((item.quantity * item.unitCost).toFixed(2));
       return sum + lineTotal;
     }, 0);
-    
+
     const subtotal = Number(recalculatedSubtotal.toFixed(2));
     const markupAmount = Number(((subtotal * formData.markup) / 100).toFixed(2));
     const taxAmount = mode === 'invoice' ? Number(((subtotal + markupAmount) * (formData.tax / 100)).toFixed(2)) : 0;
     const total = Number((subtotal + markupAmount + taxAmount).toFixed(2));
-    
+
     return {
       subtotal,
       markupAmount,
@@ -142,7 +142,7 @@ export default function NewFinancialDocumentPage() {
   };
 
   const updateLineItem = (id: string, field: string, value: any) => {
-    setItems(prevItems => 
+    setItems(prevItems =>
       prevItems.map(item => {
         if (item.id === id) {
           const updatedItem = { ...item, [field]: value };
@@ -172,7 +172,7 @@ export default function NewFinancialDocumentPage() {
 
     try {
       const totals = calculateTotals();
-      
+
       const documentData = {
         ...formData,
         type: mode,
@@ -186,10 +186,10 @@ export default function NewFinancialDocumentPage() {
 
       // Validate for QuickBooks if enabled
       if (qbEnabled) {
-        // const validation = mode === 'estimate' 
+        // const validation = mode === 'estimate'
         //   ? QuickBooksService.validateEstimateForSync(documentData)
         //   : QuickBooksService.validateInvoiceForSync(documentData);
-        
+
         // if (!validation.valid) {
         //   setError(`QuickBooks validation failed: ${validation.errors.join(', ')}`);
         //   return;
@@ -209,7 +209,7 @@ export default function NewFinancialDocumentPage() {
 
       if (result.success) {
         setSuccess(`${mode === 'estimate' ? 'Estimate' : 'Invoice'} ${sendAfterSave ? 'saved and sent' : 'saved'} successfully!`);
-        
+
         // Auto-sync to QuickBooks if enabled
         if (qbEnabled && result.id) {
           try {
@@ -252,13 +252,13 @@ export default function NewFinancialDocumentPage() {
             <ArrowLeft className="w-4 h-4" />
             Back to Sales
           </button>
-          <EstimateInvoiceToggle 
-            currentMode={mode} 
+          <EstimateInvoiceToggle
+            currentMode={mode}
             onModeChange={setMode}
             className="ml-4"
           />
         </div>
-        
+
         <div className="flex items-center gap-3">
           {qbEnabled && (
             <div className="flex items-center gap-2 px-3 py-2 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-lg border border-green-200 dark:border-green-700">
@@ -266,7 +266,7 @@ export default function NewFinancialDocumentPage() {
               <span className="text-sm font-medium">QB Auto-Sync</span>
             </div>
           )}
-          
+
           <button
             onClick={() => handleSave(false)}
             disabled={saving}
@@ -279,7 +279,7 @@ export default function NewFinancialDocumentPage() {
             )}
             Save Draft
           </button>
-          
+
           <button
             onClick={() => handleSave(true)}
             disabled={saving}
@@ -303,7 +303,7 @@ export default function NewFinancialDocumentPage() {
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               {mode === 'estimate' ? 'Estimate' : 'Invoice'} Details
             </h2>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -317,7 +317,7 @@ export default function NewFinancialDocumentPage() {
                   placeholder={`Enter ${mode} title`}
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Client Name
@@ -330,7 +330,7 @@ export default function NewFinancialDocumentPage() {
                   placeholder="Enter client name"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Project Type
@@ -348,7 +348,7 @@ export default function NewFinancialDocumentPage() {
                   <option value="commercial">Commercial</option>
                 </select>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Priority
@@ -363,7 +363,7 @@ export default function NewFinancialDocumentPage() {
                   <option value="high">High</option>
                 </select>
               </div>
-              
+
               {mode === 'estimate' ? (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -403,7 +403,7 @@ export default function NewFinancialDocumentPage() {
                 </>
               )}
             </div>
-            
+
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Project Scope
@@ -430,7 +430,7 @@ export default function NewFinancialDocumentPage() {
                 Add Item
               </button>
             </div>
-            
+
             <div className="space-y-4">
               {items.map((item, index) => (
                 <div key={item.id} className="grid grid-cols-12 gap-3 items-end p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
@@ -446,7 +446,7 @@ export default function NewFinancialDocumentPage() {
                       rows={2}
                     />
                   </div>
-                  
+
                   <div className="col-span-2">
                     <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Category
@@ -464,7 +464,7 @@ export default function NewFinancialDocumentPage() {
                       <option value="other">Other</option>
                     </select>
                   </div>
-                  
+
                   <div className="col-span-1">
                     <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Qty
@@ -478,7 +478,7 @@ export default function NewFinancialDocumentPage() {
                       step="0.1"
                     />
                   </div>
-                  
+
                   <div className="col-span-1">
                     <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Unit
@@ -491,7 +491,7 @@ export default function NewFinancialDocumentPage() {
                       placeholder="Unit"
                     />
                   </div>
-                  
+
                   <div className="col-span-2">
                     <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Unit Cost
@@ -505,7 +505,7 @@ export default function NewFinancialDocumentPage() {
                       step="0.01"
                     />
                   </div>
-                  
+
                   <div className="col-span-2">
                     <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Total
@@ -514,7 +514,7 @@ export default function NewFinancialDocumentPage() {
                       ${(item.quantity * item.unitCost).toFixed(2)}
                     </div>
                   </div>
-                  
+
                   {items.length > 1 && (
                     <div className="col-span-1 flex justify-end">
                       <button
@@ -533,7 +533,7 @@ export default function NewFinancialDocumentPage() {
           {/* Additional Information */}
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Additional Information</h2>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -547,7 +547,7 @@ export default function NewFinancialDocumentPage() {
                   placeholder="Internal notes and comments"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Terms & Conditions
@@ -569,29 +569,29 @@ export default function NewFinancialDocumentPage() {
           {/* Totals */}
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Summary</h3>
-            
+
             <div className="space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600 dark:text-gray-400">Subtotal:</span>
                 <span className="font-medium">${totals.subtotal.toFixed(2)}</span>
               </div>
-              
+
               {formData.markup > 0 && (
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600 dark:text-gray-400">Markup ({formData.markup}%):</span>
                   <span className="font-medium">${totals.markupAmount.toFixed(2)}</span>
                 </div>
               )}
-              
+
               {mode === 'invoice' && formData.tax > 0 && (
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600 dark:text-gray-400">Tax ({formData.tax}%):</span>
                   <span className="font-medium">${totals.taxAmount.toFixed(2)}</span>
                 </div>
               )}
-              
+
               <hr className="border-gray-200 dark:border-gray-600" />
-              
+
               <div className="flex justify-between text-lg font-semibold">
                 <span>Total:</span>
                 <span className="text-brand-600">${totals.total.toFixed(2)}</span>
@@ -602,7 +602,7 @@ export default function NewFinancialDocumentPage() {
           {/* Settings */}
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Settings</h3>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -618,7 +618,7 @@ export default function NewFinancialDocumentPage() {
                   step="0.1"
                 />
               </div>
-              
+
               {mode === 'invoice' && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -645,7 +645,7 @@ export default function NewFinancialDocumentPage() {
         <div className="fixed bottom-4 right-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg shadow-lg">
           <div className="flex items-center gap-2">
             <span>{error}</span>
-            <button 
+            <button
               onClick={() => setError(null)}
               className="ml-2 text-red-500 hover:text-red-700"
             >
@@ -659,7 +659,7 @@ export default function NewFinancialDocumentPage() {
         <div className="fixed bottom-4 right-4 bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-600 text-green-700 dark:text-green-300 px-4 py-3 rounded-lg shadow-lg">
           <div className="flex items-center gap-2">
             <span>{success}</span>
-            <button 
+            <button
               onClick={() => setSuccess(null)}
               className="ml-2 text-green-500 hover:text-green-700"
             >

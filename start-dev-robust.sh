@@ -81,7 +81,8 @@ print_success "Ports 3000, 3001 and 3005 are available"
 # Start the development server
 print_status "Starting development server..."
 # Ensure correct frontend URL is propagated for link generation in dev
-export USE_DEMO_USERS=false
+# Enable in-memory demo users for local development (demo@test.com / demo123)
+export USE_DEMO_USERS=${USE_DEMO_USERS:-true}
 export FRONTEND_URL=${FRONTEND_URL:-http://localhost:3005}
 export NEXT_PUBLIC_FRONTEND_URL=${NEXT_PUBLIC_FRONTEND_URL:-http://localhost:3005}
 npm run dev

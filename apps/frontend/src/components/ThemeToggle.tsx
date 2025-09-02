@@ -10,10 +10,10 @@ interface ThemeToggleProps {
   className?: string;
 }
 
-export default function ThemeToggle({ 
-  variant = 'button', 
-  showLabel = false, 
-  className = '' 
+export default function ThemeToggle({
+  variant = 'button',
+  showLabel = false,
+  className = '',
 }: ThemeToggleProps) {
   const { theme, setTheme, toggleTheme, system } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
@@ -47,22 +47,24 @@ export default function ThemeToggle({
             <MoonIcon className="h-4 w-4 text-blue-400" />
           )}
           {showLabel && <span className="capitalize">{theme}</span>}
-          <svg className="w-4 h-4 ml-1 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            className="w-4 h-4 ml-1 text-secondary"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </button>
 
         {isOpen && (
           <>
-            <div 
-              className="fixed inset-0 z-10" 
-              onClick={() => setIsOpen(false)}
-            />
+            <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
             <div className="absolute right-0 mt-2 w-44 surface-1 elevated border border-token rounded-lg shadow-lg py-1 z-20">
               <div className="px-3 py-2 text-xs uppercase tracking-wide text-tertiary border-b border-token">
                 Theme
               </div>
-              {(['light', 'dark'] as const).map((t) => (
+              {(['light', 'dark'] as const).map(t => (
                 <button
                   key={t}
                   onClick={() => {
@@ -79,9 +81,7 @@ export default function ThemeToggle({
                     <MoonIcon className="h-4 w-4" />
                   )}
                   <span className="capitalize">{t}</span>
-                  {theme === t && (
-                    <div className="ml-auto w-2 h-2 rounded-full bg-amber-600"></div>
-                  )}
+                  {theme === t && <div className="ml-auto w-2 h-2 rounded-full bg-amber-600"></div>}
                 </button>
               ))}
               <div className="px-3 py-2 text-xs text-tertiary border-t border-token mt-1">
@@ -108,11 +108,7 @@ export default function ThemeToggle({
       ) : (
         <MoonIcon className="h-5 w-5 text-blue-400 group-hover:text-blue-300" />
       )}
-      {showLabel && (
-        <span>
-          Switch to {theme === 'light' ? 'Dark' : 'Light'} Mode
-        </span>
-      )}
+      {showLabel && <span>Switch to {theme === 'light' ? 'Dark' : 'Light'} Mode</span>}
     </button>
   );
 }

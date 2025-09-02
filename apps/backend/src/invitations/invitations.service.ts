@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as crypto from 'crypto';
@@ -12,8 +17,8 @@ import * as bcrypt from 'bcrypt';
 export class InvitationsService {
   constructor(
     @InjectModel(Invitation.name) private invitationModel: Model<InvitationDocument>,
-  @InjectModel(User.name) private userModel: Model<UserDocument>,
-  @InjectModel(Workspace.name) private workspaceModel: Model<WorkspaceDocument>,
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(Workspace.name) private workspaceModel: Model<WorkspaceDocument>
   ) {}
 
   async create(dto: CreateInvitationDto, workspaceId: string, createdBy: string) {
@@ -25,7 +30,12 @@ export class InvitationsService {
     }
     const existing = await this.userModel.findOne({ email: dto.email, workspaceId });
     if (existing) throw new BadRequestException('User already in workspace');
-    const activeInvite = await this.invitationModel.findOne({ email: dto.email, workspaceId, acceptedAt: { $exists: false }, expiresAt: { $gt: new Date() } });
+    const activeInvite = await this.invitationModel.findOne({
+      email: dto.email,
+      workspaceId,
+      acceptedAt: { $exists: false },
+      expiresAt: { $gt: new Date() },
+    });
     if (activeInvite) return activeInvite; // idempotent
     const token = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + (dto.ttlHours || 168) * 3600 * 1000);
@@ -66,7 +76,10 @@ export class InvitationsService {
     // Re-check seat availability at acceptance time
     const ws = await this.workspaceModel.findOne({ workspaceId: inv.workspaceId });
     if (ws) {
-      const seatCount = await this.userModel.countDocuments({ workspaceId: inv.workspaceId, isActive: true });
+      const seatCount = await this.userModel.countDocuments({
+        workspaceId: inv.workspaceId,
+        isActive: true,
+      });
       if (seatCount >= ws.seatLimit) throw new ForbiddenException('Seat limit reached');
     }
     if (existingGlobal) {
@@ -84,7 +97,7 @@ export class InvitationsService {
     } else {
       // Require password presence else reject (lightweight for now)
       if (!dto.password) throw new BadRequestException('Password required for new user');
-  const hashed = await bcrypt.hash(dto.password, 12);
+      const hashed = await bcrypt.hash(dto.password, 12);
       user = new this.userModel({
         email: inv.email,
         password: hashed,

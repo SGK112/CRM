@@ -90,7 +90,7 @@ export default function ProfileSettingsPage() {
 
   const loadNotificationPreferences = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
       if (!token) return;
 
       // For now, we'll use default preferences since we don't have them from backend yet
@@ -138,7 +138,7 @@ export default function ProfileSettingsPage() {
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       setMessage('New passwords do not match');
       return;
@@ -233,7 +233,7 @@ export default function ProfileSettingsPage() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center py-20">
             <p className="text-slate-400">Unable to load profile data</p>
-            <button 
+            <button
               onClick={loadUserProfile}
               className="mt-4 px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-500"
             >
@@ -258,8 +258,8 @@ export default function ProfileSettingsPage() {
         {/* Success/Error Messages */}
         {message && (
           <div className={`mb-6 p-4 rounded-md ${
-            message.includes('successfully') || message.includes('saved') 
-              ? 'bg-green-600/20 text-green-400 border border-green-600/30' 
+            message.includes('successfully') || message.includes('saved')
+              ? 'bg-green-600/20 text-green-400 border border-green-600/30'
               : 'bg-red-600/20 text-red-400 border border-red-600/30'
           }`}>
             {message}
@@ -434,7 +434,7 @@ export default function ProfileSettingsPage() {
               {/* Password & Security */}
               <div id="security" className="rounded-xl border border-slate-800 bg-slate-900/40 p-6">
                 <h3 className="text-lg font-semibold mb-6">Password & Security</h3>
-                
+
                 <form onSubmit={handlePasswordChange} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">
@@ -493,7 +493,7 @@ export default function ProfileSettingsPage() {
               {/* Notification Preferences */}
               <div id="notifications" className="rounded-xl border border-slate-800 bg-slate-900/40 p-6">
                 <h3 className="text-lg font-semibold mb-6">Notification Preferences</h3>
-                
+
                 <div className="space-y-6">
                   <div>
                     <h4 className="font-medium text-slate-200 mb-4">Email Notifications</h4>
@@ -506,8 +506,8 @@ export default function ProfileSettingsPage() {
                             </div>
                           </div>
                           <label className="relative inline-flex items-center cursor-pointer">
-                            <input 
-                              type="checkbox" 
+                            <input
+                              type="checkbox"
                               checked={enabled}
                               onChange={(e) => setNotifications({
                                 ...notifications,
@@ -516,7 +516,7 @@ export default function ProfileSettingsPage() {
                                   [key]: e.target.checked
                                 }
                               })}
-                              className="sr-only peer" 
+                              className="sr-only peer"
                             />
                             <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
                           </label>
@@ -536,8 +536,8 @@ export default function ProfileSettingsPage() {
                             </div>
                           </div>
                           <label className="relative inline-flex items-center cursor-pointer">
-                            <input 
-                              type="checkbox" 
+                            <input
+                              type="checkbox"
                               checked={enabled}
                               onChange={(e) => setNotifications({
                                 ...notifications,
@@ -546,7 +546,7 @@ export default function ProfileSettingsPage() {
                                   [key]: e.target.checked
                                 }
                               })}
-                              className="sr-only peer" 
+                              className="sr-only peer"
                             />
                             <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
                           </label>

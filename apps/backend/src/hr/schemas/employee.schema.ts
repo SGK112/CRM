@@ -65,13 +65,15 @@ export class Employee {
   };
 
   @Prop({
-    type: [{
-      name: String,
-      identifier: String, // license or cert number
-      issuedDate: Date,
-      expirationDate: Date,
-      issuingAuthority: String,
-    }],
+    type: [
+      {
+        name: String,
+        identifier: String, // license or cert number
+        issuedDate: Date,
+        expirationDate: Date,
+        issuingAuthority: String,
+      },
+    ],
     default: [],
   })
   certifications: {
@@ -83,14 +85,16 @@ export class Employee {
   }[];
 
   @Prop({
-    type: [{
-      date: Date,
-      type: { type: String }, // warning, suspension, termination_notice
-      reason: String,
-      notes: String,
-      issuedBy: String,
-      actionTaken: String,
-    }],
+    type: [
+      {
+        date: Date,
+        type: { type: String }, // warning, suspension, termination_notice
+        reason: String,
+        notes: String,
+        issuedBy: String,
+        actionTaken: String,
+      },
+    ],
     default: [],
   })
   disciplinaryActions: {
@@ -103,14 +107,16 @@ export class Employee {
   }[];
 
   @Prop({
-    type: [{
-      date: Date,
-      topic: String,
-      description: String,
-      hours: Number,
-      trainer: String,
-      certificateUrl: String,
-    }],
+    type: [
+      {
+        date: Date,
+        topic: String,
+        description: String,
+        hours: Number,
+        trainer: String,
+        certificateUrl: String,
+      },
+    ],
     default: [],
   })
   trainings: {
@@ -123,14 +129,16 @@ export class Employee {
   }[];
 
   @Prop({
-    type: [{
-      periodStart: Date,
-      periodEnd: Date,
-      regularHours: Number,
-      overtimeHours: Number,
-      notes: String,
-      approvedBy: String,
-    }],
+    type: [
+      {
+        periodStart: Date,
+        periodEnd: Date,
+        regularHours: Number,
+        overtimeHours: Number,
+        notes: String,
+        approvedBy: String,
+      },
+    ],
     default: [],
   })
   timeEntries: {

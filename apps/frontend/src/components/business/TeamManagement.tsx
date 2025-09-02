@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  UserPlusIcon, 
+import {
+  UserPlusIcon,
   UserGroupIcon,
   CogIcon,
   TrashIcon,
@@ -11,7 +11,7 @@ import {
   XMarkIcon,
   ShieldCheckIcon,
   EnvelopeIcon,
-  PhoneIcon
+  PhoneIcon,
 } from '@heroicons/react/24/outline';
 
 interface TeamMember {
@@ -49,50 +49,56 @@ const DEFAULT_ROLES: TeamRole[] = [
     name: 'Business Owner',
     description: 'Full access to all features and billing',
     permissions: ['*'],
-    level: 1
+    level: 1,
   },
   {
     id: 'admin',
     name: 'Administrator',
     description: 'Manage team, projects, and most business operations',
-    permissions: ['manage_team', 'manage_projects', 'manage_clients', 'view_reports', 'manage_estimates'],
-    level: 2
+    permissions: [
+      'manage_team',
+      'manage_projects',
+      'manage_clients',
+      'view_reports',
+      'manage_estimates',
+    ],
+    level: 2,
   },
   {
     id: 'manager',
     name: 'Project Manager',
     description: 'Oversee projects, estimates, and client communication',
     permissions: ['manage_projects', 'manage_clients', 'create_estimates', 'view_reports'],
-    level: 3
+    level: 3,
   },
   {
     id: 'foreman',
     name: 'Foreman',
     description: 'Lead field crews and update project progress',
     permissions: ['update_projects', 'view_schedules', 'upload_photos', 'crew_management'],
-    level: 4
+    level: 4,
   },
   {
     id: 'crew',
     name: 'Crew Member',
     description: 'View assignments and update work progress',
     permissions: ['view_assignments', 'update_progress', 'upload_photos'],
-    level: 5
+    level: 5,
   },
   {
     id: 'office',
     name: 'Office Staff',
     description: 'Handle scheduling, invoicing, and client communications',
     permissions: ['manage_schedule', 'create_invoices', 'client_communication', 'data_entry'],
-    level: 6
-  }
+    level: 6,
+  },
 ];
 
 export default function TeamManagement({
   businessId,
   currentUser,
   onTeamUpdate,
-  className = ''
+  className = '',
 }: TeamManagementProps) {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(false);
@@ -108,7 +114,7 @@ export default function TeamManagement({
     lastName: '',
     email: '',
     phone: '',
-    role: 'crew' as TeamMember['role']
+    role: 'crew' as TeamMember['role'],
   });
 
   useEffect(() => {
@@ -131,7 +137,7 @@ export default function TeamManagement({
           status: 'active',
           hireDate: new Date('2023-01-01'),
           lastLogin: new Date(),
-          avatar: undefined
+          avatar: undefined,
         },
         {
           id: '2',
@@ -144,8 +150,8 @@ export default function TeamManagement({
           status: 'active',
           hireDate: new Date('2023-02-15'),
           lastLogin: new Date(Date.now() - 86400000),
-          avatar: undefined
-        }
+          avatar: undefined,
+        },
       ];
       setTeamMembers(mockTeam);
     } catch (error) {
@@ -170,7 +176,7 @@ export default function TeamManagement({
         role: newMember.role,
         permissions: DEFAULT_ROLES.find(r => r.id === newMember.role)?.permissions || [],
         status: 'invited',
-        hireDate: new Date()
+        hireDate: new Date(),
       };
 
       const updatedTeam = [...teamMembers, invitation];
@@ -183,7 +189,7 @@ export default function TeamManagement({
         lastName: '',
         email: '',
         phone: '',
-        role: 'crew'
+        role: 'crew',
       });
       setShowInviteForm(false);
     } catch (error) {
@@ -194,12 +200,12 @@ export default function TeamManagement({
   };
 
   const handleUpdateMemberRole = async (memberId: string, newRole: TeamMember['role']) => {
-    const updatedTeam = teamMembers.map(member => 
-      member.id === memberId 
-        ? { 
-            ...member, 
-            role: newRole, 
-            permissions: DEFAULT_ROLES.find(r => r.id === newRole)?.permissions || [] 
+    const updatedTeam = teamMembers.map(member =>
+      member.id === memberId
+        ? {
+            ...member,
+            role: newRole,
+            permissions: DEFAULT_ROLES.find(r => r.id === newRole)?.permissions || [],
           }
         : member
     );
@@ -221,7 +227,7 @@ export default function TeamManagement({
       .includes(searchTerm.toLowerCase());
     const matchesRole = filterRole === 'all' || member.role === filterRole;
     const matchesStatus = filterStatus === 'all' || member.status === filterStatus;
-    
+
     return matchesSearch && matchesRole && matchesStatus;
   });
 
@@ -232,7 +238,7 @@ export default function TeamManagement({
       manager: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300',
       foreman: 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300',
       crew: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300',
-      office: 'bg-pink-100 text-pink-800 dark:bg-pink-900/20 dark:text-pink-300'
+      office: 'bg-pink-100 text-pink-800 dark:bg-pink-900/20 dark:text-pink-300',
     };
     return colors[role] || colors.crew;
   };
@@ -241,7 +247,7 @@ export default function TeamManagement({
     const colors = {
       active: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300',
       invited: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300',
-      inactive: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300'
+      inactive: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300',
     };
     return colors[status];
   };
@@ -259,7 +265,7 @@ export default function TeamManagement({
             Manage your team members, roles, and permissions
           </p>
         </div>
-        
+
         <button
           onClick={() => setShowInviteForm(true)}
           className="pill pill-tint-amber flex items-center gap-2"
@@ -273,41 +279,41 @@ export default function TeamManagement({
       <div className="surface-solid p-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-[var(--text)] mb-1">
-              Search Team
-            </label>
+            <label className="block text-sm font-medium text-[var(--text)] mb-1">Search Team</label>
             <input
               type="text"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={e => setSearchTerm(e.target.value)}
               placeholder="Search by name or email..."
               className="w-full p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-[var(--text)] mb-1">
               Filter by Role
             </label>
             <select
               value={filterRole}
-              onChange={(e) => setFilterRole(e.target.value)}
+              onChange={e => setFilterRole(e.target.value)}
               className="w-full p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm"
             >
               <option value="all">All Roles</option>
               {DEFAULT_ROLES.map(role => (
-                <option key={role.id} value={role.id}>{role.name}</option>
+                <option key={role.id} value={role.id}>
+                  {role.name}
+                </option>
               ))}
             </select>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-[var(--text)] mb-1">
               Filter by Status
             </label>
             <select
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
+              onChange={e => setFilterStatus(e.target.value)}
               className="w-full p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm"
             >
               <option value="all">All Status</option>
@@ -326,40 +332,44 @@ export default function TeamManagement({
             Team Members ({filteredMembers.length})
           </h3>
         </div>
-        
+
         <div className="divide-y divide-[var(--border)]">
           {loading ? (
-            <div className="p-8 text-center text-[var(--text-dim)]">
-              Loading team members...
-            </div>
+            <div className="p-8 text-center text-[var(--text-dim)]">Loading team members...</div>
           ) : filteredMembers.length === 0 ? (
-            <div className="p-8 text-center text-[var(--text-dim)]">
-              No team members found
-            </div>
+            <div className="p-8 text-center text-[var(--text-dim)]">No team members found</div>
           ) : (
             filteredMembers.map(member => (
-              <div key={member.id} className="p-4 hover:bg-[var(--surface-hover)] transition-colors">
+              <div
+                key={member.id}
+                className="p-4 hover:bg-[var(--surface-hover)] transition-colors"
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 bg-[var(--accent)]/20 rounded-full flex items-center justify-center">
                       <span className="text-sm font-medium text-[var(--accent)]">
-                        {member.firstName[0]}{member.lastName[0]}
+                        {member.firstName[0]}
+                        {member.lastName[0]}
                       </span>
                     </div>
-                    
+
                     <div>
                       <div className="flex items-center gap-2">
                         <h4 className="font-medium text-[var(--text)]">
                           {member.firstName} {member.lastName}
                         </h4>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRoleColor(member.role)}`}>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${getRoleColor(member.role)}`}
+                        >
                           {DEFAULT_ROLES.find(r => r.id === member.role)?.name || member.role}
                         </span>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(member.status)}`}>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(member.status)}`}
+                        >
                           {member.status}
                         </span>
                       </div>
-                      
+
                       <div className="flex items-center gap-4 mt-1 text-sm text-[var(--text-dim)]">
                         <span className="flex items-center gap-1">
                           <EnvelopeIcon className="w-4 h-4" />
@@ -372,26 +382,28 @@ export default function TeamManagement({
                           </span>
                         )}
                         {member.lastLogin && (
-                          <span>
-                            Last login: {member.lastLogin.toLocaleDateString()}
-                          </span>
+                          <span>Last login: {member.lastLogin.toLocaleDateString()}</span>
                         )}
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center gap-2">
                     <select
                       value={member.role}
-                      onChange={(e) => handleUpdateMemberRole(member.id, e.target.value as TeamMember['role'])}
+                      onChange={e =>
+                        handleUpdateMemberRole(member.id, e.target.value as TeamMember['role'])
+                      }
                       className="px-3 py-1 bg-[var(--input-bg)] border border-[var(--border)] rounded text-sm text-[var(--text)]"
                       disabled={member.role === 'owner' && currentUser?.role !== 'owner'}
                     >
                       {DEFAULT_ROLES.map(role => (
-                        <option key={role.id} value={role.id}>{role.name}</option>
+                        <option key={role.id} value={role.id}>
+                          {role.name}
+                        </option>
                       ))}
                     </select>
-                    
+
                     {member.role !== 'owner' && (
                       <button
                         onClick={() => handleRemoveMember(member.id)}
@@ -415,9 +427,7 @@ export default function TeamManagement({
           <div className="bg-[var(--surface-solid)] rounded-lg shadow-xl w-full max-w-md">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-[var(--text)]">
-                  Invite Team Member
-                </h3>
+                <h3 className="text-lg font-semibold text-[var(--text)]">Invite Team Member</h3>
                 <button
                   onClick={() => setShowInviteForm(false)}
                   className="p-2 hover:bg-[var(--surface-hover)] rounded transition-colors"
@@ -425,7 +435,7 @@ export default function TeamManagement({
                   <XMarkIcon className="w-5 h-5" />
                 </button>
               </div>
-              
+
               <form onSubmit={handleInviteMember} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -435,12 +445,12 @@ export default function TeamManagement({
                     <input
                       type="text"
                       value={newMember.firstName}
-                      onChange={(e) => setNewMember(prev => ({ ...prev, firstName: e.target.value }))}
+                      onChange={e => setNewMember(prev => ({ ...prev, firstName: e.target.value }))}
                       className="w-full p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm"
                       required
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-[var(--text)] mb-1">
                       Last Name *
@@ -448,13 +458,13 @@ export default function TeamManagement({
                     <input
                       type="text"
                       value={newMember.lastName}
-                      onChange={(e) => setNewMember(prev => ({ ...prev, lastName: e.target.value }))}
+                      onChange={e => setNewMember(prev => ({ ...prev, lastName: e.target.value }))}
                       className="w-full p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm"
                       required
                     />
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-[var(--text)] mb-1">
                     Email Address *
@@ -462,12 +472,12 @@ export default function TeamManagement({
                   <input
                     type="email"
                     value={newMember.email}
-                    onChange={(e) => setNewMember(prev => ({ ...prev, email: e.target.value }))}
+                    onChange={e => setNewMember(prev => ({ ...prev, email: e.target.value }))}
                     className="w-full p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm"
                     required
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-[var(--text)] mb-1">
                     Phone (Optional)
@@ -475,18 +485,23 @@ export default function TeamManagement({
                   <input
                     type="tel"
                     value={newMember.phone}
-                    onChange={(e) => setNewMember(prev => ({ ...prev, phone: e.target.value }))}
+                    onChange={e => setNewMember(prev => ({ ...prev, phone: e.target.value }))}
                     className="w-full p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-[var(--text)] mb-1">
                     Role *
                   </label>
                   <select
                     value={newMember.role}
-                    onChange={(e) => setNewMember(prev => ({ ...prev, role: e.target.value as TeamMember['role'] }))}
+                    onChange={e =>
+                      setNewMember(prev => ({
+                        ...prev,
+                        role: e.target.value as TeamMember['role'],
+                      }))
+                    }
                     className="w-full p-2 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)] text-sm"
                     required
                   >
@@ -497,7 +512,7 @@ export default function TeamManagement({
                     ))}
                   </select>
                 </div>
-                
+
                 <div className="flex items-center justify-end gap-3 pt-4">
                   <button
                     type="button"

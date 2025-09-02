@@ -50,7 +50,7 @@ export class AIEstimateService {
   constructor(
     private aiService: AiService,
     @InjectModel(Estimate.name) private estimateModel: Model<EstimateDocument>,
-    @InjectModel(PriceItem.name) private priceModel: Model<PriceItemDocument>,
+    @InjectModel(PriceItem.name) private priceModel: Model<PriceItemDocument>
   ) {}
 
   /**
@@ -63,7 +63,6 @@ export class AIEstimateService {
     clientPreferences?: string;
     propertyDetails?: string;
   }): Promise<AIEstimateItem[]> {
-    
     const systemPrompt = `You are an expert remodeling contractor AI assistant specializing in ${projectData.projectType} renovations. 
     Generate detailed, accurate estimate line items based on the project scope. Consider current 2025 material costs and labor rates.
     
@@ -100,10 +99,13 @@ export class AIEstimateService {
     Return ONLY valid JSON array of items.`;
 
     try {
-      const response = await this.aiService.chat([
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt }
-      ], { strategy: 'quality', temperature: 0.3 });
+      const response = await this.aiService.chat(
+        [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
+        { strategy: 'quality', temperature: 0.3 }
+      );
 
       // Parse AI response
       let items: any[] = [];
@@ -121,18 +123,21 @@ export class AIEstimateService {
       return items.map(item => ({
         category: item.category || 'other',
         description: item.description || 'Professional Service',
-        detailedDescription: item.detailedDescription || item.description || 'Professional service as specified',
+        detailedDescription:
+          item.detailedDescription || item.description || 'Professional service as specified',
         quantity: Number(item.quantity) || 1,
         unit: item.unit || 'each',
         unitCost: Number(item.unitCost) || 0,
-        totalCost: Number(item.totalCost) || (Number(item.quantity) || 1) * (Number(item.unitCost) || 0),
+        totalCost:
+          Number(item.totalCost) || (Number(item.quantity) || 1) * (Number(item.unitCost) || 0),
         notes: item.notes || '',
-        supplierRecommendations: Array.isArray(item.supplierRecommendations) ? item.supplierRecommendations : [],
+        supplierRecommendations: Array.isArray(item.supplierRecommendations)
+          ? item.supplierRecommendations
+          : [],
         alternativeOptions: Array.isArray(item.alternativeOptions) ? item.alternativeOptions : [],
         isAiGenerated: true,
-        confidenceLevel: item.confidenceLevel || 'medium'
+        confidenceLevel: item.confidenceLevel || 'medium',
       }));
-
     } catch (error) {
       this.logger.error('Failed to generate AI estimate items:', error);
       return this.getFallbackItems(projectData.projectType);
@@ -150,7 +155,6 @@ export class AIEstimateService {
     clientPreferences?: string;
     timeline?: any;
   }): Promise<EstimateAIInsights> {
-
     const systemPrompt = `You are an expert construction cost analyst and market researcher. 
     Analyze the provided estimate and generate insights about pricing competitiveness, risks, and recommendations.
     Consider current 2025 market conditions, material costs, and industry standards.`;
@@ -162,7 +166,10 @@ export class AIEstimateService {
     Item Count: ${estimate.items.length}
     
     Items Summary:
-    ${estimate.items.slice(0, 5).map(item => `- ${item.description || item.name}: $${item.totalCost || item.sellPrice || 0}`).join('\n')}
+    ${estimate.items
+      .slice(0, 5)
+      .map(item => `- ${item.description || item.name}: $${item.totalCost || item.sellPrice || 0}`)
+      .join('\n')}
     
     Provide analysis in this JSON format:
     {
@@ -184,35 +191,46 @@ export class AIEstimateService {
     }`;
 
     try {
-      const response = await this.aiService.chat([
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt }
-      ], { strategy: 'balanced', temperature: 0.2 });
+      const response = await this.aiService.chat(
+        [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
+        { strategy: 'balanced', temperature: 0.2 }
+      );
 
       const insights = JSON.parse(response.reply);
-      
+
       // Validate and provide defaults
       return {
         confidenceScore: Math.min(1, Math.max(0, Number(insights.confidenceScore) || 0.75)),
-        marketComparison: insights.marketComparison || 'Pricing appears aligned with current market rates.',
-        riskFactors: Array.isArray(insights.riskFactors) ? insights.riskFactors : ['Standard project risks apply'],
-        recommendations: Array.isArray(insights.recommendations) ? insights.recommendations : ['Review timeline and material availability'],
+        marketComparison:
+          insights.marketComparison || 'Pricing appears aligned with current market rates.',
+        riskFactors: Array.isArray(insights.riskFactors)
+          ? insights.riskFactors
+          : ['Standard project risks apply'],
+        recommendations: Array.isArray(insights.recommendations)
+          ? insights.recommendations
+          : ['Review timeline and material availability'],
         competitivePricing: {
           isCompetitive: insights.competitivePricing?.isCompetitive ?? true,
           marketRange: {
-            low: Number(insights.competitivePricing?.marketRange?.low) || Math.round(estimate.totalAmount * 0.8),
-            high: Number(insights.competitivePricing?.marketRange?.high) || Math.round(estimate.totalAmount * 1.2)
+            low:
+              Number(insights.competitivePricing?.marketRange?.low) ||
+              Math.round(estimate.totalAmount * 0.8),
+            high:
+              Number(insights.competitivePricing?.marketRange?.high) ||
+              Math.round(estimate.totalAmount * 1.2),
           },
-          percentageVsMarket: Number(insights.competitivePricing?.percentageVsMarket) || 0
+          percentageVsMarket: Number(insights.competitivePricing?.percentageVsMarket) || 0,
         },
         projectComplexity: insights.projectComplexity || 'medium',
         timelineEstimate: {
           optimistic: Number(insights.timelineEstimate?.optimistic) || 14,
           realistic: Number(insights.timelineEstimate?.realistic) || 21,
-          pessimistic: Number(insights.timelineEstimate?.pessimistic) || 35
-        }
+          pessimistic: Number(insights.timelineEstimate?.pessimistic) || 35,
+        },
       };
-
     } catch (error) {
       this.logger.error('Failed to generate AI insights:', error);
       return this.getFallbackInsights(estimate);
@@ -237,17 +255,19 @@ export class AIEstimateService {
           
           Provide a professional, detailed description that clients can understand. Include what's included in the work/materials. Keep it under 150 words.`;
 
-          const response = await this.aiService.chat([
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt }
-          ], { strategy: 'cost', temperature: 0.4 });
+          const response = await this.aiService.chat(
+            [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: userPrompt },
+            ],
+            { strategy: 'cost', temperature: 0.4 }
+          );
 
           enhancedItems.push({
             ...item,
             description: response.reply.replace(/"/g, '').trim(),
-            isAiEnhanced: true
+            isAiEnhanced: true,
           });
-
         } catch (error) {
           enhancedItems.push(item);
         }
@@ -272,11 +292,11 @@ export class AIEstimateService {
       itemDetailLevel: 0.3,
       marketDataRecency: 0.25,
       projectComplexity: 0.25,
-      estimatorExperience: 0.2
+      estimatorExperience: 0.2,
     };
 
     return Object.entries(factors).reduce((score, [key, value]) => {
-      return score + (value * weights[key as keyof typeof weights]);
+      return score + value * weights[key as keyof typeof weights];
     }, 0);
   }
 
@@ -289,7 +309,8 @@ export class AIEstimateService {
         {
           category: 'materials' as const,
           description: 'Custom Kitchen Cabinets',
-          detailedDescription: 'High-quality custom cabinets with soft-close doors and drawers, including installation hardware',
+          detailedDescription:
+            'High-quality custom cabinets with soft-close doors and drawers, including installation hardware',
           quantity: 15,
           unit: 'linear feet',
           unitCost: 450,
@@ -298,12 +319,13 @@ export class AIEstimateService {
           supplierRecommendations: ['Premier Cabinet Co.', 'Custom Kitchen Solutions'],
           alternativeOptions: [],
           isAiGenerated: false,
-          confidenceLevel: 'high' as const
+          confidenceLevel: 'high' as const,
         },
         {
           category: 'labor' as const,
           description: 'Kitchen Installation Labor',
-          detailedDescription: 'Professional installation including demolition, cabinet installation, and finish work',
+          detailedDescription:
+            'Professional installation including demolition, cabinet installation, and finish work',
           quantity: 40,
           unit: 'hours',
           unitCost: 75,
@@ -312,14 +334,15 @@ export class AIEstimateService {
           supplierRecommendations: [],
           alternativeOptions: [],
           isAiGenerated: false,
-          confidenceLevel: 'high' as const
-        }
+          confidenceLevel: 'high' as const,
+        },
       ],
       bathroom: [
         {
           category: 'materials' as const,
           description: 'Bathroom Tile and Fixtures',
-          detailedDescription: 'Premium porcelain tile flooring and wall tile with matching fixtures',
+          detailedDescription:
+            'Premium porcelain tile flooring and wall tile with matching fixtures',
           quantity: 120,
           unit: 'sq ft',
           unitCost: 12,
@@ -328,9 +351,9 @@ export class AIEstimateService {
           supplierRecommendations: ['Tile & Stone Depot'],
           alternativeOptions: [],
           isAiGenerated: false,
-          confidenceLevel: 'medium' as const
-        }
-      ]
+          confidenceLevel: 'medium' as const,
+        },
+      ],
     };
 
     return baseItems[projectType as keyof typeof baseItems] || baseItems.kitchen;
@@ -342,36 +365,38 @@ export class AIEstimateService {
   private getFallbackInsights(estimate: any): EstimateAIInsights {
     const avgConfidence = 0.75;
     const marketVariance = Math.random() * 0.3 - 0.15; // -15% to +15%
-    
+
     return {
       confidenceScore: avgConfidence,
-      marketComparison: marketVariance > 0 
-        ? `This estimate is ${Math.abs(marketVariance * 100).toFixed(0)}% above market average for similar projects.`
-        : `This estimate is ${Math.abs(marketVariance * 100).toFixed(0)}% below market average for similar projects.`,
+      marketComparison:
+        marketVariance > 0
+          ? `This estimate is ${Math.abs(marketVariance * 100).toFixed(0)}% above market average for similar projects.`
+          : `This estimate is ${Math.abs(marketVariance * 100).toFixed(0)}% below market average for similar projects.`,
       riskFactors: [
         'Material price fluctuations',
         'Potential delays due to permit processing',
-        'Weather-related timeline impacts'
+        'Weather-related timeline impacts',
       ],
       recommendations: [
         'Include 10% contingency for unforeseen issues',
         'Confirm material availability before starting',
-        'Consider upgrading electrical if older home'
+        'Consider upgrading electrical if older home',
       ],
       competitivePricing: {
         isCompetitive: Math.abs(marketVariance) < 0.1,
         marketRange: {
           low: Math.round(estimate.totalAmount * 0.85),
-          high: Math.round(estimate.totalAmount * 1.15)
+          high: Math.round(estimate.totalAmount * 1.15),
         },
-        percentageVsMarket: Math.round(marketVariance * 100)
+        percentageVsMarket: Math.round(marketVariance * 100),
       },
-      projectComplexity: estimate.totalAmount > 50000 ? 'high' : estimate.totalAmount > 25000 ? 'medium' : 'low',
+      projectComplexity:
+        estimate.totalAmount > 50000 ? 'high' : estimate.totalAmount > 25000 ? 'medium' : 'low',
       timelineEstimate: {
         optimistic: Math.ceil(estimate.totalAmount / 3000),
         realistic: Math.ceil(estimate.totalAmount / 2000),
-        pessimistic: Math.ceil(estimate.totalAmount / 1500)
-      }
+        pessimistic: Math.ceil(estimate.totalAmount / 1500),
+      },
     };
   }
 }

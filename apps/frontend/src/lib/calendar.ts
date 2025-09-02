@@ -13,7 +13,7 @@ interface CalendarEvent {
  */
 export function getGoogleCalendarUrl(event: CalendarEvent): string {
   const formatDate = (date: Date) => date.toISOString().replace(/-|:|\.\d+/g, '');
-  
+
   const url = new URL('https://www.google.com/calendar/render');
   url.searchParams.set('action', 'TEMPLATE');
   url.searchParams.set('text', event.title);
@@ -24,7 +24,7 @@ export function getGoogleCalendarUrl(event: CalendarEvent): string {
   if (event.location) {
     url.searchParams.set('location', event.location);
   }
-  
+
   return url.toString();
 }
 
@@ -58,8 +58,10 @@ export function generateIcsContent(event: CalendarEvent): string {
     event.description ? `DESCRIPTION:${event.description}` : '',
     event.location ? `LOCATION:${event.location}` : '',
     'END:VEVENT',
-    'END:VCALENDAR'
-  ].filter(Boolean).join('\r\n');
+    'END:VCALENDAR',
+  ]
+    .filter(Boolean)
+    .join('\r\n');
 
   return icsBody;
 }

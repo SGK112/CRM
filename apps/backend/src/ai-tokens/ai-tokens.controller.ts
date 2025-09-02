@@ -26,6 +26,9 @@ export class AiTokensController {
   @Post('consume')
   @RequiresPermissions('ai.tokens.consume')
   consume(@Req() req, @Body() body: ConsumeTokensDto) {
-    return this.service.consume(req.user.workspaceId, body.quantity, { reason: body.reason, referenceId: body.referenceId });
+    return this.service.consume(req.user.workspaceId, body.quantity, {
+      reason: body.reason,
+      referenceId: body.referenceId,
+    });
   }
 }

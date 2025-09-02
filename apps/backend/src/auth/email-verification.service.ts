@@ -21,10 +21,14 @@ export class EmailVerificationService {
 
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
-    private emailService: EmailService,
+    private emailService: EmailService
   ) {}
 
-  async sendVerificationEmail(user: { id: string; email: string; firstName: string }): Promise<{ success: boolean; verificationUrl?: string }> {
+  async sendVerificationEmail(user: {
+    id: string;
+    email: string;
+    firstName: string;
+  }): Promise<{ success: boolean; verificationUrl?: string }> {
     try {
       // Generate verification token
       const token = crypto.randomBytes(32).toString('hex');
@@ -45,14 +49,12 @@ export class EmailVerificationService {
       // Create verification URL - handle different environments
       // Default to the actual dev frontend port (3005) when not explicitly set
       const frontendUrl =
-        process.env.FRONTEND_URL ||
-        process.env.NEXT_PUBLIC_FRONTEND_URL ||
-        'http://localhost:3005';
+        process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3005';
       const baseUrl = frontendUrl;
       const verificationUrl = `${baseUrl.replace(/\/$/, '')}/auth/verify-email?token=${token}`;
 
       // Send verification email
-  const emailSent = await this.emailService.sendEmail({
+      const emailSent = await this.emailService.sendEmail({
         to: user.email,
         subject: 'Verify Your Email Address - Remodely CRM',
         html: this.getVerificationEmailTemplate(user.firstName, verificationUrl),
@@ -64,14 +66,29 @@ export class EmailVerificationService {
         console.log(`[EmailVerification] Verification link for ${user.email}: ${verificationUrl}`);
       }
 
-  return { success: emailSent, verificationUrl: process.env.NODE_ENV !== 'production' ? verificationUrl : undefined };
+      return {
+        success: emailSent,
+        verificationUrl: process.env.NODE_ENV !== 'production' ? verificationUrl : undefined,
+      };
     } catch (error) {
       this.logger.error('Failed to send verification email', error?.stack || String(error));
-  return { success: false };
+      return { success: false };
     }
   }
 
-  async verifyEmail(token: string): Promise<{ success: boolean; message: string; user?: { id: string; email: string; firstName: string; lastName: string; isEmailVerified: boolean } }> {
+  async verifyEmail(
+    token: string
+  ): Promise<{
+    success: boolean;
+    message: string;
+    user?: {
+      id: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      isEmailVerified: boolean;
+    };
+  }> {
     try {
       const tokenData = this.verificationTokens.get(token);
 
@@ -87,14 +104,14 @@ export class EmailVerificationService {
       // Update user as verified in database
       const user = await this.userModel.findByIdAndUpdate(
         tokenData.userId,
-        { 
+        {
           isEmailVerified: true,
           emailVerifiedAt: new Date(),
         },
         { new: true }
       );
 
-  if (!user) {
+      if (!user) {
         return { success: false, message: 'User not found' };
       }
 

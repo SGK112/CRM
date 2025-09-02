@@ -1,7 +1,26 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, Request, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AppointmentsService } from './appointments.service';
-import { CreateAppointmentDto, UpdateAppointmentDto, AppointmentStatus, AppointmentFilters, PaginationOptions, AppointmentStats } from './dto/appointment.dto';
+import { UnifiedCalendarService } from './unified-calendar.service';
+import {
+  CreateAppointmentDto,
+  UpdateAppointmentDto,
+  AppointmentStatus,
+  AppointmentFilters,
+  PaginationOptions,
+  AppointmentStats,
+} from './dto/appointment.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('appointments')
@@ -9,7 +28,10 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 @UseGuards(JwtAuthGuard)
 @Controller('appointments')
 export class AppointmentsController {
-  constructor(private readonly appointmentsService: AppointmentsService) {}
+  constructor(
+    private readonly appointmentsService: AppointmentsService,
+    private readonly unifiedCalendarService: UnifiedCalendarService
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Create new appointment' })
@@ -31,25 +53,25 @@ export class AppointmentsController {
       type: query.type,
       assignedTo: query.assignedTo,
       clientId: query.clientId,
-      search: query.search
+      search: query.search,
     };
     const pagination: PaginationOptions = {
       limit: parseInt(query.limit) || 10,
-      offset: parseInt(query.offset) || 0
+      offset: parseInt(query.offset) || 0,
     };
-    return await this.appointmentsService.findAllWithFilters(
-      filters,
-      pagination
-    );
+    return await this.appointmentsService.findAllWithFilters(filters, pagination);
   }
 
   @Get('calendar')
   @ApiOperation({ summary: 'Get appointments formatted for calendar view' })
   async getCalendarEvents(@Request() req: any, @Query() query: any) {
     const startDate = query.start ? new Date(query.start) : new Date();
-    const endDate = query.end ? new Date(query.end) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
-    
-    return this.appointmentsService.getCalendarEvents(
+    const endDate = query.end
+      ? new Date(query.end)
+      : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
+
+    return this.unifiedCalendarService.getUnifiedCalendarEvents(
+      req.user._id || req.user.id || req.user.sub,
       req.user.workspaceId,
       startDate,
       endDate
@@ -88,7 +110,7 @@ export class AppointmentsController {
   async update(
     @Param('id') id: string,
     @Body() updateAppointmentDto: UpdateAppointmentDto,
-    @Request() req: any,
+    @Request() req: any
   ) {
     return await this.appointmentsService.update(id, updateAppointmentDto, req.user.workspaceId);
   }
@@ -108,7 +130,7 @@ export class AppointmentsController {
     @Param('id') id: string,
     @Body('newDate') newDate: string,
     @Body('reason') reason: string,
-    @Request() req: any,
+    @Request() req: any
   ) {
     return await this.appointmentsService.reschedule(
       id,
@@ -151,20 +173,42 @@ export class AppointmentsController {
     return await this.appointmentsService.sendReminder(id, req.user.workspaceId);
   }
 
-  @Put(':id/status')
-  @ApiOperation({ summary: 'Update appointment status' })
-  @ApiResponse({ status: 200, description: 'Status updated successfully' })
-  async updateStatus(
-    @Param('id') id: string,
-    @Body('status') status: AppointmentStatus,
-    @Body('notes') notes: string,
-    @Request() req: any,
-  ) {
-    return await this.appointmentsService.updateStatus(
-      id,
-      status,
-      req.user.workspaceId,
-      notes
+  @Post('google-calendar/sync')
+  @ApiOperation({ summary: 'Sync CRM appointment to Google Calendar' })
+  @ApiResponse({ status: 201, description: 'Event synced to Google Calendar' })
+  async syncToGoogleCalendar(@Body() data: { appointmentId: string }, @Request() req: any) {
+    // Get the appointment details
+    const appointment = await this.appointmentsService.findOne(
+      data.appointmentId,
+      req.user.workspaceId
+    );
+    if (!appointment) {
+      throw new Error('Appointment not found');
+    }
+
+    // Create event in Google Calendar
+    const googleEvent = await this.unifiedCalendarService.createGoogleCalendarEvent(
+      req.user._id || req.user.id || req.user.sub,
+      {
+        summary: appointment.title,
+        description: appointment.description,
+        start: appointment.scheduledDate.toISOString(),
+        end: new Date(
+          appointment.scheduledDate.getTime() + appointment.duration * 60000
+        ).toISOString(),
+        location: appointment.location,
+      }
+    );
+
+    return { success: true, googleEvent };
+  }
+
+  @Get('google-calendar/status')
+  @ApiOperation({ summary: 'Get Google Calendar integration status' })
+  @ApiResponse({ status: 200, description: 'Google Calendar status retrieved' })
+  async getGoogleCalendarStatus(@Request() req: any) {
+    return await this.unifiedCalendarService.getGoogleCalendarStatus(
+      req.user._id || req.user.id || req.user.sub
     );
   }
 }

@@ -26,7 +26,15 @@ import { EmailService } from '../services/email.service';
       inject: [ConfigService],
     }),
   ],
-  providers: [AuthService, EmailVerificationService, LocalStrategy, JwtStrategy, GoogleStrategy, TwilioService, EmailService],
+  providers: [
+    AuthService,
+    EmailVerificationService,
+    LocalStrategy,
+    JwtStrategy,
+    GoogleStrategy,
+    TwilioService,
+    EmailService,
+  ],
   controllers: [AuthController],
   exports: [AuthService, EmailVerificationService],
 })

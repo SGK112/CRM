@@ -34,10 +34,10 @@ export default function SystemHealth() {
   const fetchSystemHealth = async () => {
     try {
       const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
-      
+
       const response = await fetch('/api/admin/system/health', {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -60,7 +60,7 @@ export default function SystemHealth() {
     const days = Math.floor(seconds / 86400);
     const hours = Math.floor((seconds % 86400) / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
-    
+
     if (days > 0) {
       return `${days}d ${hours}h ${minutes}m`;
     } else if (hours > 0) {
@@ -142,12 +142,7 @@ export default function SystemHealth() {
           status={memoryUsagePercent > 80 ? 'bad' : memoryUsagePercent > 60 ? 'warning' : 'good'}
           subtitle={`${formatMemory(server.memory.used)} / ${formatMemory(server.memory.total)}`}
         />
-        <HealthCard
-          title="Node Version"
-          value={server.nodeVersion}
-          icon="🟢"
-          status="good"
-        />
+        <HealthCard title="Node Version" value={server.nodeVersion} icon="🟢" status="good" />
       </div>
 
       {/* Detailed Metrics */}
@@ -161,11 +156,13 @@ export default function SystemHealth() {
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Connection Status</span>
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                database.status === 'healthy' 
-                  ? 'bg-green-100 text-green-800' 
-                  : 'bg-red-100 text-red-800'
-              }`}>
+              <span
+                className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  database.status === 'healthy'
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-red-100 text-red-800'
+                }`}
+              >
                 {database.status}
               </span>
             </div>
@@ -212,10 +209,13 @@ export default function SystemHealth() {
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Memory Usage</h3>
         <div className="relative">
           <div className="w-full bg-gray-200 rounded-full h-4">
-            <div 
+            <div
               className={`h-4 rounded-full transition-all duration-300 ${
-                memoryUsagePercent > 80 ? 'bg-red-500' :
-                memoryUsagePercent > 60 ? 'bg-yellow-500' : 'bg-green-500'
+                memoryUsagePercent > 80
+                  ? 'bg-red-500'
+                  : memoryUsagePercent > 60
+                    ? 'bg-yellow-500'
+                    : 'bg-green-500'
               }`}
               style={{ width: `${memoryUsagePercent}%` }}
             ></div>
@@ -275,7 +275,7 @@ function HealthCard({ title, value, icon, status, subtitle }: HealthCardProps) {
   const statusColors = {
     good: 'bg-green-500',
     warning: 'bg-yellow-500',
-    bad: 'bg-red-500'
+    bad: 'bg-red-500',
   };
 
   return (
@@ -287,9 +287,7 @@ function HealthCard({ title, value, icon, status, subtitle }: HealthCardProps) {
         <div>
           <p className="text-sm font-medium text-gray-600">{title}</p>
           <p className="text-2xl font-bold text-gray-900">{value}</p>
-          {subtitle && (
-            <p className="text-xs text-gray-500 mt-1">{subtitle}</p>
-          )}
+          {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
         </div>
       </div>
     </div>

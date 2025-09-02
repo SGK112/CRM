@@ -1,5 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { walletService, type Wallet, type Transaction, type WalletStats } from '../lib/services/walletService';
+import {
+  walletService,
+  type Wallet,
+  type Transaction,
+  type WalletStats,
+} from '../lib/services/walletService';
 
 export interface UseWalletReturn {
   wallet: Wallet | null;
@@ -9,7 +14,12 @@ export interface UseWalletReturn {
   error: string | null;
   connectWallet: (address: string) => Promise<void>;
   disconnectWallet: () => Promise<void>;
-  createPayment: (amount: string, description: string, clientId?: string, projectId?: string) => Promise<void>;
+  createPayment: (
+    amount: string,
+    description: string,
+    clientId?: string,
+    projectId?: string
+  ) => Promise<void>;
   refreshWalletData: () => Promise<void>;
   clearError: () => void;
 }
@@ -31,9 +41,10 @@ export function useWallet(): UseWalletReturn {
       setError(null);
 
       // Check if user is authenticated before making API calls
-      const token = typeof window !== 'undefined' 
-        ? localStorage.getItem('accessToken') || localStorage.getItem('token')
-        : null;
+      const token =
+        typeof window !== 'undefined'
+          ? localStorage.getItem('accessToken') || localStorage.getItem('token')
+          : null;
 
       if (!token) {
         setLoading(false);
@@ -51,10 +62,10 @@ export function useWallet(): UseWalletReturn {
       setStats(walletStats);
     } catch (err) {
       // Don't show error if it's an authentication issue
-      if (err instanceof Error && (
-        err.message.includes('401') || 
-        err.message.includes('Unauthorized')
-      )) {
+      if (
+        err instanceof Error &&
+        (err.message.includes('401') || err.message.includes('Unauthorized'))
+      ) {
         setLoading(false);
         return;
       }
@@ -64,53 +75,54 @@ export function useWallet(): UseWalletReturn {
     }
   }, []);
 
-  const connectWallet = useCallback(async (address: string) => {
-    try {
-      setError(null);
-      const connectedWallet = await walletService.connectWallet(address);
-      setWallet(connectedWallet);
-      
-      // Refresh all data after connecting
-      await refreshWalletData();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to connect wallet');
-      throw err;
-    }
-  }, [refreshWalletData]);
+  const connectWallet = useCallback(
+    async (address: string) => {
+      try {
+        setError(null);
+        const connectedWallet = await walletService.connectWallet(address);
+        setWallet(connectedWallet);
+
+        // Refresh all data after connecting
+        await refreshWalletData();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to connect wallet');
+        throw err;
+      }
+    },
+    [refreshWalletData]
+  );
 
   const disconnectWallet = useCallback(async () => {
     try {
       setError(null);
       await walletService.disconnectWallet();
-      setWallet(prev => prev ? { ...prev, isConnected: false } : null);
+      setWallet(prev => (prev ? { ...prev, isConnected: false } : null));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to disconnect wallet');
       throw err;
     }
   }, []);
 
-  const createPayment = useCallback(async (
-    amount: string, 
-    description: string, 
-    clientId?: string, 
-    projectId?: string
-  ) => {
-    try {
-      setError(null);
-      await walletService.createPayment({
-        amount,
-        description,
-        clientId,
-        projectId,
-      });
-      
-      // Refresh data after creating payment
-      await refreshWalletData();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create payment');
-      throw err;
-    }
-  }, [refreshWalletData]);
+  const createPayment = useCallback(
+    async (amount: string, description: string, clientId?: string, projectId?: string) => {
+      try {
+        setError(null);
+        await walletService.createPayment({
+          amount,
+          description,
+          clientId,
+          projectId,
+        });
+
+        // Refresh data after creating payment
+        await refreshWalletData();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to create payment');
+        throw err;
+      }
+    },
+    [refreshWalletData]
+  );
 
   // Load wallet data on mount, but delay to allow authentication check
   useEffect(() => {

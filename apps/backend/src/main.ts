@@ -16,7 +16,7 @@ async function bootstrap() {
   // Note: We expose /auth/google and /auth/google/callback without the /api prefix because some OAuth providers
   // are configured with fixed redirect URIs. All other routes remain under /api/*.
   app.setGlobalPrefix('api', {
-    exclude: ['/billing/webhook', '/auth/google', '/auth/google/callback', '/']
+    exclude: ['/billing/webhook', '/auth/google', '/auth/google/callback', '/'],
   });
 
   // Security headers
@@ -30,16 +30,18 @@ async function bootstrap() {
     .map(o => o.trim())
     .filter(Boolean);
   const fallbackOrigin = process.env.FRONTEND_URL?.trim();
-  const allowedOrigins = Array.from(new Set([
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:3002',
-    'http://localhost:3003',
-    'http://localhost:3004',
-    'http://localhost:3005',
-    ...(explicitOrigins.length ? explicitOrigins : []),
-    ...(fallbackOrigin ? [fallbackOrigin] : []),
-  ])).filter(Boolean);
+  const allowedOrigins = Array.from(
+    new Set([
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://localhost:3002',
+      'http://localhost:3003',
+      'http://localhost:3004',
+      'http://localhost:3005',
+      ...(explicitOrigins.length ? explicitOrigins : []),
+      ...(fallbackOrigin ? [fallbackOrigin] : []),
+    ])
+  ).filter(Boolean);
 
   const corsLogger = new Logger('CORS');
   corsLogger.log(`Allowed Origins: ${allowedOrigins.join(', ') || '(none)'}`);
@@ -51,7 +53,7 @@ async function bootstrap() {
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
-  corsLogger.warn(`Blocked CORS origin: ${origin}`);
+      corsLogger.warn(`Blocked CORS origin: ${origin}`);
       return callback(new Error('CORS blocked')); // Will omit CORS headers
     },
     credentials: true,
@@ -66,7 +68,7 @@ async function bootstrap() {
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
-    }),
+    })
   );
 
   // Global structured exception filter
@@ -88,7 +90,9 @@ async function bootstrap() {
     await app.listen(port);
   } catch (err: any) {
     if (err?.code === 'EADDRINUSE') {
-      logger.warn(`Port ${port} already in use; assuming server already running. Skipping second bootstrap.`);
+      logger.warn(
+        `Port ${port} already in use; assuming server already running. Skipping second bootstrap.`
+      );
       return; // Do not log normal startup banners twice
     }
     throw err;

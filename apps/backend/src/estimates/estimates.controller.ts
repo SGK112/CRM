@@ -1,4 +1,15 @@
-import { Body, Controller, Get, Post, Param, Req, UseGuards, Patch, Res, Delete } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Param,
+  Req,
+  UseGuards,
+  Patch,
+  Res,
+  Delete,
+} from '@nestjs/common';
 import { EstimatesService } from './estimates.service';
 import { InvoicesService } from '../invoices/invoices.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -8,7 +19,10 @@ import { CreateEstimateDto, UpdateEstimateDto } from './estimates.service';
 @Controller('estimates')
 @UseGuards(JwtAuthGuard)
 export class EstimatesController {
-  constructor(private estimates: EstimatesService, private invoices: InvoicesService) {}
+  constructor(
+    private estimates: EstimatesService,
+    private invoices: InvoicesService
+  ) {}
 
   @Get()
   list(@Req() req) {

@@ -16,7 +16,7 @@ import {
   PhoneIcon,
   EnvelopeIcon,
   CloudArrowUpIcon,
-  WrenchScrewdriverIcon
+  WrenchScrewdriverIcon,
 } from '@heroicons/react/24/outline';
 
 interface QuickActionsProps {
@@ -40,49 +40,49 @@ export default function QuickActions({ isOpen, onToggle }: QuickActionsProps) {
       href: '/dashboard/projects/new',
       icon: ClipboardDocumentListIcon,
       color: 'bg-blue-500',
-      description: 'Start a new construction project'
+      description: 'Start a new construction project',
     },
     {
       name: 'Add Client',
       href: '/dashboard/clients/new',
       icon: UserGroupIcon,
       color: 'bg-green-500',
-      description: 'Register a new client'
+      description: 'Register a new client',
     },
     {
       name: 'Schedule Meeting',
       href: '/dashboard/calendar/new',
       icon: CalendarDaysIcon,
       color: 'bg-purple-500',
-      description: 'Book a client appointment'
+      description: 'Book a client appointment',
     },
     {
       name: 'Upload Document',
       href: '/dashboard/documents/upload',
       icon: CloudArrowUpIcon,
       color: 'bg-orange-500',
-      description: 'Upload blueprints, contracts, permits'
+      description: 'Upload blueprints, contracts, permits',
     },
     {
       name: 'Create Design',
       href: '/dashboard/designer/new',
       icon: PencilSquareIcon,
       color: 'bg-pink-500',
-      description: 'Design floor plans and layouts'
+      description: 'Design floor plans and layouts',
     },
     {
       name: 'Send Message',
       href: '/dashboard/inbox?compose=1',
       icon: ChatBubbleLeftRightIcon,
       color: 'bg-indigo-500',
-      description: 'Message a client or team member'
+      description: 'Message a client or team member',
     },
     {
       name: 'Generate Invoice',
       href: '/dashboard/invoices/new',
       icon: CurrencyDollarIcon,
       color: 'bg-yellow-500',
-      description: 'Create project invoice'
+      description: 'Create project invoice',
     },
     {
       name: 'Take Photo',
@@ -95,7 +95,7 @@ export default function QuickActions({ isOpen, onToggle }: QuickActionsProps) {
         input.type = 'file';
         input.accept = 'image/*';
         input.capture = 'environment';
-        input.onchange = (e) => {
+        input.onchange = e => {
           const file = (e.target as HTMLInputElement).files?.[0];
           if (file) {
             // Handle file upload
@@ -103,7 +103,7 @@ export default function QuickActions({ isOpen, onToggle }: QuickActionsProps) {
           }
         };
         input.click();
-      }
+      },
     },
     {
       name: 'Call Client',
@@ -113,15 +113,15 @@ export default function QuickActions({ isOpen, onToggle }: QuickActionsProps) {
       onClick: () => {
         // Open phone dialer or show client list
         window.location.href = 'tel:';
-      }
+      },
     },
     {
       name: 'Send Email',
       href: '/dashboard/marketing/email',
       icon: EnvelopeIcon,
       color: 'bg-cyan-500',
-      description: 'Send email to clients'
-    }
+      description: 'Send email to clients',
+    },
   ];
 
   const handleActionClick = (action: QuickAction) => {
@@ -135,25 +135,25 @@ export default function QuickActions({ isOpen, onToggle }: QuickActionsProps) {
     <>
       {/* Overlay */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity duration-300"
           onClick={onToggle}
         />
       )}
 
       {/* Quick action items */}
-      <div className={`fixed bottom-24 right-6 z-50 transition-all duration-300 ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}>
+      <div
+        className={`fixed bottom-24 right-6 z-50 transition-all duration-300 ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
+      >
         <div className="space-y-3">
           {quickActions.map((action, index) => (
             <div
               key={action.name}
               className={`transform transition-all duration-300 ${
-                isOpen 
-                  ? 'translate-y-0 opacity-100' 
-                  : 'translate-y-4 opacity-0'
+                isOpen ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
               }`}
-              style={{ 
-                transitionDelay: isOpen ? `${index * 50}ms` : '0ms' 
+              style={{
+                transitionDelay: isOpen ? `${index * 50}ms` : '0ms',
               }}
             >
               {action.href ? (
@@ -169,9 +169,7 @@ export default function QuickActions({ isOpen, onToggle }: QuickActionsProps) {
                     <p className="font-medium text-gray-900 group-hover:text-amber-600 transition-colors">
                       {action.name}
                     </p>
-                    <p className="text-xs text-gray-500">
-                      {action.description}
-                    </p>
+                    <p className="text-xs text-gray-500">{action.description}</p>
                   </div>
                 </Link>
               ) : (
@@ -186,9 +184,7 @@ export default function QuickActions({ isOpen, onToggle }: QuickActionsProps) {
                     <p className="font-medium text-gray-900 group-hover:text-amber-600 transition-colors">
                       {action.name}
                     </p>
-                    <p className="text-xs text-gray-500">
-                      {action.description}
-                    </p>
+                    <p className="text-xs text-gray-500">{action.description}</p>
                   </div>
                 </button>
               )}
@@ -204,11 +200,7 @@ export default function QuickActions({ isOpen, onToggle }: QuickActionsProps) {
           isOpen ? 'rotate-45 bg-red-500 hover:bg-red-600' : 'rotate-0'
         }`}
       >
-        {isOpen ? (
-          <XMarkIcon className="h-6 w-6" />
-        ) : (
-          <PlusIcon className="h-6 w-6" />
-        )}
+        {isOpen ? <XMarkIcon className="h-6 w-6" /> : <PlusIcon className="h-6 w-6" />}
       </button>
 
       {/* Helper text */}

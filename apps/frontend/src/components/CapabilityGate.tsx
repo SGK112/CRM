@@ -1,14 +1,14 @@
-"use client";
+'use client';
 import React, { useState, useEffect } from 'react';
 import { Crown, Lock, ArrowUpRight, Check, Sparkles, Zap } from 'lucide-react';
-import { 
-  hasCapability, 
-  getUserPlan, 
-  getUpgradeUrl, 
-  getPlanColor, 
-  PLANS, 
+import {
+  hasCapability,
+  getUserPlan,
+  getUpgradeUrl,
+  getPlanColor,
+  PLANS,
   type PlanTier,
-  type PlanCapabilities 
+  type PlanCapabilities,
 } from '@/lib/plans';
 
 interface CapabilityGateProps {
@@ -20,13 +20,13 @@ interface CapabilityGateProps {
   upgradeMessage?: string;
 }
 
-export function CapabilityGate({ 
-  need, 
-  children, 
-  fallback, 
+export function CapabilityGate({
+  need,
+  children,
+  fallback,
   onUpgrade,
   showUpgradeButton = true,
-  upgradeMessage
+  upgradeMessage,
 }: CapabilityGateProps) {
   const [userPlan, setUserPlan] = useState<PlanTier>('basic');
   const [loading, setLoading] = useState(true);
@@ -45,7 +45,11 @@ export function CapabilityGate({
   }, []);
 
   if (loading) {
-    return <>{fallback || <div className="animate-pulse h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>}</>;
+    return (
+      <>
+        {fallback || <div className="animate-pulse h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>}
+      </>
+    );
   }
 
   // Check if user has the required capability
@@ -62,7 +66,7 @@ export function CapabilityGate({
   }
 
   return (
-    <UpgradePrompt 
+    <UpgradePrompt
       capabilities={capabilities}
       currentPlan={userPlan}
       onUpgrade={onUpgrade}
@@ -80,24 +84,26 @@ interface UpgradePromptProps {
   message?: string;
 }
 
-function UpgradePrompt({ 
-  capabilities, 
-  currentPlan, 
+function UpgradePrompt({
+  capabilities,
+  currentPlan,
   onUpgrade,
   showButton = true,
-  message 
+  message,
 }: UpgradePromptProps) {
   // Find the minimum plan that includes all required capabilities
-  const requiredPlan = capabilities.some(cap => cap.includes('voice')) || capabilities.some(cap => cap.includes('ai'))
-    ? 'ai-pro' 
-    : 'ai-pro';
+  const requiredPlan =
+    capabilities.some(cap => cap.includes('voice')) || capabilities.some(cap => cap.includes('ai'))
+      ? 'ai-pro'
+      : 'ai-pro';
 
   const plan = PLANS[requiredPlan];
   const upgradeUrl = getUpgradeUrl(currentPlan, requiredPlan);
 
-  const defaultMessage = capabilities.length === 1 
-    ? `This feature requires ${plan.name}`
-    : `These features require ${plan.name}`;
+  const defaultMessage =
+    capabilities.length === 1
+      ? `This feature requires ${plan.name}`
+      : `These features require ${plan.name}`;
 
   return (
     <div className="rounded-lg border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-900/10 p-4">
@@ -107,12 +113,12 @@ function UpgradePrompt({
             <Crown className="w-4 h-4 text-amber-600 dark:text-amber-400" />
           </div>
         </div>
-        
+
         <div className="flex-1 min-w-0">
           <h3 className="text-sm font-medium text-amber-800 dark:text-amber-200 mb-1">
             {message || defaultMessage}
           </h3>
-          
+
           <p className="text-xs text-amber-700 dark:text-amber-300 mb-3">
             Upgrade to unlock AI-powered features, voice agents, and advanced tools.
           </p>
@@ -120,7 +126,10 @@ function UpgradePrompt({
           {/* Feature highlights for the required plan */}
           <div className="space-y-1 mb-3">
             {plan.features.slice(0, 3).map((feature, index) => (
-              <div key={index} className="flex items-center gap-2 text-xs text-amber-700 dark:text-amber-300">
+              <div
+                key={index}
+                className="flex items-center gap-2 text-xs text-amber-700 dark:text-amber-300"
+              >
                 <Check className="w-3 h-3 text-amber-600 dark:text-amber-400 flex-shrink-0" />
                 <span>{feature.name}</span>
               </div>
@@ -138,7 +147,7 @@ function UpgradePrompt({
                 Upgrade to {plan.name}
                 <ArrowUpRight className="w-3 h-3" />
               </a>
-              
+
               <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
                 ${plan.price}/{plan.period}
               </span>
@@ -153,7 +162,7 @@ function UpgradePrompt({
 // Legacy compatibility exports
 export function UpgradeInline({ onUpgrade }: { onUpgrade?: () => void }) {
   return (
-    <UpgradePrompt 
+    <UpgradePrompt
       capabilities={['ai.descriptions']}
       currentPlan={getUserPlan()}
       onUpgrade={onUpgrade}
@@ -163,7 +172,7 @@ export function UpgradeInline({ onUpgrade }: { onUpgrade?: () => void }) {
 
 export function UpgradeModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   if (!open) return null;
-  
+
   const currentPlan = getUserPlan();
   const targetPlan = currentPlan === 'basic' ? 'ai-pro' : 'enterprise';
   const plan = PLANS[targetPlan];
@@ -172,11 +181,11 @@ export function UpgradeModal({ open, onClose }: { open: boolean; onClose: () => 
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-full items-center justify-center p-4">
         {/* Backdrop */}
-        <div 
+        <div
           className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity"
           onClick={onClose}
         />
-        
+
         {/* Modal */}
         <div className="relative transform overflow-hidden rounded-xl bg-white dark:bg-gray-800 px-6 py-8 shadow-2xl transition-all sm:w-full sm:max-w-lg">
           <div className="text-center">
@@ -184,17 +193,15 @@ export function UpgradeModal({ open, onClose }: { open: boolean; onClose: () => 
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-orange-600 mb-4">
               <Sparkles className="h-8 w-8 text-white" />
             </div>
-            
+
             {/* Title */}
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               Unlock {plan.name} Features
             </h3>
-            
+
             {/* Description */}
-            <p className="text-gray-600 dark:text-gray-300 mb-6">
-              {plan.description}
-            </p>
-            
+            <p className="text-gray-600 dark:text-gray-300 mb-6">{plan.description}</p>
+
             {/* Features */}
             <div className="text-left mb-6 space-y-3">
               {plan.features.slice(0, 5).map((feature, index) => (
@@ -208,7 +215,7 @@ export function UpgradeModal({ open, onClose }: { open: boolean; onClose: () => 
                 </div>
               ))}
             </div>
-            
+
             {/* Actions */}
             <div className="flex gap-3">
               <button
@@ -235,9 +242,11 @@ export function UpgradeModal({ open, onClose }: { open: boolean; onClose: () => 
 export function PlanBadge({ plan, className = '' }: { plan?: PlanTier; className?: string }) {
   const userPlan = plan || getUserPlan();
   const planData = PLANS[userPlan];
-  
+
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getPlanColor(userPlan)} ${className}`}>
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getPlanColor(userPlan)} ${className}`}
+    >
       {userPlan === 'basic' && <Lock className="w-3 h-3" />}
       {userPlan === 'ai-pro' && <Zap className="w-3 h-3" />}
       {userPlan === 'enterprise' && <Crown className="w-3 h-3" />}

@@ -1,15 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  PlusIcon, 
-  PencilIcon, 
+import {
+  PlusIcon,
+  PencilIcon,
   TrashIcon,
   CheckIcon,
   XMarkIcon,
   ClockIcon,
   UserIcon,
-  TagIcon
+  TagIcon,
 } from '@heroicons/react/24/outline';
 
 interface Note {
@@ -39,7 +39,7 @@ export default function Notes({
   currentUser = { id: '1', name: 'Current User' },
   allowPrivate = true,
   categories = true,
-  className = ''
+  className = '',
 }: NotesProps) {
   const [newNote, setNewNote] = useState('');
   const [newCategory, setNewCategory] = useState<Note['category']>('general');
@@ -59,7 +59,10 @@ export default function Notes({
       authorId: currentUser.id,
       timestamp: new Date(),
       category: newCategory,
-      tags: newTags.split(',').map(tag => tag.trim()).filter(Boolean),
+      tags: newTags
+        .split(',')
+        .map(tag => tag.trim())
+        .filter(Boolean),
       isPrivate,
     };
 
@@ -80,12 +83,10 @@ export default function Notes({
 
   const saveEdit = () => {
     if (!editContent.trim()) return;
-    
-    onNotesChange(notes.map(note => 
-      note.id === editingId 
-        ? { ...note, content: editContent.trim() }
-        : note
-    ));
+
+    onNotesChange(
+      notes.map(note => (note.id === editingId ? { ...note, content: editContent.trim() } : note))
+    );
     setEditingId(null);
     setEditContent('');
   };
@@ -95,9 +96,7 @@ export default function Notes({
     setEditContent('');
   };
 
-  const filteredNotes = filter === 'all' 
-    ? notes 
-    : notes.filter(note => note.category === filter);
+  const filteredNotes = filter === 'all' ? notes : notes.filter(note => note.category === filter);
 
   const categoryColors = {
     general: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400',
@@ -106,7 +105,7 @@ export default function Notes({
     issue: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
     reminder: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
     invoice: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
-    material: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+    material: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
   };
 
   return (
@@ -114,21 +113,21 @@ export default function Notes({
       {/* Add Note Form */}
       <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Project Notes</h3>
-        
+
         <div className="space-y-3">
           <textarea
             value={newNote}
-            onChange={(e) => setNewNote(e.target.value)}
+            onChange={e => setNewNote(e.target.value)}
             placeholder="Add a note about this project..."
             rows={3}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 dark:focus:ring-amber-400 dark:focus:border-amber-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-vertical"
           />
-          
+
           <div className="flex flex-wrap gap-3 items-center">
             {categories && (
               <select
                 value={newCategory}
-                onChange={(e) => setNewCategory(e.target.value as Note['category'])}
+                onChange={e => setNewCategory(e.target.value as Note['category'])}
                 className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 <option value="general">General</option>
@@ -140,27 +139,27 @@ export default function Notes({
                 <option value="material">Materials</option>
               </select>
             )}
-            
+
             <input
               type="text"
               value={newTags}
-              onChange={(e) => setNewTags(e.target.value)}
+              onChange={e => setNewTags(e.target.value)}
               placeholder="Tags (comma separated)"
               className="flex-1 min-w-32 px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             />
-            
+
             {allowPrivate && (
               <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                 <input
                   type="checkbox"
                   checked={isPrivate}
-                  onChange={(e) => setIsPrivate(e.target.checked)}
+                  onChange={e => setIsPrivate(e.target.checked)}
                   className="rounded border-gray-300 text-amber-600 focus:ring-amber-500"
                 />
                 Private
               </label>
             )}
-            
+
             <button
               onClick={addNote}
               disabled={!newNote.trim()}
@@ -179,8 +178,8 @@ export default function Notes({
           <button
             onClick={() => setFilter('all')}
             className={`px-3 py-1 rounded-full text-sm font-medium ${
-              filter === 'all' 
-                ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400' 
+              filter === 'all'
+                ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400'
                 : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
             }`}
           >
@@ -189,13 +188,13 @@ export default function Notes({
           {Object.keys(categoryColors).map(category => {
             const count = notes.filter(note => note.category === category).length;
             if (count === 0) return null;
-            
+
             return (
               <button
                 key={category}
                 onClick={() => setFilter(category as Note['category'])}
                 className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  filter === category 
+                  filter === category
                     ? categoryColors[category as keyof typeof categoryColors]
                     : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                 }`}
@@ -209,12 +208,17 @@ export default function Notes({
 
       {/* Notes List */}
       <div className="space-y-3">
-        {filteredNotes.map((note) => (
-          <div key={note.id} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+        {filteredNotes.map(note => (
+          <div
+            key={note.id}
+            className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4"
+          >
             <div className="flex items-start justify-between mb-2">
               <div className="flex items-center gap-2">
                 <UserIcon className="h-4 w-4 text-gray-400" />
-                <span className="text-sm font-medium text-gray-900 dark:text-white">{note.author}</span>
+                <span className="text-sm font-medium text-gray-900 dark:text-white">
+                  {note.author}
+                </span>
                 <div className="flex items-center gap-1 text-xs text-gray-500">
                   <ClockIcon className="h-3 w-3" />
                   {note.timestamp.toLocaleDateString()} {note.timestamp.toLocaleTimeString()}
@@ -225,7 +229,7 @@ export default function Notes({
                   </span>
                 )}
               </div>
-              
+
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => startEdit(note)}
@@ -246,7 +250,7 @@ export default function Notes({
               <div className="space-y-2">
                 <textarea
                   value={editContent}
-                  onChange={(e) => setEditContent(e.target.value)}
+                  onChange={e => setEditContent(e.target.value)}
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
@@ -272,21 +276,26 @@ export default function Notes({
                 <p className="text-gray-700 dark:text-gray-300 text-sm whitespace-pre-wrap mb-2">
                   {note.content}
                 </p>
-                
+
                 <div className="flex items-center gap-2">
                   {categories && note.category && (
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                      categoryColors[note.category]
-                    }`}>
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                        categoryColors[note.category]
+                      }`}
+                    >
                       {note.category}
                     </span>
                   )}
-                  
+
                   {note.tags && note.tags.length > 0 && (
                     <div className="flex items-center gap-1">
                       <TagIcon className="h-3 w-3 text-gray-400" />
                       {note.tags.map(tag => (
-                        <span key={tag} className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs rounded-full">
+                        <span
+                          key={tag}
+                          className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs rounded-full"
+                        >
                           {tag}
                         </span>
                       ))}
@@ -297,7 +306,7 @@ export default function Notes({
             )}
           </div>
         ))}
-        
+
         {filteredNotes.length === 0 && (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">
             No notes found. Add your first note above.

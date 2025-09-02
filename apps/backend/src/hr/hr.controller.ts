@@ -1,7 +1,25 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { HrService } from './hr.service';
 import { Employee } from './schemas/employee.schema';
-import { CreateEmployeeDto, UpdateEmployeeDto, AddCertificationDto, AddTrainingDto, AddDisciplinaryActionDto, AddTimeEntryDto } from './dto/create-employee.dto';
+import {
+  CreateEmployeeDto,
+  UpdateEmployeeDto,
+  AddCertificationDto,
+  AddTrainingDto,
+  AddDisciplinaryActionDto,
+  AddTimeEntryDto,
+} from './dto/create-employee.dto';
 import { WorkspaceGuard } from '../common/guards/workspace.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { PermissionsGuard } from '../common/permissions/permissions.guard';
@@ -18,19 +36,30 @@ export class HrController {
   create(@Body() body: CreateEmployeeDto, @Req() req: any) {
     const workspaceId = req.workspaceId;
     const mapped: any = { ...body, workspaceId };
-  if (body.hireDate) mapped.hireDate = new Date(body.hireDate);
-  if (body.terminationDate) mapped.terminationDate = new Date(body.terminationDate);
-  mapped.certifications = body.certifications || [];
-  mapped.trainings = body.trainings || [];
-  mapped.disciplinaryActions = body.disciplinaryActions || [];
-  mapped.timeEntries = body.timeEntries || [];
-  return this.hrService.create(mapped);
+    if (body.hireDate) mapped.hireDate = new Date(body.hireDate);
+    if (body.terminationDate) mapped.terminationDate = new Date(body.terminationDate);
+    mapped.certifications = body.certifications || [];
+    mapped.trainings = body.trainings || [];
+    mapped.disciplinaryActions = body.disciplinaryActions || [];
+    mapped.timeEntries = body.timeEntries || [];
+    return this.hrService.create(mapped);
   }
 
   @Get()
-  findAll(@Req() req: any, @Query('page') page?: string, @Query('limit') limit?: string, @Query('search') search?: string, @Query('active') active?: string) {
+  findAll(
+    @Req() req: any,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+    @Query('active') active?: string
+  ) {
     const workspaceId = req.workspaceId;
-    return this.hrService.findAll(workspaceId, { page: page? parseInt(page,10): undefined, limit: limit? parseInt(limit,10): undefined, search, active: active !== undefined ? active === 'true' : undefined });
+    return this.hrService.findAll(workspaceId, {
+      page: page ? parseInt(page, 10) : undefined,
+      limit: limit ? parseInt(limit, 10) : undefined,
+      search,
+      active: active !== undefined ? active === 'true' : undefined,
+    });
   }
 
   @Get(':id')
@@ -43,8 +72,8 @@ export class HrController {
   update(@Param('id') id: string, @Body() body: UpdateEmployeeDto, @Req() req: any) {
     const workspaceId = req.workspaceId;
     const mapped: any = { ...body };
-  if (body.hireDate) mapped.hireDate = new Date(body.hireDate);
-  if (body.terminationDate) mapped.terminationDate = new Date(body.terminationDate);
+    if (body.hireDate) mapped.hireDate = new Date(body.hireDate);
+    if (body.terminationDate) mapped.terminationDate = new Date(body.terminationDate);
     return this.hrService.update(id, workspaceId, mapped);
   }
 
@@ -68,7 +97,11 @@ export class HrController {
 
   @Post(':id/disciplinary')
   @RequiresPermissions('employees.manage.nested')
-  addDisciplinary(@Param('id') id: string, @Body() body: AddDisciplinaryActionDto, @Req() req: any) {
+  addDisciplinary(
+    @Param('id') id: string,
+    @Body() body: AddDisciplinaryActionDto,
+    @Req() req: any
+  ) {
     return this.hrService.addDisciplinaryAction(id, req.workspaceId, body);
   }
 

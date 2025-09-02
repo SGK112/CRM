@@ -15,7 +15,7 @@ const PLAN_SEAT_LIMIT: Record<string, number> = {
 export class WorkspaceUsageService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
-    @InjectModel(Workspace.name) private workspaceModel: Model<WorkspaceDocument>,
+    @InjectModel(Workspace.name) private workspaceModel: Model<WorkspaceDocument>
   ) {}
 
   async seatUsage(workspaceId: string) {
@@ -32,9 +32,15 @@ export class WorkspaceUsageService {
   }
 
   async updateSettings(workspaceId: string, body: any): Promise<WorkspaceDocument | null> {
-    const allowed: (keyof Workspace)[] = ['name','brandingColor','logoUrl','personalizationEnabled'];
+    const allowed: (keyof Workspace)[] = [
+      'name',
+      'brandingColor',
+      'logoUrl',
+      'personalizationEnabled',
+    ];
     const update: Partial<Workspace> = {};
-    for (const k of allowed) if (Object.prototype.hasOwnProperty.call(body, k)) (update as any)[k] = body[k];
+    for (const k of allowed)
+      if (Object.prototype.hasOwnProperty.call(body, k)) (update as any)[k] = body[k];
     const doc = await this.workspaceModel.findOneAndUpdate({ workspaceId }, update, { new: true });
     return doc;
   }

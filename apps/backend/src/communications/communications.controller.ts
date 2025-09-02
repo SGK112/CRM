@@ -35,20 +35,24 @@ export class CommunicationsController {
   @Post('email/template')
   @ApiOperation({ summary: 'Send templated email to client' })
   @ApiResponse({ status: 201, description: 'Templated email sent successfully' })
-  async sendTemplatedEmail(@Body() data: {
-    type: 'appointment' | 'estimate' | 'followup';
-    clientId: string;
-    clientName?: string;
-    appointmentDate?: string; // ISO string from client
-    appointmentType?: string;
-    location?: string;
-    notes?: string;
-    estimateNumber?: string;
-    estimateAmount?: number;
-    subject?: string;
-    message?: string;
-    callNotes?: string;
-  }, @Request() req) {
+  async sendTemplatedEmail(
+    @Body()
+    data: {
+      type: 'appointment' | 'estimate' | 'followup';
+      clientId: string;
+      clientName?: string;
+      appointmentDate?: string; // ISO string from client
+      appointmentType?: string;
+      location?: string;
+      notes?: string;
+      estimateNumber?: string;
+      estimateAmount?: number;
+      subject?: string;
+      message?: string;
+      callNotes?: string;
+    },
+    @Request() req
+  ) {
     // Convert appointmentDate to Date if provided
     const normalized: {
       type: 'appointment' | 'estimate' | 'followup';

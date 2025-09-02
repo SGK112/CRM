@@ -45,10 +45,11 @@ interface PaymentResponse {
 
 class WalletService {
   private getAuthHeaders(): HeadersInit {
-    const token = typeof window !== 'undefined' 
-      ? localStorage.getItem('accessToken') || localStorage.getItem('token')
-      : null;
-    
+    const token =
+      typeof window !== 'undefined'
+        ? localStorage.getItem('accessToken') || localStorage.getItem('token')
+        : null;
+
     return {
       'Content-Type': 'application/json',
       ...(token && { Authorization: `Bearer ${token}` }),
@@ -241,7 +242,7 @@ class WalletService {
       amount: (parseFloat(amount) * 1e9).toString(), // Convert to nanotons
       text: description,
     };
-    
+
     return `ton://transfer?${new URLSearchParams(paymentData).toString()}`;
   }
 }

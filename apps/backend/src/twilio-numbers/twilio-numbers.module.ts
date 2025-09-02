@@ -7,9 +7,7 @@ import { TwilioService } from '../services/twilio.service';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      { name: TwilioPhoneNumber.name, schema: TwilioPhoneNumberSchema },
-    ]),
+    MongooseModule.forFeature([{ name: TwilioPhoneNumber.name, schema: TwilioPhoneNumberSchema }]),
   ],
   controllers: [TwilioNumbersController],
   providers: [TwilioNumbersService, TwilioService],

@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ShareLink, ShareLinkDocument } from './schemas/share-link.schema';
@@ -11,7 +16,7 @@ import { JwtService } from '@nestjs/jwt';
 export class ShareLinksService {
   constructor(
     @InjectModel(ShareLink.name) private shareModel: Model<ShareLinkDocument>,
-    private jwt: JwtService,
+    private jwt: JwtService
   ) {}
 
   async create(dto: CreateShareLinkDto, workspaceId: string, userId: string) {
@@ -39,9 +44,12 @@ export class ShareLinksService {
     const link = await this.shareModel.findOne({ token });
     if (!link) throw new NotFoundException('Invalid share link');
     if (link.revokedAt) throw new BadRequestException('Share link revoked');
-    if (link.expiresAt && link.expiresAt < new Date()) throw new BadRequestException('Share link expired');
-    if (link.singleUse && link.usedCount >= 1) throw new ForbiddenException('Share link already used');
-    if (link.maxUses && link.usedCount >= link.maxUses) throw new ForbiddenException('Usage limit reached');
+    if (link.expiresAt && link.expiresAt < new Date())
+      throw new BadRequestException('Share link expired');
+    if (link.singleUse && link.usedCount >= 1)
+      throw new ForbiddenException('Share link already used');
+    if (link.maxUses && link.usedCount >= link.maxUses)
+      throw new ForbiddenException('Usage limit reached');
     if (link.passwordHash) {
       const ok = await bcrypt.compare(password || '', link.passwordHash);
       if (!ok) throw new ForbiddenException('Invalid password');
@@ -58,7 +66,12 @@ export class ShareLinksService {
       scope: 'share',
     };
     const shareToken = this.jwt.sign(payload, { expiresIn: '2h' });
-    return { token: shareToken, permissions: link.permissions, targetId: link.targetId, type: link.type };
+    return {
+      token: shareToken,
+      permissions: link.permissions,
+      targetId: link.targetId,
+      type: link.type,
+    };
   }
 
   async revoke(token: string, workspaceId: string) {

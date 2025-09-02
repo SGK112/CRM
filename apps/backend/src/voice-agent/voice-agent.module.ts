@@ -28,13 +28,13 @@ import { ElevenLabsIntegrationService } from './elevenlabs-integration.service';
   ],
   controllers: [VoiceAgentController],
   providers: [
-    VoiceAgentService, 
+    VoiceAgentService,
     ElevenLabsPureCallingService,
-    TwilioService, 
-    ElevenLabsService, 
+    TwilioService,
+    ElevenLabsService,
     EmailService,
-  NotesService,
-  ElevenLabsIntegrationService,
+    NotesService,
+    ElevenLabsIntegrationService,
   ],
   exports: [VoiceAgentService],
 })

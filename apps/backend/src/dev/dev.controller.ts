@@ -14,7 +14,7 @@ export class DevController {
     if (user.email !== 'help.remodely@gmail.com') {
       throw new Error('Unauthorized: This endpoint is only for help.remodely@gmail.com');
     }
-    
+
     return await this.devService.setupSuperAdminAccount(user.email);
   }
 
@@ -30,7 +30,7 @@ export class DevController {
     if (user.email !== 'help.remodely@gmail.com') {
       throw new Error('Unauthorized: This endpoint is only for help.remodely@gmail.com');
     }
-    
+
     return await this.devService.resetAllData(user.email);
   }
 }

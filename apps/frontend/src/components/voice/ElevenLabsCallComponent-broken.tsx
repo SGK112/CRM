@@ -28,7 +28,11 @@ interface ElevenLabsCallProps {
   onCallInitiated?: (callInfo: any) => void;
 }
 
-export function ElevenLabsCallComponent({ client, workspaceId, onCallInitiated }: ElevenLabsCallProps) {
+export function ElevenLabsCallComponent({
+  client,
+  workspaceId,
+  onCallInitiated,
+}: ElevenLabsCallProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [callResult, setCallResult] = useState<any>(null);
   const [purpose, setPurpose] = useState('');
@@ -41,15 +45,15 @@ export function ElevenLabsCallComponent({ client, workspaceId, onCallInitiated }
     'Discuss installation timeline',
     'Address customer concerns',
     'Book site measurement appointment',
-    'Confirm installation date'
+    'Confirm installation date',
   ];
 
   const handleInitiateCall = async () => {
     if (!purpose.trim()) {
       toast({
-        title: "Purpose Required",
-        description: "Please specify the purpose of this call",
-        variant: "destructive"
+        title: 'Purpose Required',
+        description: 'Please specify the purpose of this call',
+        variant: 'destructive',
       });
       return;
     }
@@ -68,8 +72,10 @@ export function ElevenLabsCallComponent({ client, workspaceId, onCallInitiated }
           phoneNumber: client.phone,
           workspaceId,
           purpose,
-          context: context || `Client: ${client.name}, Phone: ${client.phone}${client.email ? `, Email: ${client.email}` : ''}${client.address ? `, Address: ${client.address}` : ''}${client.notes ? `, Notes: ${client.notes}` : ''}`
-        })
+          context:
+            context ||
+            `Client: ${client.name}, Phone: ${client.phone}${client.email ? `, Email: ${client.email}` : ''}${client.address ? `, Address: ${client.address}` : ''}${client.notes ? `, Notes: ${client.notes}` : ''}`,
+        }),
       });
 
       const result = await response.json();
@@ -78,19 +84,20 @@ export function ElevenLabsCallComponent({ client, workspaceId, onCallInitiated }
         setCallResult(result);
         onCallInitiated?.(result);
         toast({
-          title: "Call Setup Ready",
-          description: "ElevenLabs call instructions generated successfully",
+          title: 'Call Setup Ready',
+          description: 'ElevenLabs call instructions generated successfully',
         });
       } else {
         throw new Error(result.error || 'Failed to setup call');
       }
     } catch (error) {
       console.error('Error initiating call:', error);
-      const errorMessage = error instanceof Error ? error.message : "Failed to setup ElevenLabs call";
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to setup ElevenLabs call';
       toast({
-        title: "Call Setup Failed",
+        title: 'Call Setup Failed',
         description: errorMessage,
-        variant: "destructive"
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -102,8 +109,8 @@ export function ElevenLabsCallComponent({ client, workspaceId, onCallInitiated }
       await navigator.clipboard.writeText(text);
       setCopied(true);
       toast({
-        title: "Copied!",
-        description: "Instructions copied to clipboard",
+        title: 'Copied!',
+        description: 'Instructions copied to clipboard',
       });
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
@@ -121,7 +128,8 @@ export function ElevenLabsCallComponent({ client, workspaceId, onCallInitiated }
             ElevenLabs AI Voice Call Setup
           </CardTitle>
           <CardDescription>
-            Initiate a high-quality AI voice call with Sarah (Surprise Granite specialist) to: {client.name}
+            Initiate a high-quality AI voice call with Sarah (Surprise Granite specialist) to:{' '}
+            {client.name}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -137,15 +145,19 @@ export function ElevenLabsCallComponent({ client, workspaceId, onCallInitiated }
           </div>
 
           <div>
-            <Label htmlFor="purpose" className="text-sm font-medium">Call Purpose *</Label>
+            <Label htmlFor="purpose" className="text-sm font-medium">
+              Call Purpose *
+            </Label>
             <select
               value={purpose}
-              onChange={(e) => setPurpose(e.target.value)}
+              onChange={e => setPurpose(e.target.value)}
               className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">Select call purpose...</option>
-              {defaultPurposes.map((p) => (
-                <option key={p} value={p}>{p}</option>
+              {defaultPurposes.map(p => (
+                <option key={p} value={p}>
+                  {p}
+                </option>
               ))}
               <option value="custom">Custom (specify below)</option>
             </select>
@@ -154,18 +166,20 @@ export function ElevenLabsCallComponent({ client, workspaceId, onCallInitiated }
                 className="mt-2"
                 placeholder="Enter custom call purpose..."
                 value={purpose}
-                onChange={(e) => setPurpose(e.target.value)}
+                onChange={e => setPurpose(e.target.value)}
               />
             )}
           </div>
 
           <div>
-            <Label htmlFor="context" className="text-sm font-medium">Additional Context (Optional)</Label>
+            <Label htmlFor="context" className="text-sm font-medium">
+              Additional Context (Optional)
+            </Label>
             <Textarea
               id="context"
               placeholder="Any specific details Sarah should know about this client or call..."
               value={context}
-              onChange={(e) => setContext(e.target.value)}
+              onChange={e => setContext(e.target.value)}
               rows={3}
             />
           </div>
@@ -176,7 +190,7 @@ export function ElevenLabsCallComponent({ client, workspaceId, onCallInitiated }
             className="w-full"
             size="lg"
           >
-            {isLoading ? "Setting up call..." : "Setup ElevenLabs Call"}
+            {isLoading ? 'Setting up call...' : 'Setup ElevenLabs Call'}
           </Button>
         </CardContent>
       </Card>
@@ -230,11 +244,19 @@ export function ElevenLabsCallComponent({ client, workspaceId, onCallInitiated }
             <div className="bg-blue-50 p-4 rounded border border-blue-200">
               <h4 className="font-medium text-blue-800 mb-2">Call Summary:</h4>
               <ul className="text-sm text-blue-700 space-y-1">
-                <li><strong>Client:</strong> {callResult.clientInfo.name}</li>
-                <li><strong>Phone:</strong> {callResult.clientInfo.phone}</li>
-                <li><strong>Purpose:</strong> {callResult.clientInfo.purpose}</li>
+                <li>
+                  <strong>Client:</strong> {callResult.clientInfo.name}
+                </li>
+                <li>
+                  <strong>Phone:</strong> {callResult.clientInfo.phone}
+                </li>
+                <li>
+                  <strong>Purpose:</strong> {callResult.clientInfo.purpose}
+                </li>
                 {callResult.clientInfo.context && (
-                  <li><strong>Context:</strong> {callResult.clientInfo.context}</li>
+                  <li>
+                    <strong>Context:</strong> {callResult.clientInfo.context}
+                  </li>
                 )}
               </ul>
             </div>

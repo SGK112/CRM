@@ -1,7 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { XMarkIcon, ChevronLeftIcon, ChevronRightIcon, PlayIcon } from '@heroicons/react/24/outline';
+import {
+  XMarkIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  PlayIcon,
+} from '@heroicons/react/24/outline';
 
 interface TourStep {
   target: string;
@@ -18,7 +23,12 @@ interface OnboardingTourProps {
   onSkip: () => void;
 }
 
-export default function OnboardingTour({ steps, isActive, onComplete, onSkip }: OnboardingTourProps) {
+export default function OnboardingTour({
+  steps,
+  isActive,
+  onComplete,
+  onSkip,
+}: OnboardingTourProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [targetElement, setTargetElement] = useState<HTMLElement | null>(null);
 
@@ -46,7 +56,7 @@ export default function OnboardingTour({ steps, isActive, onComplete, onSkip }: 
     if (steps[currentStep].action) {
       steps[currentStep].action!();
     }
-    
+
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
@@ -66,7 +76,7 @@ export default function OnboardingTour({ steps, isActive, onComplete, onSkip }: 
     <>
       {/* Overlay */}
       <div className="fixed inset-0 bg-black/50 z-50" onClick={onSkip} />
-      
+
       {/* Tour Tooltip */}
       <div className="fixed z-[60] bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6 max-w-sm">
         <div className="flex items-start justify-between mb-4">
@@ -84,13 +94,9 @@ export default function OnboardingTour({ steps, isActive, onComplete, onSkip }: 
           </button>
         </div>
 
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-          {step.title}
-        </h3>
-        
-        <p className="text-gray-600 dark:text-gray-400 mb-6">
-          {step.content}
-        </p>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{step.title}</h3>
+
+        <p className="text-gray-600 dark:text-gray-400 mb-6">{step.content}</p>
 
         <div className="flex items-center justify-between">
           <button
@@ -107,11 +113,11 @@ export default function OnboardingTour({ steps, isActive, onComplete, onSkip }: 
               <div
                 key={index}
                 className={`h-2 w-2 rounded-full ${
-                  index === currentStep 
-                    ? 'bg-amber-600' 
-                    : index < currentStep 
-                    ? 'bg-amber-300' 
-                    : 'bg-gray-300 dark:bg-gray-600'
+                  index === currentStep
+                    ? 'bg-amber-600'
+                    : index < currentStep
+                      ? 'bg-amber-300'
+                      : 'bg-gray-300 dark:bg-gray-600'
                 }`}
               />
             ))}
@@ -136,7 +142,7 @@ export default function OnboardingTour({ steps, isActive, onComplete, onSkip }: 
           animation: onboarding-pulse 2.5s ease-in-out infinite;
           transition: all 0.3s ease;
         }
-        
+
         .onboarding-highlight::before {
           content: '';
           position: absolute;
@@ -144,55 +150,61 @@ export default function OnboardingTour({ steps, isActive, onComplete, onSkip }: 
           left: -3px;
           right: -3px;
           bottom: -3px;
-          background: linear-gradient(45deg, 
-            rgba(245, 158, 11, 0.6), 
-            rgba(251, 191, 36, 0.4), 
+          background: linear-gradient(
+            45deg,
+            rgba(245, 158, 11, 0.6),
+            rgba(251, 191, 36, 0.4),
             rgba(245, 158, 11, 0.6)
           );
           border-radius: 15px;
           z-index: -1;
           animation: onboarding-border-rotate 3s linear infinite;
         }
-        
+
         @keyframes onboarding-pulse {
-          0%, 100% {
-            box-shadow: 
+          0%,
+          100% {
+            box-shadow:
               0 0 20px rgba(245, 158, 11, 0.3),
               0 0 40px rgba(245, 158, 11, 0.1);
           }
           50% {
-            box-shadow: 
+            box-shadow:
               0 0 30px rgba(245, 158, 11, 0.5),
               0 0 60px rgba(245, 158, 11, 0.2);
           }
         }
-        
+
         @keyframes onboarding-border-rotate {
           0% {
-            background: linear-gradient(45deg, 
-              rgba(245, 158, 11, 0.6), 
-              rgba(251, 191, 36, 0.4), 
+            background: linear-gradient(
+              45deg,
+              rgba(245, 158, 11, 0.6),
+              rgba(251, 191, 36, 0.4),
               rgba(245, 158, 11, 0.6)
             );
           }
           33% {
-            background: linear-gradient(135deg, 
-              rgba(251, 191, 36, 0.6), 
-              rgba(245, 158, 11, 0.4), 
+            background: linear-gradient(
+              135deg,
+              rgba(251, 191, 36, 0.6),
+              rgba(245, 158, 11, 0.4),
               rgba(251, 191, 36, 0.6)
             );
           }
           66% {
-            background: linear-gradient(225deg, 
-              rgba(245, 158, 11, 0.6), 
-              rgba(251, 191, 36, 0.4), 
+            background: linear-gradient(
+              225deg,
+              rgba(245, 158, 11, 0.6),
+              rgba(251, 191, 36, 0.4),
               rgba(245, 158, 11, 0.6)
             );
           }
           100% {
-            background: linear-gradient(315deg, 
-              rgba(251, 191, 36, 0.6), 
-              rgba(245, 158, 11, 0.4), 
+            background: linear-gradient(
+              315deg,
+              rgba(251, 191, 36, 0.6),
+              rgba(245, 158, 11, 0.4),
               rgba(251, 191, 36, 0.6)
             );
           }

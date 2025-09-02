@@ -57,11 +57,11 @@ const ElevenLabsWidgetComponent: React.FC<ElevenLabsWidgetComponentProps> = ({
       script.src = widgetConfig.widget.scriptSrc;
       script.async = true;
       script.type = 'text/javascript';
-      
+
       script.onload = () => {
         console.log('✅ ElevenLabs widget script loaded successfully');
       };
-      
+
       script.onerror = () => {
         console.error('❌ Failed to load ElevenLabs widget script');
       };
@@ -81,7 +81,7 @@ const ElevenLabsWidgetComponent: React.FC<ElevenLabsWidgetComponentProps> = ({
 
   const initiateWidgetCall = async () => {
     setIsLoading(true);
-    
+
     try {
       const payload = {
         phoneNumber: client.phone,
@@ -100,7 +100,7 @@ const ElevenLabsWidgetComponent: React.FC<ElevenLabsWidgetComponentProps> = ({
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -109,13 +109,12 @@ const ElevenLabsWidgetComponent: React.FC<ElevenLabsWidgetComponentProps> = ({
 
       const config = await response.json();
       console.log('🎉 Widget configuration received:', config);
-      
+
       setWidgetConfig(config);
       setShowWidget(true);
-      
+
       // Only call onCallInitiated if it exists
       onCallInitiated?.(config);
-
     } catch (error) {
       console.error('❌ Widget call setup failed:', error);
       alert('Failed to set up widget call. Please check the console for details.');
@@ -129,7 +128,7 @@ const ElevenLabsWidgetComponent: React.FC<ElevenLabsWidgetComponentProps> = ({
     { value: 'quote_follow_up', label: 'Quote Follow-up' },
     { value: 'customer_service', label: 'Customer Service' },
     { value: 'sales_inquiry', label: 'Sales Inquiry' },
-    { value: 'project_update', label: 'Project Update' }
+    { value: 'project_update', label: 'Project Update' },
   ];
 
   return (
@@ -147,7 +146,7 @@ const ElevenLabsWidgetComponent: React.FC<ElevenLabsWidgetComponentProps> = ({
             <span className="text-sm font-medium">Widget Call</span>
           </div>
         </div>
-        
+
         {client.notes && (
           <div className="bg-gray-50 p-3 rounded-lg mb-4">
             <p className="text-sm text-gray-700">{client.notes}</p>
@@ -157,15 +156,13 @@ const ElevenLabsWidgetComponent: React.FC<ElevenLabsWidgetComponentProps> = ({
         {!showWidget && (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Call Purpose
-              </label>
-              <select 
+              <label className="block text-sm font-medium text-gray-700 mb-2">Call Purpose</label>
+              <select
                 value={purpose}
-                onChange={(e) => setPurpose(e.target.value)}
+                onChange={e => setPurpose(e.target.value)}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                {purposeOptions.map((option) => (
+                {purposeOptions.map(option => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
@@ -179,13 +176,13 @@ const ElevenLabsWidgetComponent: React.FC<ElevenLabsWidgetComponentProps> = ({
               </label>
               <textarea
                 value={context}
-                onChange={(e) => setContext(e.target.value)}
+                onChange={e => setContext(e.target.value)}
                 placeholder="Any specific information Sarah should know for this conversation..."
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 h-20 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
-            <button 
+            <button
               onClick={initiateWidgetCall}
               disabled={isLoading}
               className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-lg transition-colors"
@@ -219,7 +216,9 @@ const ElevenLabsWidgetComponent: React.FC<ElevenLabsWidgetComponentProps> = ({
               <h4 className="font-medium text-green-800 mb-2">Advantages of Widget Approach:</h4>
               <ul className="space-y-1">
                 {widgetConfig.advantages.map((advantage, index) => (
-                  <li key={index} className="text-sm text-green-700">{advantage}</li>
+                  <li key={index} className="text-sm text-green-700">
+                    {advantage}
+                  </li>
                 ))}
               </ul>
             </div>
@@ -228,7 +227,9 @@ const ElevenLabsWidgetComponent: React.FC<ElevenLabsWidgetComponentProps> = ({
               <h4 className="font-medium text-blue-800 mb-2">Instructions:</h4>
               <ol className="space-y-1">
                 {widgetConfig.widget.instructions.map((instruction, index) => (
-                  <li key={index} className="text-sm text-blue-700">{index + 1}. {instruction}</li>
+                  <li key={index} className="text-sm text-blue-700">
+                    {index + 1}. {instruction}
+                  </li>
                 ))}
               </ol>
             </div>
@@ -236,9 +237,9 @@ const ElevenLabsWidgetComponent: React.FC<ElevenLabsWidgetComponentProps> = ({
             {/* ElevenLabs Widget Embed */}
             {showWidget && (
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                <div 
-                  dangerouslySetInnerHTML={{ 
-                    __html: widgetConfig.widget.embedCode 
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: widgetConfig.widget.embedCode,
                   }}
                 />
                 <p className="text-sm text-gray-500 mt-4">
@@ -248,16 +249,26 @@ const ElevenLabsWidgetComponent: React.FC<ElevenLabsWidgetComponentProps> = ({
             )}
 
             <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-medium text-gray-800 mb-2">Client Information Passed to Agent:</h4>
+              <h4 className="font-medium text-gray-800 mb-2">
+                Client Information Passed to Agent:
+              </h4>
               <div className="text-sm text-gray-600 space-y-1">
-                <p><strong>Name:</strong> {widgetConfig.widget.clientInfo.name}</p>
-                <p><strong>Phone:</strong> {widgetConfig.widget.clientInfo.phone}</p>
-                <p><strong>Purpose:</strong> {widgetConfig.widget.clientInfo.purpose}</p>
-                <p><strong>Context:</strong> {widgetConfig.widget.clientInfo.context}</p>
+                <p>
+                  <strong>Name:</strong> {widgetConfig.widget.clientInfo.name}
+                </p>
+                <p>
+                  <strong>Phone:</strong> {widgetConfig.widget.clientInfo.phone}
+                </p>
+                <p>
+                  <strong>Purpose:</strong> {widgetConfig.widget.clientInfo.purpose}
+                </p>
+                <p>
+                  <strong>Context:</strong> {widgetConfig.widget.clientInfo.context}
+                </p>
               </div>
             </div>
 
-            <button 
+            <button
               onClick={() => setShowWidget(false)}
               className="w-full border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors"
             >

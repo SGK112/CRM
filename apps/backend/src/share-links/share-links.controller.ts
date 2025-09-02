@@ -32,5 +32,7 @@ export class ShareLinksController {
   @UseGuards(JwtAuthGuard, ActiveSubscriptionGuard, PermissionsGuard)
   @Get()
   @RequiresPermissions('share.create')
-  list(@Req() req) { return this.service.list(req.user.workspaceId); }
+  list(@Req() req) {
+    return this.service.list(req.user.workspaceId);
+  }
 }

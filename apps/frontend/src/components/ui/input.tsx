@@ -1,11 +1,11 @@
-"use client"
+'use client';
 
-import * as React from "react"
+import * as React from 'react';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className = "", type = "text", ...props }, ref) => {
+  ({ className = '', type = 'text', ...props }, ref) => {
     return (
       <input
         type={type}
@@ -13,9 +13,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         ref={ref}
         {...props}
       />
-    )
+    );
   }
-)
-Input.displayName = "Input"
+);
+Input.displayName = 'Input';
 
-export { Input }
+export { Input };

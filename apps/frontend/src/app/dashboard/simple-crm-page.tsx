@@ -191,7 +191,7 @@ export default function SimpleCRMDashboard() {
               </Link>
             </div>
           </div>
-          
+
           <div className="p-6">
             <div className="space-y-4">
               {recentProjects.map((project) => (
@@ -202,11 +202,11 @@ export default function SimpleCRMDashboard() {
                       {project.status.replace('_', ' ')}
                     </span>
                   </div>
-                  
+
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                     Client: {project.client}
                   </p>
-                  
+
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-gray-600 dark:text-gray-400">
                       Budget: {formatCurrency(project.budget)}
@@ -215,7 +215,7 @@ export default function SimpleCRMDashboard() {
                       {project.progress}% Complete
                     </span>
                   </div>
-                  
+
                   <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                     <div
                       className="bg-blue-600 h-2 rounded-full transition-all duration-300"

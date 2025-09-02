@@ -5,6 +5,9 @@ import { LoginDto, RegisterDto } from './dto/auth.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { EmailVerificationService } from './email-verification.service';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { User, UserDocument } from '../users/schemas/user.schema';
 
 @ApiTags('Authentication')
 // Controller base is '/auth'. With global prefix 'api', most routes are available under '/api/auth/*'.
@@ -14,6 +17,7 @@ export class AuthController {
   constructor(
     private authService: AuthService,
     private emailVerificationService: EmailVerificationService,
+    @InjectModel(User.name) private userModel: Model<UserDocument>
   ) {}
   private readonly logger = new Logger('AuthController');
 
@@ -23,27 +27,31 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Bad request' })
   async register(@Body() registerDto: RegisterDto) {
     const result = await this.authService.register(registerDto);
-    
+
     // Send verification email after successful registration
     if (result.user && result.user.email) {
       try {
         const emailResult = await this.emailVerificationService.sendVerificationEmail({
           id: result.user.id,
           email: result.user.email,
-          firstName: result.user.firstName
+          firstName: result.user.firstName,
         });
         this.logger.log(`Verification email send attempted for: ${result.user.email}`);
         if (emailResult?.verificationUrl) {
           // Attach a dev-only hint to the response
-          (result as unknown as { verificationUrl?: string }).verificationUrl = emailResult.verificationUrl;
+          (result as unknown as { verificationUrl?: string }).verificationUrl =
+            emailResult.verificationUrl;
         }
       } catch (emailError: unknown) {
-        const stack = typeof emailError === 'object' && emailError && 'stack' in emailError ? String((emailError as { stack?: string }).stack) : undefined;
+        const stack =
+          typeof emailError === 'object' && emailError && 'stack' in emailError
+            ? String((emailError as { stack?: string }).stack)
+            : undefined;
         this.logger.error('Failed to send verification email', stack || String(emailError));
         // Don't fail registration if email fails
       }
     }
-    
+
     return result;
   }
 
@@ -61,6 +69,34 @@ export class AuthController {
   @ApiOperation({ summary: 'Get current user profile' })
   @ApiResponse({ status: 200, description: 'Profile retrieved successfully' })
   async getProfile(@Request() req) {
+    // Get the full user document from database to include googleAuth data
+    try {
+      const userId = req.user._id || req.user.id || req.user.sub;
+      const user = await this.userModel.findById(userId).select('-password').exec();
+      if (user) {
+        return {
+          id: user._id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+          workspaceId: user.workspaceId,
+          avatar: user.avatar,
+          isEmailVerified: user.isEmailVerified,
+          isPhoneVerified: user.isPhoneVerified,
+          twoFactorEnabled: user.twoFactorEnabled,
+          googleAuth: user.googleAuth, // Include Google auth data
+          subscriptionPlan: user.subscriptionPlan,
+          subscriptionStatus: user.subscriptionStatus,
+          trialEndsAt: user.trialEndsAt,
+        };
+      }
+    } catch (error) {
+      // If database lookup fails, fall back to JWT user data
+      this.logger.log('Database profile lookup failed, using JWT data');
+    }
+
+    // Fallback to JWT user data (for demo users or if DB lookup fails)
     return req.user;
   }
 
@@ -100,10 +136,10 @@ export class AuthController {
   @ApiOperation({ summary: 'Google OAuth callback' })
   async googleAuthRedirect(@Req() req, @Res() res) {
     // Persist Google OAuth tokens if available
-  try {
+    try {
       const uid = req.user?._id || req.user?.id;
       if (uid && (req.user?.accessToken || req.user?.refreshToken)) {
-    // Update DB user when possible
+        // Update DB user when possible
         try {
           // Lazily require to avoid circulars at module load
           // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -139,14 +175,18 @@ export class AuthController {
     const accessToken = this.authService.jwtService.sign(payload);
 
     // Redirect to frontend with token
-  // Prefer FRONTEND_URL (backend env), then NEXT_PUBLIC_FRONTEND_URL (legacy), then localhost
-  const frontendUrlRaw = process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3000';
-  const frontendUrl = frontendUrlRaw.trim();
-    const prodSafeUrl = frontendUrl.includes('localhost') && process.env.NODE_ENV === 'production'
-      ? 'https://crm-h137.onrender.com'
-      : frontendUrl;
-  const finalRedirect = `${prodSafeUrl.replace(/\/$/, '')}/auth/google/success?token=${accessToken}`;
-    this.logger.log(`Google login redirect -> ${finalRedirect} (FRONTEND_URL='${process.env.FRONTEND_URL}', NEXT_PUBLIC_FRONTEND_URL='${process.env.NEXT_PUBLIC_FRONTEND_URL}', NODE_ENV='${process.env.NODE_ENV}')`);
+    // Prefer FRONTEND_URL (backend env), then NEXT_PUBLIC_FRONTEND_URL (legacy), then localhost
+    const frontendUrlRaw =
+      process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3000';
+    const frontendUrl = frontendUrlRaw.trim();
+    const prodSafeUrl =
+      frontendUrl.includes('localhost') && process.env.NODE_ENV === 'production'
+        ? 'https://crm-h137.onrender.com'
+        : frontendUrl;
+    const finalRedirect = `${prodSafeUrl.replace(/\/$/, '')}/auth/google/success?token=${accessToken}`;
+    this.logger.log(
+      `Google login redirect -> ${finalRedirect} (FRONTEND_URL='${process.env.FRONTEND_URL}', NEXT_PUBLIC_FRONTEND_URL='${process.env.NEXT_PUBLIC_FRONTEND_URL}', NODE_ENV='${process.env.NODE_ENV}')`
+    );
     res.redirect(finalRedirect);
   }
 
@@ -159,7 +199,10 @@ export class AuthController {
       NODE_ENV: process.env.NODE_ENV || null,
       GOOGLE_REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI || null,
       computedSuccessRedirectBase: (() => {
-        const frontendUrl = process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3000';
+        const frontendUrl =
+          process.env.FRONTEND_URL ||
+          process.env.NEXT_PUBLIC_FRONTEND_URL ||
+          'http://localhost:3000';
         if (frontendUrl.includes('localhost') && process.env.NODE_ENV === 'production') {
           return 'https://crm-h137.onrender.com';
         }

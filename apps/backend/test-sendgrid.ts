@@ -6,18 +6,18 @@ async function testEmail() {
   const mockConfigService = {
     get: (key: string) => {
       const config = {
-        'SENDGRID_API_KEY': 'your-sendgrid-api-key-here',
-        'SENDGRID_FROM_EMAIL': 'noreply@remodely.ai',
-        'SENDGRID_FROM_NAME': 'Remodely CRM'
+        SENDGRID_API_KEY: 'your-sendgrid-api-key-here',
+        SENDGRID_FROM_EMAIL: 'noreply@remodely.ai',
+        SENDGRID_FROM_NAME: 'Remodely CRM',
       };
       return config[key];
-    }
+    },
   } as ConfigService;
 
   const emailService = new EmailService(mockConfigService);
 
   console.log('Testing SendGrid email...');
-  
+
   try {
     const result = await emailService.sendEmail({
       to: 'test@example.com', // Change this to your email
@@ -28,7 +28,7 @@ async function testEmail() {
         <p><strong>SendGrid Web API is working correctly!</strong></p>
         <p>Sent at: ${new Date().toISOString()}</p>
       `,
-      text: 'SendGrid Integration Test - This is a test email from your Remodely CRM system! SendGrid Web API is working correctly!'
+      text: 'SendGrid Integration Test - This is a test email from your Remodely CRM system! SendGrid Web API is working correctly!',
     });
 
     if (result) {

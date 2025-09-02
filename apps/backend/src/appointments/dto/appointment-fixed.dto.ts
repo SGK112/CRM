@@ -1,4 +1,17 @@
-import { IsString, IsNotEmpty, IsOptional, IsEnum, IsDateString, IsNumber, IsBoolean, IsArray, IsObject, Min, Max, IsPositive } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsEnum,
+  IsDateString,
+  IsNumber,
+  IsBoolean,
+  IsArray,
+  IsObject,
+  Min,
+  Max,
+  IsPositive,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Document } from 'mongoose';
@@ -12,7 +25,7 @@ export enum AppointmentType {
   INSPECTION = 'inspection',
   SITE_VISIT = 'site_visit',
   MEETING = 'meeting',
-  OTHER = 'other'
+  OTHER = 'other',
 }
 
 export enum AppointmentStatus {
@@ -21,7 +34,7 @@ export enum AppointmentStatus {
   COMPLETED = 'completed',
   CANCELLED = 'cancelled',
   NO_SHOW = 'no-show',
-  RESCHEDULED = 'rescheduled'
+  RESCHEDULED = 'rescheduled',
 }
 
 // Type for appointments with MongoDB document
@@ -185,7 +198,11 @@ export class UpdateAppointmentDto {
   @IsOptional()
   description?: string;
 
-  @ApiPropertyOptional({ description: 'Scheduled date and time', type: String, format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Scheduled date and time',
+    type: String,
+    format: 'date-time',
+  })
   @IsDateString()
   @IsOptional()
   scheduledDate?: string;
@@ -287,7 +304,9 @@ export class AvailabilityCheckDto {
   @IsOptional()
   assignedTo?: string;
 
-  @ApiPropertyOptional({ description: 'Appointment ID to exclude from conflict check (for rescheduling)' })
+  @ApiPropertyOptional({
+    description: 'Appointment ID to exclude from conflict check (for rescheduling)',
+  })
   @IsString()
   @IsOptional()
   excludeAppointmentId?: string;
@@ -324,12 +343,20 @@ export class AppointmentQueryDto {
   @IsOptional()
   type?: AppointmentType;
 
-  @ApiPropertyOptional({ description: 'Start date for date range filter', type: String, format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Start date for date range filter',
+    type: String,
+    format: 'date-time',
+  })
   @IsDateString()
   @IsOptional()
   startDate?: string;
 
-  @ApiPropertyOptional({ description: 'End date for date range filter', type: String, format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'End date for date range filter',
+    type: String,
+    format: 'date-time',
+  })
   @IsDateString()
   @IsOptional()
   endDate?: string;
@@ -340,7 +367,12 @@ export class AppointmentQueryDto {
   @IsOptional()
   page?: number;
 
-  @ApiPropertyOptional({ description: 'Number of items per page', minimum: 1, maximum: 100, default: 10 })
+  @ApiPropertyOptional({
+    description: 'Number of items per page',
+    minimum: 1,
+    maximum: 100,
+    default: 10,
+  })
   @IsNumber()
   @IsPositive()
   @Min(1)
@@ -391,7 +423,10 @@ export class BulkActionDto {
   @IsNotEmpty()
   appointmentIds: string[];
 
-  @ApiProperty({ description: 'Action to perform', enum: ['delete', 'cancel', 'confirm', 'reschedule'] })
+  @ApiProperty({
+    description: 'Action to perform',
+    enum: ['delete', 'cancel', 'confirm', 'reschedule'],
+  })
   @IsEnum(['delete', 'cancel', 'confirm', 'reschedule'])
   action: 'delete' | 'cancel' | 'confirm' | 'reschedule';
 

@@ -1,14 +1,32 @@
 'use client';
 
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { EnvelopeIcon, DevicePhoneMobileIcon, CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  EnvelopeIcon,
+  DevicePhoneMobileIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+} from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 
 interface Client {
@@ -28,15 +46,15 @@ interface CommunicationModalProps {
 export default function CommunicationModal({ isOpen, onClose, client }: CommunicationModalProps) {
   const [activeTab, setActiveTab] = useState('email');
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Email form state
   const [emailSubject, setEmailSubject] = useState('');
   const [emailMessage, setEmailMessage] = useState('');
   const [emailTemplate, setEmailTemplate] = useState('custom');
-  
+
   // SMS form state
   const [smsMessage, setSmsMessage] = useState('');
-  
+
   // Template data
   const [templateData, setTemplateData] = useState({
     appointmentDate: '',
@@ -44,7 +62,7 @@ export default function CommunicationModal({ isOpen, onClose, client }: Communic
     estimateNumber: '',
     estimateAmount: '',
     subject: '',
-    message: ''
+    message: '',
   });
 
   const handleSendEmail = async () => {
@@ -72,7 +90,7 @@ export default function CommunicationModal({ isOpen, onClose, client }: Communic
       }
 
       const result = await response.json();
-      
+
       if (result.success) {
         toast.success('Email sent successfully!');
         setEmailSubject('');
@@ -118,7 +136,7 @@ export default function CommunicationModal({ isOpen, onClose, client }: Communic
       }
 
       const result = await response.json();
-      
+
       if (result.success) {
         toast.success('SMS sent successfully!');
         setSmsMessage('');
@@ -158,7 +176,7 @@ export default function CommunicationModal({ isOpen, onClose, client }: Communic
       }
 
       const result = await response.json();
-      
+
       if (result.success) {
         toast.success('Email sent successfully!');
         onClose();
@@ -189,9 +207,7 @@ export default function CommunicationModal({ isOpen, onClose, client }: Communic
             <EnvelopeIcon className="h-5 w-5" />
             Contact {client.firstName} {client.lastName}
           </DialogTitle>
-          <DialogDescription>
-            Send an email or SMS message to your client
-          </DialogDescription>
+          <DialogDescription>Send an email or SMS message to your client</DialogDescription>
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -229,7 +245,7 @@ export default function CommunicationModal({ isOpen, onClose, client }: Communic
                   <Input
                     id="email-subject"
                     value={emailSubject}
-                    onChange={(e) => setEmailSubject(e.target.value)}
+                    onChange={e => setEmailSubject(e.target.value)}
                     placeholder="Enter email subject"
                   />
                 </div>
@@ -238,7 +254,7 @@ export default function CommunicationModal({ isOpen, onClose, client }: Communic
                   <Textarea
                     id="email-message"
                     value={emailMessage}
-                    onChange={(e) => setEmailMessage(e.target.value)}
+                    onChange={e => setEmailMessage(e.target.value)}
                     placeholder="Type your message here..."
                     rows={6}
                   />
@@ -254,7 +270,9 @@ export default function CommunicationModal({ isOpen, onClose, client }: Communic
                     id="appointment-date"
                     type="datetime-local"
                     value={templateData.appointmentDate}
-                    onChange={(e) => setTemplateData({ ...templateData, appointmentDate: e.target.value })}
+                    onChange={e =>
+                      setTemplateData({ ...templateData, appointmentDate: e.target.value })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -262,7 +280,9 @@ export default function CommunicationModal({ isOpen, onClose, client }: Communic
                   <Input
                     id="appointment-type"
                     value={templateData.appointmentType}
-                    onChange={(e) => setTemplateData({ ...templateData, appointmentType: e.target.value })}
+                    onChange={e =>
+                      setTemplateData({ ...templateData, appointmentType: e.target.value })
+                    }
                     placeholder="e.g., Kitchen Consultation"
                   />
                 </div>
@@ -276,7 +296,9 @@ export default function CommunicationModal({ isOpen, onClose, client }: Communic
                   <Input
                     id="estimate-number"
                     value={templateData.estimateNumber}
-                    onChange={(e) => setTemplateData({ ...templateData, estimateNumber: e.target.value })}
+                    onChange={e =>
+                      setTemplateData({ ...templateData, estimateNumber: e.target.value })
+                    }
                     placeholder="EST-001"
                   />
                 </div>
@@ -286,7 +308,9 @@ export default function CommunicationModal({ isOpen, onClose, client }: Communic
                     id="estimate-amount"
                     type="number"
                     value={templateData.estimateAmount}
-                    onChange={(e) => setTemplateData({ ...templateData, estimateAmount: e.target.value })}
+                    onChange={e =>
+                      setTemplateData({ ...templateData, estimateAmount: e.target.value })
+                    }
                     placeholder="15000"
                   />
                 </div>
@@ -300,7 +324,7 @@ export default function CommunicationModal({ isOpen, onClose, client }: Communic
                   <Input
                     id="followup-subject"
                     value={templateData.subject}
-                    onChange={(e) => setTemplateData({ ...templateData, subject: e.target.value })}
+                    onChange={e => setTemplateData({ ...templateData, subject: e.target.value })}
                     placeholder="Following up on our conversation"
                   />
                 </div>
@@ -309,7 +333,7 @@ export default function CommunicationModal({ isOpen, onClose, client }: Communic
                   <Textarea
                     id="followup-message"
                     value={templateData.message}
-                    onChange={(e) => setTemplateData({ ...templateData, message: e.target.value })}
+                    onChange={e => setTemplateData({ ...templateData, message: e.target.value })}
                     placeholder="Your follow-up message..."
                     rows={4}
                   />
@@ -324,17 +348,19 @@ export default function CommunicationModal({ isOpen, onClose, client }: Communic
               <Textarea
                 id="sms-message"
                 value={smsMessage}
-                onChange={(e) => setSmsMessage(e.target.value)}
+                onChange={e => setSmsMessage(e.target.value)}
                 placeholder="Type your SMS message here..."
                 rows={4}
                 maxLength={1000}
               />
               <div className="flex justify-between text-sm text-gray-500">
                 <span>{getCharacterCount()}/1000 characters</span>
-                <span>{getSMSCount()} SMS {getSMSCount() > 1 ? 'messages' : 'message'}</span>
+                <span>
+                  {getSMSCount()} SMS {getSMSCount() > 1 ? 'messages' : 'message'}
+                </span>
               </div>
             </div>
-            
+
             {!client.phone && (
               <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <ExclamationTriangleIcon className="h-5 w-5 text-yellow-600" />
@@ -347,11 +373,18 @@ export default function CommunicationModal({ isOpen, onClose, client }: Communic
         </Tabs>
 
         <DialogFooter>
-          <Button className="border border-gray-300 bg-white text-gray-700 hover:bg-gray-50" onClick={onClose} disabled={isLoading}>
+          <Button
+            className="border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+            onClick={onClose}
+            disabled={isLoading}
+          >
             Cancel
           </Button>
           {activeTab === 'email' && (
-            <Button onClick={emailTemplate === 'custom' ? handleSendEmail : handleSendTemplatedEmail} disabled={isLoading}>
+            <Button
+              onClick={emailTemplate === 'custom' ? handleSendEmail : handleSendTemplatedEmail}
+              disabled={isLoading}
+            >
               {isLoading ? 'Sending...' : 'Send Email'}
             </Button>
           )}

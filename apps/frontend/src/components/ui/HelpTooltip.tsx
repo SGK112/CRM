@@ -24,7 +24,7 @@ export default function HelpTooltip({
   className = '',
   iconClassName = '',
   showOnHover = true,
-  showOnClick = false
+  showOnClick = false,
 }: HelpTooltipProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
@@ -45,18 +45,18 @@ export default function HelpTooltip({
     switch (position) {
       case 'top':
         top = iconRect.top - tooltipRect.height - 8;
-        left = iconRect.left + (iconRect.width / 2) - (tooltipRect.width / 2);
+        left = iconRect.left + iconRect.width / 2 - tooltipRect.width / 2;
         break;
       case 'bottom':
         top = iconRect.bottom + 8;
-        left = iconRect.left + (iconRect.width / 2) - (tooltipRect.width / 2);
+        left = iconRect.left + iconRect.width / 2 - tooltipRect.width / 2;
         break;
       case 'left':
-        top = iconRect.top + (iconRect.height / 2) - (tooltipRect.height / 2);
+        top = iconRect.top + iconRect.height / 2 - tooltipRect.height / 2;
         left = iconRect.left - tooltipRect.width - 8;
         break;
       case 'right':
-        top = iconRect.top + (iconRect.height / 2) - (tooltipRect.height / 2);
+        top = iconRect.top + iconRect.height / 2 - tooltipRect.height / 2;
         left = iconRect.right + 8;
         break;
     }
@@ -90,27 +90,43 @@ export default function HelpTooltip({
   const getIcon = () => {
     switch (variant) {
       case 'help':
-        return <QuestionMarkCircleIcon className={`cursor-help ${getIconSize()} ${iconClassName}`} />;
+        return (
+          <QuestionMarkCircleIcon className={`cursor-help ${getIconSize()} ${iconClassName}`} />
+        );
       case 'warning':
-        return <InformationCircleIcon className={`cursor-help ${getIconSize()} ${iconClassName} text-amber-500`} />;
+        return (
+          <InformationCircleIcon
+            className={`cursor-help ${getIconSize()} ${iconClassName} text-amber-500`}
+          />
+        );
       default:
-        return <InformationCircleIcon className={`cursor-help ${getIconSize()} ${iconClassName} text-gray-400 hover:text-gray-600 dark:hover:text-gray-300`} />;
+        return (
+          <InformationCircleIcon
+            className={`cursor-help ${getIconSize()} ${iconClassName} text-gray-400 hover:text-gray-600 dark:hover:text-gray-300`}
+          />
+        );
     }
   };
 
   const getIconSize = () => {
     switch (size) {
-      case 'sm': return 'h-4 w-4';
-      case 'lg': return 'h-6 w-6';
-      default: return 'h-5 w-5';
+      case 'sm':
+        return 'h-4 w-4';
+      case 'lg':
+        return 'h-6 w-6';
+      default:
+        return 'h-5 w-5';
     }
   };
 
   const getTooltipSize = () => {
     switch (size) {
-      case 'sm': return 'max-w-xs text-xs';
-      case 'lg': return 'max-w-md text-base';
-      default: return 'max-w-sm text-sm';
+      case 'sm':
+        return 'max-w-xs text-xs';
+      case 'lg':
+        return 'max-w-md text-base';
+      default:
+        return 'max-w-sm text-sm';
     }
   };
 
@@ -129,8 +145,13 @@ export default function HelpTooltip({
   };
 
   const handleClickOutside = (e: MouseEvent) => {
-    if (showOnClick && tooltipRef.current && !tooltipRef.current.contains(e.target as Node) && 
-        iconRef.current && !iconRef.current.contains(e.target as Node)) {
+    if (
+      showOnClick &&
+      tooltipRef.current &&
+      !tooltipRef.current.contains(e.target as Node) &&
+      iconRef.current &&
+      !iconRef.current.contains(e.target as Node)
+    ) {
       setIsVisible(false);
     }
   };
@@ -157,10 +178,8 @@ export default function HelpTooltip({
       {isVisible && (
         <>
           {/* Backdrop for click outside detection */}
-          {showOnClick && (
-            <div className="fixed inset-0 z-40" />
-          )}
-          
+          {showOnClick && <div className="fixed inset-0 z-40" />}
+
           {/* Tooltip */}
           <div
             ref={tooltipRef}
@@ -170,22 +189,19 @@ export default function HelpTooltip({
               left: `${tooltipPosition.left}px`,
             }}
           >
-            {title && (
-              <div className="font-semibold mb-1 text-white">
-                {title}
-              </div>
-            )}
-            <div className="text-gray-200">
-              {content}
-            </div>
-            
+            {title && <div className="font-semibold mb-1 text-white">{title}</div>}
+            <div className="text-gray-200">{content}</div>
+
             {/* Arrow */}
             <div
               className={`absolute w-2 h-2 bg-gray-900 dark:bg-gray-800 border border-gray-700 transform rotate-45 ${
-                position === 'top' ? 'bottom-[-5px] left-1/2 -translate-x-1/2' :
-                position === 'bottom' ? 'top-[-5px] left-1/2 -translate-x-1/2' :
-                position === 'left' ? 'right-[-5px] top-1/2 -translate-y-1/2' :
-                'left-[-5px] top-1/2 -translate-y-1/2'
+                position === 'top'
+                  ? 'bottom-[-5px] left-1/2 -translate-x-1/2'
+                  : position === 'bottom'
+                    ? 'top-[-5px] left-1/2 -translate-x-1/2'
+                    : position === 'left'
+                      ? 'right-[-5px] top-1/2 -translate-y-1/2'
+                      : 'left-[-5px] top-1/2 -translate-y-1/2'
               }`}
             />
           </div>

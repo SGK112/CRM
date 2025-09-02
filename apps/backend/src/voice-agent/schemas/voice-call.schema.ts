@@ -17,7 +17,10 @@ export class VoiceCall {
   @Prop({ required: true, enum: ['outbound', 'inbound'] })
   direction: 'outbound' | 'inbound';
 
-  @Prop({ required: true, enum: ['initiated', 'ringing', 'answered', 'busy', 'failed', 'completed', 'no-answer'] })
+  @Prop({
+    required: true,
+    enum: ['initiated', 'ringing', 'answered', 'busy', 'failed', 'completed', 'no-answer'],
+  })
   status: 'initiated' | 'ringing' | 'answered' | 'busy' | 'failed' | 'completed' | 'no-answer';
 
   @Prop()

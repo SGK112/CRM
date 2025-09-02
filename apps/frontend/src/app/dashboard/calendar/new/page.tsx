@@ -27,7 +27,7 @@ export default function NewAppointment() {
     const cid = params?.get('clientId');
     const pid = params?.get('projectId');
     const dateParam = params?.get('date');
-    
+
     if (cid) setClientId(cid);
     if (pid) setProjectId(pid);
     if (dateParam) setDate(dateParam);
@@ -181,7 +181,7 @@ export default function NewAppointment() {
                   />
                 </div>
               </div>
-              
+
               <div className="mt-6">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Location
@@ -196,7 +196,7 @@ export default function NewAppointment() {
                   />
                 </div>
               </div>
-              
+
               <div className="mt-6">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Notes

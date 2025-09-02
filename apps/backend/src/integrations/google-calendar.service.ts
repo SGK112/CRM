@@ -22,7 +22,8 @@ export class GoogleCalendarService {
   private getOAuthClient(user: UserDocument) {
     const clientId = process.env.GOOGLE_CLIENT_ID || '';
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET || '';
-    const redirectUri = process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3001/auth/google/callback';
+    const redirectUri =
+      process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3001/auth/google/callback';
     const oAuth2Client = new google.auth.OAuth2(clientId, clientSecret, redirectUri);
     if (user.googleAuth?.accessToken || user.googleAuth?.refreshToken) {
       oAuth2Client.setCredentials({
@@ -52,7 +53,10 @@ export class GoogleCalendarService {
     return { connected: true, events: resp.data.items || [] };
   }
 
-  async createEvent(userId: string, event: { summary: string; description?: string; start: string; end: string }) {
+  async createEvent(
+    userId: string,
+    event: { summary: string; description?: string; start: string; end: string }
+  ) {
     const user = await this.userModel.findById(userId);
     if (!user) throw new UnauthorizedException('User not found');
     if (!user.googleAuth?.accessToken && !user.googleAuth?.refreshToken) {

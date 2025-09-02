@@ -10,21 +10,21 @@ module.exports = {
     extend: {
       colors: {
         // Use CSS custom properties for theme variables
-        'surface': {
+        surface: {
           1: 'var(--surface-1)',
           2: 'var(--surface-2)',
           3: 'var(--surface-3)',
         },
-        'text': {
+        text: {
           DEFAULT: 'var(--text)',
           dim: 'var(--text-dim)',
           faint: 'var(--text-faint)',
         },
-        'border': {
+        border: {
           DEFAULT: 'var(--border)',
           strong: 'var(--border-strong)',
         },
-        'accent': {
+        accent: {
           DEFAULT: 'var(--accent)',
           hover: 'var(--accent-hover)',
           alt: 'var(--accent-alt)',
@@ -105,12 +105,12 @@ module.exports = {
         },
       },
       textColor: {
-        'theme': 'var(--text)',
-        'theme-muted': 'var(--text-muted)', 
+        theme: 'var(--text)',
+        'theme-muted': 'var(--text-muted)',
         'theme-faint': 'var(--text-faint)',
       },
       backgroundColor: {
-        'primary': 'var(--bg)',
+        primary: 'var(--bg)',
         'surface-1': 'var(--surface-1)',
         'surface-2': 'var(--surface-2)',
         'surface-3': 'var(--surface-3)',
@@ -131,26 +131,26 @@ module.exports = {
       },
       minHeight: {
         'screen-safe': 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom))',
-        'touch': '44px', // Minimum touch target size
+        touch: '44px', // Minimum touch target size
       },
       minWidth: {
-        'touch': '44px', // Minimum touch target size
+        touch: '44px', // Minimum touch target size
       },
       // App-like border radius
       borderRadius: {
-        'app': '1.5rem',
+        app: '1.5rem',
         'app-lg': '2rem',
       },
       // Mobile-optimized shadows
       boxShadow: {
-        'app': '0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        app: '0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
         'app-lg': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
       },
       // Mobile-friendly transitions
       transitionDuration: {
-        'fast': '150ms',
-        'normal': '200ms',
-        'slow': '300ms',
+        fast: '150ms',
+        normal: '200ms',
+        slow: '300ms',
       },
       // Mobile viewport units
       height: {
@@ -162,7 +162,7 @@ module.exports = {
   },
   plugins: [
     // Custom utilities for mobile optimization
-    function({ addUtilities }) {
+    function ({ addUtilities }) {
       addUtilities({
         '.touch-manipulation': {
           'touch-action': 'manipulation',
@@ -178,7 +178,7 @@ module.exports = {
           'backface-visibility': 'hidden',
         },
         '.transform-gpu': {
-          'transform': 'translateZ(0)',
+          transform: 'translateZ(0)',
         },
         '.tap-highlight-none': {
           '-webkit-tap-highlight-color': 'transparent',
@@ -187,16 +187,16 @@ module.exports = {
           'scrollbar-width': 'none',
           '-ms-overflow-style': 'none',
           '&::-webkit-scrollbar': {
-            'display': 'none'
-          }
+            display: 'none',
+          },
         },
         '.overscroll-contain': {
           'overscroll-behavior': 'contain',
         },
         '.will-change-scroll': {
           'will-change': 'scroll-position',
-        }
-      })
-    }
+        },
+      });
+    },
   ],
-}
+};

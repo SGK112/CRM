@@ -26,7 +26,7 @@ export default function ClientDetailPage() {
 
   useEffect(() => {
     if (!clientId) return;
-    
+
     const fetchClient = async () => {
       try {
         const response = await fetch(`/api/clients/${clientId}`, {
@@ -34,7 +34,7 @@ export default function ClientDetailPage() {
             'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
           }
         });
-        
+
         if (response.ok) {
           const data = await response.json();
           setClient(data);

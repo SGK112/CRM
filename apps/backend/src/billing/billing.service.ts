@@ -17,17 +17,18 @@ export class BillingService {
     if (!priceId) return undefined;
     return this.priceToPlan[priceId];
   }
-  constructor(
-    @InjectModel(User.name) private userModel: Model<UserDocument>,
-  ) {}
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
-  async attachSubscriptionToUser(email: string, params: {
-    stripeCustomerId?: string;
-    stripeSubscriptionId?: string;
-  subscriptionPlan?: string; // internal code (starter, growth)
-    subscriptionStatus?: string;
-    trialEndsAt?: Date;
-  }) {
+  async attachSubscriptionToUser(
+    email: string,
+    params: {
+      stripeCustomerId?: string;
+      stripeSubscriptionId?: string;
+      subscriptionPlan?: string; // internal code (starter, growth)
+      subscriptionStatus?: string;
+      trialEndsAt?: Date;
+    }
+  ) {
     const user = await this.userModel.findOne({ email });
     if (!user) {
       this.logger.warn(`User not found for subscription attach: ${email}`);

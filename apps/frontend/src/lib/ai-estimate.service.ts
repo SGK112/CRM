@@ -58,10 +58,10 @@ class AIEstimateService {
   private async getAuthHeaders(): Promise<HeadersInit> {
     // In a real implementation, get the JWT token from storage
     const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
-    
+
     return {
       'Content-Type': 'application/json',
-      'Authorization': token ? `Bearer ${token}` : '',
+      Authorization: token ? `Bearer ${token}` : '',
     };
   }
 
@@ -169,7 +169,7 @@ class AIEstimateService {
         costRange: { low: 25000, high: 55000 },
         marketTrends: 'Market analysis unavailable',
         regionalFactors: 'Regional data unavailable',
-        recommendations: ['Contact local suppliers for current pricing']
+        recommendations: ['Contact local suppliers for current pricing'],
       };
     }
   }
@@ -203,7 +203,7 @@ class AIEstimateService {
         pessimistic: 35,
         complexity: 'medium',
         phases: [],
-        riskFactors: ['Standard project risks']
+        riskFactors: ['Standard project risks'],
       };
     }
   }
@@ -221,11 +221,11 @@ class AIEstimateService {
       itemDetailLevel: 0.25,
       priceAccuracy: 0.35,
       scopeClarity: 0.25,
-      marketData: 0.15
+      marketData: 0.15,
     };
 
     const score = Object.entries(factors).reduce((total, [key, value]) => {
-      return total + (value * weights[key as keyof typeof weights]);
+      return total + value * weights[key as keyof typeof weights];
     }, 0);
 
     return Math.min(1, Math.max(0, score));
@@ -242,18 +242,22 @@ class AIEstimateService {
     const requiredCategories = ['labor', 'materials'];
     const recommendedCategories = ['permits', 'overhead'];
     const presentCategories = Array.from(new Set(items.map(item => item.category)));
-    
+
     const missingRequired = requiredCategories.filter(cat => !presentCategories.includes(cat));
-    const missingRecommended = recommendedCategories.filter(cat => !presentCategories.includes(cat));
-    
+    const missingRecommended = recommendedCategories.filter(
+      cat => !presentCategories.includes(cat)
+    );
+
     const completenessScore = 1 - (missingRequired.length * 0.3 + missingRecommended.length * 0.1);
-    
+
     const recommendations = [];
     if (missingRequired.length > 0) {
       recommendations.push(`Add ${missingRequired.join(', ')} categories for complete estimate`);
     }
     if (missingRecommended.length > 0) {
-      recommendations.push(`Consider adding ${missingRecommended.join(', ')} for more accurate pricing`);
+      recommendations.push(
+        `Consider adding ${missingRecommended.join(', ')} for more accurate pricing`
+      );
     }
     if (items.length < 5) {
       recommendations.push('Add more detailed line items for better accuracy');
@@ -262,7 +266,7 @@ class AIEstimateService {
     return {
       completenessScore: Math.max(0, completenessScore),
       missingCategories: [...missingRequired, ...missingRecommended],
-      recommendations
+      recommendations,
     };
   }
 
@@ -275,7 +279,8 @@ class AIEstimateService {
         {
           category: 'materials' as const,
           description: 'Kitchen Cabinets - Custom',
-          detailedDescription: 'Custom-built kitchen cabinets with soft-close hinges, full-extension drawers, and premium hardware. Includes all installation materials and trim work.',
+          detailedDescription:
+            'Custom-built kitchen cabinets with soft-close hinges, full-extension drawers, and premium hardware. Includes all installation materials and trim work.',
           quantity: 15,
           unit: 'linear feet',
           unitCost: 450,
@@ -287,18 +292,19 @@ class AIEstimateService {
               description: 'Semi-custom cabinets',
               unitCost: 325,
               pros: ['Lower cost', 'Faster delivery'],
-              cons: ['Limited customization', 'Standard sizes only']
-            }
+              cons: ['Limited customization', 'Standard sizes only'],
+            },
           ],
           isAiGenerated: false,
-          confidenceLevel: 'high' as const
-        }
+          confidenceLevel: 'high' as const,
+        },
       ],
       bathroom: [
         {
           category: 'materials' as const,
           description: 'Bathroom Tile Package',
-          detailedDescription: 'Premium porcelain floor and wall tile with matching trim pieces, waterproof membrane, and professional-grade grout.',
+          detailedDescription:
+            'Premium porcelain floor and wall tile with matching trim pieces, waterproof membrane, and professional-grade grout.',
           quantity: 120,
           unit: 'sq ft',
           unitCost: 12,
@@ -307,9 +313,9 @@ class AIEstimateService {
           supplierRecommendations: ['Tile & Stone Depot'],
           alternativeOptions: [],
           isAiGenerated: false,
-          confidenceLevel: 'medium' as const
-        }
-      ]
+          confidenceLevel: 'medium' as const,
+        },
+      ],
     };
 
     return baseItems[projectType as keyof typeof baseItems] || baseItems.kitchen;
@@ -320,36 +326,42 @@ class AIEstimateService {
    */
   private getFallbackInsights(estimateData: any): EstimateAIInsights {
     const marketVariance = (Math.random() - 0.5) * 0.2; // -10% to +10%
-    
+
     return {
       confidenceScore: 0.75,
-      marketComparison: marketVariance > 0 
-        ? `This estimate is approximately ${Math.abs(marketVariance * 100).toFixed(0)}% above market average for similar projects.`
-        : `This estimate is approximately ${Math.abs(marketVariance * 100).toFixed(0)}% below market average for similar projects.`,
+      marketComparison:
+        marketVariance > 0
+          ? `This estimate is approximately ${Math.abs(marketVariance * 100).toFixed(0)}% above market average for similar projects.`
+          : `This estimate is approximately ${Math.abs(marketVariance * 100).toFixed(0)}% below market average for similar projects.`,
       riskFactors: [
         'Material price fluctuations',
         'Permit processing delays',
-        'Weather-related impacts'
+        'Weather-related impacts',
       ],
       recommendations: [
         'Include contingency budget for unforeseen issues',
         'Verify material availability before project start',
-        'Consider phased approach for large projects'
+        'Consider phased approach for large projects',
       ],
       competitivePricing: {
         isCompetitive: Math.abs(marketVariance) < 0.05,
         marketRange: {
           low: Math.round(estimateData.totalAmount * 0.85),
-          high: Math.round(estimateData.totalAmount * 1.15)
+          high: Math.round(estimateData.totalAmount * 1.15),
         },
-        percentageVsMarket: Math.round(marketVariance * 100)
+        percentageVsMarket: Math.round(marketVariance * 100),
       },
-      projectComplexity: estimateData.totalAmount > 50000 ? 'high' : estimateData.totalAmount > 25000 ? 'medium' : 'low',
+      projectComplexity:
+        estimateData.totalAmount > 50000
+          ? 'high'
+          : estimateData.totalAmount > 25000
+            ? 'medium'
+            : 'low',
       timelineEstimate: {
         optimistic: Math.ceil(estimateData.totalAmount / 3000),
         realistic: Math.ceil(estimateData.totalAmount / 2000),
-        pessimistic: Math.ceil(estimateData.totalAmount / 1200)
-      }
+        pessimistic: Math.ceil(estimateData.totalAmount / 1200),
+      },
     };
   }
 }

@@ -1,4 +1,12 @@
-import { Controller, Get, Patch, Body, Request, UseGuards, BadRequestException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Patch,
+  Body,
+  Request,
+  UseGuards,
+  BadRequestException,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -25,22 +33,23 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'Profile updated successfully' })
   async updateProfile(
     @Request() req,
-    @Body() updateData: {
+    @Body()
+    updateData: {
       firstName?: string;
       lastName?: string;
       phone?: string;
       avatar?: string;
-  emailSignatureHtml?: string;
-  emailSignatureText?: string;
+      emailSignatureHtml?: string;
+      emailSignatureText?: string;
     }
   ) {
     const userId = req.user.sub || req.user._id;
     const updatedUser = await this.usersService.updateProfile(userId, updateData);
-    
+
     return {
       success: true,
       message: 'Profile updated successfully',
-      user: updatedUser
+      user: updatedUser,
     };
   }
 
@@ -49,7 +58,8 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'Password updated successfully' })
   async updatePassword(
     @Request() req,
-    @Body() passwordData: {
+    @Body()
+    passwordData: {
       currentPassword: string;
       newPassword: string;
     }
@@ -63,17 +73,17 @@ export class UsersController {
     }
 
     const userId = req.user.sub || req.user._id;
-    
+
     try {
       await this.usersService.updatePassword(
-        userId, 
-        passwordData.currentPassword, 
+        userId,
+        passwordData.currentPassword,
         passwordData.newPassword
       );
-      
+
       return {
         success: true,
-        message: 'Password updated successfully'
+        message: 'Password updated successfully',
       };
     } catch (error) {
       throw new BadRequestException(error.message);
@@ -85,7 +95,8 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'Notification preferences updated successfully' })
   async updateNotificationPreferences(
     @Request() req,
-    @Body() preferences: {
+    @Body()
+    preferences: {
       email?: boolean;
       sms?: boolean;
       push?: boolean;
@@ -94,11 +105,11 @@ export class UsersController {
   ) {
     const userId = req.user.sub || req.user._id;
     const updatedUser = await this.usersService.updateNotificationPreferences(userId, preferences);
-    
+
     return {
       success: true,
       message: 'Notification preferences updated successfully',
-      user: updatedUser
+      user: updatedUser,
     };
   }
 }

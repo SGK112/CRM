@@ -11,30 +11,44 @@ const PLAN_ALIASES: Record<string, PlanSlug> = {
   pro: 'professional',
   professional: 'professional',
   enterprise: 'enterprise',
-  growth: 'growth'
+  growth: 'growth',
 };
 
 const CAPABILITIES: Record<PlanSlug, string[]> = {
-  free: [
+  free: ['core.crm', 'projects.basic', 'estimates.create'],
+  starter: ['core.crm', 'projects.basic', 'estimates.create', 'invoices.basic'],
+  professional: [
     'core.crm',
     'projects.basic',
-    'estimates.create'
-  ],
-  starter: [
-    'core.crm', 'projects.basic', 'estimates.create', 'invoices.basic',
-  ],
-  professional: [
-    'core.crm', 'projects.basic', 'estimates.create', 'invoices.basic', 'reports.advanced', 'api.access',
-    'ai.voice', 'design.lab'
+    'estimates.create',
+    'invoices.basic',
+    'reports.advanced',
+    'api.access',
+    'ai.voice',
+    'design.lab',
   ],
   enterprise: [
-    'core.crm', 'projects.basic', 'estimates.create', 'invoices.basic', 'reports.advanced', 'api.access',
-    'ai.voice', 'design.lab', 'sso.saml', 'support.247'
+    'core.crm',
+    'projects.basic',
+    'estimates.create',
+    'invoices.basic',
+    'reports.advanced',
+    'api.access',
+    'ai.voice',
+    'design.lab',
+    'sso.saml',
+    'support.247',
   ],
   growth: [
-    'core.crm', 'projects.basic', 'estimates.create', 'invoices.basic', 'reports.advanced', 'api.access',
-    'ai.voice', 'design.lab'
-  ]
+    'core.crm',
+    'projects.basic',
+    'estimates.create',
+    'invoices.basic',
+    'reports.advanced',
+    'api.access',
+    'ai.voice',
+    'design.lab',
+  ],
 };
 
 export function normalizePlan(plan?: string | null): PlanSlug {
@@ -47,15 +61,17 @@ export function capabilitiesForPlan(plan?: string | null): Set<string> {
   const slug = normalizePlan(plan);
   const caps = new Set<string>();
   if (slug === 'enterprise') {
-    ['starter','professional','enterprise'].forEach(p => CAPABILITIES[p as PlanSlug].forEach(c => caps.add(c)));
+    ['starter', 'professional', 'enterprise'].forEach(p =>
+      CAPABILITIES[p as PlanSlug].forEach(c => caps.add(c))
+    );
     return caps;
   }
   if (slug === 'professional') {
-    ['starter','professional'].forEach(p => CAPABILITIES[p as PlanSlug].forEach(c => caps.add(c)));
+    ['starter', 'professional'].forEach(p => CAPABILITIES[p as PlanSlug].forEach(c => caps.add(c)));
     return caps;
   }
   if (slug === 'growth') {
-    ['starter','growth'].forEach(p => CAPABILITIES[p as PlanSlug].forEach(c => caps.add(c)));
+    ['starter', 'growth'].forEach(p => CAPABILITIES[p as PlanSlug].forEach(c => caps.add(c)));
     return caps;
   }
   CAPABILITIES[slug].forEach(c => caps.add(c));

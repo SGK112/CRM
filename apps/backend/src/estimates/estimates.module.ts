@@ -16,7 +16,7 @@ import { AiModule } from '../ai/ai.module';
     MongooseModule.forFeature([
       { name: Estimate.name, schema: EstimateSchema },
       { name: PriceItem.name, schema: PriceItemSchema },
-  { name: Client.name, schema: ClientSchema },
+      { name: Client.name, schema: ClientSchema },
     ]),
     // Needed so EstimatesController can inject InvoicesService for conversions
     InvoicesModule,
@@ -25,7 +25,6 @@ import { AiModule } from '../ai/ai.module';
   ],
   providers: [EstimatesService, AIEstimateService, EmailService],
   controllers: [EstimatesController, AIEstimateController],
-  exports: [EstimatesService, AIEstimateService]
+  exports: [EstimatesService, AIEstimateService],
 })
 export class EstimatesModule {}
-

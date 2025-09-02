@@ -22,9 +22,7 @@ interface CreateNoteDto {
 
 @Injectable()
 export class NotesService {
-  constructor(
-    @InjectModel(Note.name) private noteModel: Model<NoteDocument>,
-  ) {}
+  constructor(@InjectModel(Note.name) private noteModel: Model<NoteDocument>) {}
 
   async create(createNoteDto: CreateNoteDto): Promise<Note> {
     const note = new this.noteModel({
@@ -37,12 +35,16 @@ export class NotesService {
     return note.save();
   }
 
-  async findByClient(workspaceId: string, clientId: string, filters?: {
-    type?: string;
-    tags?: string[];
-    priority?: string;
-    includePrivate?: boolean;
-  }): Promise<Note[]> {
+  async findByClient(
+    workspaceId: string,
+    clientId: string,
+    filters?: {
+      type?: string;
+      tags?: string[];
+      priority?: string;
+      includePrivate?: boolean;
+    }
+  ): Promise<Note[]> {
     const query: any = { workspaceId, clientId };
 
     if (filters) {
@@ -93,7 +95,7 @@ export class NotesService {
         followUpDate: callData.followUpDate,
         sentiment: callData.sentiment,
         actionItems: callData.actionItems,
-      }
+      },
     });
   }
 
@@ -118,26 +120,30 @@ export class NotesService {
       priority: 'high',
       metadata: {
         followUpDate: data.followUpDate,
-        nextAction: 'Contact client for follow-up'
-      }
+        nextAction: 'Contact client for follow-up',
+      },
     });
   }
 
-  async searchNotes(workspaceId: string, searchTerm: string, filters?: {
-    clientId?: string;
-    type?: string;
-    dateFrom?: Date;
-    dateTo?: Date;
-  }): Promise<Note[]> {
-    const query: any = { 
+  async searchNotes(
+    workspaceId: string,
+    searchTerm: string,
+    filters?: {
+      clientId?: string;
+      type?: string;
+      dateFrom?: Date;
+      dateTo?: Date;
+    }
+  ): Promise<Note[]> {
+    const query: any = {
       workspaceId,
-      $text: { $search: searchTerm }
+      $text: { $search: searchTerm },
     };
 
     if (filters) {
       if (filters.clientId) query.clientId = filters.clientId;
       if (filters.type) query.type = filters.type;
-      
+
       if (filters.dateFrom || filters.dateTo) {
         query.createdAt = {};
         if (filters.dateFrom) query.createdAt.$gte = filters.dateFrom;
@@ -145,39 +151,34 @@ export class NotesService {
       }
     }
 
-    return this.noteModel.find(query, { score: { $meta: 'textScore' } })
+    return this.noteModel
+      .find(query, { score: { $meta: 'textScore' } })
       .sort({ score: { $meta: 'textScore' }, createdAt: -1 })
       .exec();
   }
 
   async getRecentNotes(workspaceId: string, limit: number = 10): Promise<Note[]> {
-    return this.noteModel.find({ workspaceId })
-      .sort({ createdAt: -1 })
-      .limit(limit)
-      .exec();
+    return this.noteModel.find({ workspaceId }).sort({ createdAt: -1 }).limit(limit).exec();
   }
 
   async getActionItems(workspaceId: string): Promise<Note[]> {
-    return this.noteModel.find({
-      workspaceId,
-      'metadata.actionItems': { $exists: true, $ne: [] },
-      priority: { $in: ['medium', 'high'] }
-    }).sort({ createdAt: -1 }).exec();
+    return this.noteModel
+      .find({
+        workspaceId,
+        'metadata.actionItems': { $exists: true, $ne: [] },
+        priority: { $in: ['medium', 'high'] },
+      })
+      .sort({ createdAt: -1 })
+      .exec();
   }
 
   async markAsPrivate(noteId: string): Promise<Note> {
-    return this.noteModel.findByIdAndUpdate(
-      noteId,
-      { isPrivate: true },
-      { new: true }
-    ).exec();
+    return this.noteModel.findByIdAndUpdate(noteId, { isPrivate: true }, { new: true }).exec();
   }
 
   async addTags(noteId: string, tags: string[]): Promise<Note> {
-    return this.noteModel.findByIdAndUpdate(
-      noteId,
-      { $addToSet: { tags: { $each: tags } } },
-      { new: true }
-    ).exec();
+    return this.noteModel
+      .findByIdAndUpdate(noteId, { $addToSet: { tags: { $each: tags } } }, { new: true })
+      .exec();
   }
 }

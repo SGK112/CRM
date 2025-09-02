@@ -34,15 +34,15 @@ export default function EstimatesPage() {
 
   const fetchEstimates = useCallback(async () => {
     if (!token) return;
-    
+
     try {
       setLoading(true);
       setError(null);
-      
+
       const res = await fetch('/api/estimates', {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
+
       if (res.ok) {
         const data = await res.json();
         setEstimates(data);
@@ -122,19 +122,19 @@ export default function EstimatesPage() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search..."
-              style={{ 
-                paddingLeft: '35px', 
-                paddingRight: '15px', 
-                paddingTop: '8px', 
-                paddingBottom: '8px', 
-                border: '1px solid #ddd', 
-                borderRadius: '6px', 
+              style={{
+                paddingLeft: '35px',
+                paddingRight: '15px',
+                paddingTop: '8px',
+                paddingBottom: '8px',
+                border: '1px solid #ddd',
+                borderRadius: '6px',
                 fontSize: '14px',
                 width: '200px'
               }}
             />
           </div>
-          
+
           <Link
             href="/dashboard/estimates/new"
             style={{
@@ -178,8 +178,8 @@ export default function EstimatesPage() {
                 <td style={{ padding: '16px', fontSize: '14px' }}>
                   <div>
                     <div style={{ fontWeight: '500' }}>
-                      {estimate.client ? 
-                        `${estimate.client.firstName} ${estimate.client.lastName}` : 
+                      {estimate.client ?
+                        `${estimate.client.firstName} ${estimate.client.lastName}` :
                         'No Client'
                       }
                     </div>
@@ -198,7 +198,7 @@ export default function EstimatesPage() {
                     fontWeight: '500',
                     borderRadius: '12px',
                     textTransform: 'capitalize',
-                    backgroundColor: 
+                    backgroundColor:
                       estimate.status === 'draft' ? '#f3f4f6' :
                       estimate.status === 'sent' ? '#dbeafe' :
                       estimate.status === 'accepted' ? '#d1fae5' :
@@ -269,7 +269,7 @@ export default function EstimatesPage() {
                     {searchTerm ? 'No estimates match your search' : 'No estimates found'}
                   </div>
                   {!searchTerm && (
-                    <Link 
+                    <Link
                       href="/dashboard/estimates/new"
                       style={{ color: '#007bff', textDecoration: 'none', fontSize: '14px', marginTop: '8px', display: 'inline-block' }}
                     >

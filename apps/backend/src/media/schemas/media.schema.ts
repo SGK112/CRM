@@ -16,8 +16,13 @@ export class Media {
   @Prop() height?: number;
   @Prop({ required: true }) hash: string; // sha256 for dedupe
   @Prop({ required: true }) publicId: string; // cloudinary public_id or s3 key
-  @Prop({ default: 'workspace', enum: ['public','workspace','restricted'] }) access: string;
-  @Prop({ type: [Object], default: [] }) variants: { type: string; url: string; width?: number; height?: number; }[];
+  @Prop({ default: 'workspace', enum: ['public', 'workspace', 'restricted'] }) access: string;
+  @Prop({ type: [Object], default: [] }) variants: {
+    type: string;
+    url: string;
+    width?: number;
+    height?: number;
+  }[];
   @Prop() description?: string;
   @Prop() tags?: string[];
   @Prop({ default: false }) deleted: boolean;

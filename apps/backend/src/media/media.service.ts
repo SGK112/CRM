@@ -6,7 +6,13 @@ import { v4 as uuid } from 'uuid';
 import * as crypto from 'crypto';
 import { CreateMediaRecordDto } from './dto/create-media.dto';
 
-interface SignResult { timestamp: number; signature: string; apiKey: string; cloudName: string; folder?: string; }
+interface SignResult {
+  timestamp: number;
+  signature: string;
+  apiKey: string;
+  cloudName: string;
+  folder?: string;
+}
 
 @Injectable()
 export class MediaService {
@@ -15,14 +21,29 @@ export class MediaService {
   private apiSecret = process.env.CLOUDINARY_API_SECRET || '';
   constructor(@InjectModel(Media.name) private mediaModel: Model<MediaDocument>) {}
 
-  async signUpload(workspaceId: string, userId: string, params: { folder?: string; projectId?: string; access?: string; tags?: string[]; mimeType?: string; }) : Promise<SignResult> {
-    if (!this.cloudName || !this.apiKey || !this.apiSecret) throw new BadRequestException('Cloudinary not configured');
-    const timestamp = Math.floor(Date.now()/1000);
+  async signUpload(
+    workspaceId: string,
+    userId: string,
+    params: {
+      folder?: string;
+      projectId?: string;
+      access?: string;
+      tags?: string[];
+      mimeType?: string;
+    }
+  ): Promise<SignResult> {
+    if (!this.cloudName || !this.apiKey || !this.apiSecret)
+      throw new BadRequestException('Cloudinary not configured');
+    const timestamp = Math.floor(Date.now() / 1000);
     // Basic folder isolation per workspace
     const folder = params.folder || `ws_${workspaceId}`;
     // Access mapping: workspace/restricted => set type=authenticated (upload preset handles); we'll just sign public_id path.
-    const toSign: Record<string,string|number> = { timestamp, folder };
-    const signatureBase = Object.keys(toSign).sort().map(k=>`${k}=${toSign[k]}`).join('&') + this.apiSecret;
+    const toSign: Record<string, string | number> = { timestamp, folder };
+    const signatureBase =
+      Object.keys(toSign)
+        .sort()
+        .map(k => `${k}=${toSign[k]}`)
+        .join('&') + this.apiSecret;
     const signature = crypto.createHash('sha1').update(signatureBase).digest('hex');
     return { timestamp, signature, apiKey: this.apiKey, cloudName: this.cloudName, folder };
   }

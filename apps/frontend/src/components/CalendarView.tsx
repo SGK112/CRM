@@ -23,13 +23,18 @@ interface CalendarViewProps {
 
 const eventColorMap: Record<string, string> = {
   consultation: '#7c3aed', // purple
-  site_visit: '#f97316',   // orange
-  meeting: '#2563eb',      // blue
-  inspection: '#16a34a',   // green
-  other: '#64748b',        // slate
+  site_visit: '#f97316', // orange
+  meeting: '#2563eb', // blue
+  inspection: '#16a34a', // green
+  other: '#64748b', // slate
 };
 
-export function CalendarView({ appointments, initialView = 'dayGridMonth', onEventClick, onDateClick }: CalendarViewProps) {
+export function CalendarView({
+  appointments,
+  initialView = 'dayGridMonth',
+  onEventClick,
+  onDateClick,
+}: CalendarViewProps) {
   const calendarEvents = appointments.map(app => ({
     id: app._id,
     title: app.title,
@@ -47,7 +52,7 @@ export function CalendarView({ appointments, initialView = 'dayGridMonth', onEve
         headerToolbar={{
           left: 'prev,next today',
           center: 'title',
-          right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+          right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek',
         }}
         events={calendarEvents}
         eventClick={onEventClick}

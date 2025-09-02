@@ -60,7 +60,7 @@ export class Vendor {
   notes?: string;
 
   // Support multiple ways to tag vendors (category-like freeform tags)
-  @Prop({ type:[String], default: [] })
+  @Prop({ type: [String], default: [] })
   tags: string[];
 
   // Arbitrary key/value metadata for future custom fields

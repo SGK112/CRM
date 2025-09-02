@@ -72,71 +72,71 @@ function TypewriterText({ text, speed = 50, delay = 0, className = "" }: Typewri
 
 // Features data
 const coreFeatures = [
-  { 
-    icon: UserGroupIcon, 
-    title: 'Client Management', 
+  {
+    icon: UserGroupIcon,
+    title: 'Client Management',
     description: 'Complete client profiles with contact history, project timeline, and communication logs.',
     benefits: ['360° client view', 'Communication tracking', 'Project history']
   },
-  { 
-    icon: DocumentTextIcon, 
-    title: 'Estimates → Invoices', 
+  {
+    icon: DocumentTextIcon,
+    title: 'Estimates → Invoices',
     description: 'Transform estimates into invoices with one click. Track approvals and payments seamlessly.',
     benefits: ['One-click conversion', 'Payment tracking', 'Professional templates']
   },
-  { 
-    icon: WrenchScrewdriverIcon, 
-    title: 'Project Management', 
+  {
+    icon: WrenchScrewdriverIcon,
+    title: 'Project Management',
     description: 'Manage multiple projects with timeline tracking, resource allocation, and team coordination.',
     benefits: ['Timeline tracking', 'Resource planning', 'Team collaboration']
   },
-  { 
-    icon: CalendarIcon, 
-    title: 'Smart Scheduling', 
+  {
+    icon: CalendarIcon,
+    title: 'Smart Scheduling',
     description: 'AI-powered scheduling prevents conflicts and optimizes your team\'s time automatically.',
     benefits: ['Conflict prevention', 'Auto-optimization', 'Team coordination']
   },
-  { 
-    icon: SpeakerWaveIcon, 
-    title: 'AI Voice Agent', 
+  {
+    icon: SpeakerWaveIcon,
+    title: 'AI Voice Agent',
     description: 'Sarah, your AI sales specialist, makes calls to prospects and schedules appointments 24/7.',
     benefits: ['24/7 availability', 'Natural conversations', 'Automatic scheduling']
   },
-  { 
-    icon: PhotoIcon, 
-    title: 'Secure Media Sharing', 
+  {
+    icon: PhotoIcon,
+    title: 'Secure Media Sharing',
     description: 'Share project photos, blueprints, and documents with clients through secure, controlled links.',
     benefits: ['Secure sharing', 'Version control', 'Client access control']
   },
-  { 
-    icon: ChartBarIcon, 
-    title: 'Business Analytics', 
+  {
+    icon: ChartBarIcon,
+    title: 'Business Analytics',
     description: 'Real-time insights into margins, pipeline, and performance metrics to grow your business.',
     benefits: ['Real-time metrics', 'Profit tracking', 'Growth insights']
   },
-  { 
-    icon: CurrencyDollarIcon, 
-    title: 'Usage-Based AI', 
+  {
+    icon: CurrencyDollarIcon,
+    title: 'Usage-Based AI',
     description: 'Pay only for the AI features you use. No monthly AI fees - complete transparency.',
     benefits: ['Pay per use', 'Cost control', 'Full transparency']
   }
 ]
 
 const businessPillars = [
-  { 
-    label: 'Run', 
+  {
+    label: 'Run',
     icon: CogIcon,
     color: 'blue',
     points: ['Centralize jobs & docs', 'Real-time margins', 'Fast estimating', 'Team coordination']
   },
-  { 
-    label: 'Grow', 
+  {
+    label: 'Grow',
     icon: RocketLaunchIcon,
-    color: 'amber', 
+    color: 'amber',
     points: ['Sharable links', 'Faster approvals', 'Insight dashboards', 'Lead conversion']
   },
-  { 
-    label: 'Automate', 
+  {
+    label: 'Automate',
     icon: BoltIcon,
     color: 'emerald',
     points: ['AI drafting', 'One-click conversion', 'Voice agent calls', 'Smart scheduling']
@@ -151,14 +151,14 @@ const testimonials = [
     rating: 5
   },
   {
-    name: "Sarah Chen", 
+    name: "Sarah Chen",
     role: "Project Manager, Coastal Construction",
     content: "The AI voice agent is incredible. It books appointments while I sleep and the voice quality is so natural clients think it's human.",
     rating: 5
   },
   {
     name: "David Thompson",
-    role: "CEO, Premium Granite Solutions", 
+    role: "CEO, Premium Granite Solutions",
     content: "From estimates to invoices in seconds. The pricing integration alone has saved us 10 hours per week.",
     rating: 5
   }
@@ -236,7 +236,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen text-[var(--text)]">
       <RevealInit />
-      
+
       {/* Navigation Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-[var(--bg-primary)]/90 backdrop-blur-sm">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -296,24 +296,24 @@ export default function HomePage() {
 
       {/* Add padding top to account for fixed header */}
       <div className="pt-16">
-      
+
       {/* Background elements */}
       <div className="pointer-events-none select-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-amber-600/10 blur-3xl" />
       <div className="pointer-events-none select-none absolute top-1/3 -right-40 h-[28rem] w-[28rem] rounded-full bg-amber-500/5 blur-3xl" />
-      
+
       {/* Hero Section */}
       <section className="relative z-10 px-4 py-20 sm:py-32">
         <div className="max-w-7xl mx-auto text-center">
           <div className="mb-8">
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-              <TypewriterText 
-                text="Turn Every Project Into " 
+              <TypewriterText
+                text="Turn Every Project Into "
                 speed={50}
                 delay={500}
               />
               <span className="gradient-amber">
-                <TypewriterText 
-                  text="Profit" 
+                <TypewriterText
+                  text="Profit"
                   speed={80}
                   delay={1800}
                 />
@@ -412,7 +412,7 @@ export default function HomePage() {
                 return colorMap[color as keyof typeof colorMap] || colorMap.amber;
               };
               const colors = getColorClasses(pillar.color);
-              
+
               return (
               <div key={index} className="text-center p-8 rounded-2xl bg-[var(--surface-1)] border border-[var(--border)] hover:shadow-lg transition-shadow">
                 <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6 ${colors.bg} ring-1 ${colors.ring}`}>
@@ -526,7 +526,7 @@ export default function HomePage() {
             <p className="text-xl text-[var(--text-dim)] mb-8">
               Start free and upgrade only when your operation demands more
             </p>
-            
+
             {/* Billing toggle */}
             <div className="inline-flex items-center gap-4 p-1 bg-[var(--surface-2)] rounded-lg border border-[var(--border)]">
               <button
@@ -551,8 +551,8 @@ export default function HomePage() {
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {pricingPlans.map((plan, index) => (
               <div key={index} className={`relative p-8 rounded-2xl border transition-all hover:shadow-lg ${
-                plan.popular 
-                  ? 'bg-amber-600/5 border-amber-500/50 ring-2 ring-amber-500/20' 
+                plan.popular
+                  ? 'bg-amber-600/5 border-amber-500/50 ring-2 ring-amber-500/20'
                   : 'bg-[var(--bg)] border-[var(--border)]'
               }`}>
                 {plan.popular && (
@@ -562,7 +562,7 @@ export default function HomePage() {
                     </span>
                   </div>
                 )}
-                
+
                 <div className="text-center mb-8">
                   <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
                   <p className="text-[var(--text-dim)] mb-4">{plan.description}</p>
@@ -633,7 +633,7 @@ export default function HomePage() {
             <div className="text-xl text-[var(--text-dim)] mb-8 max-w-2xl mx-auto">
               <p>Join hundreds of construction companies that have streamlined their operations and increased profits with Remodely CRM.</p>
             </div>
-            
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
               <Link href="/auth/register" className="btn btn-amber text-lg px-8 py-4 shadow-soft shine">
                 Start Your Free Trial

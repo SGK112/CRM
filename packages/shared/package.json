@@ -6,8 +6,8 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-  "dev": "tsc --watch",
-  "type-check": "tsc --noEmit"
+    "dev": "tsc --watch",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {},
   "devDependencies": {

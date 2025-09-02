@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  UserGroupIcon, 
-  ClipboardDocumentListIcon, 
+import {
+  UserGroupIcon,
+  ClipboardDocumentListIcon,
   CurrencyDollarIcon,
   CheckCircleIcon,
   ArrowRightIcon,
-  PlayIcon
+  PlayIcon,
 } from '@heroicons/react/24/outline';
 
 interface OnboardingStep {
@@ -31,7 +31,7 @@ export default function GettingStartedModal({ onClose }: { onClose: () => void }
       icon: UserGroupIcon,
       action: 'Add Client',
       completed: false,
-      href: '/dashboard/clients?action=new'
+      href: '/dashboard/clients?action=new',
     },
     {
       id: 'estimate',
@@ -40,7 +40,7 @@ export default function GettingStartedModal({ onClose }: { onClose: () => void }
       icon: ClipboardDocumentListIcon,
       action: 'Create Estimate',
       completed: false,
-      href: '/dashboard/estimates/new'
+      href: '/dashboard/estimates/new',
     },
     {
       id: 'invoice',
@@ -49,8 +49,8 @@ export default function GettingStartedModal({ onClose }: { onClose: () => void }
       icon: CurrencyDollarIcon,
       action: 'Create Invoice',
       completed: false,
-      href: '/dashboard/invoices/new'
-    }
+      href: '/dashboard/invoices/new',
+    },
   ]);
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -61,26 +61,29 @@ export default function GettingStartedModal({ onClose }: { onClose: () => void }
     const savedProgress = localStorage.getItem('onboarding_progress');
     if (savedProgress) {
       const progress = JSON.parse(savedProgress);
-      setSteps(prev => prev.map(step => ({
-        ...step,
-        completed: progress[step.id] || false
-      })));
+      setSteps(prev =>
+        prev.map(step => ({
+          ...step,
+          completed: progress[step.id] || false,
+        }))
+      );
     }
   }, []);
 
   const markStepCompleted = (stepId: string) => {
     setSteps(prev => {
-      const updated = prev.map(step => 
-        step.id === stepId ? { ...step, completed: true } : step
-      );
-      
+      const updated = prev.map(step => (step.id === stepId ? { ...step, completed: true } : step));
+
       // Save to localStorage
-      const progress = updated.reduce((acc, step) => {
-        acc[step.id] = step.completed;
-        return acc;
-      }, {} as Record<string, boolean>);
+      const progress = updated.reduce(
+        (acc, step) => {
+          acc[step.id] = step.completed;
+          return acc;
+        },
+        {} as Record<string, boolean>
+      );
       localStorage.setItem('onboarding_progress', JSON.stringify(progress));
-      
+
       return updated;
     });
   };
@@ -108,12 +111,11 @@ export default function GettingStartedModal({ onClose }: { onClose: () => void }
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-semibold text-slate-100">Welcome to Remodely CRM</h2>
-              <p className="text-slate-400 mt-1">Let's get you started with managing your remodeling business</p>
+              <p className="text-slate-400 mt-1">
+                Let's get you started with managing your remodeling business
+              </p>
             </div>
-            <button
-              onClick={onClose}
-              className="text-slate-400 hover:text-slate-300 text-2xl"
-            >
+            <button onClick={onClose} className="text-slate-400 hover:text-slate-300 text-2xl">
               ×
             </button>
           </div>
@@ -132,9 +134,11 @@ export default function GettingStartedModal({ onClose }: { onClose: () => void }
                   </span>
                 </div>
                 <div className="w-full bg-slate-800 rounded-full h-2">
-                  <div 
+                  <div
                     className="bg-amber-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${(steps.filter(s => s.completed).length / steps.length) * 100}%` }}
+                    style={{
+                      width: `${(steps.filter(s => s.completed).length / steps.length) * 100}%`,
+                    }}
                   />
                 </div>
               </div>
@@ -151,11 +155,11 @@ export default function GettingStartedModal({ onClose }: { onClose: () => void }
                     }`}
                   >
                     <div className="flex items-center gap-4">
-                      <div className={`p-3 rounded-lg ${
-                        step.completed
-                          ? 'bg-green-600 text-white'
-                          : 'bg-slate-700 text-slate-300'
-                      }`}>
+                      <div
+                        className={`p-3 rounded-lg ${
+                          step.completed ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-300'
+                        }`}
+                      >
                         {step.completed ? (
                           <CheckCircleIcon className="w-6 h-6" />
                         ) : (
@@ -209,7 +213,8 @@ export default function GettingStartedModal({ onClose }: { onClose: () => void }
               </div>
               <h3 className="text-xl font-semibold text-slate-100 mb-2">You're All Set!</h3>
               <p className="text-slate-400 mb-6">
-                Great job! You've completed the basic setup. You're ready to start managing your remodeling business.
+                Great job! You've completed the basic setup. You're ready to start managing your
+                remodeling business.
               </p>
               <button
                 onClick={onClose}

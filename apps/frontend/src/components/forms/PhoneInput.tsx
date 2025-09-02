@@ -17,8 +17,8 @@ interface PhoneInputProps {
 export const PhoneInput: React.FC<PhoneInputProps> = ({
   value,
   onChange,
-  placeholder = "Phone number",
-  className = "input",
+  placeholder = 'Phone number',
+  className = 'input',
   required = false,
   disabled = false,
 }) => {
@@ -28,10 +28,10 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
   const formatPhoneNumber = (phone: string): string => {
     // Remove all non-digits
     const digits = phone.replace(/\D/g, '');
-    
+
     // Handle different lengths
     if (digits.length === 0) return '';
-    
+
     // If it starts with 1, assume it's already country code
     if (digits.startsWith('1')) {
       const number = digits.slice(1); // Remove the 1
@@ -51,7 +51,7 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
   const getCleanPhoneNumber = (formatted: string): string => {
     const digits = formatted.replace(/\D/g, '');
     if (digits.length === 0) return '';
-    
+
     // Ensure it starts with 1 for US/Canadian numbers
     if (digits.startsWith('1')) {
       return digits;
@@ -73,25 +73,27 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
     const input = e.target.value;
     const formatted = formatPhoneNumber(input);
     const clean = getCleanPhoneNumber(formatted);
-    
+
     setDisplayValue(formatted);
     onChange(clean);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     // Allow: backspace, delete, tab, escape, enter
-    if ([8, 9, 27, 13, 46].indexOf(e.keyCode) !== -1 ||
-        // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
-        (e.keyCode === 65 && e.ctrlKey === true) ||
-        (e.keyCode === 67 && e.ctrlKey === true) ||
-        (e.keyCode === 86 && e.ctrlKey === true) ||
-        (e.keyCode === 88 && e.ctrlKey === true) ||
-        // Allow: home, end, left, right
-        (e.keyCode >= 35 && e.keyCode <= 39)) {
+    if (
+      [8, 9, 27, 13, 46].indexOf(e.keyCode) !== -1 ||
+      // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+      (e.keyCode === 65 && e.ctrlKey === true) ||
+      (e.keyCode === 67 && e.ctrlKey === true) ||
+      (e.keyCode === 86 && e.ctrlKey === true) ||
+      (e.keyCode === 88 && e.ctrlKey === true) ||
+      // Allow: home, end, left, right
+      (e.keyCode >= 35 && e.keyCode <= 39)
+    ) {
       return;
     }
     // Ensure that it is a number and stop the keypress
-    if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+    if ((e.shiftKey || e.keyCode < 48 || e.keyCode > 57) && (e.keyCode < 96 || e.keyCode > 105)) {
       e.preventDefault();
     }
   };

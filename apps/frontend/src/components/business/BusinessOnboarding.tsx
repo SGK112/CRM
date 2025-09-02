@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
+import {
   BuildingOfficeIcon,
   UserGroupIcon,
   CogIcon,
   CheckCircleIcon,
   ChevronRightIcon,
   ClockIcon,
-  InformationCircleIcon
+  InformationCircleIcon,
 } from '@heroicons/react/24/outline';
 import TeamManagement from './TeamManagement';
 
@@ -16,7 +16,15 @@ interface BusinessProfile {
   id?: string;
   name: string;
   description: string;
-  industry: 'remodeling' | 'construction' | 'landscaping' | 'electrical' | 'plumbing' | 'roofing' | 'painting' | 'other';
+  industry:
+    | 'remodeling'
+    | 'construction'
+    | 'landscaping'
+    | 'electrical'
+    | 'plumbing'
+    | 'roofing'
+    | 'painting'
+    | 'other';
   address: {
     street: string;
     city: string;
@@ -57,24 +65,24 @@ const INDUSTRIES = [
   { value: 'plumbing', label: 'Plumbing Services' },
   { value: 'roofing', label: 'Roofing Services' },
   { value: 'painting', label: 'Painting Services' },
-  { value: 'other', label: 'Other' }
+  { value: 'other', label: 'Other' },
 ];
 
 const BUSINESS_TYPES = [
   { value: 'sole_proprietor', label: 'Sole Proprietor' },
   { value: 'llc', label: 'Limited Liability Company (LLC)' },
   { value: 'corporation', label: 'Corporation' },
-  { value: 'partnership', label: 'Partnership' }
+  { value: 'partnership', label: 'Partnership' },
 ];
 
 export default function BusinessOnboarding({
   onComplete,
   existingBusiness,
-  className = ''
+  className = '',
 }: BusinessOnboardingProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
-  
+
   const [businessProfile, setBusinessProfile] = useState<BusinessProfile>({
     name: '',
     description: '',
@@ -83,16 +91,16 @@ export default function BusinessOnboarding({
       street: '',
       city: '',
       state: '',
-      zipCode: ''
+      zipCode: '',
     },
     contact: {
       phone: '',
       email: '',
-      website: ''
+      website: '',
     },
     businessType: 'llc',
     licenseNumber: '',
-    insuranceProvider: ''
+    insuranceProvider: '',
   });
 
   useEffect(() => {
@@ -118,20 +126,25 @@ export default function BusinessOnboarding({
               <input
                 type="text"
                 value={businessProfile.name}
-                onChange={(e) => setBusinessProfile(prev => ({ ...prev, name: e.target.value }))}
+                onChange={e => setBusinessProfile(prev => ({ ...prev, name: e.target.value }))}
                 className="w-full p-3 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)]"
                 placeholder="Your Business Name"
                 required
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-[var(--text)] mb-1">
                 Industry *
               </label>
               <select
                 value={businessProfile.industry}
-                onChange={(e) => setBusinessProfile(prev => ({ ...prev, industry: e.target.value as BusinessProfile['industry'] }))}
+                onChange={e =>
+                  setBusinessProfile(prev => ({
+                    ...prev,
+                    industry: e.target.value as BusinessProfile['industry'],
+                  }))
+                }
                 className="w-full p-3 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)]"
                 required
               >
@@ -143,27 +156,32 @@ export default function BusinessOnboarding({
               </select>
             </div>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-[var(--text)] mb-1">
               Business Description
             </label>
             <textarea
               value={businessProfile.description}
-              onChange={(e) => setBusinessProfile(prev => ({ ...prev, description: e.target.value }))}
+              onChange={e => setBusinessProfile(prev => ({ ...prev, description: e.target.value }))}
               className="w-full p-3 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)]"
               rows={3}
               placeholder="Brief description of your business services..."
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-[var(--text)] mb-1">
               Business Type
             </label>
             <select
               value={businessProfile.businessType}
-              onChange={(e) => setBusinessProfile(prev => ({ ...prev, businessType: e.target.value as BusinessProfile['businessType'] }))}
+              onChange={e =>
+                setBusinessProfile(prev => ({
+                  ...prev,
+                  businessType: e.target.value as BusinessProfile['businessType'],
+                }))
+              }
               className="w-full p-3 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)]"
             >
               {BUSINESS_TYPES.map(type => (
@@ -174,13 +192,17 @@ export default function BusinessOnboarding({
             </select>
           </div>
         </div>
-      )
+      ),
     },
     {
       id: 'contact-address',
       title: 'Contact & Address',
       description: 'Add your business contact information and address',
-      completed: !!(businessProfile.contact.phone && businessProfile.contact.email && businessProfile.address.street),
+      completed: !!(
+        businessProfile.contact.phone &&
+        businessProfile.contact.email &&
+        businessProfile.address.street
+      ),
       required: true,
       component: (
         <div className="space-y-6">
@@ -192,16 +214,18 @@ export default function BusinessOnboarding({
               <input
                 type="tel"
                 value={businessProfile.contact.phone}
-                onChange={(e) => setBusinessProfile(prev => ({ 
-                  ...prev, 
-                  contact: { ...prev.contact, phone: e.target.value }
-                }))}
+                onChange={e =>
+                  setBusinessProfile(prev => ({
+                    ...prev,
+                    contact: { ...prev.contact, phone: e.target.value },
+                  }))
+                }
                 className="w-full p-3 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)]"
                 placeholder="(555) 123-4567"
                 required
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-[var(--text)] mb-1">
                 Business Email *
@@ -209,17 +233,19 @@ export default function BusinessOnboarding({
               <input
                 type="email"
                 value={businessProfile.contact.email}
-                onChange={(e) => setBusinessProfile(prev => ({ 
-                  ...prev, 
-                  contact: { ...prev.contact, email: e.target.value }
-                }))}
+                onChange={e =>
+                  setBusinessProfile(prev => ({
+                    ...prev,
+                    contact: { ...prev.contact, email: e.target.value },
+                  }))
+                }
                 className="w-full p-3 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)]"
                 placeholder="info@yourbusiness.com"
                 required
               />
             </div>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-[var(--text)] mb-1">
               Website (Optional)
@@ -227,18 +253,20 @@ export default function BusinessOnboarding({
             <input
               type="url"
               value={businessProfile.contact.website}
-              onChange={(e) => setBusinessProfile(prev => ({ 
-                ...prev, 
-                contact: { ...prev.contact, website: e.target.value }
-              }))}
+              onChange={e =>
+                setBusinessProfile(prev => ({
+                  ...prev,
+                  contact: { ...prev.contact, website: e.target.value },
+                }))
+              }
               className="w-full p-3 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)]"
               placeholder="https://yourbusiness.com"
             />
           </div>
-          
+
           <div className="space-y-4">
             <h4 className="font-medium text-[var(--text)]">Business Address</h4>
-            
+
             <div>
               <label className="block text-sm font-medium text-[var(--text)] mb-1">
                 Street Address *
@@ -246,51 +274,53 @@ export default function BusinessOnboarding({
               <input
                 type="text"
                 value={businessProfile.address.street}
-                onChange={(e) => setBusinessProfile(prev => ({ 
-                  ...prev, 
-                  address: { ...prev.address, street: e.target.value }
-                }))}
+                onChange={e =>
+                  setBusinessProfile(prev => ({
+                    ...prev,
+                    address: { ...prev.address, street: e.target.value },
+                  }))
+                }
                 className="w-full p-3 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)]"
                 placeholder="123 Business Street"
                 required
               />
             </div>
-            
+
             <div className="grid md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-[var(--text)] mb-1">
-                  City *
-                </label>
+                <label className="block text-sm font-medium text-[var(--text)] mb-1">City *</label>
                 <input
                   type="text"
                   value={businessProfile.address.city}
-                  onChange={(e) => setBusinessProfile(prev => ({ 
-                    ...prev, 
-                    address: { ...prev.address, city: e.target.value }
-                  }))}
+                  onChange={e =>
+                    setBusinessProfile(prev => ({
+                      ...prev,
+                      address: { ...prev.address, city: e.target.value },
+                    }))
+                  }
                   className="w-full p-3 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)]"
                   placeholder="City"
                   required
                 />
               </div>
-              
+
               <div>
-                <label className="block text-sm font-medium text-[var(--text)] mb-1">
-                  State *
-                </label>
+                <label className="block text-sm font-medium text-[var(--text)] mb-1">State *</label>
                 <input
                   type="text"
                   value={businessProfile.address.state}
-                  onChange={(e) => setBusinessProfile(prev => ({ 
-                    ...prev, 
-                    address: { ...prev.address, state: e.target.value }
-                  }))}
+                  onChange={e =>
+                    setBusinessProfile(prev => ({
+                      ...prev,
+                      address: { ...prev.address, state: e.target.value },
+                    }))
+                  }
                   className="w-full p-3 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)]"
                   placeholder="State"
                   required
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-[var(--text)] mb-1">
                   ZIP Code *
@@ -298,10 +328,12 @@ export default function BusinessOnboarding({
                 <input
                   type="text"
                   value={businessProfile.address.zipCode}
-                  onChange={(e) => setBusinessProfile(prev => ({ 
-                    ...prev, 
-                    address: { ...prev.address, zipCode: e.target.value }
-                  }))}
+                  onChange={e =>
+                    setBusinessProfile(prev => ({
+                      ...prev,
+                      address: { ...prev.address, zipCode: e.target.value },
+                    }))
+                  }
                   className="w-full p-3 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)]"
                   placeholder="12345"
                   required
@@ -310,7 +342,7 @@ export default function BusinessOnboarding({
             </div>
           </div>
         </div>
-      )
+      ),
     },
     {
       id: 'licenses-insurance',
@@ -328,12 +360,13 @@ export default function BusinessOnboarding({
                   Professional Credentials
                 </h4>
                 <p className="text-sm text-blue-700 dark:text-blue-400 mt-1">
-                  Adding your license and insurance information builds trust with clients and can be displayed on estimates and invoices.
+                  Adding your license and insurance information builds trust with clients and can be
+                  displayed on estimates and invoices.
                 </p>
               </div>
             </div>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-[var(--text)] mb-1">
               License Number
@@ -341,12 +374,14 @@ export default function BusinessOnboarding({
             <input
               type="text"
               value={businessProfile.licenseNumber}
-              onChange={(e) => setBusinessProfile(prev => ({ ...prev, licenseNumber: e.target.value }))}
+              onChange={e =>
+                setBusinessProfile(prev => ({ ...prev, licenseNumber: e.target.value }))
+              }
               className="w-full p-3 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)]"
               placeholder="Enter your business license number"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-[var(--text)] mb-1">
               Insurance Provider
@@ -354,13 +389,15 @@ export default function BusinessOnboarding({
             <input
               type="text"
               value={businessProfile.insuranceProvider}
-              onChange={(e) => setBusinessProfile(prev => ({ ...prev, insuranceProvider: e.target.value }))}
+              onChange={e =>
+                setBusinessProfile(prev => ({ ...prev, insuranceProvider: e.target.value }))
+              }
               className="w-full p-3 bg-[var(--input-bg)] border border-[var(--border)] rounded text-[var(--text)]"
               placeholder="Enter your insurance provider name"
             />
           </div>
         </div>
-      )
+      ),
     },
     {
       id: 'team-setup',
@@ -368,8 +405,8 @@ export default function BusinessOnboarding({
       description: 'Invite your team members and set up roles',
       completed: false, // Will be updated based on team members
       required: false,
-      component: <TeamManagement businessId="current-business" />
-    }
+      component: <TeamManagement businessId="current-business" />,
+    },
   ];
 
   const handleNext = () => {
@@ -405,9 +442,7 @@ export default function BusinessOnboarding({
     <div className={`max-w-4xl mx-auto ${className}`}>
       {/* Header */}
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-[var(--text)] mb-2">
-          Welcome to Remodely CRM
-        </h1>
+        <h1 className="text-3xl font-bold text-[var(--text)] mb-2">Welcome to Remodely CRM</h1>
         <p className="text-lg text-[var(--text-dim)]">
           Let's set up your business profile to get started
         </p>
@@ -422,7 +457,7 @@ export default function BusinessOnboarding({
           </span>
         </div>
         <div className="w-full bg-[var(--surface)] rounded-full h-2">
-          <div 
+          <div
             className="bg-[var(--accent)] h-2 rounded-full transition-all duration-300"
             style={{ width: `${progressPercent}%` }}
           />
@@ -440,22 +475,20 @@ export default function BusinessOnboarding({
                 index === currentStep
                   ? 'bg-[var(--accent)]/20 text-[var(--accent)]'
                   : index < currentStep
-                  ? 'text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20'
-                  : 'text-[var(--text-dim)] hover:bg-[var(--surface-hover)]'
+                    ? 'text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20'
+                    : 'text-[var(--text-dim)] hover:bg-[var(--surface-hover)]'
               }`}
             >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                step.completed
-                  ? 'bg-green-600 text-white'
-                  : index === currentStep
-                  ? 'bg-[var(--accent)] text-white'
-                  : 'bg-[var(--surface)] text-[var(--text-dim)]'
-              }`}>
-                {step.completed ? (
-                  <CheckCircleIcon className="w-5 h-5" />
-                ) : (
-                  index + 1
-                )}
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                  step.completed
+                    ? 'bg-green-600 text-white'
+                    : index === currentStep
+                      ? 'bg-[var(--accent)] text-white'
+                      : 'bg-[var(--surface)] text-[var(--text-dim)]'
+                }`}
+              >
+                {step.completed ? <CheckCircleIcon className="w-5 h-5" /> : index + 1}
               </div>
               <div className="hidden md:block text-left">
                 <div className="font-medium">{step.title}</div>
@@ -470,18 +503,14 @@ export default function BusinessOnboarding({
       <div className="surface-solid p-8 mb-8">
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-2">
-            <h2 className="text-xl font-semibold text-[var(--text)]">
-              {currentStepData.title}
-            </h2>
+            <h2 className="text-xl font-semibold text-[var(--text)]">{currentStepData.title}</h2>
             {currentStepData.required && (
               <span className="px-2 py-1 bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300 text-xs font-medium rounded">
                 Required
               </span>
             )}
           </div>
-          <p className="text-[var(--text-dim)]">
-            {currentStepData.description}
-          </p>
+          <p className="text-[var(--text-dim)]">{currentStepData.description}</p>
         </div>
 
         {currentStepData.component}
@@ -507,10 +536,7 @@ export default function BusinessOnboarding({
               {loading ? 'Completing...' : 'Complete Setup'}
             </button>
           ) : (
-            <button
-              onClick={handleNext}
-              className="pill pill-tint-amber flex items-center gap-2"
-            >
+            <button onClick={handleNext} className="pill pill-tint-amber flex items-center gap-2">
               Next Step
               <ChevronRightIcon className="w-4 h-4" />
             </button>

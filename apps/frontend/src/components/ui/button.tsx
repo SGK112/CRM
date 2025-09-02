@@ -4,20 +4,20 @@ import clsx from 'clsx';
 export type ButtonIntent = 'primary' | 'secondary' | 'neutral' | 'danger' | 'warning' | 'success';
 export type ButtonSize = 'xs' | 'sm' | 'md' | 'lg';
 
-const intentToClass: Record<ButtonIntent,string> = {
+const intentToClass: Record<ButtonIntent, string> = {
   primary: 'pill-tint-blue',
   secondary: 'pill-tint-indigo',
   neutral: 'pill-tint-neutral',
   danger: 'pill-tint-red',
   warning: 'pill-tint-yellow',
-  success: 'pill-tint-green'
+  success: 'pill-tint-green',
 };
 
-const sizeToClass: Record<ButtonSize,string> = {
+const sizeToClass: Record<ButtonSize, string> = {
   xs: 'pill xs',
   sm: 'pill sm',
   md: 'pill',
-  lg: 'pill lg'
+  lg: 'pill lg',
 };
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -54,7 +54,10 @@ export const Button: React.FC<ButtonProps> = ({
       )}
     >
       {loading && (
-        <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-r-transparent" aria-hidden />
+        <span
+          className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-r-transparent"
+          aria-hidden
+        />
       )}
       {iconLeft && <span className="shrink-0">{iconLeft}</span>}
       <span>{children}</span>

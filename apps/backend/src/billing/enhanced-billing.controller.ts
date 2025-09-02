@@ -1,18 +1,18 @@
-import { 
-  Controller, 
-  Post, 
-  Get, 
-  Put, 
+import {
+  Controller,
+  Post,
+  Get,
+  Put,
   Delete,
-  Body, 
-  Query, 
+  Body,
+  Query,
   Param,
-  Req, 
-  BadRequestException, 
+  Req,
+  BadRequestException,
   UseGuards,
   HttpStatus,
   HttpCode,
-  Logger
+  Logger,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { EnhancedBillingService, PaymentIntentData } from './enhanced-billing.service';
@@ -39,19 +39,23 @@ export class EnhancedBillingController {
   getPlans() {
     return {
       success: true,
-      plans: this.enhancedBillingService.getSubscriptionPlans()
+      plans: this.enhancedBillingService.getSubscriptionPlans(),
     };
   }
 
   // Create subscription checkout session
   @Post('subscribe')
   @UseGuards(JwtAuthGuard)
-  async createSubscription(@Req() req, @Body() body: {
-    planId: string;
-    trialDays?: number;
-    successUrl?: string;
-    cancelUrl?: string;
-  }) {
+  async createSubscription(
+    @Req() req,
+    @Body()
+    body: {
+      planId: string;
+      trialDays?: number;
+      successUrl?: string;
+      cancelUrl?: string;
+    }
+  ) {
     try {
       const user = req.user;
       const result = await this.enhancedBillingService.createSubscriptionCheckout({
@@ -63,15 +67,15 @@ export class EnhancedBillingController {
         cancelUrl: body.cancelUrl,
         metadata: {
           userId: user.id,
-          workspaceId: user.workspaceId
-        }
+          workspaceId: user.workspaceId,
+        },
       });
 
       return {
         success: true,
         sessionId: result.sessionId,
         url: result.url,
-        customerId: result.customerId
+        customerId: result.customerId,
       };
     } catch (error) {
       this.logger.error('Error creating subscription:', error);
@@ -82,12 +86,16 @@ export class EnhancedBillingController {
   // Create one-time payment intent
   @Post('payment-intent')
   @UseGuards(JwtAuthGuard)
-  async createPaymentIntent(@Req() req, @Body() body: {
-    amount: number;
-    currency?: string;
-    description: string;
-    savePaymentMethod?: boolean;
-  }) {
+  async createPaymentIntent(
+    @Req() req,
+    @Body()
+    body: {
+      amount: number;
+      currency?: string;
+      description: string;
+      savePaymentMethod?: boolean;
+    }
+  ) {
     try {
       const user = req.user;
       const paymentData: PaymentIntentData = {
@@ -98,8 +106,8 @@ export class EnhancedBillingController {
         setupFutureUsage: body.savePaymentMethod ? 'off_session' : undefined,
         metadata: {
           userId: user.id,
-          workspaceId: user.workspaceId
-        }
+          workspaceId: user.workspaceId,
+        },
       };
 
       const result = await this.enhancedBillingService.createPaymentIntent(paymentData);
@@ -107,7 +115,7 @@ export class EnhancedBillingController {
       return {
         success: true,
         clientSecret: result.clientSecret,
-        paymentIntentId: result.paymentIntentId
+        paymentIntentId: result.paymentIntentId,
       };
     } catch (error) {
       this.logger.error('Error creating payment intent:', error);
@@ -126,7 +134,7 @@ export class EnhancedBillingController {
       return {
         success: true,
         clientSecret: result.clientSecret,
-        setupIntentId: result.setupIntentId
+        setupIntentId: result.setupIntentId,
       };
     } catch (error) {
       this.logger.error('Error creating setup intent:', error);
@@ -140,21 +148,25 @@ export class EnhancedBillingController {
   async getPaymentMethods(@Req() req) {
     try {
       const user = req.user;
-      const paymentMethods = await this.enhancedBillingService.getCustomerPaymentMethods(user.email);
+      const paymentMethods = await this.enhancedBillingService.getCustomerPaymentMethods(
+        user.email
+      );
 
       return {
         success: true,
         paymentMethods: paymentMethods.map(pm => ({
           id: pm.id,
           type: pm.type,
-          card: pm.card ? {
-            brand: pm.card.brand,
-            last4: pm.card.last4,
-            exp_month: pm.card.exp_month,
-            exp_year: pm.card.exp_year
-          } : null,
-          created: pm.created
-        }))
+          card: pm.card
+            ? {
+                brand: pm.card.brand,
+                last4: pm.card.last4,
+                exp_month: pm.card.exp_month,
+                exp_year: pm.card.exp_year,
+              }
+            : null,
+          created: pm.created,
+        })),
       };
     } catch (error) {
       this.logger.error('Error fetching payment methods:', error);
@@ -168,19 +180,25 @@ export class EnhancedBillingController {
   async getSubscription(@Req() req) {
     try {
       const user = req.user;
-      
+
       // Get subscription details from Stripe if subscription ID exists
       let stripeSubscription = null;
       if (user.stripeSubscriptionId) {
         try {
-          stripeSubscription = await this.enhancedBillingService.getSubscriptionDetails(user.stripeSubscriptionId);
+          stripeSubscription = await this.enhancedBillingService.getSubscriptionDetails(
+            user.stripeSubscriptionId
+          );
         } catch (error) {
-          this.logger.warn(`Failed to fetch Stripe subscription ${user.stripeSubscriptionId}:`, error.message);
+          this.logger.warn(
+            `Failed to fetch Stripe subscription ${user.stripeSubscriptionId}:`,
+            error.message
+          );
         }
       }
 
       const plans = this.enhancedBillingService.getSubscriptionPlans();
-      const currentPlan = plans.find(p => p.id === user.subscriptionPlan) || plans.find(p => p.id === 'starter');
+      const currentPlan =
+        plans.find(p => p.id === user.subscriptionPlan) || plans.find(p => p.id === 'starter');
 
       return {
         success: true,
@@ -188,11 +206,12 @@ export class EnhancedBillingController {
           plan: currentPlan,
           status: user.subscriptionStatus || 'active',
           trialEndsAt: user.trialEndsAt,
-          currentPeriodEnd: stripeSubscription?.current_period_end ? 
-            new Date(stripeSubscription.current_period_end * 1000) : null,
+          currentPeriodEnd: stripeSubscription?.current_period_end
+            ? new Date(stripeSubscription.current_period_end * 1000)
+            : null,
           cancelAtPeriodEnd: stripeSubscription?.cancel_at_period_end || false,
-          stripeSubscriptionId: user.stripeSubscriptionId
-        }
+          stripeSubscriptionId: user.stripeSubscriptionId,
+        },
       };
     } catch (error) {
       this.logger.error('Error fetching subscription:', error);
@@ -206,7 +225,7 @@ export class EnhancedBillingController {
   async cancelSubscription(@Req() req, @Body() body: { immediately?: boolean }) {
     try {
       const user = req.user;
-      
+
       if (!user.stripeSubscriptionId) {
         throw new BadRequestException('No active subscription found');
       }
@@ -222,8 +241,8 @@ export class EnhancedBillingController {
           id: subscription.id,
           status: subscription.status,
           cancelAtPeriodEnd: subscription.cancel_at_period_end,
-          currentPeriodEnd: new Date(subscription.current_period_end * 1000)
-        }
+          currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+        },
       };
     } catch (error) {
       this.logger.error('Error canceling subscription:', error);
@@ -237,12 +256,14 @@ export class EnhancedBillingController {
   async reactivateSubscription(@Req() req) {
     try {
       const user = req.user;
-      
+
       if (!user.stripeSubscriptionId) {
         throw new BadRequestException('No subscription found');
       }
 
-      const subscription = await this.enhancedBillingService.reactivateSubscription(user.stripeSubscriptionId);
+      const subscription = await this.enhancedBillingService.reactivateSubscription(
+        user.stripeSubscriptionId
+      );
 
       return {
         success: true,
@@ -250,8 +271,8 @@ export class EnhancedBillingController {
           id: subscription.id,
           status: subscription.status,
           cancelAtPeriodEnd: subscription.cancel_at_period_end,
-          currentPeriodEnd: new Date(subscription.current_period_end * 1000)
-        }
+          currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+        },
       };
     } catch (error) {
       this.logger.error('Error reactivating subscription:', error);
@@ -266,8 +287,11 @@ export class EnhancedBillingController {
     try {
       const user = req.user;
       const invoiceLimit = limit ? parseInt(limit, 10) : 10;
-      
-      const invoices = await this.enhancedBillingService.getCustomerInvoices(user.email, invoiceLimit);
+
+      const invoices = await this.enhancedBillingService.getCustomerInvoices(
+        user.email,
+        invoiceLimit
+      );
 
       return {
         success: true,
@@ -280,8 +304,8 @@ export class EnhancedBillingController {
           pdfUrl: invoice.invoice_pdf,
           hostedUrl: invoice.hosted_invoice_url,
           number: invoice.number,
-          description: invoice.description
-        }))
+          description: invoice.description,
+        })),
       };
     } catch (error) {
       this.logger.error('Error fetching invoices:', error);
@@ -299,21 +323,19 @@ export class EnhancedBillingController {
 
     const endpointSecret = this.config.get<string>('STRIPE_WEBHOOK_SECRET');
     if (!endpointSecret) {
-      this.logger.warn('STRIPE_WEBHOOK_SECRET not configured - webhook signature verification disabled');
+      this.logger.warn(
+        'STRIPE_WEBHOOK_SECRET not configured - webhook signature verification disabled'
+      );
     }
 
     let event: Stripe.Event;
 
     try {
       const signature = req.headers['stripe-signature'];
-      
+
       if (endpointSecret && signature) {
         // Verify webhook signature
-        event = this.stripe.webhooks.constructEvent(
-          req.body,
-          signature,
-          endpointSecret
-        );
+        event = this.stripe.webhooks.constructEvent(req.body, signature, endpointSecret);
       } else {
         // Parse event without verification (not recommended for production)
         event = req.body;
@@ -338,7 +360,7 @@ export class EnhancedBillingController {
 
     try {
       const session = await this.stripe.checkout.sessions.retrieve(sessionId);
-      
+
       return {
         success: true,
         session: {
@@ -348,8 +370,8 @@ export class EnhancedBillingController {
           customerEmail: session.customer_details?.email || session.customer_email,
           amountTotal: session.amount_total,
           currency: session.currency,
-          subscription: session.subscription
-        }
+          subscription: session.subscription,
+        },
       };
     } catch (error) {
       this.logger.error('Error fetching checkout session:', error);
@@ -367,11 +389,11 @@ export class EnhancedBillingController {
 
     try {
       const user = req.user;
-      
+
       // Find Stripe customer
       const customers = await this.stripe.customers.list({
         email: user.email,
-        limit: 1
+        limit: 1,
       });
 
       if (customers.data.length === 0) {
@@ -386,7 +408,7 @@ export class EnhancedBillingController {
 
       return {
         success: true,
-        url: session.url
+        url: session.url,
       };
     } catch (error) {
       this.logger.error('Error creating portal session:', error);

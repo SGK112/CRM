@@ -1,4 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, UploadedFile, UseInterceptors, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Request,
+  UploadedFile,
+  UseInterceptors,
+  Query,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ClientsService } from './clients.service';
@@ -28,7 +41,7 @@ export class ClientsController {
     @Query('status') status?: string,
     @Query('source') source?: string,
     @Query('limit') limit?: string,
-    @Query('offset') offset?: string,
+    @Query('offset') offset?: string
   ) {
     const searchParams = {
       search: search?.trim(),
@@ -37,15 +50,18 @@ export class ClientsController {
       limit: limit ? parseInt(limit, 10) : undefined,
       offset: offset ? parseInt(offset, 10) : undefined,
     };
-    
+
     // Remove undefined values
     Object.keys(searchParams).forEach(key => {
       if (searchParams[key] === undefined || searchParams[key] === '') {
         delete searchParams[key];
       }
     });
-    
-    return this.clientsService.findAll(req.user.workspaceId, Object.keys(searchParams).length > 0 ? searchParams : undefined);
+
+    return this.clientsService.findAll(
+      req.user.workspaceId,
+      Object.keys(searchParams).length > 0 ? searchParams : undefined
+    );
   }
 
   @Get('count')
@@ -55,22 +71,25 @@ export class ClientsController {
     @Request() req,
     @Query('search') search?: string,
     @Query('status') status?: string,
-    @Query('source') source?: string,
+    @Query('source') source?: string
   ) {
     const searchParams = {
       search: search?.trim(),
       status: status?.trim(),
       source: source?.trim(),
     };
-    
+
     // Remove undefined values
     Object.keys(searchParams).forEach(key => {
       if (searchParams[key] === undefined || searchParams[key] === '') {
         delete searchParams[key];
       }
     });
-    
-    return this.clientsService.count(req.user.workspaceId, Object.keys(searchParams).length > 0 ? searchParams : undefined);
+
+    return this.clientsService.count(
+      req.user.workspaceId,
+      Object.keys(searchParams).length > 0 ? searchParams : undefined
+    );
   }
 
   @Get(':id')
@@ -105,29 +124,22 @@ export class ClientsController {
     @Query('allowEmailOnly') allowEmailOnly?: string,
     @Query('allowPhoneOnly') allowPhoneOnly?: string,
     @Query('synthEmailFromPhone') synthEmailFromPhone?: string,
-    @Query('dedupeByPhone') dedupeByPhone?: string,
+    @Query('dedupeByPhone') dedupeByPhone?: string
   ) {
-    const parseBool = (v: string | undefined, def = false) => v === undefined ? def : /^(1|true|yes|on)$/i.test(v);
-    return this.clientsService.importCsv(
-      file,
-      req.user.workspaceId,
-      parseBool(dryRun),
-      {
-        allowEmailOnly: parseBool(allowEmailOnly),
-        allowPhoneOnly: parseBool(allowPhoneOnly, true), // default: phone-only w/ synthesized email allowed
-        synthEmailFromPhone: parseBool(synthEmailFromPhone, true),
-        dedupeByPhone: parseBool(dedupeByPhone, true),
-      }
-    );
+    const parseBool = (v: string | undefined, def = false) =>
+      v === undefined ? def : /^(1|true|yes|on)$/i.test(v);
+    return this.clientsService.importCsv(file, req.user.workspaceId, parseBool(dryRun), {
+      allowEmailOnly: parseBool(allowEmailOnly),
+      allowPhoneOnly: parseBool(allowPhoneOnly, true), // default: phone-only w/ synthesized email allowed
+      synthEmailFromPhone: parseBool(synthEmailFromPhone, true),
+      dedupeByPhone: parseBool(dedupeByPhone, true),
+    });
   }
 
   @Post('bulk')
   @ApiOperation({ summary: 'Bulk create/update clients via JSON payload' })
   @ApiResponse({ status: 201, description: 'Bulk operation processed' })
-  async bulkJson(
-    @Body('clients') clients: any[],
-    @Request() req,
-  ) {
+  async bulkJson(@Body('clients') clients: any[], @Request() req) {
     return this.clientsService.bulkJson(clients || [], req.user.workspaceId);
   }
 }

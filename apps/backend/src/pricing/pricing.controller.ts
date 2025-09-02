@@ -1,4 +1,15 @@
-import { Body, Controller, Get, Post, Query, Req, UseGuards, UploadedFile, UseInterceptors, BadRequestException } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+  UploadedFile,
+  UseInterceptors,
+  BadRequestException,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PricingService } from './pricing.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -7,7 +18,16 @@ import { CapabilityGuard } from '../billing/guards/capability.guard';
 import { RequiresFeature } from '../billing/decorators/requires-feature.decorator';
 
 class BulkUpsertDto {
-  items: { sku: string; name: string; description?: string; vendorId?: string; baseCost?: number; unit?: string; defaultMarginPct?: number; tags?: string[] }[];
+  items: {
+    sku: string;
+    name: string;
+    description?: string;
+    vendorId?: string;
+    baseCost?: number;
+    unit?: string;
+    defaultMarginPct?: number;
+    tags?: string[];
+  }[];
 }
 
 class ImportPriceListDto {
@@ -32,7 +52,12 @@ export class PricingController {
   @Get('items')
   @UseGuards(ActiveSubscriptionGuard, CapabilityGuard)
   @RequiresFeature('pricing.read')
-  findAll(@Req() req, @Query('vendorId') vendorId?: string, @Query('search') search?: string, @Query('tags') tags?: string) {
+  findAll(
+    @Req() req,
+    @Query('vendorId') vendorId?: string,
+    @Query('search') search?: string,
+    @Query('tags') tags?: string
+  ) {
     const workspaceId = req.user.workspaceId || req.user.sub;
     return this.pricingService.findAll(workspaceId, { vendorId, search, tags: tags?.split(',') });
   }

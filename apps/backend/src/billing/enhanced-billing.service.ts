@@ -46,8 +46,8 @@ export class EnhancedBillingService {
         'Basic estimates & invoices',
         'Email support',
         'Mobile app access',
-        '5GB storage'
-      ]
+        '5GB storage',
+      ],
     },
     {
       id: 'professional',
@@ -64,9 +64,9 @@ export class EnhancedBillingService {
         'Priority support',
         'Custom branding',
         '50GB storage',
-        'Team collaboration'
+        'Team collaboration',
       ],
-      recommended: true
+      recommended: true,
     },
     {
       id: 'enterprise',
@@ -84,9 +84,9 @@ export class EnhancedBillingService {
         'Dedicated support',
         'Unlimited storage',
         'Custom workflows',
-        'API access'
-      ]
-    }
+        'API access',
+      ],
+    },
   ];
 
   constructor(
@@ -95,9 +95,9 @@ export class EnhancedBillingService {
   ) {
     const secretKey = this.config.get<string>('STRIPE_SECRET_KEY');
     if (secretKey) {
-      this.stripe = new Stripe(secretKey, { 
+      this.stripe = new Stripe(secretKey, {
         apiVersion: '2023-08-16',
-        typescript: true
+        typescript: true,
       });
       this.logger.log('Stripe initialized successfully');
     } else {
@@ -107,7 +107,9 @@ export class EnhancedBillingService {
 
   private ensureStripe(): Stripe {
     if (!this.stripe) {
-      throw new BadRequestException('Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.');
+      throw new BadRequestException(
+        'Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.'
+      );
     }
     return this.stripe;
   }
@@ -118,16 +120,20 @@ export class EnhancedBillingService {
   }
 
   // Create a customer in Stripe
-  async createStripeCustomer(email: string, name?: string, metadata?: Record<string, string>): Promise<Stripe.Customer> {
+  async createStripeCustomer(
+    email: string,
+    name?: string,
+    metadata?: Record<string, string>
+  ): Promise<Stripe.Customer> {
     const stripe = this.ensureStripe();
-    
+
     const customer = await stripe.customers.create({
       email,
       name,
       metadata: {
         source: 'remodely-crm',
-        ...metadata
-      }
+        ...metadata,
+      },
     });
 
     this.logger.log(`Created Stripe customer: ${customer.id} for ${email}`);
@@ -145,7 +151,7 @@ export class EnhancedBillingService {
     metadata?: Record<string, string>;
   }): Promise<{ sessionId: string; url: string; customerId?: string }> {
     const stripe = this.ensureStripe();
-    
+
     const plan = this.subscriptionPlans.find(p => p.id === params.planId);
     if (!plan) {
       throw new BadRequestException(`Invalid plan ID: ${params.planId}`);
@@ -155,7 +161,7 @@ export class EnhancedBillingService {
     let customer: Stripe.Customer | undefined;
     const existingCustomers = await stripe.customers.list({
       email: params.customerEmail,
-      limit: 1
+      limit: 1,
     });
 
     if (existingCustomers.data.length > 0) {
@@ -169,15 +175,18 @@ export class EnhancedBillingService {
     }
 
     const baseUrl = this.config.get('FRONTEND_URL') || 'http://localhost:3000';
-    
+
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       customer: customer.id,
-      line_items: [{
-        price: plan.stripePriceId,
-        quantity: 1
-      }],
-      success_url: params.successUrl || `${baseUrl}/billing/success?session_id={CHECKOUT_SESSION_ID}`,
+      line_items: [
+        {
+          price: plan.stripePriceId,
+          quantity: 1,
+        },
+      ],
+      success_url:
+        params.successUrl || `${baseUrl}/billing/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: params.cancelUrl || `${baseUrl}/billing/cancel`,
       allow_promotion_codes: true,
       billing_address_collection: 'auto',
@@ -186,25 +195,27 @@ export class EnhancedBillingService {
         metadata: {
           plan_id: plan.id,
           source: 'remodely-crm',
-          ...params.metadata
-        }
+          ...params.metadata,
+        },
       },
       metadata: {
         plan_id: plan.id,
         customer_email: params.customerEmail,
-        ...params.metadata
-      }
+        ...params.metadata,
+      },
     });
 
     return {
       sessionId: session.id,
       url: session.url!,
-      customerId: customer.id
+      customerId: customer.id,
     };
   }
 
   // Create a one-time payment intent
-  async createPaymentIntent(data: PaymentIntentData): Promise<{ clientSecret: string; paymentIntentId: string }> {
+  async createPaymentIntent(
+    data: PaymentIntentData
+  ): Promise<{ clientSecret: string; paymentIntentId: string }> {
     const stripe = this.ensureStripe();
 
     const paymentIntent = await stripe.paymentIntents.create({
@@ -215,24 +226,26 @@ export class EnhancedBillingService {
       setup_future_usage: data.setupFutureUsage,
       receipt_email: data.customerEmail,
       automatic_payment_methods: {
-        enabled: true
-      }
+        enabled: true,
+      },
     });
 
     return {
       clientSecret: paymentIntent.client_secret!,
-      paymentIntentId: paymentIntent.id
+      paymentIntentId: paymentIntent.id,
     };
   }
 
   // Create a setup intent for saving payment methods
-  async createSetupIntent(customerEmail: string): Promise<{ clientSecret: string; setupIntentId: string }> {
+  async createSetupIntent(
+    customerEmail: string
+  ): Promise<{ clientSecret: string; setupIntentId: string }> {
     const stripe = this.ensureStripe();
 
     let customer: Stripe.Customer | undefined;
     const existingCustomers = await stripe.customers.list({
       email: customerEmail,
-      limit: 1
+      limit: 1,
     });
 
     if (existingCustomers.data.length > 0) {
@@ -244,12 +257,12 @@ export class EnhancedBillingService {
     const setupIntent = await stripe.setupIntents.create({
       customer: customer.id,
       payment_method_types: ['card'],
-      usage: 'off_session'
+      usage: 'off_session',
     });
 
     return {
       clientSecret: setupIntent.client_secret!,
-      setupIntentId: setupIntent.id
+      setupIntentId: setupIntent.id,
     };
   }
 
@@ -259,7 +272,7 @@ export class EnhancedBillingService {
 
     const customers = await stripe.customers.list({
       email: customerEmail,
-      limit: 1
+      limit: 1,
     });
 
     if (customers.data.length === 0) {
@@ -268,21 +281,24 @@ export class EnhancedBillingService {
 
     const paymentMethods = await stripe.paymentMethods.list({
       customer: customers.data[0].id,
-      type: 'card'
+      type: 'card',
     });
 
     return paymentMethods.data;
   }
 
   // Update user subscription in database
-  async updateUserSubscription(email: string, subscriptionData: {
-    stripeCustomerId?: string;
-    stripeSubscriptionId?: string;
-    subscriptionPlan?: string;
-    subscriptionStatus?: 'active' | 'trialing' | 'past_due' | 'canceled' | 'incomplete';
-    trialEndsAt?: Date;
-    currentPeriodEnd?: Date;
-  }): Promise<UserDocument | null> {
+  async updateUserSubscription(
+    email: string,
+    subscriptionData: {
+      stripeCustomerId?: string;
+      stripeSubscriptionId?: string;
+      subscriptionPlan?: string;
+      subscriptionStatus?: 'active' | 'trialing' | 'past_due' | 'canceled' | 'incomplete';
+      trialEndsAt?: Date;
+      currentPeriodEnd?: Date;
+    }
+  ): Promise<UserDocument | null> {
     const user = await this.userModel.findOne({ email });
     if (!user) {
       this.logger.warn(`User not found for subscription update: ${email}`);
@@ -297,14 +313,17 @@ export class EnhancedBillingService {
   }
 
   // Cancel subscription
-  async cancelSubscription(subscriptionId: string, immediately = false): Promise<Stripe.Subscription> {
+  async cancelSubscription(
+    subscriptionId: string,
+    immediately = false
+  ): Promise<Stripe.Subscription> {
     const stripe = this.ensureStripe();
 
     if (immediately) {
       return await stripe.subscriptions.cancel(subscriptionId);
     } else {
       return await stripe.subscriptions.update(subscriptionId, {
-        cancel_at_period_end: true
+        cancel_at_period_end: true,
       });
     }
   }
@@ -314,7 +333,7 @@ export class EnhancedBillingService {
     const stripe = this.ensureStripe();
 
     return await stripe.subscriptions.update(subscriptionId, {
-      cancel_at_period_end: false
+      cancel_at_period_end: false,
     });
   }
 
@@ -330,7 +349,7 @@ export class EnhancedBillingService {
 
     const customers = await stripe.customers.list({
       email: customerEmail,
-      limit: 1
+      limit: 1,
     });
 
     if (customers.data.length === 0) {
@@ -339,7 +358,7 @@ export class EnhancedBillingService {
 
     const invoices = await stripe.invoices.list({
       customer: customers.data[0].id,
-      limit
+      limit,
     });
 
     return invoices.data;
@@ -354,24 +373,24 @@ export class EnhancedBillingService {
         case 'checkout.session.completed':
           await this.handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session);
           break;
-        
+
         case 'customer.subscription.created':
         case 'customer.subscription.updated':
           await this.handleSubscriptionUpdate(event.data.object as Stripe.Subscription);
           break;
-        
+
         case 'customer.subscription.deleted':
           await this.handleSubscriptionDeleted(event.data.object as Stripe.Subscription);
           break;
-        
+
         case 'invoice.payment_succeeded':
           await this.handlePaymentSucceeded(event.data.object as Stripe.Invoice);
           break;
-        
+
         case 'invoice.payment_failed':
           await this.handlePaymentFailed(event.data.object as Stripe.Invoice);
           break;
-        
+
         default:
           this.logger.log(`Unhandled webhook event type: ${event.type}`);
       }
@@ -395,41 +414,41 @@ export class EnhancedBillingService {
       stripeCustomerId: session.customer as string,
       stripeSubscriptionId: session.subscription as string,
       subscriptionPlan: plan?.id || 'starter',
-      subscriptionStatus: 'trialing' // Will be updated by subscription webhook
+      subscriptionStatus: 'trialing', // Will be updated by subscription webhook
     });
   }
 
   private async handleSubscriptionUpdate(subscription: Stripe.Subscription): Promise<void> {
     const stripe = this.ensureStripe();
     const customer = await stripe.customers.retrieve(subscription.customer as string);
-    
+
     if (!customer || customer.deleted || !('email' in customer) || !customer.email) {
       this.logger.warn('Customer not found or missing email for subscription update');
       return;
     }
 
     const planId = subscription.metadata?.plan_id;
-    
+
     await this.updateUserSubscription(customer.email, {
       stripeSubscriptionId: subscription.id,
       subscriptionStatus: subscription.status as any,
       subscriptionPlan: planId,
       currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-      trialEndsAt: subscription.trial_end ? new Date(subscription.trial_end * 1000) : undefined
+      trialEndsAt: subscription.trial_end ? new Date(subscription.trial_end * 1000) : undefined,
     });
   }
 
   private async handleSubscriptionDeleted(subscription: Stripe.Subscription): Promise<void> {
     const stripe = this.ensureStripe();
     const customer = await stripe.customers.retrieve(subscription.customer as string);
-    
+
     if (!customer || customer.deleted || !('email' in customer) || !customer.email) {
       return;
     }
 
     await this.updateUserSubscription(customer.email, {
       subscriptionStatus: 'canceled',
-      subscriptionPlan: 'free'
+      subscriptionPlan: 'free',
     });
   }
 
@@ -440,13 +459,13 @@ export class EnhancedBillingService {
 
   private async handlePaymentFailed(invoice: Stripe.Invoice): Promise<void> {
     const stripe = this.ensureStripe();
-    
+
     if (invoice.customer && typeof invoice.customer === 'string') {
       const customer = await stripe.customers.retrieve(invoice.customer);
-      
+
       if (!customer.deleted && 'email' in customer && customer.email) {
         await this.updateUserSubscription(customer.email, {
-          subscriptionStatus: 'past_due'
+          subscriptionStatus: 'past_due',
         });
       }
     }

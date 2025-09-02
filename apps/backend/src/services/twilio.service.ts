@@ -11,7 +11,7 @@ export class TwilioService {
     const accountSid = this.configService.get('TWILIO_ACCOUNT_SID');
     const authToken = this.configService.get('TWILIO_AUTH_TOKEN');
     this.fromNumber = this.configService.get('TWILIO_PHONE_NUMBER');
-    
+
     if (accountSid && authToken && /^AC[0-9a-fA-F]{32}$/.test(accountSid)) {
       this.client = twilio(accountSid, authToken);
     } else if (accountSid || authToken) {
@@ -27,11 +27,14 @@ export class TwilioService {
     return this.fromNumber;
   }
 
-  async createOutboundCall(to: string, webhookUrl: string): Promise<{ sid: string } | { error: string }> {
+  async createOutboundCall(
+    to: string,
+    webhookUrl: string
+  ): Promise<{ sid: string } | { error: string }> {
     if (!this.client || !this.fromNumber) {
       return { error: 'Twilio not configured' };
     }
-    
+
     const result = await this.client.calls.create({
       to,
       from: this.fromNumber,
@@ -64,7 +67,7 @@ export class TwilioService {
 
   async sendPasswordResetCode(phoneNumber: string, code: string): Promise<boolean> {
     const message = `Your CRM password reset code is: ${code}. This code expires in 10 minutes.`;
-    
+
     if (!this.client) {
       console.log('🔧 Twilio not configured - SMS simulation mode');
       console.log(`📱 Simulated SMS to ${phoneNumber}: ${message}`);
@@ -72,7 +75,7 @@ export class TwilioService {
       // Return true for development to simulate successful SMS
       return true;
     }
-    
+
     return this.sendSMS(phoneNumber, message);
   }
 

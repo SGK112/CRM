@@ -2,7 +2,13 @@ import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { AiService, ChatMessage, ChatOptions } from './ai.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
-interface ChatRequestDto { messages: ChatMessage[]; strategy?: ChatOptions['strategy']; provider?: string; temperature?: number; maxTokens?: number; }
+interface ChatRequestDto {
+  messages: ChatMessage[];
+  strategy?: ChatOptions['strategy'];
+  provider?: string;
+  temperature?: number;
+  maxTokens?: number;
+}
 
 @Controller('ai')
 export class AiController {
@@ -20,7 +26,7 @@ export class AiController {
   async demoChat(@Body() body: ChatRequestDto) {
     const messages = Array.isArray(body.messages) ? body.messages : [];
     const { strategy, provider, temperature, maxTokens } = body;
-    
+
     // Add context about kitchen bidding for demo
     const contextualMessages = [
       {
@@ -32,11 +38,11 @@ export class AiController {
         - Marketing tactics for kitchen remodeling
         - Client relationship management
         - Pricing strategies
-        Be specific and actionable.`
+        Be specific and actionable.`,
       },
-      ...messages
+      ...messages,
     ];
-    
+
     return this.ai.chat(contextualMessages, { strategy, provider, temperature, maxTokens });
   }
 

@@ -3,12 +3,12 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { InboxController } from './inbox.controller';
 import { InboxService } from './inbox.service';
 import { InboxMessage, InboxMessageSchema } from './schemas/inbox-message.schema';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      { name: InboxMessage.name, schema: InboxMessageSchema },
-    ]),
+    MongooseModule.forFeature([{ name: InboxMessage.name, schema: InboxMessageSchema }]),
+    NotificationsModule,
   ],
   controllers: [InboxController],
   providers: [InboxService],

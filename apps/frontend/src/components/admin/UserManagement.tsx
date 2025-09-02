@@ -37,7 +37,7 @@ export default function UserManagement() {
     search: '',
     role: '',
     subscriptionStatus: '',
-    page: 1
+    page: 1,
   });
   const [showUserModal, setShowUserModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -49,18 +49,18 @@ export default function UserManagement() {
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
-      
+
       const queryParams = new URLSearchParams({
         page: filters.page.toString(),
         limit: '20',
         ...(filters.search && { search: filters.search }),
         ...(filters.role && { role: filters.role }),
-        ...(filters.subscriptionStatus && { subscriptionStatus: filters.subscriptionStatus })
+        ...(filters.subscriptionStatus && { subscriptionStatus: filters.subscriptionStatus }),
       });
-      
+
       const response = await fetch(`/api/admin/users?${queryParams}`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -102,7 +102,7 @@ export default function UserManagement() {
       const response = await fetch(url, {
         method,
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -112,14 +112,16 @@ export default function UserManagement() {
 
       // Refresh users list
       await fetchUsers();
-      
+
       // Clear selections
       setSelectedUsers([]);
-      
+
       alert(`User ${action}d successfully`);
     } catch (error) {
       console.error(`Failed to ${action} user:`, error);
-      alert(`Failed to ${action} user: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      alert(
+        `Failed to ${action} user: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   };
 
@@ -129,22 +131,24 @@ export default function UserManagement() {
       return;
     }
 
-    const confirmed = confirm(`Are you sure you want to ${action} ${selectedUsers.length} user(s)?`);
+    const confirmed = confirm(
+      `Are you sure you want to ${action} ${selectedUsers.length} user(s)?`
+    );
     if (!confirmed) return;
 
     try {
       const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
-      
+
       const response = await fetch('/api/admin/bulk-actions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           userIds: selectedUsers,
-          action
-        })
+          action,
+        }),
       });
 
       if (!response.ok) {
@@ -152,14 +156,16 @@ export default function UserManagement() {
       }
 
       const result = await response.json();
-      
+
       // Refresh users list
       await fetchUsers();
-      
+
       // Clear selections
       setSelectedUsers([]);
-      
-      alert(`Bulk action completed: ${result.summary.successful} successful, ${result.summary.failed} failed`);
+
+      alert(
+        `Bulk action completed: ${result.summary.successful} successful, ${result.summary.failed} failed`
+      );
     } catch (error) {
       console.error('Bulk action failed:', error);
       alert(`Bulk action failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -167,17 +173,13 @@ export default function UserManagement() {
   };
 
   const toggleUserSelection = (userId: string) => {
-    setSelectedUsers(prev => 
-      prev.includes(userId) 
-        ? prev.filter(id => id !== userId)
-        : [...prev, userId]
+    setSelectedUsers(prev =>
+      prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId]
     );
   };
 
   const toggleSelectAll = () => {
-    setSelectedUsers(prev => 
-      prev.length === users.length ? [] : users.map(user => user._id)
-    );
+    setSelectedUsers(prev => (prev.length === users.length ? [] : users.map(user => user._id)));
   };
 
   if (loading && users.length === 0) {
@@ -204,7 +206,7 @@ export default function UserManagement() {
             <input
               type="text"
               value={filters.search}
-              onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value, page: 1 }))}
+              onChange={e => setFilters(prev => ({ ...prev, search: e.target.value, page: 1 }))}
               placeholder="Search by name or email..."
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -213,7 +215,7 @@ export default function UserManagement() {
             <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
             <select
               value={filters.role}
-              onChange={(e) => setFilters(prev => ({ ...prev, role: e.target.value, page: 1 }))}
+              onChange={e => setFilters(prev => ({ ...prev, role: e.target.value, page: 1 }))}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">All Roles</option>
@@ -229,7 +231,9 @@ export default function UserManagement() {
             <label className="block text-sm font-medium text-gray-700 mb-2">Subscription</label>
             <select
               value={filters.subscriptionStatus}
-              onChange={(e) => setFilters(prev => ({ ...prev, subscriptionStatus: e.target.value, page: 1 }))}
+              onChange={e =>
+                setFilters(prev => ({ ...prev, subscriptionStatus: e.target.value, page: 1 }))
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">All Subscriptions</option>
@@ -315,7 +319,7 @@ export default function UserManagement() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {users.map((user) => (
+            {users.map(user => (
               <tr key={user._id} className="hover:bg-gray-50">
                 <td className="px-6 py-4">
                   <input
@@ -339,11 +343,11 @@ export default function UserManagement() {
                   </span>
                 </td>
                 <td className="px-6 py-4">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    user.isActive 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
-                  }`}>
+                  <span
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}
+                  >
                     {user.isActive ? 'Active' : 'Suspended'}
                   </span>
                 </td>
@@ -356,10 +360,7 @@ export default function UserManagement() {
                   </div>
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-500">
-                  {user.lastLoginAt 
-                    ? new Date(user.lastLoginAt).toLocaleDateString()
-                    : 'Never'
-                  }
+                  {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : 'Never'}
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex space-x-2">
@@ -414,9 +415,9 @@ export default function UserManagement() {
         <div className="bg-white rounded-lg shadow p-4">
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-700">
-              Showing {((pagination.page - 1) * pagination.limit) + 1} to{' '}
-              {Math.min(pagination.page * pagination.limit, pagination.total)} of{' '}
-              {pagination.total} results
+              Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}
+              {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}{' '}
+              results
             </div>
             <div className="flex space-x-2">
               <button

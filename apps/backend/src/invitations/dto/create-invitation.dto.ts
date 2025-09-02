@@ -5,7 +5,7 @@ export class CreateInvitationDto {
   email: string;
 
   @IsString()
-  @IsIn(['owner','admin','sales_associate','project_manager','team_member','client'])
+  @IsIn(['owner', 'admin', 'sales_associate', 'project_manager', 'team_member', 'client'])
   role: string;
 
   @IsOptional()

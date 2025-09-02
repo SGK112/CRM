@@ -10,7 +10,7 @@ export class IntegrationsController {
   constructor(
     private readonly integrationsService: IntegrationsService,
     private readonly integrationManager: IntegrationManagerService,
-    private readonly googleCalendar: GoogleCalendarService,
+    private readonly googleCalendar: GoogleCalendarService
   ) {}
 
   @Get('status')
@@ -21,19 +21,31 @@ export class IntegrationsController {
   @Get('config')
   getAllIntegrations() {
     const integrations = this.integrationsService.getAllIntegrations();
-    
+
     // Remove sensitive credentials from the response
-  return Object.entries(integrations).reduce((acc: Record<string, { enabled: boolean; configured: boolean; fields: { name: string; configured: boolean }[] }>, [name, config]) => {
-      acc[name] = {
-        enabled: config.enabled,
-        configured: config.enabled && Object.values(config.credentials).every(val => val !== ''),
-        fields: Object.keys(config.credentials).map(key => ({
-          name: key,
-          configured: !!config.credentials[key],
-        })),
-      };
-      return acc;
-  }, {} as Record<string, { enabled: boolean; configured: boolean; fields: { name: string; configured: boolean }[] }>);
+    return Object.entries(integrations).reduce(
+      (
+        acc: Record<
+          string,
+          { enabled: boolean; configured: boolean; fields: { name: string; configured: boolean }[] }
+        >,
+        [name, config]
+      ) => {
+        acc[name] = {
+          enabled: config.enabled,
+          configured: config.enabled && Object.values(config.credentials).every(val => val !== ''),
+          fields: Object.keys(config.credentials).map(key => ({
+            name: key,
+            configured: !!config.credentials[key],
+          })),
+        };
+        return acc;
+      },
+      {} as Record<
+        string,
+        { enabled: boolean; configured: boolean; fields: { name: string; configured: boolean }[] }
+      >
+    );
   }
 
   // NEW USER-FRIENDLY ENDPOINTS
@@ -53,13 +65,13 @@ export class IntegrationsController {
     // Return OAuth URL for the provider
     const oauthUrls = {
       gmail: this.buildGmailOAuthUrl(),
-      outlook: this.buildOutlookOAuthUrl()
+      outlook: this.buildOutlookOAuthUrl(),
     };
 
     return {
       provider,
       oauthUrl: oauthUrls[provider],
-      instructions: `You will be redirected to ${provider} to authorize email access`
+      instructions: `You will be redirected to ${provider} to authorize email access`,
     };
   }
 
@@ -81,13 +93,13 @@ export class IntegrationsController {
     // Generate Stripe Connect OAuth URL
     const clientId = process.env.STRIPE_CLIENT_ID;
     const redirectUri = `${process.env.FRONTEND_URL}/integrations/stripe/callback`;
-    
+
     const stripeOAuthUrl = `https://connect.stripe.com/oauth/authorize?response_type=code&client_id=${clientId}&scope=read_write&redirect_uri=${redirectUri}&state=${req.user.id}`;
 
     return {
       provider: 'stripe',
       oauthUrl: stripeOAuthUrl,
-      instructions: 'You will be redirected to Stripe to connect your payment account'
+      instructions: 'You will be redirected to Stripe to connect your payment account',
     };
   }
 
@@ -116,7 +128,7 @@ export class IntegrationsController {
     const scopes = [
       'https://www.googleapis.com/auth/gmail.send',
       'https://www.googleapis.com/auth/gmail.readonly',
-      'https://www.googleapis.com/auth/userinfo.email'
+      'https://www.googleapis.com/auth/userinfo.email',
     ].join(' ');
 
     return `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${encodeURIComponent(scopes)}&response_type=code&access_type=offline&prompt=consent`;
@@ -128,7 +140,7 @@ export class IntegrationsController {
     const scopes = [
       'https://graph.microsoft.com/Mail.Send',
       'https://graph.microsoft.com/Mail.Read',
-      'https://graph.microsoft.com/User.Read'
+      'https://graph.microsoft.com/User.Read',
     ].join(' ');
 
     return `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=${encodeURIComponent(scopes)}&response_mode=query`;

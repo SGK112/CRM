@@ -1,6 +1,6 @@
 /**
  * Voice Agent CRM Integration Examples
- * 
+ *
  * This file demonstrates how to use the enhanced voice agent service
  * to make calls, schedule appointments, leave notes, and send emails
  * from the CRM system.
@@ -24,7 +24,7 @@ export class VoiceAgentExamples {
         workspaceId,
         'consultation'
       );
-      
+
       console.log('Appointment call initiated:', call);
       return call;
     } catch (error) {
@@ -43,7 +43,7 @@ export class VoiceAgentExamples {
         workspaceId,
         estimateId
       );
-      
+
       console.log('Estimate follow-up call initiated:', call);
       return call;
     } catch (error) {
@@ -62,7 +62,7 @@ export class VoiceAgentExamples {
         workspaceId,
         'Project status update and next steps discussion'
       );
-      
+
       console.log('Project update call initiated:', call);
       return call;
     } catch (error) {
@@ -80,7 +80,7 @@ export class VoiceAgentExamples {
         clientId,
         startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // Last 30 days
       });
-      
+
       console.log(`Found ${calls.length} calls for client:`, calls);
       return calls;
     } catch (error) {
@@ -94,12 +94,8 @@ export class VoiceAgentExamples {
    */
   async markCallCompleted(callId: string, notes: string) {
     try {
-      const updatedCall = await this.voiceAgentService.updateCallStatus(
-        callId,
-        'completed',
-        notes
-      );
-      
+      const updatedCall = await this.voiceAgentService.updateCallStatus(callId, 'completed', notes);
+
       console.log('Call marked as completed:', updatedCall);
       return updatedCall;
     } catch (error) {
@@ -119,10 +115,10 @@ export class VoiceAgentExamples {
         'follow_up',
         {
           followUpReason: 'Check satisfaction with recent installation',
-          estimateId: 'EST-123456'
+          estimateId: 'EST-123456',
         }
       );
-      
+
       console.log('Custom CRM call initiated:', call);
       return call;
     } catch (error) {
@@ -134,7 +130,7 @@ export class VoiceAgentExamples {
 
 /**
  * API Endpoint Usage Examples
- * 
+ *
  * These show how to call the voice agent endpoints from the frontend
  */
 export const API_EXAMPLES = {
@@ -146,8 +142,8 @@ export const API_EXAMPLES = {
       clientId: '507f1f77bcf86cd799439011',
       workspaceId: '507f1f77bcf86cd799439012',
       appointmentType: 'consultation',
-      agentId: 'agent_12345' // optional
-    }
+      agentId: 'agent_12345', // optional
+    },
   },
 
   // Estimate follow-up call
@@ -157,8 +153,8 @@ export const API_EXAMPLES = {
     body: {
       clientId: '507f1f77bcf86cd799439011',
       workspaceId: '507f1f77bcf86cd799439012',
-      estimateId: '507f1f77bcf86cd799439013'
-    }
+      estimateId: '507f1f77bcf86cd799439013',
+    },
   },
 
   // General follow-up call
@@ -168,14 +164,14 @@ export const API_EXAMPLES = {
     body: {
       clientId: '507f1f77bcf86cd799439011',
       workspaceId: '507f1f77bcf86cd799439012',
-      reason: 'Check on project satisfaction and gather feedback'
-    }
+      reason: 'Check on project satisfaction and gather feedback',
+    },
   },
 
   // Get call history
   getCallHistory: {
     method: 'GET',
-    url: '/voice-agent/call-history/507f1f77bcf86cd799439012?clientId=507f1f77bcf86cd799439011&status=completed&startDate=2024-01-01'
+    url: '/voice-agent/call-history/507f1f77bcf86cd799439012?clientId=507f1f77bcf86cd799439011&status=completed&startDate=2024-01-01',
   },
 
   // Custom CRM call
@@ -189,23 +185,23 @@ export const API_EXAMPLES = {
       callData: {
         followUpReason: 'Post-project satisfaction survey',
         estimateId: 'EST-123456',
-        urgency: 'medium'
-      }
-    }
-  }
+        urgency: 'medium',
+      },
+    },
+  },
 };
 
 /**
  * Expected Automated Workflows
- * 
+ *
  * When a call is completed, the system automatically:
- * 
+ *
  * 1. Creates a note in the client's record with call details
  * 2. If appointment was scheduled, creates appointment and sends confirmation
  * 3. Sends appropriate follow-up emails based on call purpose
  * 4. Schedules future follow-ups if required
  * 5. Updates call status and logs all activities
- * 
+ *
  * Database records created:
  * - VoiceCall: Complete call tracking with results
  * - Note: Call summary and action items
