@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import PhoneInput from '../../../../../components/forms/PhoneInput';
-import AddressInput from '../../../../../components/forms/AddressInput';
+import PhoneInput from '@/components/forms/PhoneInput';
+import AddressInput from '@/components/forms/AddressInput';
 import { API_BASE } from '@/lib/api';
 import { ArrowLeftIcon, CheckIcon } from '@heroicons/react/24/outline';
 

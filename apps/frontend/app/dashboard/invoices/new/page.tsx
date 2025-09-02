@@ -12,11 +12,11 @@ import {
   TrashIcon,
 } from '@heroicons/react/24/outline';
 import { Trash2 } from 'lucide-react';
-import ClientSelector from '../../../../components/ClientSelector';
-import ImageUpload from '../../../../components/forms/ImageUpload';
-import Notes from '../../../../components/forms/Notes';
-import AIWritingAssistant from '../../../../components/AIWritingAssistant';
-import { useAI } from '../../../../hooks/useAI';
+import ClientSelector from '@/components/ClientSelector';
+import ImageUpload from '@/components/forms/ImageUpload';
+import Notes from '@/components/forms/Notes';
+import AIWritingAssistant from '@/components/AIWritingAssistant';
+import { useAI } from '@/hooks/useAI';
 
 interface Client {
   _id: string;

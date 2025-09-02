@@ -1,11 +1,11 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
+import { Model, Types } from 'mongoose';
+import { TwilioService } from '../services/twilio.service';
 import { User, UserDocument } from '../users/schemas/user.schema';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
-import { TwilioService } from '../services/twilio.service';
 /* eslint-disable @typescript-eslint/no-explicit-any, no-console, @typescript-eslint/no-unused-vars */
 
 type DemoUser = {

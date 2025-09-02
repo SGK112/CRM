@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Estimate, EstimateSchema } from './schemas/estimate.schema';
-import { EstimatesService } from './estimates.service';
-import { Client, ClientSchema } from '../clients/schemas/client.schema';
-import { EmailService } from '../services/email.service';
-import { EstimatesController } from './estimates.controller';
-import { AIEstimateService } from './ai-estimate.service';
-import { AIEstimateController } from './ai-estimate.controller';
-import { PriceItem, PriceItemSchema } from '../pricing/schemas/price-item.schema';
-import { InvoicesModule } from '../invoices/invoices.module';
 import { AiModule } from '../ai/ai.module';
+import { Client, ClientSchema } from '../clients/schemas/client.schema';
+import { InvoicesModule } from '../invoices/invoices.module';
+import { PriceItem, PriceItemSchema } from '../pricing/schemas/price-item.schema';
+import { EmailService } from '../services/email.service';
+import { AIEstimateController } from './ai-estimate.controller';
+import { AIEstimateService } from './ai-estimate.service';
+import { EstimatesController } from './estimates.controller';
+import { EstimatesService } from './estimates.service';
+import { Estimate, EstimateSchema } from './schemas/estimate.schema';
 
 @Module({
   imports: [

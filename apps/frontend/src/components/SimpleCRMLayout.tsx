@@ -1,25 +1,25 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import Link from 'next/link';
 import {
-  HomeIcon,
-  ClipboardDocumentListIcon,
-  UserGroupIcon,
-  CalendarDaysIcon,
-  EnvelopeIcon,
-  CurrencyDollarIcon,
-  DocumentTextIcon,
-  ChartBarIcon,
-  CogIcon,
-  Bars3Icon,
-  XMarkIcon,
+    Bars3Icon,
+    CalendarDaysIcon,
+    ChartBarIcon,
+    ClipboardDocumentListIcon,
+    CogIcon,
+    CurrencyDollarIcon,
+    DocumentTextIcon,
+    EnvelopeIcon,
+    HomeIcon,
+    UserGroupIcon,
+    XMarkIcon,
 } from '@heroicons/react/24/outline';
-import { ThemeProvider } from './ThemeProvider';
-import SearchBar from './SearchBar';
-import ThemeToggle from './ThemeToggle';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import Logo from './Logo';
+import SearchBar from './SearchBar';
+import { ThemeProvider } from './ThemeProvider';
+import ThemeToggle from './ThemeToggle';
 
 interface NavigationItem {
   name: string;

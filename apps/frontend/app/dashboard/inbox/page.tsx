@@ -1,31 +1,31 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { simple } from '@/lib/simple-ui';
 import {
-  Mail,
+  AlertCircle,
+  Archive,
   Bell,
+  ChevronDown,
+  Circle,
+  Clock,
+  Forward,
+  Inbox as InboxIcon,
+  Loader,
+  Mail,
   MessageSquare,
+  MoreVertical,
+  Paperclip,
+  Reply,
+  Search,
+  Send,
   Settings,
   Star,
-  Archive,
-  Search,
-  ChevronDown,
-  MoreVertical,
-  Reply,
-  Forward,
-  Clock,
-  User,
-  Circle,
-  Loader,
-  Inbox as InboxIcon,
-  Send,
-  X,
-  AlertCircle,
-  Paperclip,
   Trash2,
+  User,
+  X,
 } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 
 interface InboxMessage {
   _id: string;

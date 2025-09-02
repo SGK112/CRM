@@ -1,24 +1,24 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Query,
-  Req,
-  UseGuards,
-  UploadedFile,
-  UseInterceptors,
-  Body,
+    Body,
+    Controller,
+    Get,
+    Post,
+    Query,
+    Req,
+    UploadedFile,
+    UseGuards,
+    UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { CatalogService } from './catalog.service';
-import { PDFProcessingService, PDFProcessingResult } from './pdf-processing.service';
+import * as fs from 'fs';
+import * as multer from 'multer';
+import * as path from 'path';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ActiveSubscriptionGuard } from '../billing/billing.service';
-import { CapabilityGuard } from '../billing/guards/capability.guard';
 import { RequiresFeature } from '../billing/decorators/requires-feature.decorator';
-import * as multer from 'multer';
-import * as fs from 'fs';
-import * as path from 'path';
+import { CapabilityGuard } from '../billing/guards/capability.guard';
+import { CatalogService } from './catalog.service';
+import { PDFProcessingResult, PDFProcessingService } from './pdf-processing.service';
 
 @Controller('catalog')
 @UseGuards(JwtAuthGuard, ActiveSubscriptionGuard, CapabilityGuard)

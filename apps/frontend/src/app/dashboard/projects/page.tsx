@@ -1,17 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import {
-  PlusIcon,
-  MagnifyingGlassIcon,
-  BuildingOfficeIcon,
-  CalendarIcon,
-  CurrencyDollarIcon,
-  EyeIcon,
-} from '@heroicons/react/24/outline';
 import { simple } from '@/lib/simple-ui';
+import {
+    BuildingOfficeIcon,
+    CalendarIcon,
+    CurrencyDollarIcon,
+    EyeIcon,
+    MagnifyingGlassIcon,
+    PlusIcon,
+} from '@heroicons/react/24/outline';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface Project {
   _id: string;

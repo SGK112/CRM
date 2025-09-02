@@ -1,16 +1,16 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
 import {
-  DocumentDuplicateIcon,
-  PaperAirplaneIcon,
-  CurrencyDollarIcon,
-  PencilIcon,
-  ArrowLeftIcon,
-  ArrowDownTrayIcon,
-  TrashIcon,
+    ArrowDownTrayIcon,
+    ArrowLeftIcon,
+    CurrencyDollarIcon,
+    DocumentDuplicateIcon,
+    PaperAirplaneIcon,
+    PencilIcon,
+    TrashIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 interface Client {
   _id: string;

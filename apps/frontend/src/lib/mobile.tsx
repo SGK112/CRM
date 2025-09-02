@@ -1,5 +1,4 @@
 // Comprehensive mobile optimization utilities for CRM
-import React from 'react';
 
 interface MobileNavProps {
   onClose?: () => void;

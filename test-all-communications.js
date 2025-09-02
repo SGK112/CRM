@@ -47,14 +47,14 @@ const makeRequest = async (endpoint, options = {}) => {
   try {
     const response = await fetch(url, { ...options, headers });
     const data = await response.json().catch(() => ({}));
-    
+
     console.log(`📡 ${options.method || 'GET'} ${endpoint}`);
     console.log(`   Status: ${response.status} ${response.statusText}`);
     if (Object.keys(data).length > 0) {
       console.log(`   Response:`, JSON.stringify(data, null, 2));
     }
     console.log('');
-    
+
     return { response, data, ok: response.ok };
   } catch (error) {
     console.error(`❌ Request failed: ${error.message}`);
@@ -77,7 +77,7 @@ const testStep = (description) => {
 // Test functions
 async function testHealthCheck() {
   section('HEALTH CHECK');
-  
+
   testStep('Testing backend health endpoint');
   const health = await makeRequest('/api/health');
   if (health.ok) {
@@ -102,7 +102,7 @@ async function testHealthCheck() {
 
 async function testRegistrationAndEmailVerification() {
   section('REGISTRATION & EMAIL VERIFICATION');
-  
+
   testStep('Registering new user account');
   const registration = await makeRequest('/api/auth/register', {
     method: 'POST',
@@ -112,22 +112,22 @@ async function testRegistrationAndEmailVerification() {
   if (registration.ok) {
     console.log('✅ Registration successful');
     testUserId = registration.data.user?.id;
-    
+
     if (registration.data.verificationUrl) {
       console.log(`📧 Verification URL (dev mode): ${registration.data.verificationUrl}`);
       console.log('💡 In production, this would be sent via email');
-      
+
       // Extract token from verification URL
       const tokenMatch = registration.data.verificationUrl.match(/token=([^&]+)/);
       if (tokenMatch) {
         const token = tokenMatch[1];
-        
+
         testStep('Testing email verification with token');
         const verification = await makeRequest('/api/auth/verify-email', {
           method: 'POST',
           body: JSON.stringify({ token })
         });
-        
+
         if (verification.ok && verification.data.success) {
           console.log('✅ Email verification successful');
         } else {
@@ -145,7 +145,7 @@ async function testRegistrationAndEmailVerification() {
 
 async function testLogin() {
   section('LOGIN TESTING');
-  
+
   testStep('Testing user login');
   const login = await makeRequest('/api/auth/login', {
     method: 'POST',
@@ -167,7 +167,7 @@ async function testLogin() {
 
 async function testForgotPassword() {
   section('FORGOT PASSWORD WORKFLOW');
-  
+
   testStep('Testing forgot password SMS sending');
   const forgotPassword = await makeRequest('/api/auth/forgot-password', {
     method: 'POST',
@@ -177,7 +177,7 @@ async function testForgotPassword() {
   if (forgotPassword.ok) {
     console.log('✅ Password reset SMS request sent');
     console.log('📱 Check your phone for the reset code');
-    
+
     const code = await prompt('Enter the reset code you received (or press Enter to skip): ');
     if (code.trim()) {
       testStep('Testing reset code verification');
@@ -188,26 +188,26 @@ async function testForgotPassword() {
 
       if (verifyCode.ok && verifyCode.data.token) {
         console.log('✅ Reset code verified');
-        
+
         testStep('Testing password reset with token');
         const resetPassword = await makeRequest('/api/auth/reset-password', {
           method: 'POST',
-          body: JSON.stringify({ 
-            token: verifyCode.data.token, 
-            newPassword: TEST_USER.password + '1' 
+          body: JSON.stringify({
+            token: verifyCode.data.token,
+            newPassword: TEST_USER.password + '1'
           })
         });
 
         if (resetPassword.ok) {
           console.log('✅ Password reset successful');
           console.log('💡 Password was temporarily changed and should be changed back');
-          
+
           // Change password back
           await makeRequest('/api/auth/reset-password', {
             method: 'POST',
-            body: JSON.stringify({ 
-              token: verifyCode.data.token, 
-              newPassword: TEST_USER.password 
+            body: JSON.stringify({
+              token: verifyCode.data.token,
+              newPassword: TEST_USER.password
             })
           });
         }
@@ -225,7 +225,7 @@ async function testForgotPassword() {
 
 async function testCommunicationsStatus() {
   section('COMMUNICATIONS STATUS');
-  
+
   if (!authToken) {
     console.log('⚠️ Skipping - no auth token available');
     return;
@@ -233,7 +233,7 @@ async function testCommunicationsStatus() {
 
   testStep('Checking communications service status');
   const status = await makeRequest('/api/communications/status');
-  
+
   if (status.ok) {
     console.log('✅ Communications status retrieved');
     console.log(`📧 Email configured: ${status.data.email?.configured}`);
@@ -247,7 +247,7 @@ async function testCommunicationsStatus() {
 
 async function testEmailCommunications() {
   section('EMAIL COMMUNICATIONS');
-  
+
   if (!authToken) {
     console.log('⚠️ Skipping - no auth token available');
     return;
@@ -285,7 +285,7 @@ async function testEmailCommunications() {
 
 async function testSMSCommunications() {
   section('SMS COMMUNICATIONS');
-  
+
   if (!authToken) {
     console.log('⚠️ Skipping - no auth token available');
     return;
@@ -308,7 +308,7 @@ async function testSMSCommunications() {
 
 async function testNotifications() {
   section('NOTIFICATIONS SYSTEM');
-  
+
   if (!authToken) {
     console.log('⚠️ Skipping - no auth token available');
     return;
@@ -316,7 +316,7 @@ async function testNotifications() {
 
   testStep('Getting notification count');
   const notificationCount = await makeRequest('/api/notifications/count');
-  
+
   if (notificationCount.ok) {
     console.log('✅ Notification count retrieved');
     console.log(`📬 Unread notifications: ${notificationCount.data.unreadCount || 0}`);
@@ -324,7 +324,7 @@ async function testNotifications() {
 
   testStep('Getting notifications list');
   const notifications = await makeRequest('/api/notifications');
-  
+
   if (notifications.ok) {
     console.log('✅ Notifications list retrieved');
     console.log(`📋 Total notifications: ${notifications.data.length || 0}`);
@@ -333,7 +333,7 @@ async function testNotifications() {
 
 async function testBillingCommunications() {
   section('BILLING COMMUNICATIONS');
-  
+
   if (!authToken) {
     console.log('⚠️ Skipping - no auth token available');
     return;
@@ -341,7 +341,7 @@ async function testBillingCommunications() {
 
   testStep('Checking billing status');
   const billingStatus = await makeRequest('/api/billing/me');
-  
+
   if (billingStatus.ok) {
     console.log('✅ Billing status retrieved');
   } else if (billingStatus.response?.status === 401) {
@@ -353,7 +353,7 @@ async function testBillingCommunications() {
 
   testStep('Getting subscription info');
   const subscription = await makeRequest('/api/api/billing/subscription');
-  
+
   if (subscription.ok) {
     console.log('✅ Subscription info retrieved');
   } else {
@@ -363,7 +363,7 @@ async function testBillingCommunications() {
 
 async function testTemplatedEmails() {
   section('TEMPLATED EMAIL COMMUNICATIONS');
-  
+
   if (!authToken) {
     console.log('⚠️ Skipping - no auth token available');
     return;
@@ -452,7 +452,7 @@ async function testTemplatedEmails() {
 
 async function testIntegrationEndpoints() {
   section('INTEGRATION STATUS');
-  
+
   if (!authToken) {
     console.log('⚠️ Skipping - no auth token available');
     return;
@@ -460,14 +460,14 @@ async function testIntegrationEndpoints() {
 
   testStep('Checking integrations status');
   const integrationsStatus = await makeRequest('/api/integrations/status');
-  
+
   if (integrationsStatus.ok) {
     console.log('✅ Integrations status retrieved');
   }
 
   testStep('Checking communication integration status');
   const commIntegrationStatus = await makeRequest('/api/integrations/communication-status');
-  
+
   if (commIntegrationStatus.ok) {
     console.log('✅ Communication integration status retrieved');
   }
@@ -505,7 +505,7 @@ async function runAllTests() {
     console.log('💡 Configure email/SMS services for full functionality:');
     console.log('   - Set SENDGRID_API_KEY for email');
     console.log('   - Set TWILIO credentials for SMS');
-    
+
   } catch (error) {
     console.error('❌ Test suite failed:', error.message);
   } finally {

@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Invoice, InvoiceDocument } from './schemas/invoice.schema';
-import { Estimate, EstimateDocument } from '../estimates/schemas/estimate.schema';
 import PDFDocument from 'pdfkit';
-import { EmailService } from '../services/email.service';
 import { Client, ClientDocument } from '../clients/schemas/client.schema';
+import { Estimate, EstimateDocument } from '../estimates/schemas/estimate.schema';
+import { EmailService } from '../services/email.service';
+import { Invoice, InvoiceDocument } from './schemas/invoice.schema';
 
 export interface CreateInvoiceDto {
   clientId: string;

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import SimpleCRMLayout from '../../components/SimpleCRMLayout';
+import SimpleCRMLayout from '@/components/SimpleCRMLayout';
 import {
   UserGroupIcon,
   ClipboardDocumentListIcon,

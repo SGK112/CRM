@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import PhoneInput from '../../../../components/forms/PhoneInput';
+import PhoneInput from '@/components/forms/PhoneInput';
 import {
   ArrowLeftIcon,
   CalendarIcon,

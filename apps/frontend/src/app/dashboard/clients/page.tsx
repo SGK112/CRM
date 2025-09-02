@@ -1,15 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import {
-  UserGroupIcon,
-  PlusIcon,
-  MagnifyingGlassIcon,
-  PhoneIcon,
-  EnvelopeIcon
-} from '@heroicons/react/24/outline';
 import { simple } from '@/lib/simple-ui';
+import {
+    EnvelopeIcon,
+    MagnifyingGlassIcon,
+    PhoneIcon,
+    PlusIcon,
+    UserGroupIcon
+} from '@heroicons/react/24/outline';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 interface Client {
   id: string;

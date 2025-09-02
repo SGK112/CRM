@@ -1,24 +1,29 @@
 # Browser Cache Clear Guide - Traditional Inbox Issue Fix
 
 ## The Problem
+
 Your traditional inbox layout is only showing in VS Code's Simple Browser but not in your regular browser due to caching issues. Here's how to fix it:
 
 ## Solution 1: Hard Refresh (Try this first)
 
 ### Chrome/Edge:
+
 - **Windows/Linux**: `Ctrl + Shift + R` or `Ctrl + F5`
 - **Mac**: `Cmd + Shift + R`
 
 ### Firefox:
+
 - **Windows/Linux**: `Ctrl + Shift + R` or `Ctrl + F5`
 - **Mac**: `Cmd + Shift + R`
 
 ### Safari:
+
 - **Mac**: `Cmd + Option + R`
 
 ## Solution 2: Clear Browser Cache (If hard refresh doesn't work)
 
 ### Chrome:
+
 1. Open Chrome DevTools (`F12` or `Ctrl+Shift+I` / `Cmd+Option+I`)
 2. Right-click the refresh button
 3. Select "Empty Cache and Hard Reload"
@@ -34,12 +39,14 @@ OR
 4. Click "Clear data"
 
 ### Firefox:
+
 1. Press `Ctrl+Shift+Delete` (`Cmd+Shift+Delete` on Mac)
 2. Select "Everything" for time range
 3. Check "Cache" and "Cookies"
 4. Click "Clear Now"
 
 ### Safari:
+
 1. Safari menu → Preferences → Privacy → Manage Website Data
 2. Click "Remove All"
 3. OR use `Cmd+Option+E` to empty caches
@@ -54,6 +61,7 @@ OR
 ## Solution 4: Incognito/Private Browsing
 
 Open your browser in incognito/private mode:
+
 - **Chrome**: `Ctrl+Shift+N` (`Cmd+Shift+N` on Mac)
 - **Firefox**: `Ctrl+Shift+P` (`Cmd+Shift+P` on Mac)
 - **Safari**: `Cmd+Shift+N`
@@ -73,6 +81,7 @@ Then visit: `http://localhost:3005/dashboard/inbox`
 After clearing cache, when you visit `http://localhost:3005/dashboard/inbox`, you should see:
 
 ✅ **Traditional Email Layout with:**
+
 - Left sidebar with folders (Inbox, Starred, Sent, Drafts, etc.)
 - Top search bar and filters
 - Message list in the center
@@ -86,7 +95,7 @@ If you still don't see the changes:
 
 1. **Check the URL**: Make sure you're visiting `http://localhost:3005/dashboard/inbox` (not 3000 or 3001)
 
-2. **Check Network Tab**: 
+2. **Check Network Tab**:
    - Open DevTools → Network tab
    - Refresh the page
    - Look for any failed requests (red entries)

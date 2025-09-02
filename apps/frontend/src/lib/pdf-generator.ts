@@ -52,93 +52,93 @@ export const generateEstimatePDF = async (estimate: EstimateData): Promise<void>
       <title>Estimate ${estimate.id} - ${estimate.clientName}</title>
       <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
+        body {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-          line-height: 1.6; 
-          color: #333; 
+          line-height: 1.6;
+          color: #333;
           padding: 40px;
           max-width: 800px;
           margin: 0 auto;
         }
-        .header { 
-          border-bottom: 3px solid #f97316; 
-          padding-bottom: 20px; 
+        .header {
+          border-bottom: 3px solid #f97316;
+          padding-bottom: 20px;
           margin-bottom: 30px;
           text-align: center;
         }
-        .company-name { 
-          font-size: 28px; 
-          font-weight: bold; 
-          color: #f97316; 
+        .company-name {
+          font-size: 28px;
+          font-weight: bold;
+          color: #f97316;
           margin-bottom: 5px;
         }
-        .document-title { 
-          font-size: 24px; 
-          font-weight: bold; 
+        .document-title {
+          font-size: 24px;
+          font-weight: bold;
           margin: 20px 0 10px;
         }
-        .client-info { 
-          background: #f8fafc; 
-          padding: 20px; 
-          border-radius: 8px; 
+        .client-info {
+          background: #f8fafc;
+          padding: 20px;
+          border-radius: 8px;
           margin: 20px 0;
         }
-        .estimate-details { 
-          display: grid; 
-          grid-template-columns: 1fr 1fr; 
-          gap: 20px; 
+        .estimate-details {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 20px;
           margin: 20px 0;
         }
-        .items-table { 
-          width: 100%; 
-          border-collapse: collapse; 
+        .items-table {
+          width: 100%;
+          border-collapse: collapse;
           margin: 30px 0;
         }
-        .items-table th, .items-table td { 
-          padding: 12px; 
-          text-align: left; 
+        .items-table th, .items-table td {
+          padding: 12px;
+          text-align: left;
           border-bottom: 1px solid #e5e7eb;
         }
-        .items-table th { 
-          background: #f8fafc; 
+        .items-table th {
+          background: #f8fafc;
           font-weight: bold;
           color: #374151;
         }
-        .items-table tr:hover { 
-          background: #f9fafb; 
+        .items-table tr:hover {
+          background: #f9fafb;
         }
-        .total-section { 
-          background: #f8fafc; 
-          padding: 20px; 
-          border-radius: 8px; 
+        .total-section {
+          background: #f8fafc;
+          padding: 20px;
+          border-radius: 8px;
           margin: 30px 0;
           text-align: right;
         }
-        .total-amount { 
-          font-size: 24px; 
-          font-weight: bold; 
+        .total-amount {
+          font-size: 24px;
+          font-weight: bold;
           color: #059669;
           margin-top: 10px;
         }
-        .notes-section { 
-          margin: 30px 0; 
-          padding: 20px; 
-          background: #fef3c7; 
+        .notes-section {
+          margin: 30px 0;
+          padding: 20px;
+          background: #fef3c7;
           border-radius: 8px;
         }
-        .terms-section { 
-          margin: 30px 0; 
-          padding: 20px; 
-          background: #e0f2fe; 
-          border-radius: 8px; 
+        .terms-section {
+          margin: 30px 0;
+          padding: 20px;
+          background: #e0f2fe;
+          border-radius: 8px;
           font-size: 14px;
         }
-        .footer { 
-          margin-top: 40px; 
-          padding-top: 20px; 
-          border-top: 1px solid #e5e7eb; 
-          text-align: center; 
-          color: #6b7280; 
+        .footer {
+          margin-top: 40px;
+          padding-top: 20px;
+          border-top: 1px solid #e5e7eb;
+          text-align: center;
+          color: #6b7280;
           font-size: 14px;
         }
         @media print {
@@ -261,17 +261,17 @@ export const generateInvoicePDF = async (invoice: InvoiceData): Promise<void> =>
       <title>Invoice ${invoice.number}</title>
       <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
+        body {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-          line-height: 1.6; 
-          color: #333; 
+          line-height: 1.6;
+          color: #333;
           padding: 40px;
           max-width: 800px;
           margin: 0 auto;
         }
-        .header { 
-          border-bottom: 3px solid #f97316; 
-          padding-bottom: 20px; 
+        .header {
+          border-bottom: 3px solid #f97316;
+          padding-bottom: 20px;
           margin-bottom: 30px;
           display: flex;
           justify-content: space-between;
@@ -280,57 +280,57 @@ export const generateInvoicePDF = async (invoice: InvoiceData): Promise<void> =>
         .company-info {
           text-align: left;
         }
-        .company-name { 
-          font-size: 28px; 
-          font-weight: bold; 
-          color: #f97316; 
+        .company-name {
+          font-size: 28px;
+          font-weight: bold;
+          color: #f97316;
           margin-bottom: 5px;
         }
         .invoice-info {
           text-align: right;
         }
-        .document-title { 
-          font-size: 36px; 
-          font-weight: bold; 
+        .document-title {
+          font-size: 36px;
+          font-weight: bold;
           color: #f97316;
         }
         .invoice-number {
           font-size: 18px;
           margin-top: 5px;
         }
-        .invoice-details { 
-          display: grid; 
-          grid-template-columns: 1fr 1fr; 
-          gap: 20px; 
+        .invoice-details {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 20px;
           margin: 20px 0;
         }
-        .bill-to { 
-          background: #f8fafc; 
-          padding: 20px; 
+        .bill-to {
+          background: #f8fafc;
+          padding: 20px;
           border-radius: 8px;
         }
         .invoice-meta {
           text-align: right;
         }
-        .items-table { 
-          width: 100%; 
-          border-collapse: collapse; 
+        .items-table {
+          width: 100%;
+          border-collapse: collapse;
           margin: 30px 0;
         }
-        .items-table th, .items-table td { 
-          padding: 12px; 
-          text-align: left; 
+        .items-table th, .items-table td {
+          padding: 12px;
+          text-align: left;
           border-bottom: 1px solid #e5e7eb;
         }
-        .items-table th { 
-          background: #f8fafc; 
+        .items-table th {
+          background: #f8fafc;
           font-weight: bold;
           color: #374151;
         }
-        .items-table .amount { 
-          text-align: right; 
+        .items-table .amount {
+          text-align: right;
         }
-        .totals-section { 
+        .totals-section {
           margin: 30px 0;
           text-align: right;
         }
@@ -359,12 +359,12 @@ export const generateInvoicePDF = async (invoice: InvoiceData): Promise<void> =>
         .status-paid { background: #d1fae5; color: #059669; }
         .status-pending { background: #fef3c7; color: #d97706; }
         .status-overdue { background: #fee2e2; color: #dc2626; }
-        .footer { 
-          margin-top: 40px; 
-          padding-top: 20px; 
-          border-top: 1px solid #e5e7eb; 
-          text-align: center; 
-          color: #6b7280; 
+        .footer {
+          margin-top: 40px;
+          padding-top: 20px;
+          border-top: 1px solid #e5e7eb;
+          text-align: center;
+          color: #6b7280;
           font-size: 14px;
         }
         @media print {
@@ -391,7 +391,7 @@ export const generateInvoicePDF = async (invoice: InvoiceData): Promise<void> =>
           <p>Invoice Date: ${new Date(invoice.createdAt).toLocaleDateString()}</p>
         </div>
         <div class="invoice-meta">
-          <p><strong>Status:</strong> 
+          <p><strong>Status:</strong>
             <span class="status-badge status-${invoice.status}">
               ${invoice.status}
             </span>
@@ -500,29 +500,29 @@ export const generateBulkPDF = async (
       <title>${type.charAt(0).toUpperCase() + type.slice(1)} Report</title>
       <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
+        body {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-          line-height: 1.6; 
-          color: #333; 
+          line-height: 1.6;
+          color: #333;
           padding: 40px;
           max-width: 1000px;
           margin: 0 auto;
         }
-        .header { 
-          border-bottom: 3px solid #f97316; 
-          padding-bottom: 20px; 
+        .header {
+          border-bottom: 3px solid #f97316;
+          padding-bottom: 20px;
           margin-bottom: 30px;
           text-align: center;
         }
-        .company-name { 
-          font-size: 28px; 
-          font-weight: bold; 
-          color: #f97316; 
+        .company-name {
+          font-size: 28px;
+          font-weight: bold;
+          color: #f97316;
           margin-bottom: 5px;
         }
-        .report-title { 
-          font-size: 24px; 
-          font-weight: bold; 
+        .report-title {
+          font-size: 24px;
+          font-weight: bold;
           margin: 20px 0;
         }
         .summary-stats {
@@ -542,29 +542,29 @@ export const generateBulkPDF = async (
           font-weight: bold;
           color: #f97316;
         }
-        .data-table { 
-          width: 100%; 
-          border-collapse: collapse; 
+        .data-table {
+          width: 100%;
+          border-collapse: collapse;
           margin: 30px 0;
           font-size: 14px;
         }
-        .data-table th, .data-table td { 
-          padding: 12px 8px; 
-          text-align: left; 
+        .data-table th, .data-table td {
+          padding: 12px 8px;
+          text-align: left;
           border-bottom: 1px solid #e5e7eb;
         }
-        .data-table th { 
-          background: #f8fafc; 
+        .data-table th {
+          background: #f8fafc;
           font-weight: bold;
           color: #374151;
         }
         .amount { text-align: right; }
-        .footer { 
-          margin-top: 40px; 
-          padding-top: 20px; 
-          border-top: 1px solid #e5e7eb; 
-          text-align: center; 
-          color: #6b7280; 
+        .footer {
+          margin-top: 40px;
+          padding-top: 20px;
+          border-top: 1px solid #e5e7eb;
+          text-align: center;
+          color: #6b7280;
           font-size: 14px;
         }
         @media print {

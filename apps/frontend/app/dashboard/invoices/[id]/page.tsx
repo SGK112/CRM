@@ -1,7 +1,7 @@
 'use client';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { API_BASE } from '../../../../lib/api';
+import { API_BASE } from '@/lib/api';
 import {
   TrashIcon,
   ArrowLeftIcon,

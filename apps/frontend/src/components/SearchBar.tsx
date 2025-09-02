@@ -1,19 +1,19 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import {
-  MagnifyingGlassIcon,
-  DocumentTextIcon,
-  UserGroupIcon,
-  ClipboardDocumentListIcon,
-  ChatBubbleLeftRightIcon,
-  XMarkIcon,
-  ClockIcon,
-  CubeTransparentIcon,
-  RectangleGroupIcon,
-} from '@heroicons/react/24/outline';
 import { useSearch } from '@/hooks/useSearch';
+import {
+    ChatBubbleLeftRightIcon,
+    ClipboardDocumentListIcon,
+    ClockIcon,
+    CubeTransparentIcon,
+    DocumentTextIcon,
+    MagnifyingGlassIcon,
+    RectangleGroupIcon,
+    UserGroupIcon,
+    XMarkIcon,
+} from '@heroicons/react/24/outline';
+import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 import MobileSearchBar from './MobileSearchBar';
 
 interface SearchBarProps {

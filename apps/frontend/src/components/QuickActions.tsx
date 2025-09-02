@@ -1,23 +1,20 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
 import {
-  PlusIcon,
-  XMarkIcon,
-  ClipboardDocumentListIcon,
-  UserGroupIcon,
-  CalendarDaysIcon,
-  DocumentTextIcon,
-  ChatBubbleLeftRightIcon,
-  CurrencyDollarIcon,
-  PencilSquareIcon,
-  PhotoIcon,
-  PhoneIcon,
-  EnvelopeIcon,
-  CloudArrowUpIcon,
-  WrenchScrewdriverIcon,
+    CalendarDaysIcon,
+    ChatBubbleLeftRightIcon,
+    ClipboardDocumentListIcon,
+    CloudArrowUpIcon,
+    CurrencyDollarIcon,
+    EnvelopeIcon,
+    PencilSquareIcon,
+    PhoneIcon,
+    PhotoIcon,
+    PlusIcon,
+    UserGroupIcon,
+    XMarkIcon
 } from '@heroicons/react/24/outline';
+import Link from 'next/link';
 
 interface QuickActionsProps {
   isOpen: boolean;

@@ -19,7 +19,7 @@ import {
   StandardCard,
   StandardSection,
   StandardButton,
-} from '../../../components/ui/StandardPageWrapper';
+} from '@/components/ui/StandardPageWrapper';
 
 // Mock data for phone numbers
 const mockPhoneNumbers = [

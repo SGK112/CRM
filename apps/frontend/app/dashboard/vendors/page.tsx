@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
-import { API_BASE } from '../../../lib/api';
-import { PageHeader } from '../../../components/ui/PageHeader';
+import { API_BASE } from '@/lib/api';
+import { PageHeader } from '@/components/ui/PageHeader';
 import {
   ArrowPathIcon,
   PlusIcon,

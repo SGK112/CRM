@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import PhoneInput from '../../../components/forms/PhoneInput';
+import PhoneInput from '@/components/forms/PhoneInput';
 import { EyeIcon, EyeSlashIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline';
 
 export default function RegisterPage() {

@@ -3,7 +3,7 @@
 /**
  * Production-Ready Communications Test Suite
  * Tests all communications features for both local dev and production environments
- * 
+ *
  * Usage:
  *   node test-production-ready.js                    # Test local development
  *   node test-production-ready.js --prod             # Test production on Render
@@ -102,19 +102,19 @@ async function testCommunicationsConfig() {
   try {
     const response = await api.get('/api/communications/status');
     log('✅', 'Communications config check passed', response.data);
-    
+
     // Check if providers are configured
     const config = response.data;
     const emailConfigured = config.email?.configured || false;
     const smsConfigured = config.sms?.configured || false;
-    
+
     if (!emailConfigured) {
       log('⚠️', 'Email provider not configured - verification emails will use dev URLs');
     }
     if (!smsConfigured) {
       log('⚠️', 'SMS provider not configured - SMS features will be disabled');
     }
-    
+
     return { emailConfigured, smsConfigured };
   } catch (error) {
     if (error.response?.status === 401) {
@@ -131,7 +131,7 @@ async function testCommunicationsConfig() {
 
 async function testUserRegistration() {
   log('📝', 'Testing user registration...');
-  
+
   const userData = {
     email: TEST_EMAIL,
     password: 'TestPassword123!',
@@ -140,16 +140,16 @@ async function testUserRegistration() {
     workspaceName: 'Surprise Granite Test Workspace',
     phone: TEST_PHONE
   };
-  
+
   try {
     const response = await api.post('/api/auth/register', userData);
     log('✅', 'User registration successful', {
       user: response.data.user,
       message: response.data.message
     });
-    
+
     testUserId = response.data.user.id;
-    
+
     // Check if verification email was sent
     if (response.data.message?.includes('verification email')) {
       log('📧', 'Verification email should be sent');
@@ -157,7 +157,7 @@ async function testUserRegistration() {
         log('🔧', 'In development, check console for verification URL');
       }
     }
-    
+
     return response.data;
   } catch (error) {
     if (error.response?.status === 409 || error.response?.status === 400) {
@@ -174,7 +174,7 @@ async function testUserRegistration() {
 
 async function testEmailVerification() {
   log('✉️', 'Testing email verification...');
-  
+
   if (environment === 'production') {
     log('📧', 'Check your email for verification link and click it');
     const verified = await prompt('Have you clicked the verification link? (y/n): ');
@@ -190,26 +190,26 @@ async function testEmailVerification() {
       const clicked = await prompt('Click the URL and press Enter when done...');
     }
   }
-  
+
   log('✅', 'Email verification completed');
   return true;
 }
 
 async function testUserLogin() {
   log('🔐', 'Testing user login...');
-  
+
   const loginData = {
     email: TEST_EMAIL,
     password: 'TestPassword123!'
   };
-  
+
   try {
     const response = await api.post('/api/auth/login', loginData);
     log('✅', 'User login successful');
-    
+
     authToken = response.data.access_token;
     api.defaults.headers.Authorization = `Bearer ${authToken}`;
-    
+
     return response.data;
   } catch (error) {
     log('❌', 'User login failed', {
@@ -222,19 +222,19 @@ async function testUserLogin() {
 
 async function testForgotPassword() {
   log('🔑', 'Testing forgot password flow...');
-  
+
   try {
     const response = await api.post('/api/auth/forgot-password', {
       email: TEST_EMAIL
     });
     log('✅', 'Forgot password request successful', response.data);
-    
+
     if (environment === 'production') {
       log('📱', 'Check your phone for SMS with reset instructions');
     } else {
       log('🔧', 'In development mode - check console for dev reset flow');
     }
-    
+
     return response.data;
   } catch (error) {
     log('❌', 'Forgot password failed', {
@@ -247,7 +247,7 @@ async function testForgotPassword() {
 
 async function testNotifications() {
   log('🔔', 'Testing notifications system...');
-  
+
   try {
     // Get user notifications
     const response = await api.get('/api/notifications');
@@ -255,17 +255,17 @@ async function testNotifications() {
       count: response.data.length,
       notifications: response.data.slice(0, 3) // Show first 3
     });
-    
+
     // Test creating a notification
     const testNotification = {
       title: 'Test Notification',
       message: 'This is a test notification from the communications test suite',
       type: 'info'
     };
-    
+
     const createResponse = await api.post('/api/notifications', testNotification);
     log('✅', 'Test notification created', createResponse.data);
-    
+
     return true;
   } catch (error) {
     log('❌', 'Notifications test failed', {
@@ -278,7 +278,7 @@ async function testNotifications() {
 
 async function testEmailTemplates() {
   log('📨', 'Testing email templates...');
-  
+
   const templates = [
     'welcome',
     'estimate-ready',
@@ -286,7 +286,7 @@ async function testEmailTemplates() {
     'payment-reminder',
     'project-update'
   ];
-  
+
   for (const template of templates) {
     try {
       const response = await api.post('/api/communications/test-email', {
@@ -312,21 +312,21 @@ async function testEmailTemplates() {
 
 async function testSMSMessaging() {
   log('📱', 'Testing SMS messaging...');
-  
+
   try {
     const response = await api.post('/api/communications/test-sms', {
       phoneNumber: TEST_PHONE,
       message: 'Test SMS from Remodely CRM - your communications are working!'
     });
     log('✅', 'SMS sent successfully', response.data);
-    
+
     const received = await prompt('Did you receive the test SMS? (y/n): ');
     if (received.toLowerCase() === 'y') {
       log('✅', 'SMS delivery confirmed');
     } else {
       log('⚠️', 'SMS delivery not confirmed');
     }
-    
+
     return true;
   } catch (error) {
     log('❌', 'SMS test failed', {
@@ -339,7 +339,7 @@ async function testSMSMessaging() {
 
 async function testSchedulingEmails() {
   log('📅', 'Testing scheduling email notifications...');
-  
+
   try {
     // Create a test appointment
     const appointmentData = {
@@ -350,14 +350,14 @@ async function testSchedulingEmails() {
       scheduledDate: new Date(Date.now() + 24 * 60 * 60 * 1000), // Tomorrow
       notes: 'Test appointment from communications test suite'
     };
-    
+
     const response = await api.post('/api/appointments', appointmentData);
     log('✅', 'Test appointment created', response.data);
-    
+
     // Test appointment confirmation email
     const confirmResponse = await api.post(`/api/appointments/${response.data.id}/send-confirmation`);
     log('✅', 'Appointment confirmation email sent');
-    
+
     return true;
   } catch (error) {
     log('❌', 'Scheduling email test failed', {
@@ -370,7 +370,7 @@ async function testSchedulingEmails() {
 
 async function testBillingEmails() {
   log('💳', 'Testing billing email notifications...');
-  
+
   try {
     // Test invoice email
     const invoiceData = {
@@ -379,10 +379,10 @@ async function testBillingEmails() {
       description: 'Test invoice from communications test suite',
       dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 1 week from now
     };
-    
+
     const response = await api.post('/api/billing/test-invoice-email', invoiceData);
     log('✅', 'Invoice email sent successfully', response.data);
-    
+
     // Test payment reminder
     const reminderResponse = await api.post('/api/billing/test-reminder-email', {
       clientEmail: TEST_EMAIL,
@@ -390,7 +390,7 @@ async function testBillingEmails() {
       daysOverdue: 5
     });
     log('✅', 'Payment reminder email sent successfully');
-    
+
     return true;
   } catch (error) {
     log('❌', 'Billing email test failed', {
@@ -403,7 +403,7 @@ async function testBillingEmails() {
 
 async function testWebhooksAndIntegrations() {
   log('🔗', 'Testing webhooks and integrations...');
-  
+
   try {
     // Test Stripe webhook simulation
     const webhookResponse = await api.post('/api/webhooks/test', {
@@ -411,7 +411,7 @@ async function testWebhooksAndIntegrations() {
       data: { message: 'Test webhook from communications suite' }
     });
     log('✅', 'Webhook test successful', webhookResponse.data);
-    
+
     return true;
   } catch (error) {
     log('❌', 'Webhook test failed', {
@@ -438,31 +438,31 @@ async function runAllTests() {
     billingEmails: false,
     webhooks: false
   };
-  
+
   try {
     console.log('\n🏥 HEALTH CHECKS');
     console.log('='.repeat(50));
     results.serverHealth = await testServerHealth();
-    
+
     if (!results.serverHealth) {
       log('💥', 'Server is not healthy - aborting tests');
       return results;
     }
-    
+
     results.communicationsConfig = await testCommunicationsConfig();
-    
+
     console.log('\n🔐 AUTHENTICATION TESTS');
     console.log('='.repeat(50));
-    
+
     try {
       await testUserRegistration();
       results.registration = true;
     } catch (error) {
       // Continue with existing user
     }
-    
+
     results.emailVerification = await testEmailVerification();
-    
+
     try {
       await testUserLogin();
       results.login = true;
@@ -470,33 +470,33 @@ async function runAllTests() {
       log('💥', 'Cannot continue without authentication');
       return results;
     }
-    
+
     console.log('\n📧 EMAIL & SMS TESTS');
     console.log('='.repeat(50));
     results.forgotPassword = await testForgotPassword() !== null;
     results.emailTemplates = await testEmailTemplates();
     results.smsMessaging = await testSMSMessaging();
-    
+
     console.log('\n🔔 NOTIFICATION TESTS');
     console.log('='.repeat(50));
     results.notifications = await testNotifications();
-    
+
     console.log('\n📅 SCHEDULING TESTS');
     console.log('='.repeat(50));
     results.schedulingEmails = await testSchedulingEmails();
-    
+
     console.log('\n💳 BILLING TESTS');
     console.log('='.repeat(50));
     results.billingEmails = await testBillingEmails();
-    
+
     console.log('\n🔗 INTEGRATION TESTS');
     console.log('='.repeat(50));
     results.webhooks = await testWebhooksAndIntegrations();
-    
+
   } catch (error) {
     log('💥', 'Fatal error during testing', error.message);
   }
-  
+
   return results;
 }
 
@@ -504,7 +504,7 @@ async function printSummary(results) {
   console.log('\n' + '='.repeat(80));
   console.log('📊 TEST RESULTS SUMMARY');
   console.log('='.repeat(80));
-  
+
   const tests = [
     ['Server Health', results.serverHealth],
     ['User Registration', results.registration],
@@ -518,10 +518,10 @@ async function printSummary(results) {
     ['Billing Emails', results.billingEmails],
     ['Webhooks', results.webhooks]
   ];
-  
+
   let passed = 0;
   let total = 0;
-  
+
   tests.forEach(([name, result]) => {
     if (result !== null) {
       total++;
@@ -535,17 +535,17 @@ async function printSummary(results) {
       console.log(`⚠️  ${name} (skipped)`);
     }
   });
-  
+
   console.log('\n' + '='.repeat(80));
   console.log(`📈 OVERALL SCORE: ${passed}/${total} tests passed (${Math.round(passed/total*100)}%)`);
-  
+
   if (results.communicationsConfig) {
     const { emailConfigured, smsConfigured } = results.communicationsConfig;
     console.log('\n📋 CONFIGURATION STATUS:');
     console.log(`📧 Email Provider: ${emailConfigured ? '✅ Configured' : '❌ Not configured'}`);
     console.log(`📱 SMS Provider: ${smsConfigured ? '✅ Configured' : '❌ Not configured'}`);
   }
-  
+
   console.log('\n🚀 DEPLOYMENT STATUS:');
   if (passed === total && total > 0) {
     console.log('✅ All tests passed - Ready for production deployment!');
@@ -554,12 +554,12 @@ async function printSummary(results) {
   } else {
     console.log('❌ Multiple test failures - Needs attention before deployment');
   }
-  
+
   console.log('\n🔗 Quick Links:');
   console.log(`Frontend: ${frontendURL}`);
   console.log(`Backend API: ${baseURL}/api/docs`);
   console.log(`Health Check: ${baseURL}/api/health`);
-  
+
   if (environment === 'local') {
     console.log('\n💡 Next Steps:');
     console.log('1. Fix any failing tests');

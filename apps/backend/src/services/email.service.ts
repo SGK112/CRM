@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as nodemailer from 'nodemailer';
 import * as sgMail from '@sendgrid/mail';
+import * as nodemailer from 'nodemailer';
 
 export interface SendEmailOptions {
   to: string;

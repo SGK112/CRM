@@ -1,26 +1,25 @@
 import {
-  Injectable,
-  NotFoundException,
-  ConflictException,
-  BadRequestException,
+    ConflictException,
+    Injectable,
+    NotFoundException
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Appointment, AppointmentDocument } from './schemas/appointment.schema';
 import { EmailService } from '../services/email.service';
 import { TwilioService } from '../services/twilio.service';
 import {
-  CreateAppointmentDto,
-  UpdateAppointmentDto,
-  AvailabilityCheckDto,
-  CalendarEventDto,
-  AppointmentStatus,
-  AppointmentType,
-  AppointmentFilters,
-  PaginationOptions,
-  AppointmentStats,
-  ConflictCheckResult,
+    AppointmentFilters,
+    AppointmentStats,
+    AppointmentStatus,
+    AppointmentType,
+    AvailabilityCheckDto,
+    CalendarEventDto,
+    ConflictCheckResult,
+    CreateAppointmentDto,
+    PaginationOptions,
+    UpdateAppointmentDto,
 } from './dto/appointment.dto';
+import { Appointment, AppointmentDocument } from './schemas/appointment.schema';
 
 @Injectable()
 export class AppointmentsService {

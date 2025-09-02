@@ -1,8 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { AppointmentsService } from '../appointments/appointments.service';
+import { AppointmentType, CalendarEventDto } from '../appointments/dto/appointment.dto';
 import { GoogleCalendarService } from '../integrations/google-calendar.service';
-import { CalendarEventDto } from '../appointments/dto/appointment.dto';
-import { AppointmentType } from '../appointments/dto/appointment.dto';
 
 @Injectable()
 export class UnifiedCalendarService {

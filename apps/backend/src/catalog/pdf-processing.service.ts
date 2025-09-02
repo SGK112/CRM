@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import * as fs from 'fs';
+import { Model } from 'mongoose';
 import * as pdfParse from 'pdf-parse';
 import { PriceItem, PriceItemDocument } from '../pricing/schemas/price-item.schema';
 import { Vendor, VendorDocument } from '../vendors/schemas/vendor.schema';

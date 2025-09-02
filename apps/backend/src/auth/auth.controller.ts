@@ -1,13 +1,13 @@
-import { Controller, Post, Body, UseGuards, Request, Get, Req, Res, Logger } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { AuthService } from './auth.service';
-import { LoginDto, RegisterDto } from './dto/auth.dto';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { AuthGuard } from '@nestjs/passport';
-import { EmailVerificationService } from './email-verification.service';
+import { Body, Controller, Get, Logger, Post, Req, Request, Res, UseGuards } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { AuthGuard } from '@nestjs/passport';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '../users/schemas/user.schema';
+import { AuthService } from './auth.service';
+import { LoginDto, RegisterDto } from './dto/auth.dto';
+import { EmailVerificationService } from './email-verification.service';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @ApiTags('Authentication')
 // Controller base is '/auth'. With global prefix 'api', most routes are available under '/api/auth/*'.

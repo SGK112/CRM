@@ -1,18 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useTheme } from '../../../components/ThemeProvider';
-import CommunicationSettings from '../../../components/CommunicationSettings';
 import {
-  UserIcon,
-  BellIcon,
-  ShieldCheckIcon,
-  CreditCardIcon,
-  KeyIcon,
-  EnvelopeIcon,
-  SwatchIcon
+    BellIcon,
+    CreditCardIcon,
+    EnvelopeIcon,
+    KeyIcon,
+    ShieldCheckIcon,
+    SwatchIcon,
+    UserIcon
 } from '@heroicons/react/24/outline';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import CommunicationSettings from '../../../components/CommunicationSettings';
+import { useTheme } from '../../../components/ThemeProvider';
 
 // (Integrations list moved to a dedicated page)
 

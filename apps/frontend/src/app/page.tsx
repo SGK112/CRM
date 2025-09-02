@@ -1,30 +1,30 @@
 'use client';
 
-import { RevealInit } from '@/components/RevealInit'
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
+import { RevealInit } from '@/components/RevealInit';
 import {
-  ShieldCheckIcon,
-  ChartBarIcon,
-  CurrencyDollarIcon,
-  UserGroupIcon,
-  PhotoIcon,
-  CalendarIcon,
-  BuildingOfficeIcon,
-  WrenchScrewdriverIcon,
-  CogIcon,
-  ArrowRightIcon,
-  PlayIcon,
-  CheckIcon,
-  StarIcon,
-  ClockIcon,
-  DocumentTextIcon,
-  SpeakerWaveIcon,
-  BoltIcon,
-  RocketLaunchIcon,
-  Bars3Icon,
-  XMarkIcon
-} from '@heroicons/react/24/outline'
+    ArrowRightIcon,
+    Bars3Icon,
+    BoltIcon,
+    BuildingOfficeIcon,
+    CalendarIcon,
+    ChartBarIcon,
+    CheckIcon,
+    ClockIcon,
+    CogIcon,
+    CurrencyDollarIcon,
+    DocumentTextIcon,
+    PhotoIcon,
+    PlayIcon,
+    RocketLaunchIcon,
+    ShieldCheckIcon,
+    SpeakerWaveIcon,
+    StarIcon,
+    UserGroupIcon,
+    WrenchScrewdriverIcon,
+    XMarkIcon
+} from '@heroicons/react/24/outline';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 // Typing animation component
 interface TypewriterTextProps {

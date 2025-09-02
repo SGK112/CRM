@@ -1,16 +1,16 @@
 import {
-  Injectable,
-  BadRequestException,
-  InternalServerErrorException,
-  Logger,
+    BadRequestException,
+    Injectable,
+    InternalServerErrorException,
+    Logger,
 } from '@nestjs/common';
-import { EmailService } from '../services/email.service';
-import { TwilioService } from '../services/twilio.service';
-import { SendEmailDto, SendSmsDto } from './dto/communications.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Client, ClientDocument } from '../clients/schemas/client.schema';
+import { EmailService } from '../services/email.service';
+import { TwilioService } from '../services/twilio.service';
 import { User, UserDocument } from '../users/schemas/user.schema';
+import { SendEmailDto, SendSmsDto } from './dto/communications.dto';
 
 @Injectable()
 export class CommunicationsService {
@@ -236,11 +236,11 @@ export class CommunicationsService {
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="padding: 20px; background-color: #f8f9fa; border-radius: 8px;">
           <p>Dear ${client.firstName} ${client.lastName},</p>
-          
+
           <div style="margin: 20px 0; line-height: 1.6;">
             ${message.replace(/\n/g, '<br>')}
           </div>
-          
+
           <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6;">
             <p style="margin: 0;"><strong>${user.firstName} ${user.lastName}</strong></p>
             <p style="margin: 5px 0; color: #6c757d;">${user.email}</p>

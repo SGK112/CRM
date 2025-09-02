@@ -1,6 +1,5 @@
 'use client';
 
-import { BiRocket } from './icons/bootstrap';
 import Link from 'next/link';
 import React from 'react';
 

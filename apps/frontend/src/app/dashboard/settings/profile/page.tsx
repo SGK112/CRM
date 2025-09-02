@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { UserIcon, CameraIcon, KeyIcon, BellIcon } from '@heroicons/react/24/outline';
+import { BellIcon, CameraIcon, KeyIcon, UserIcon } from '@heroicons/react/24/outline';
+import { useEffect, useState } from 'react';
 
 interface UserProfile {
   id: string;

@@ -55,14 +55,14 @@ async function testCommunicationsConfig() {
     // Test without auth first
     const response = await api.get('/api/communications/status');
     log('✅', 'Communications config accessible', response.data);
-    
+
     const { email, sms } = response.data;
     const emailConfigured = email?.configured || false;
     const smsConfigured = sms?.configured || false;
-    
+
     log('📧', `Email Provider: ${emailConfigured ? '✅ Configured' : '❌ Not configured'}`);
     log('📱', `SMS Provider: ${smsConfigured ? '✅ Configured' : '❌ Not configured'}`);
-    
+
     return { emailConfigured, smsConfigured };
   } catch (error) {
     if (error.response?.status === 401) {
@@ -96,7 +96,7 @@ async function testFrontendAccess() {
 
 async function testRegistrationEndpoint() {
   log('📝', 'Testing registration endpoint...');
-  
+
   const testUser = {
     email: `test+${Date.now()}@example.com`,
     password: 'TestPassword123!',
@@ -105,7 +105,7 @@ async function testRegistrationEndpoint() {
     workspaceName: 'Test Workspace',
     phone: '+15551234567'
   };
-  
+
   try {
     const response = await api.post('/api/auth/register', testUser);
     log('✅', 'Registration endpoint working', {
@@ -137,7 +137,7 @@ async function testSwaggerDocs() {
   } catch (error) {
     // Try HTML endpoint
     try {
-      const htmlResponse = await axios.get(`${PRODUCTION_CONFIG.apiUrl}/api/docs`, { 
+      const htmlResponse = await axios.get(`${PRODUCTION_CONFIG.apiUrl}/api/docs`, {
         timeout: 10000,
         headers: { 'Accept': 'text/html' }
       });
@@ -179,22 +179,22 @@ async function testCorsConfiguration() {
 
 async function runProductionTests() {
   const results = {};
-  
+
   console.log('\n🏥 PRODUCTION HEALTH CHECKS');
   console.log('='.repeat(50));
   results.health = await testProductionHealth();
   results.frontend = await testFrontendAccess();
-  
+
   console.log('\n⚙️ CONFIGURATION CHECKS');
   console.log('='.repeat(50));
   results.communications = await testCommunicationsConfig();
   results.cors = await testCorsConfiguration();
-  
+
   console.log('\n📡 API ENDPOINT CHECKS');
   console.log('='.repeat(50));
   results.registration = await testRegistrationEndpoint();
   results.docs = await testSwaggerDocs();
-  
+
   return results;
 }
 
@@ -202,7 +202,7 @@ async function printProductionSummary(results) {
   console.log('\n' + '='.repeat(80));
   console.log('📊 PRODUCTION DEPLOYMENT TEST RESULTS');
   console.log('='.repeat(80));
-  
+
   const tests = [
     ['Backend Health', results.health],
     ['Frontend Accessibility', results.frontend],
@@ -210,10 +210,10 @@ async function printProductionSummary(results) {
     ['API Documentation', results.docs],
     ['CORS Configuration', results.cors]
   ];
-  
+
   let passed = 0;
-  let total = tests.length;
-  
+  const total = tests.length;
+
   tests.forEach(([name, result]) => {
     if (result) {
       passed++;
@@ -222,10 +222,10 @@ async function printProductionSummary(results) {
       console.log(`❌ ${name}`);
     }
   });
-  
+
   console.log('\n' + '='.repeat(80));
   console.log(`📈 PRODUCTION SCORE: ${passed}/${total} tests passed (${Math.round(passed/total*100)}%)`);
-  
+
   if (results.communications) {
     const { emailConfigured, smsConfigured } = results.communications;
     console.log('\n📋 COMMUNICATIONS STATUS:');
@@ -236,7 +236,7 @@ async function printProductionSummary(results) {
       console.log(`📱 SMS Provider: ${smsConfigured ? '✅ Configured' : '❌ Not configured'}`);
     }
   }
-  
+
   console.log('\n🚀 DEPLOYMENT STATUS:');
   if (passed === total) {
     console.log('✅ All production tests passed - Deployment is healthy!');
@@ -245,12 +245,12 @@ async function printProductionSummary(results) {
   } else {
     console.log('❌ Multiple test failures - Deployment needs attention');
   }
-  
+
   console.log('\n🔗 Production Links:');
   console.log(`Frontend: ${PRODUCTION_CONFIG.frontendUrl}`);
   console.log(`Backend API: ${PRODUCTION_CONFIG.apiUrl}/api/docs`);
   console.log(`Health Check: ${PRODUCTION_CONFIG.apiUrl}/api/health`);
-  
+
   console.log('\n💡 Next Steps:');
   if (passed === total) {
     console.log('✅ Production deployment is ready');

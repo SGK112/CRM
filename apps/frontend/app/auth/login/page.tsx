@@ -1,10 +1,10 @@
 'use client';
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect } from 'react';
+import { EyeIcon, EyeSlashIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { EyeIcon, EyeSlashIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline';
+import { useEffect, useState } from 'react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -26,9 +26,9 @@ export default function LoginPage() {
       // try rewrite first
       try {
         const res = await fetch('/api/health', { cache: 'no-store' });
-        if (!cancelled && res.ok) { 
-          setBackendUp(true); 
-          setCheckingHealth(false); 
+        if (!cancelled && res.ok) {
+          setBackendUp(true);
+          setCheckingHealth(false);
           return;
         }
       } catch {
@@ -53,7 +53,7 @@ export default function LoginPage() {
       }
     };
     ping();
-    return () => { 
+    return () => {
       cancelled = true;
     };
   }, []);
@@ -73,10 +73,10 @@ export default function LoginPage() {
       });
 
       let data: any = null;
-      try { 
-        data = await response.json(); 
-      } catch { 
-        /* ignore */ 
+      try {
+        data = await response.json();
+      } catch {
+        /* ignore */
       }
 
       if (response.ok) {
@@ -128,7 +128,7 @@ export default function LoginPage() {
       {/* Background decorative elements */}
       <div className="pointer-events-none select-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-amber-600/10 blur-3xl" />
       <div className="pointer-events-none select-none absolute top-1/3 -right-40 h-[28rem] w-[28rem] rounded-full bg-amber-500/5 blur-3xl" />
-      
+
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center mb-6">
           <div className="flex items-center gap-3">
@@ -141,14 +141,14 @@ export default function LoginPage() {
             </div>
           </div>
         </div>
-        
+
         <h2 className="mt-2 text-center text-3xl font-bold tracking-tight text-[var(--text)]">
           Welcome back
         </h2>
         <p className="mt-2 text-center text-base text-[var(--text-muted)]">
           Sign in to your workspace
         </p>
-        
+
         {!backendUp && (
           <div className="mt-2 text-center">
             <p className="text-xs text-red-400">Backend offline or unreachable. Authentication may fail.</p>
@@ -160,8 +160,8 @@ export default function LoginPage() {
                   setCheckingHealth(true);
                   try {
                     const res = await fetch('/api/health', { cache: 'no-store' });
-                    if (res.ok) { 
-                      setBackendUp(true); 
+                    if (res.ok) {
+                      setBackendUp(true);
                       return;
                     }
                   } catch {
@@ -175,7 +175,7 @@ export default function LoginPage() {
                     setBackendUp(res2.ok);
                   } catch {
                     setBackendUp(false);
-                  } finally { 
+                  } finally {
                     setCheckingHealth(false);
                   }
                 };
@@ -188,7 +188,7 @@ export default function LoginPage() {
             </button>
           </div>
         )}
-        
+
         <p className="mt-2 text-center text-sm text-[var(--text-dim)]">
           Or{' '}
           <Link href="/auth/register" className="font-medium text-amber-400 hover:text-amber-300 transition-colors">
@@ -205,7 +205,7 @@ export default function LoginPage() {
                 ✅ Email verified successfully! You can now log in to your account.
               </div>
             )}
-            
+
             {error && (
               <div className="bg-red-500/10 border border-red-500/40 text-red-300 px-4 py-3 rounded-md text-sm">
                 {error}

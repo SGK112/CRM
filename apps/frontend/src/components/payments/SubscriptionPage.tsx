@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { CheckIcon, CreditCardIcon, SparklesIcon, StarIcon } from '@heroicons/react/24/outline';
+import { CardElement, Elements, useElements, useStripe } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { CreditCardIcon, CheckIcon, StarIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import React, { useEffect, useState } from 'react';
 
 // Initialize Stripe with fallback
 const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY

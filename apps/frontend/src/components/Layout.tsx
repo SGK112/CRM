@@ -1,49 +1,49 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import Link from 'next/link';
-import SearchBar from './SearchBar';
-import AIAssistant from './AIAssistant';
-import RouteMemoryTracker from './RouteMemoryTracker';
-import { useInboxStats } from '../hooks/useInboxStats';
-import {
-  HomeIcon,
-  ClipboardDocumentListIcon,
-  UserGroupIcon,
-  CalendarDaysIcon,
-  DocumentTextIcon,
-  CogIcon,
-  Bars3Icon,
-  XMarkIcon,
-  BellIcon,
-  PhoneIcon,
-  ChevronDownIcon,
-  WrenchScrewdriverIcon,
-  ChartBarIcon,
-  ShoppingBagIcon,
-  CalculatorIcon,
-  SparklesIcon,
-  QuestionMarkCircleIcon,
-  ChevronUpIcon,
-  ArrowsPointingOutIcon,
-  MicrophoneIcon,
-  LockClosedIcon,
-  WalletIcon,
-  ShieldCheckIcon,
-  CreditCardIcon,
-  InboxIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-} from '@heroicons/react/24/outline';
-import Logo from './Logo';
-import { ThemeProvider } from './ThemeProvider';
-import { AIProvider } from '../hooks/useAI';
-import ThemeToggle from './ThemeToggle';
-import AIEnable from './AIEnable';
-import { mobileOptimized, mobile } from '@/lib/mobile';
-import { PlanBadge } from './CapabilityGate';
+import { mobile, mobileOptimized } from '@/lib/mobile';
 import { getUserPlan } from '@/lib/plans';
+import {
+    ArrowsPointingOutIcon,
+    Bars3Icon,
+    BellIcon,
+    CalculatorIcon,
+    CalendarDaysIcon,
+    ChartBarIcon,
+    ChevronDownIcon,
+    ChevronLeftIcon,
+    ChevronRightIcon,
+    ChevronUpIcon,
+    ClipboardDocumentListIcon,
+    CogIcon,
+    CreditCardIcon,
+    DocumentTextIcon,
+    HomeIcon,
+    InboxIcon,
+    LockClosedIcon,
+    MicrophoneIcon,
+    PhoneIcon,
+    QuestionMarkCircleIcon,
+    ShieldCheckIcon,
+    ShoppingBagIcon,
+    SparklesIcon,
+    UserGroupIcon,
+    WalletIcon,
+    WrenchScrewdriverIcon,
+    XMarkIcon,
+} from '@heroicons/react/24/outline';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { AIProvider } from '../hooks/useAI';
+import { useInboxStats } from '../hooks/useInboxStats';
+import AIAssistant from './AIAssistant';
+import AIEnable from './AIEnable';
+import { PlanBadge } from './CapabilityGate';
+import Logo from './Logo';
+import RouteMemoryTracker from './RouteMemoryTracker';
+import SearchBar from './SearchBar';
+import { ThemeProvider } from './ThemeProvider';
+import ThemeToggle from './ThemeToggle';
 
 interface User {
   id: string;

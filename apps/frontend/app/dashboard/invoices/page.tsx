@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState, useMemo } from 'react';
-import { API_BASE } from '../../../lib/api';
-import { PageHeader } from '../../../components/ui/PageHeader';
+import { API_BASE } from '@/lib/api';
+import { PageHeader } from '@/components/ui/PageHeader';
 import { generateInvoicePDF, generateBulkPDF, downloadDataAsCSV } from '@/lib/pdf-generator';
 import { Download } from 'lucide-react';
 

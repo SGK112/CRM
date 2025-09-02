@@ -1,14 +1,14 @@
 'use client';
+import {
+    CalendarDaysIcon,
+    CheckIcon,
+    DocumentTextIcon,
+    MapPinIcon,
+    UserIcon,
+    XMarkIcon
+} from '@heroicons/react/24/outline';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import {
-  CalendarDaysIcon,
-  MapPinIcon,
-  UserIcon,
-  DocumentTextIcon,
-  XMarkIcon,
-  CheckIcon
-} from '@heroicons/react/24/outline';
 
 export default function NewAppointment() {
   const router = useRouter();

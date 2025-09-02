@@ -7,35 +7,41 @@ This is a simplified version of your CRM system that focuses on core business fu
 ### Features Included:
 
 #### 📊 **Dashboard**
+
 - Business metrics overview
 - Quick stats (clients, projects, revenue, appointments)
 - Recent projects display
 - Quick action buttons
 
 #### 👥 **Client Management**
+
 - Client database
 - Contact information
 - Project associations
 - Simple search and filtering
 
-#### 🏗️ **Project Management** 
+#### 🏗️ **Project Management**
+
 - Project creation and tracking
 - Status management (Planning → In Progress → Completed)
 - Budget tracking
 - Progress indicators
 
 #### 📅 **Calendar & Scheduling**
+
 - Appointment scheduling
 - Calendar view
 - Meeting management
 - Time tracking
 
 #### 💰 **Sales & Finance**
+
 - **Estimates**: Create and send estimates to clients
 - **Invoices**: Generate invoices from estimates
 - **Reports**: Basic financial reporting and analytics
 
 #### ⚙️ **Settings**
+
 - User preferences
 - Basic configuration
 - Profile management
@@ -45,7 +51,7 @@ This is a simplified version of your CRM system that focuses on core business fu
 ```
 📁 Core CRM
 ├── Dashboard
-├── Clients  
+├── Clients
 ├── Projects
 └── Calendar
 
@@ -61,6 +67,7 @@ This is a simplified version of your CRM system that focuses on core business fu
 ### Key Differences from Full CRM:
 
 **Removed Features:**
+
 - ❌ AI Chat Assistant
 - ❌ Voice Agents
 - ❌ Advanced AI Features
@@ -71,8 +78,9 @@ This is a simplified version of your CRM system that focuses on core business fu
 - ❌ Complex Admin Features
 
 **Kept Essential Features:**
+
 - ✅ Client & Project Management
-- ✅ Estimates & Invoices  
+- ✅ Estimates & Invoices
 - ✅ Calendar & Scheduling
 - ✅ Basic Reporting
 - ✅ Clean, Professional UI

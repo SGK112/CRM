@@ -23,7 +23,7 @@ import {
   StandardSection,
   StandardGrid,
   StandardButton,
-} from '../../../components/ui/StandardPageWrapper';
+} from '@/components/ui/StandardPageWrapper';
 import { getUserPlan } from '@/lib/plans';
 import { CapabilityGate } from '@/components/CapabilityGate';
 import { useWallet } from '@/hooks/useWallet';

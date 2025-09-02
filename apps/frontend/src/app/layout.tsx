@@ -1,9 +1,9 @@
-import './globals.css'
 import { Inter } from 'next/font/google'
-import { Providers } from './providers'
-import { ConditionalTopBar, ConditionalFooter } from '../components/ConditionalLayout'
+import { ConditionalFooter, ConditionalTopBar } from '../components/ConditionalLayout'
 import { ThemeProvider } from '../components/ThemeProvider'
 import { SubscriptionProvider } from '../components/subscription-context'
+import './globals.css'
+import { Providers } from './providers'
 
 const inter = Inter({ subsets: ['latin'] })
 

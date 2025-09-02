@@ -1,23 +1,23 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 // import CalendarView from '../../../components/ui/CalendarView';
 import {
-  CalendarDaysIcon,
-  ClockIcon,
-  PlusIcon,
-  MagnifyingGlassIcon,
-  ChevronRightIcon,
-  ViewColumnsIcon,
-  Squares2X2Icon,
-  ListBulletIcon,
-  FunnelIcon,
-  UserIcon,
-  MapPinIcon,
-  CheckCircleIcon,
-  ExclamationTriangleIcon,
-  ClockIcon as ClockSolidIcon,
+    CalendarDaysIcon,
+    CheckCircleIcon,
+    ChevronRightIcon,
+    ClockIcon,
+    ClockIcon as ClockSolidIcon,
+    ExclamationTriangleIcon,
+    FunnelIcon,
+    ListBulletIcon,
+    MagnifyingGlassIcon,
+    MapPinIcon,
+    PlusIcon,
+    Squares2X2Icon,
+    UserIcon,
+    ViewColumnsIcon,
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon as CheckCircleSolidIcon } from '@heroicons/react/24/solid';
 

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Card, Pill, Heading } from '../../../components/ui/DesignSystem';
+import { Button, Card, Pill, Heading } from '@/components/ui/DesignSystem';
 import {
   DocumentTextIcon,
   FolderIcon,

@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { CommunicationsController } from './communications.controller';
-import { CommunicationsService } from './communications.service';
+import { Client, ClientSchema } from '../clients/schemas/client.schema';
+import { InboxModule } from '../inbox/inbox.module';
 import { EmailService } from '../services/email.service';
 import { TwilioService } from '../services/twilio.service';
-import { Client, ClientSchema } from '../clients/schemas/client.schema';
 import { User, UserSchema } from '../users/schemas/user.schema';
-import { InboxModule } from '../inbox/inbox.module';
+import { CommunicationsController } from './communications.controller';
+import { CommunicationsService } from './communications.service';
 
 @Module({
   imports: [

@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Invoice, InvoiceSchema } from './schemas/invoice.schema';
-import { InvoicesService } from './invoices.service';
-import { InvoicesController } from './invoices.controller';
-import { Estimate, EstimateSchema } from '../estimates/schemas/estimate.schema';
 import { Client, ClientSchema } from '../clients/schemas/client.schema';
+import { Estimate, EstimateSchema } from '../estimates/schemas/estimate.schema';
 import { EmailService } from '../services/email.service';
+import { InvoicesController } from './invoices.controller';
+import { InvoicesService } from './invoices.service';
+import { Invoice, InvoiceSchema } from './schemas/invoice.schema';
 
 @Module({
   imports: [

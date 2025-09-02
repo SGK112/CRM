@@ -8,7 +8,7 @@ import {
   ClockIcon,
   CurrencyDollarIcon,
 } from '@heroicons/react/24/outline';
-import JobApplicationModal from '../../components/JobApplicationModal';
+import JobApplicationModal from '@/components/JobApplicationModal';
 
 // Note: Since this is now a client component, we'll handle metadata differently
 // You might want to move metadata to layout.tsx or use next/head

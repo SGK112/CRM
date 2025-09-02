@@ -25,7 +25,7 @@ import {
   StandardGrid,
   StandardButton,
   StandardStat,
-} from '../../../components/ui/StandardPageWrapper';
+} from '@/components/ui/StandardPageWrapper';
 
 interface Estimate {
   id: string;

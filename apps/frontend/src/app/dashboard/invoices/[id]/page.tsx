@@ -1,9 +1,9 @@
 'use client';
+import { ArrowDownTrayIcon, ArrowLeftIcon, PaperAirplaneIcon, TrashIcon } from '@heroicons/react/24/outline';
+import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { API_BASE } from '../../../../lib/api';
-import { TrashIcon, ArrowLeftIcon, PaperAirplaneIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
-import Link from 'next/link';
+import { API_BASE } from '@/lib/api';
 
 interface LineItem { name:string; description?:string; quantity:number; unitPrice:number; total:number; taxable:boolean; }
 interface Invoice { _id:string; number:string; status:string; items:LineItem[]; subtotal:number; taxRate:number; taxAmount:number; total:number; amountPaid:number; notes?:string; dueDate?:string; }

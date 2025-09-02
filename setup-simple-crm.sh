@@ -51,7 +51,7 @@ export const simpleNavigation = [
     ]
   },
   {
-    label: 'Settings', 
+    label: 'Settings',
     items: [
       { name: 'Settings', href: '/dashboard/settings', icon: CogIcon }
     ]
@@ -84,7 +84,7 @@ http://localhost:3005/dashboard/simple
 
 ## Core Features Available:
 - Dashboard: Overview and stats
-- Clients: Customer management  
+- Clients: Customer management
 - Projects: Project tracking
 - Calendar: Appointments
 - Estimates: Quotes and proposals

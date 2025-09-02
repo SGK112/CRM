@@ -1,23 +1,23 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Param,
-  Body,
-  Req,
-  UseGuards,
-  Patch,
-  Delete,
-  Res,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Patch,
+    Post,
+    Req,
+    Res,
+    UseGuards,
 } from '@nestjs/common';
-import {
-  InvoicesService,
-  CreateInvoiceDto,
-  UpdateInvoiceDto,
-  RecordPaymentDto,
-} from './invoices.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Response } from 'express';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import {
+    CreateInvoiceDto,
+    InvoicesService,
+    RecordPaymentDto,
+    UpdateInvoiceDto,
+} from './invoices.service';
 
 @Controller('invoices')
 @UseGuards(JwtAuthGuard)

@@ -7,7 +7,7 @@ async function createTestInboxMessages() {
   try {
     await client.connect();
     const db = client.db();
-    
+
     // Get the first user and workspace for testing
     const user = await db.collection('users').findOne({ email: 'admin@remodely.ai' });
     if (!user) {
@@ -22,7 +22,7 @@ async function createTestInboxMessages() {
       console.log('Workspace not found. Checking all workspaces...');
       const allWorkspaces = await db.collection('workspaces').find({}).toArray();
       console.log('Available workspaces:', allWorkspaces.map(w => ({ id: w._id, name: w.name })));
-      
+
       // Check if workspaceId is a string and try ObjectId
       if (typeof user.workspaceId === 'string') {
         try {
@@ -33,7 +33,7 @@ async function createTestInboxMessages() {
           console.log('Invalid ObjectId format');
         }
       }
-      
+
       // If still no workspace, create one
       if (!workspace) {
         console.log('Creating a new workspace...');

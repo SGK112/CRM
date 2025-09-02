@@ -1,15 +1,15 @@
 import {
-  Controller,
-  Get,
-  Patch,
-  Body,
-  Request,
-  UseGuards,
-  BadRequestException,
+    BadRequestException,
+    Body,
+    Controller,
+    Get,
+    Patch,
+    Request,
+    UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { UsersService } from './users.service';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { UsersService } from './users.service';
 
 export const dynamic = 'force-dynamic';
 

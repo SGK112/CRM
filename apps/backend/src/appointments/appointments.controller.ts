@@ -1,27 +1,26 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Body,
-  Param,
-  Query,
-  Request,
-  UseGuards,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Post,
+    Put,
+    Query,
+    Request,
+    UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { AppointmentsService } from './appointments.service';
-import { UnifiedCalendarService } from './unified-calendar.service';
-import {
-  CreateAppointmentDto,
-  UpdateAppointmentDto,
-  AppointmentStatus,
-  AppointmentFilters,
-  PaginationOptions,
-  AppointmentStats,
-} from './dto/appointment.dto';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AppointmentsService } from './appointments.service';
+import {
+    AppointmentFilters,
+    AppointmentStats,
+    CreateAppointmentDto,
+    PaginationOptions,
+    UpdateAppointmentDto
+} from './dto/appointment.dto';
+import { UnifiedCalendarService } from './unified-calendar.service';
 
 @ApiTags('appointments')
 @ApiBearerAuth()

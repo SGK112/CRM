@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function TestAuthPage() {
   const [tokenInfo, setTokenInfo] = useState<any>(null);
@@ -11,7 +11,7 @@ export default function TestAuthPage() {
     // Check localStorage for token
     const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
     const user = localStorage.getItem('user');
-    
+
     setTokenInfo({
       token: token ? `${token.substring(0, 20)}...` : 'None',
       user: user ? JSON.parse(user) : null,
@@ -50,7 +50,7 @@ export default function TestAuthPage() {
       });
 
       const data = await response.json();
-      
+
       if (response.ok) {
         localStorage.setItem('accessToken', data.accessToken);
         localStorage.setItem('user', JSON.stringify(data.user));
@@ -66,7 +66,7 @@ export default function TestAuthPage() {
   return (
     <div className="p-8 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Authentication Test</h1>
-      
+
       <div className="space-y-6">
         <div className="border p-4 rounded">
           <h2 className="text-lg font-semibold mb-2">Token Info</h2>
@@ -92,7 +92,7 @@ export default function TestAuthPage() {
           >
             Test Login (demo@test.com)
           </button>
-          
+
           <button
             onClick={() => {
               localStorage.clear();

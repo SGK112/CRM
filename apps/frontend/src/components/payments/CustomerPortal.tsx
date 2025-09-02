@@ -1,15 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
 import {
-  CreditCardIcon,
-  CalendarIcon,
-  DocumentTextIcon,
-  CogIcon,
-  ExclamationTriangleIcon,
-  CheckCircleIcon,
-  XCircleIcon,
+    CheckCircleIcon,
+    CogIcon,
+    CreditCardIcon,
+    DocumentTextIcon,
+    ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
+import { useEffect, useState } from 'react';
 
 interface Subscription {
   id: string;

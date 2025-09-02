@@ -1,15 +1,12 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
 import {
-  SparklesIcon,
-  CommandLineIcon,
-  XMarkIcon,
-  ArrowsPointingOutIcon,
-  ChevronUpDownIcon,
-  ChevronUpIcon,
-  ChevronDownIcon,
+    ArrowsPointingOutIcon,
+    CommandLineIcon,
+    SparklesIcon,
+    XMarkIcon
 } from '@heroicons/react/24/outline';
+import { useEffect, useRef, useState } from 'react';
 import AIAssistant from './AIAssistant';
 
 type Stage = 'closed' | 'minimized' | 'open';

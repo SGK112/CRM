@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Query, Param, UseGuards, Req, Body } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { IntegrationsService } from './integrations.service';
-import { IntegrationManagerService } from './integration-manager.service';
 import { GoogleCalendarService } from './google-calendar.service';
+import { IntegrationManagerService } from './integration-manager.service';
+import { IntegrationsService } from './integrations.service';
 
 @Controller('integrations')
 @UseGuards(JwtAuthGuard)

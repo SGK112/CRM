@@ -1,15 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import CalendarView from '../../../components/ui/CalendarView';
-import {
-  CalendarDaysIcon,
-  ClockIcon,
-  PlusIcon,
-  MagnifyingGlassIcon
-} from '@heroicons/react/24/outline';
 import { simple } from '@/lib/simple-ui';
+import {
+    CalendarDaysIcon,
+    ClockIcon,
+    MagnifyingGlassIcon,
+    PlusIcon
+} from '@heroicons/react/24/outline';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import CalendarView from '../../../components/ui/CalendarView';
 
 interface Appointment {
   _id: string;

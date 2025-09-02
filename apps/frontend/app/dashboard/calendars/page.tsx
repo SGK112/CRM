@@ -37,7 +37,7 @@ import {
   StandardGrid,
   StandardButton,
   StandardStat,
-} from '../../../components/ui/StandardPageWrapper';
+} from '@/components/ui/StandardPageWrapper';
 
 const localizer = momentLocalizer(moment);
 

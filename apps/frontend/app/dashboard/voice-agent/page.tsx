@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { PageHeader } from '../../../components/ui/PageHeader';
+import { PageHeader } from '@/components/ui/PageHeader';
 import {
   PhoneIcon,
   ArrowPathIcon,
@@ -9,7 +9,7 @@ import {
   SpeakerWaveIcon,
 } from '@heroicons/react/24/outline';
 import { API_BASE } from '@/lib/api';
-import { CapabilityGate } from '../../../components/CapabilityGate';
+import { CapabilityGate, PlanBadge } from '@/components/CapabilityGate';
 
 interface OutboundResponse {
   sid: string;

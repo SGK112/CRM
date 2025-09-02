@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { CatalogService } from './catalog.service';
-import { CatalogController } from './catalog.controller';
-import { PDFProcessingService } from './pdf-processing.service';
-import { Vendor, VendorSchema } from '../vendors/schemas/vendor.schema';
 import { PriceItem, PriceItemSchema } from '../pricing/schemas/price-item.schema';
+import { Vendor, VendorSchema } from '../vendors/schemas/vendor.schema';
+import { CatalogController } from './catalog.controller';
+import { CatalogService } from './catalog.service';
+import { PDFProcessingService } from './pdf-processing.service';
 
 @Module({
   imports: [

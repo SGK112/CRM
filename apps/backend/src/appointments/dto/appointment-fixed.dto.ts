@@ -1,19 +1,17 @@
-import {
-  IsString,
-  IsNotEmpty,
-  IsOptional,
-  IsEnum,
-  IsDateString,
-  IsNumber,
-  IsBoolean,
-  IsArray,
-  IsObject,
-  Min,
-  Max,
-  IsPositive,
-} from 'class-validator';
-import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+    IsArray,
+    IsDateString,
+    IsEnum,
+    IsNotEmpty,
+    IsNumber,
+    IsObject,
+    IsOptional,
+    IsPositive,
+    IsString,
+    Max,
+    Min
+} from 'class-validator';
 import { Document } from 'mongoose';
 
 // Enums for validation

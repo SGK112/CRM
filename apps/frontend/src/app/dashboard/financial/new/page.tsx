@@ -1,18 +1,15 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
 import {
-  Plus,
-  Trash2,
-  Calculator,
-  Receipt,
-  Save,
-  Send,
-  Bot,
-  Zap,
-  ArrowLeft
+    ArrowLeft,
+    Plus,
+    Save,
+    Send,
+    Trash2,
+    Zap
 } from 'lucide-react';
-import EstimateInvoiceToggle from '../../../../components/EstimateInvoiceToggle';
+import { useEffect, useState } from 'react';
+import EstimateInvoiceToggle from '@/components/EstimateInvoiceToggle';
 // import AIWritingAssistant from '../../../components/AIWritingAssistant';
 // import { quickBooksAPI, QuickBooksService } from '../../../lib/quickbooks';
 

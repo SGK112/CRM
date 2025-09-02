@@ -1,8 +1,8 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { google } from 'googleapis';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '../users/schemas/user.schema';
-import { google } from 'googleapis';
 
 @Injectable()
 export class GoogleCalendarService {

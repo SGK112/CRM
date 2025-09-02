@@ -1,26 +1,25 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useTheme } from '@/components/ThemeProvider';
 import CommunicationSettings from '@/components/CommunicationSettings';
+import { useTheme } from '@/components/ThemeProvider';
 import {
-  UserIcon,
-  BellIcon,
-  ShieldCheckIcon,
-  CreditCardIcon,
-  KeyIcon,
-  EnvelopeIcon,
-  SwatchIcon,
-  CogIcon,
-  DocumentTextIcon,
-  UsersIcon,
-  BuildingStorefrontIcon,
-  CalendarDaysIcon,
-  ChatBubbleLeftRightIcon,
-  GlobeAltIcon,
-  WrenchScrewdriverIcon,
+    BellIcon,
+    BuildingStorefrontIcon,
+    CalendarDaysIcon,
+    ChatBubbleLeftRightIcon,
+    CreditCardIcon,
+    DocumentTextIcon,
+    EnvelopeIcon,
+    GlobeAltIcon,
+    KeyIcon,
+    ShieldCheckIcon,
+    SwatchIcon,
+    UserIcon,
+    UsersIcon,
+    WrenchScrewdriverIcon
 } from '@heroicons/react/24/outline';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 // Integration components
 function GoogleCalendarIntegration() {

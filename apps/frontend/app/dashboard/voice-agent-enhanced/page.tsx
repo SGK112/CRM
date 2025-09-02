@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Layout from '../../../components/Layout';
-import { PageHeader } from '../../../components/ui/PageHeader';
+import Layout from '@/components/Layout';
+import { PageHeader } from '@/components/ui/PageHeader';
 import {
   PhoneIcon,
   ArrowPathIcon,
@@ -17,8 +17,8 @@ import {
   ClockIcon,
 } from '@heroicons/react/24/outline';
 import { API_BASE } from '@/lib/api';
-import { CapabilityGate, PlanBadge } from '../../../components/CapabilityGate';
-import ElevenLabsWidgetComponent from '../../../components/voice/ElevenLabsWidgetComponent';
+import { CapabilityGate, PlanBadge } from '@/components/CapabilityGate';
+import ElevenLabsWidgetComponent from '@/components/voice/ElevenLabsWidgetComponent';
 import { getUserPlan, hasCapability } from '@/lib/plans';
 
 interface OutboundResponse {

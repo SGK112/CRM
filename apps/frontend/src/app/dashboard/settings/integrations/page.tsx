@@ -1,6 +1,6 @@
 'use client';
-import React, { useCallback, useEffect, useState } from 'react';
 import { simple } from '@/lib/simple-ui';
+import React, { useCallback, useEffect, useState } from 'react';
 
 type GCalStatus = { connected: boolean; hasRefreshToken: boolean; email: string };
 type CalendarEvent = {

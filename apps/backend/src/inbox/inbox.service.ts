@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { InboxMessage, InboxMessageDocument } from './schemas/inbox-message.schema';
 import { NotificationsService } from '../notifications/notifications.service';
+import { InboxMessage, InboxMessageDocument } from './schemas/inbox-message.schema';
 
 export interface CreateInboxMessageDto {
   type: 'email' | 'notification' | 'sms' | 'system';

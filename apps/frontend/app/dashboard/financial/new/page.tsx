@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Calculator, Receipt, Save, Send, Bot, Zap, ArrowLeft } from 'lucide-react';
-import EstimateInvoiceToggle from '../../../../components/EstimateInvoiceToggle';
+import EstimateInvoiceToggle from '@/components/EstimateInvoiceToggle';
 // import AIWritingAssistant from '../../../components/AIWritingAssistant';
 // import { quickBooksAPI, QuickBooksService } from '../../../lib/quickbooks';
 

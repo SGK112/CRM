@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { User, UserDocument } from '../users/schemas/user.schema';
-import { EmailService } from '../services/email.service';
 import * as crypto from 'crypto';
+import { Model } from 'mongoose';
+import { EmailService } from '../services/email.service';
+import { User, UserDocument } from '../users/schemas/user.schema';
 
 interface EmailVerificationToken {
   token: string;
@@ -202,21 +202,21 @@ export class EmailVerificationService {
           <h1 style="color: #2563eb; margin: 0;">Remodely CRM</h1>
           <p style="color: #6b7280; margin: 5px 0;">Professional CRM for Remodeling Contractors</p>
         </div>
-        
+
         <div style="background: #f9fafb; padding: 30px; border-radius: 12px; border: 1px solid #e5e7eb;">
           <h2 style="color: #111827; margin: 0 0 20px 0;">Welcome to Remodely CRM, ${firstName}!</h2>
-          
+
           <p style="color: #374151; line-height: 1.6; margin: 0 0 20px 0;">
-            Thank you for signing up! To complete your registration and start using all the features of Remodely CRM, 
+            Thank you for signing up! To complete your registration and start using all the features of Remodely CRM,
             please verify your email address by clicking the button below.
           </p>
-          
+
           <div style="text-align: center; margin: 30px 0;">
             <a href="${verificationUrl}" style="background: #2563eb; color: white; padding: 14px 30px; text-decoration: none; border-radius: 8px; font-weight: 600; display: inline-block;">
               Verify Email Address
             </a>
           </div>
-          
+
           <p style="color: #6b7280; font-size: 14px; margin: 20px 0 0 0;">
             If the button doesn't work, you can copy and paste this link into your browser:
           </p>
@@ -224,7 +224,7 @@ export class EmailVerificationService {
             ${verificationUrl}
           </p>
         </div>
-        
+
         <div style="margin-top: 30px; padding: 20px; background: #fef3c7; border-radius: 8px; border: 1px solid #fbbf24;">
           <h3 style="color: #92400e; margin: 0 0 10px 0; font-size: 16px;">What's Next?</h3>
           <ul style="color: #92400e; margin: 0; padding-left: 20px;">
@@ -235,10 +235,10 @@ export class EmailVerificationService {
             <li>Set up voice agents for client communication</li>
           </ul>
         </div>
-        
+
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center;">
           <p style="color: #6b7280; font-size: 14px; margin: 0;">
-            This verification link will expire in 24 hours. If you didn't create an account with Remodely CRM, 
+            This verification link will expire in 24 hours. If you didn't create an account with Remodely CRM,
             please ignore this email.
           </p>
           <p style="color: #6b7280; font-size: 12px; margin: 10px 0 0 0;">

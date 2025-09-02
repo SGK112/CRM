@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import Layout from '../../../../components/Layout';
-import { PageHeader } from '../../../../components/ui/PageHeader';
-import PlanSwitcher from '../../../../components/PlanSwitcher';
-import { CapabilityGate, PlanBadge } from '../../../../components/CapabilityGate';
+import Layout from '@/components/Layout';
+import { PageHeader } from '@/components/ui/PageHeader';
+import PlanSwitcher from '@/components/PlanSwitcher';
+import { CapabilityGate, PlanBadge } from '@/components/CapabilityGate';
 import { getUserPlan, setUserPlan, PLANS, type PlanTier } from '@/lib/plans';
 import {
   CreditCardIcon,
