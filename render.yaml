@@ -13,7 +13,7 @@ services:
     startCommand: cd apps/backend && npm run start:prod
     healthCheckPath: /api/health
     autoDeploy: true
-  envVars:
+    envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
@@ -60,7 +60,7 @@ services:
       echo "✅ Frontend build complete!"
     startCommand: cd apps/frontend && node .next/standalone/apps/frontend/server.js
     autoDeploy: true
-  envVars:
+    envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
