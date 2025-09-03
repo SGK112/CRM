@@ -1,8 +1,10 @@
-'use client';
+"use client";
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-// import CalendarView from '../../../components/ui/CalendarView';
+import CalendarView from '@/components/ui/CalendarView';
+import { EventClickArg } from '@fullcalendar/core';
+import { DateClickArg } from '@fullcalendar/interaction';
 import {
     CalendarDaysIcon,
     CheckCircleIcon,
@@ -478,21 +480,18 @@ export default function CalendarPage() {
           {/* Enhanced Calendar */}
           <div className="xl:col-span-3">
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
-              {/* <CalendarView
+              <CalendarView
                 events={calendarEvents}
                 initialView={view}
                 currentView={view}
-                onEventClick={info => {
+                onEventClick={(info: EventClickArg) => {
                   const appointment = info.event.extendedProps.appointment;
                   router.push(`/dashboard/calendar/${appointment._id}`);
                 }}
-                onDateClick={info => {
+                onDateClick={(info: DateClickArg) => {
                   router.push(`/dashboard/calendar/new?date=${info.dateStr}`);
                 }}
-              /> */}
-              <div className="p-6">
-                <p className="text-gray-500">Calendar component temporarily disabled</p>
-              </div>
+              />
             </div>
           </div>
 

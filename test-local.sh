@@ -75,7 +75,7 @@ echo "Running tests..."
 echo ""
 
 test_backend
-test_backend_api_prefix  
+test_backend_api_prefix
 test_frontend
 test_static_assets
 test_js_assets

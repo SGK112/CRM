@@ -33,7 +33,7 @@ import {
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { AIProvider } from '../hooks/useAI';
 import { useInboxStats } from '../hooks/useInboxStats';
 import AIAssistant from './AIAssistant';
@@ -129,11 +129,15 @@ export default function Layout({ children }: LayoutProps) {
     }
   }, [router]);
 
-  const toggleSidebar = () => {
-    const newCollapsedState = !sidebarCollapsed;
-    setSidebarCollapsed(newCollapsedState);
-    localStorage.setItem('sidebarCollapsed', JSON.stringify(newCollapsedState));
-  };
+  const toggleSidebar = useCallback(() => {
+    setSidebarCollapsed(prev => {
+      const next = !prev;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('sidebarCollapsed', JSON.stringify(next));
+      }
+      return next;
+    });
+  }, []);
 
   // Keyboard shortcut for toggling sidebar
   useEffect(() => {
@@ -147,7 +151,7 @@ export default function Layout({ children }: LayoutProps) {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [toggleSidebar]);
 
   // Dynamic counts for sidebar badges (fetched after auth)
   const [counts, setCounts] = useState<{ projects?: number; clients?: number } | null>(null);
@@ -766,6 +770,8 @@ function FooterCopilot() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showFullCopilot, setShowFullCopilot] = useState(false);
   const [inputValue, setInputValue] = useState('');
+  const pathname = usePathname();
+  const { stats: inboxStats } = useInboxStats();
 
   // Listen for global Help button event to open Copilot
   useEffect(() => {
@@ -829,6 +835,62 @@ function FooterCopilot() {
         <div className="relative z-10 border-t border-blue-200/50 dark:border-slate-600 shadow-2xl">
           {/* Main Footer Bar */}
           <div className="flex flex-col">
+            {/* Mobile Navigation Toolbar */}
+            <div className="md:hidden px-2 pt-2">
+              <nav className="grid grid-cols-5 gap-1">
+                {[{
+                  name: 'Home',
+                  href: '/dashboard',
+                  icon: HomeIcon,
+                }, {
+                  name: 'Inbox',
+                  href: '/dashboard/inbox',
+                  icon: InboxIcon,
+                  badge: (inboxStats && inboxStats.unread) || 0,
+                }, {
+                  name: 'Projects',
+                  href: '/dashboard/projects',
+                  icon: ClipboardDocumentListIcon,
+                }, {
+                  name: 'Clients',
+                  href: '/dashboard/clients',
+                  icon: UserGroupIcon,
+                }, {
+                  name: 'Calendar',
+                  href: '/dashboard/calendar',
+                  icon: CalendarDaysIcon,
+                }].map(item => {
+                  const isActive = item.href === '/dashboard'
+                    ? pathname === '/dashboard'
+                    : pathname === item.href || pathname.startsWith(item.href + '/');
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={
+                        'relative flex flex-col items-center justify-center rounded-xl py-2 text-[11px] font-medium transition-colors ' +
+                        (isActive
+                          ? 'text-blue-700 dark:text-blue-300 bg-white/70 dark:bg-slate-700/60 border border-blue-200 dark:border-slate-600'
+                          : 'text-slate-600 dark:text-slate-300 hover:text-blue-700 dark:hover:text-white')
+                      }
+                      aria-label={item.name}
+                    >
+                      <item.icon className={
+                        'h-5 w-5 mb-1 ' +
+                        (isActive ? 'text-blue-600 dark:text-blue-300' : 'text-slate-500 dark:text-slate-300')
+                      } />
+                      <span className="leading-none">{item.name}</span>
+                      {item.badge && item.badge > 0 && (
+                        <span className="absolute -top-1 right-3 h-4 min-w-[16px] px-1 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center shadow">
+                          {item.badge > 9 ? '9+' : item.badge}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </nav>
+            </div>
+
             {/* Quick Actions Row - Always visible on larger screens, toggle on mobile */}
             <div
               className={`px-3 py-2 transition-all duration-200 border-b border-blue-200/50 dark:border-slate-600 ${
