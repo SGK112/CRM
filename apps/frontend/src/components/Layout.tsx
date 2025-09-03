@@ -241,7 +241,7 @@ export default function Layout({ children }: LayoutProps) {
   ];
 
   // Update current state based on pathname with better matching logic
-  const flatNav: NavigationItem[] = navigationGroups.flatMap(g => g.items);
+  const flatNav: NavigationItem[] = navigationGroups.flatMap(g => g.items || []);
   const updatedNavigation = flatNav.map(item => {
     let current = false;
 
@@ -336,6 +336,9 @@ export default function Layout({ children }: LayoutProps) {
                   {navigationGroups
                     .filter(group => !group.hidden)
                     .map(group => {
+                      if (!group.items || !Array.isArray(group.items) || !updatedNavigation || !Array.isArray(updatedNavigation)) {
+                        return null;
+                      }
                       const groupItems = updatedNavigation.filter(i =>
                         group.items.some(gItem => gItem.href === i.href)
                       );
@@ -467,6 +470,9 @@ export default function Layout({ children }: LayoutProps) {
                     {navigationGroups
                       .filter(group => !group.hidden)
                       .map(group => {
+                        if (!group.items || !Array.isArray(group.items) || !updatedNavigation || !Array.isArray(updatedNavigation)) {
+                          return null;
+                        }
                         const groupItems = updatedNavigation.filter(i =>
                           group.items.some(gItem => gItem.href === i.href)
                         );
