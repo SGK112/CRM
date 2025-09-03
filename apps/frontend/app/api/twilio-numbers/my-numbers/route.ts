@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+function getApiBase() {
+  const raw = process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL || 'http://localhost:3001';
+  return raw.replace(/\/$/, '').replace(/(?:\/api)+$/, '');
+}
+const API_BASE = getApiBase();
+
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
@@ -9,7 +15,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const response = await fetch('http://localhost:3001/twilio-numbers/my-numbers', {
+  const response = await fetch(`${API_BASE}/twilio-numbers/my-numbers`, {
       headers: {
         Authorization: token,
         'Content-Type': 'application/json',

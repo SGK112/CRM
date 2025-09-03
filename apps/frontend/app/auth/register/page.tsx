@@ -111,7 +111,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+  <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] flex flex-col justify-center py-10 sm:px-6 lg:px-8 relative overflow-hidden [padding-top:env(safe-area-inset-top)] [padding-bottom:env(safe-area-inset-bottom)]">
       <div className="pointer-events-none select-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-amber-600/10 blur-3xl" />
       <div className="pointer-events-none select-none absolute top-1/3 -right-40 h-[28rem] w-[28rem] rounded-full bg-amber-500/5 blur-3xl" />
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -121,7 +121,7 @@ export default function RegisterPage() {
               <WrenchScrewdriverIcon className="h-6 w-6 text-white" />
             </div>
             <span className="text-2xl font-semibold tracking-tight text-[var(--text)]">
-              Remodely Ai
+              Remodely CRM
             </span>
           </div>
         </div>

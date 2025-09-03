@@ -55,13 +55,20 @@ export default function NewClientPage() {
       });
 
       if (response.ok) {
-        router.push(returnTo);
+        const created = await response.json();
+        const id = created?._id || created?.id;
+        if (id) {
+          router.push(`/dashboard/clients/${id}`);
+        } else {
+          router.push(returnTo);
+        }
       } else {
         const msg = await response.text();
         setError(`Create failed (${response.status}) ${msg}`);
       }
-    } catch (e: any) {
-      setError('Network error creating client');
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Network error creating client';
+      setError(msg);
     } finally {
       setSaving(false);
     }

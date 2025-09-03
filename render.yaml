@@ -13,7 +13,7 @@ services:
     startCommand: cd apps/backend && npm run start:prod
     healthCheckPath: /api/health
     autoDeploy: false
-    envVars:
+  envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
@@ -29,9 +29,11 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: FRONTEND_URL
-        value: https://remodely-crm-frontend.onrender.com
+        value: https://crm-h137.onrender.com
       - key: CORS_ORIGINS
-        value: https://remodely-crm-frontend.onrender.com,https://remodely-crm-backend.onrender.com
+        value: https://crm-h137.onrender.com,https://remodely-backend-api.onrender.com
+      - key: GOOGLE_REDIRECT_URI
+        value: https://crm-h137.onrender.com/auth/google/callback
       # Performance optimizations
       - key: WEB_CONCURRENCY
         value: 2
@@ -53,10 +55,12 @@ services:
       echo "🔨 Building Remodely CRM Frontend..."
       npm ci --production=false
       npm run build
+      # Ensure standalone bundle serves static & public assets (fixes manifest/icons 404)
+      cd apps/frontend && chmod +x ./fix-standalone.sh && ./fix-standalone.sh && cd -
       echo "✅ Frontend build complete!"
     startCommand: cd apps/frontend && node .next/standalone/apps/frontend/server.js
     autoDeploy: false
-    envVars:
+  envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
@@ -65,9 +69,9 @@ services:
           name: remodely-crm-frontend
           property: port
       - key: NEXT_PUBLIC_API_URL
-        value: https://remodely-crm-backend.onrender.com
+        value: https://remodely-backend-api.onrender.com
       - key: NEXT_PUBLIC_SOCKET_URL
-        value: https://remodely-crm-backend.onrender.com
+        value: https://remodely-backend-api.onrender.com
       # Performance optimizations
       - key: WEB_CONCURRENCY
         value: 1

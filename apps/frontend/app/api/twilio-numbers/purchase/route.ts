@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+function getApiBase() {
+  const raw = process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL || 'http://localhost:3001';
+  return raw.replace(/\/$/, '').replace(/(?:\/api)+$/, '');
+}
+const API_BASE = getApiBase();
+
 export async function POST(request: NextRequest) {
   try {
     const token = request.headers.get('authorization');
@@ -8,7 +14,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const response = await fetch('http://localhost:3001/twilio-numbers/purchase', {
+  const response = await fetch(`${API_BASE}/twilio-numbers/purchase`, {
       method: 'POST',
       headers: {
         Authorization: token,
@@ -20,7 +26,6 @@ export async function POST(request: NextRequest) {
     const data = await response.json();
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
-    console.error('Error purchasing phone number:', error);
     return NextResponse.json({ error: 'Failed to purchase phone number' }, { status: 500 });
   }
 }

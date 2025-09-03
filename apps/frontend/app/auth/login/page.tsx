@@ -19,6 +19,8 @@ export default function LoginPage() {
   const [backendUp, setBackendUp] = useState(true);
   const [checkingHealth, setCheckingHealth] = useState(false);
 
+  // Run health check once on mount; internal retry doesn't need React state as dependency
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     let cancelled = false;
     const ping = async (attempt = 1) => {
@@ -48,7 +50,7 @@ export default function LoginPage() {
         if (!cancelled) setCheckingHealth(false);
       }
       // light retry with backoff if still down
-      if (!cancelled && !backendUp && attempt < 3) {
+  if (!cancelled && attempt < 3) {
         setTimeout(() => ping(attempt + 1), attempt * 800);
       }
     };
@@ -56,7 +58,7 @@ export default function LoginPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, []); // intentionally empty: health check runs once on mount; state setters used internally
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +74,9 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
       });
 
-      let data: any = null;
+      type UserLite = { id?: string; email?: string; firstName?: string; lastName?: string };
+      type LoginResponse = { accessToken?: string; user?: UserLite; message?: string; validation?: string[] };
+      let data: LoginResponse | null = null;
       try {
         data = await response.json();
       } catch {
@@ -85,14 +89,20 @@ export default function LoginPage() {
           // Set cookie with proper expiration and security settings
           const expiryDate = new Date();
           expiryDate.setDate(expiryDate.getDate() + 7); // 7 days from now
-          document.cookie = `accessToken=${data.accessToken}; Path=/; SameSite=Lax; Expires=${expiryDate.toUTCString()}`;
-          console.log('Cookie set successfully');
+          if (data?.accessToken) {
+            document.cookie = `accessToken=${data.accessToken}; Path=/; SameSite=Lax; Expires=${expiryDate.toUTCString()}`;
+          }
+          // cookie set
         } catch (error) {
-          console.error('Cookie set failed:', error);
+          // ignore cookie errors
         }
-        localStorage.setItem('accessToken', data.accessToken);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        console.log('Login successful, redirecting to dashboard');
+        if (data?.accessToken) {
+          localStorage.setItem('accessToken', data.accessToken);
+        }
+        if (data?.user) {
+          localStorage.setItem('user', JSON.stringify(data.user));
+        }
+  // redirect
         // Redirect to dashboard
         router.push('/dashboard');
       } else if (response.status === 400) {
@@ -116,7 +126,7 @@ export default function LoginPage() {
         setError(data?.message || 'Login failed. Please try again.');
       }
     } catch (error) {
-      console.error('Login error:', error);
+  // ignore network error logging in UI
       setError('Network error. Please check your connection and try again.');
     } finally {
       setIsLoading(false);
@@ -124,7 +134,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-[var(--background)]">
+  <div className="min-h-screen relative flex items-center justify-center py-10 px-4 sm:px-6 lg:px-8 bg-[var(--bg)] [padding-top:env(safe-area-inset-top)] [padding-bottom:env(safe-area-inset-bottom)]">
       {/* Background decorative elements */}
       <div className="pointer-events-none select-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-amber-600/10 blur-3xl" />
       <div className="pointer-events-none select-none absolute top-1/3 -right-40 h-[28rem] w-[28rem] rounded-full bg-amber-500/5 blur-3xl" />
@@ -136,13 +146,13 @@ export default function LoginPage() {
               <WrenchScrewdriverIcon className="h-6 w-6 text-white" />
             </div>
             <div className="flex flex-col">
-              <span className="text-2xl font-bold tracking-tight text-[var(--text)]">Remodely Ai</span>
+              <span className="text-2xl font-bold tracking-tight text-[var(--text)]">Remodely CRM</span>
               <span className="text-xs text-[var(--text-muted)] font-medium">Construction CRM</span>
             </div>
           </div>
         </div>
 
-        <h2 className="mt-2 text-center text-3xl font-bold tracking-tight text-[var(--text)]">
+  <h2 className="mt-2 text-center text-3xl font-bold tracking-tight text-[var(--text)]">
           Welcome back
         </h2>
         <p className="mt-2 text-center text-base text-[var(--text-muted)]">
@@ -307,10 +317,8 @@ export default function LoginPage() {
             <div className="mt-6">
               <button
                 onClick={() => {
-                  // Google OAuth endpoints are exposed without the /api prefix: /auth/google
-                  const base = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/api$/, '');
-                  const target = `${base}/auth/google`;
-                  window.location.href = target;
+                  // Use relative OAuth path; next rewrites will forward to backend
+                  window.location.href = '/auth/google';
                 }}
                 className="btn btn-secondary w-full"
               >

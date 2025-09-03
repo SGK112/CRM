@@ -22,7 +22,8 @@ export default function IntegrationsSettingsPage() {
     end: '', // datetime-local
   });
 
-  const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001') + '/api';
+  // Use relative API base; Next.js rewrites proxy to the backend in all envs
+  const API_BASE = '/api';
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -77,8 +78,8 @@ export default function IntegrationsSettingsPage() {
   }, [status?.connected, fetchEvents]);
 
   const handleConnect = () => {
-    const backend = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-    window.location.href = `${backend}/auth/google`;
+    // Use relative OAuth path; rewritten to backend via next.config.js
+    window.location.href = `/auth/google`;
   };
 
   const createEvent = async (e: React.FormEvent) => {

@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+function getApiBase() {
+  const raw = process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL || 'http://localhost:3001';
+  return raw.replace(/\/$/, '').replace(/(?:\/api)+$/, '');
+}
+const API_BASE = getApiBase();
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,7 +16,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    const response = await fetch(`${BACKEND_URL}/api/inbox/mark-all-read`, {
+  const response = await fetch(`${API_BASE}/api/inbox/mark-all-read`, {
       method: 'POST',
       headers: {
         'Authorization': authorization,

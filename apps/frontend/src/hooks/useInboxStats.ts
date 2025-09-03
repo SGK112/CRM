@@ -21,7 +21,8 @@ export function useInboxStats() {
         return;
       }
 
-      const response = await fetch('http://localhost:3001/api/notifications/count', {
+  // Use relative API path so Next.js rewrites proxy to the configured backend in all envs
+  const response = await fetch('/api/notifications/count', {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',

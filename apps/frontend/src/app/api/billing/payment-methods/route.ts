@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+function getApiBase() {
+  const raw = process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL || 'http://localhost:3001';
+  return raw.replace(/\/$/, '').replace(/(?:\/api)+$/, '');
+}
+const API_BASE = getApiBase();
 
 export const dynamic = 'force-dynamic';
 
@@ -12,7 +16,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'Authentication required' }, { status: 401 });
     }
 
-    const response = await fetch(`${BACKEND_URL}/api/billing/payment-methods`, {
+  const response = await fetch(`${API_BASE}/api/billing/payment-methods`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'

@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+function getApiBase() {
+  const raw = process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL || 'http://localhost:3001';
+  return raw.replace(/\/$/, '').replace(/(?:\/api)+$/, '');
+}
+const API_BASE = getApiBase();
 
 export async function GET(
   request: NextRequest,
@@ -13,7 +17,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const response = await fetch(`${BACKEND_URL}/api/inbox/${params.id}`, {
+  const response = await fetch(`${API_BASE}/api/inbox/${params.id}`, {
       method: 'GET',
       headers: {
         'Authorization': authorization,
@@ -53,7 +57,7 @@ export async function PATCH(
 
     const body = await request.json();
 
-    const response = await fetch(`${BACKEND_URL}/api/inbox/${params.id}`, {
+  const response = await fetch(`${API_BASE}/api/inbox/${params.id}`, {
       method: 'PATCH',
       headers: {
         'Authorization': authorization,
@@ -92,7 +96,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const response = await fetch(`${BACKEND_URL}/api/inbox/${params.id}`, {
+  const response = await fetch(`${API_BASE}/api/inbox/${params.id}`, {
       method: 'DELETE',
       headers: {
         'Authorization': authorization,

@@ -46,6 +46,11 @@ const nextConfig = {
         source: '/api/:path*',
         destination: `${apiUrl}/api/:path*`,
       },
+      // Proxy OAuth endpoints to backend as well so clients can use relative '/auth/*'
+      {
+        source: '/auth/:path*',
+        destination: `${apiUrl}/auth/:path*`,
+      },
     ];
   },
 

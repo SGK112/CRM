@@ -3,7 +3,12 @@ import { NextRequest, NextResponse } from 'next/server';
 // Force dynamic rendering for this route
 export const dynamic = 'force-dynamic';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
+function getApiBase() {
+  const raw =
+    process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL || 'http://localhost:3001';
+  return raw.replace(/\/$/, '').replace(/(?:\/api)+$/, '');
+}
+const API_BASE = getApiBase();
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,7 +24,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const response = await fetch(`${BACKEND_URL}/api/communications/test-email`, {
+  const response = await fetch(`${API_BASE}/api/communications/test-email`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -35,13 +40,9 @@ export async function POST(request: NextRequest) {
 
     const data = await response.json();
     return NextResponse.json(data);
-  } catch (error) {
-    console.error('Test email error:', error);
+  } catch {
     return NextResponse.json(
-      {
-        success: false,
-        message: error instanceof Error ? error.message : 'Failed to send test email',
-      },
+      { success: false, message: 'Failed to send test email' },
       { status: 500 }
     );
   }

@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 
 export default function TestAuthPage() {
-  const [tokenInfo, setTokenInfo] = useState<any>(null);
-  const [inboxData, setInboxData] = useState<any>(null);
+  const [tokenInfo, setTokenInfo] = useState<{ token: string; user: unknown; hasToken: boolean } | null>(null);
+  const [inboxData, setInboxData] = useState<unknown>(null);
   const [error, setError] = useState<string>('');
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export default function TestAuthPage() {
 
     // Test API call if token exists
     if (token) {
-      fetch('http://localhost:3001/api/inbox', {
+  fetch('/api/inbox', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

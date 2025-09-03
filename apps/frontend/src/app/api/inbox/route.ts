@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+function getApiBase() {
+  const raw = process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL || 'http://localhost:3001';
+  return raw.replace(/\/$/, '').replace(/(?:\/api)+$/, '');
+}
+const API_BASE = getApiBase();
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,7 +17,7 @@ export async function GET(request: NextRequest) {
 
     // Forward the query parameters to the backend
     const queryString = searchParams.toString();
-    const backendUrl = `${BACKEND_URL}/api/inbox${queryString ? `?${queryString}` : ''}`;
+  const backendUrl = `${API_BASE}/api/inbox${queryString ? `?${queryString}` : ''}`;
 
     const response = await fetch(backendUrl, {
       method: 'GET',
@@ -52,7 +56,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    const response = await fetch(`${BACKEND_URL}/api/inbox`, {
+  const response = await fetch(`${API_BASE}/api/inbox`, {
       method: 'POST',
       headers: {
         'Authorization': authorization,

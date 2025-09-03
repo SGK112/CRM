@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
+function getApiBase() {
+  const raw = process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL || 'http://localhost:3001';
+  return raw.replace(/\/$/, '').replace(/(?:\/api)+$/, '');
+}
+const API_BASE = getApiBase();
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,7 +21,7 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
 
     // Forward the request to the backend
-    const backendResponse = await fetch(`${BACKEND_URL}/catalog/upload-pdf`, {
+  const backendResponse = await fetch(`${API_BASE}/catalog/upload-pdf`, {
       method: 'POST',
       body: formData,
       headers: {
