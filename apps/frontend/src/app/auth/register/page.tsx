@@ -103,22 +103,25 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] flex flex-col justify-center py-6 sm:py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       <div className="pointer-events-none select-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-amber-600/10 blur-3xl" />
       <div className="pointer-events-none select-none absolute top-1/3 -right-40 h-[28rem] w-[28rem] rounded-full bg-amber-500/5 blur-3xl" />
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center mb-2">
-          <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-xl bg-amber-600 flex items-center justify-center shadow-inner ring-1 ring-amber-400/40">
-              <WrenchScrewdriverIcon className="h-6 w-6 text-white" />
+      
+      {/* Header Section */}
+      <div className="w-full max-w-md mx-auto mb-6 sm:mb-8">
+        <div className="flex justify-center mb-4 sm:mb-6">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg sm:rounded-xl bg-amber-600 flex items-center justify-center shadow-inner ring-1 ring-amber-400/40">
+              <WrenchScrewdriverIcon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </div>
-            <span className="text-2xl font-semibold tracking-tight text-[var(--text)]">Remodely Ai</span>
+            <span className="text-xl sm:text-2xl font-semibold tracking-tight text-[var(--text)]">Remodely Ai</span>
           </div>
         </div>
-        <h2 className="mt-4 text-center text-3xl font-semibold tracking-tight text-[var(--text)]">Create your workspace</h2>
+        <h2 className="text-center text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text)] mb-4">Create your workspace</h2>
+        
         {!backendUp && (
-          <div className="mt-2 text-center">
-            <p className="text-xs text-red-400">Backend offline or unreachable. Registration may fail.</p>
+          <div className="mb-4 text-center">
+            <p className="text-xs text-red-400 mb-2">Backend offline or unreachable. Registration may fail.</p>
             <button
               type="button"
               onClick={() => {
@@ -146,13 +149,14 @@ export default function RegisterPage() {
                 run()
               }}
               disabled={checkingHealth}
-              className="mt-1 inline-flex items-center rounded-md border border-[var(--border)] bg-[var(--surface-2)] px-2.5 py-1 text-xs text-[var(--text)] hover:bg-[var(--surface-3)] disabled:opacity-50"
+              className="inline-flex items-center rounded-md border border-[var(--border)] bg-[var(--surface-2)] px-2.5 py-1 text-xs text-[var(--text)] hover:bg-[var(--surface-3)] disabled:opacity-50"
             >
               {checkingHealth ? 'Checking…' : 'Retry health check'}
             </button>
           </div>
         )}
-        <p className="mt-2 text-center text-sm text-[var(--text-dim)]">
+        
+        <p className="text-center text-sm text-[var(--text-dim)]">
           Or{' '}
           <Link href="/auth/login" className="font-medium text-amber-400 hover:text-amber-300 transition-colors">
             sign in to existing workspace
@@ -160,11 +164,12 @@ export default function RegisterPage() {
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="relative py-8 px-5 sm:px-10 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)]/70 backdrop-blur-sm shadow-xl">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+      {/* Form Section */}
+      <div className="w-full max-w-md mx-auto">
+        <div className="relative py-6 sm:py-8 px-4 sm:px-6 lg:px-10 rounded-xl sm:rounded-2xl border border-[var(--border)] bg-[var(--surface-2)]/70 backdrop-blur-sm shadow-xl">
+          <form className="space-y-5 sm:space-y-6" onSubmit={handleSubmit}>
             {error && (
-              <div className="bg-red-500/10 border border-red-500/40 text-red-300 px-4 py-3 rounded-md text-sm">
+              <div className="bg-red-500/10 border border-red-500/40 text-red-300 px-3 sm:px-4 py-2 sm:py-3 rounded-md text-sm">
                 {error}
               </div>
             )}

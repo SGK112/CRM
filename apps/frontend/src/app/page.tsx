@@ -303,74 +303,147 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section className="relative z-10 px-4 py-20 sm:py-32">
-        <div className="max-w-7xl mx-auto text-center">
-          <div className="mb-8">
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-              <TypewriterText
-                text="Turn Every Project Into "
-                speed={50}
-                delay={500}
-              />
-              <span className="gradient-amber">
+        <div className="max-w-7xl mx-auto">
+          {/* Hero Content */}
+          <div className="text-center mb-16">
+            <div className="mb-8">
+              {/* Announcement badge */}
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-600/10 border border-amber-500/20 text-amber-600 text-sm font-medium mb-6">
+                <RocketLaunchIcon className="h-4 w-4" />
+                <span>Now with AI Voice Agent & Smart Scheduling</span>
+              </div>
+              
+              <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
                 <TypewriterText
-                  text="Profit"
-                  speed={80}
-                  delay={1800}
+                  text="Turn Every Project Into "
+                  speed={50}
+                  delay={500}
                 />
-              </span>
-            </h1>
-            <p className="text-xl sm:text-2xl text-[var(--text-dim)] mb-8 max-w-4xl mx-auto leading-relaxed">
-              The complete business management platform designed specifically for construction contractors. Streamline estimates, manage projects, track costs, and grow your business with tools that actually understand construction.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-6 justify-center text-lg text-[var(--text-dim)] mb-8">
-              <div className="flex items-center justify-center gap-2">
-                <CheckIcon className="h-5 w-5 text-emerald-500" />
-                <span>From estimate to invoice in minutes</span>
+                <span className="gradient-amber">
+                  <TypewriterText
+                    text="Profit"
+                    speed={80}
+                    delay={1800}
+                  />
+                </span>
+              </h1>
+              <p className="text-xl sm:text-2xl text-[var(--text-dim)] mb-8 max-w-4xl mx-auto leading-relaxed">
+                The complete business management platform designed specifically for construction contractors. Streamline estimates, manage projects, track costs, and grow your business with tools that actually understand construction.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-6 justify-center text-lg text-[var(--text-dim)] mb-8">
+                <div className="flex items-center justify-center gap-2">
+                  <CheckIcon className="h-5 w-5 text-emerald-500" />
+                  <span>From estimate to invoice in minutes</span>
+                </div>
+                <div className="flex items-center justify-center gap-2">
+                  <CheckIcon className="h-5 w-5 text-emerald-500" />
+                  <span>Real profit tracking on every job</span>
+                </div>
+                <div className="flex items-center justify-center gap-2">
+                  <CheckIcon className="h-5 w-5 text-emerald-500" />
+                  <span>Built for contractors, by contractors</span>
+                </div>
               </div>
-              <div className="flex items-center justify-center gap-2">
-                <CheckIcon className="h-5 w-5 text-emerald-500" />
-                <span>Real profit tracking on every job</span>
+            </div>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+              <Link href="/auth/register" className="btn btn-amber shadow-soft shine text-lg px-8 py-4 group">
+                Start Free Trial
+                <ArrowRightIcon className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <Link href="/dashboard" className="btn btn-outline text-lg px-8 py-4 group">
+                <PlayIcon className="mr-2 h-5 w-5" />
+                View Live Demo
+              </Link>
+            </div>
+
+            {/* Trust indicators */}
+            <div className="flex flex-wrap gap-6 justify-center text-sm text-[var(--text-dim)] mb-8">
+              <div className="flex items-center gap-2">
+                <ShieldCheckIcon className="h-5 w-5 text-amber-500" />
+                <span>No Credit Card Required</span>
               </div>
-              <div className="flex items-center justify-center gap-2">
-                <CheckIcon className="h-5 w-5 text-emerald-500" />
-                <span>Built for contractors, by contractors</span>
+              <div className="flex items-center gap-2">
+                <ClockIcon className="h-5 w-5 text-amber-500" />
+                <span>14 Days Full Access</span>
               </div>
+              <div className="flex items-center gap-2">
+                <UserGroupIcon className="h-5 w-5 text-amber-500" />
+                <span>500+ Companies Trust Us</span>
+              </div>
+            </div>
+
+            {/* Industry tags */}
+            <div className="flex flex-wrap gap-3 justify-center mb-16">
+              {['Kitchen Remodeling', 'Bathroom Renovation', 'Whole Home Remodels', 'Home Additions', 'Exterior Renovations', 'Custom Cabinetry'].map((tag) => (
+                <span key={tag} className="px-4 py-2 rounded-full border border-[var(--border)] bg-[var(--surface-2)] text-sm font-medium hover:border-amber-500/50 transition-colors">
+                  {tag}
+                </span>
+              ))}
             </div>
           </div>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Link href="/auth/register" className="btn btn-amber shadow-soft shine text-lg px-8 py-4">
-              Start Free Trial
-            </Link>
-            <Link href="/dashboard" className="btn btn-outline text-lg px-8 py-4">
-              View Live Demo →
-            </Link>
-          </div>
-
-          {/* Trust indicators */}
-          <div className="flex flex-wrap gap-6 justify-center text-sm text-[var(--text-dim)] mb-8">
-            <div className="flex items-center gap-2">
-              <ShieldCheckIcon className="h-5 w-5 text-amber-500" />
-              <span>No Credit Card Required</span>
+          {/* Demo Preview Section */}
+          <div className="relative max-w-5xl mx-auto">
+            <div className="relative group">
+              {/* Browser mockup frame */}
+              <div className="bg-[var(--surface-1)] rounded-xl border border-[var(--border)] shadow-2xl overflow-hidden">
+                {/* Browser header */}
+                <div className="flex items-center gap-2 px-4 py-3 bg-[var(--surface-2)] border-b border-[var(--border)]">
+                  <div className="flex gap-1">
+                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                    <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                  </div>
+                  <div className="flex-1 mx-4">
+                    <div className="bg-[var(--bg)] rounded px-3 py-1 text-sm text-[var(--text-dim)] border border-[var(--border)]">
+                      https://crm-h137.onrender.com/dashboard
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Dashboard preview */}
+                <div className="aspect-[16/10] bg-gradient-to-br from-[var(--bg)] to-[var(--surface-1)] p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-full">
+                    {/* Stats cards */}
+                    <div className="space-y-3">
+                      <div className="bg-amber-600/10 border border-amber-500/20 rounded-lg p-4">
+                        <div className="text-2xl font-bold text-amber-600">$47,580</div>
+                        <div className="text-sm text-[var(--text-dim)]">Monthly Revenue</div>
+                      </div>
+                      <div className="bg-emerald-600/10 border border-emerald-500/20 rounded-lg p-4">
+                        <div className="text-2xl font-bold text-emerald-600">23</div>
+                        <div className="text-sm text-[var(--text-dim)]">Active Projects</div>
+                      </div>
+                      <div className="bg-blue-600/10 border border-blue-500/20 rounded-lg p-4">
+                        <div className="text-2xl font-bold text-blue-600">94%</div>
+                        <div className="text-sm text-[var(--text-dim)]">Client Satisfaction</div>
+                      </div>
+                    </div>
+                    
+                    {/* Chart placeholder */}
+                    <div className="md:col-span-2 bg-[var(--surface-2)] border border-[var(--border)] rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-semibold">Revenue Trend</h3>
+                        <div className="text-sm text-emerald-600">↗ +18% this month</div>
+                      </div>
+                      <div className="h-32 bg-gradient-to-r from-amber-500/20 to-emerald-500/20 rounded"></div>
+                    </div>
+                  </div>
+                  
+                  {/* Floating action hint */}
+                  <div className="absolute bottom-8 left-8 bg-amber-600 text-white px-3 py-2 rounded-lg text-sm font-medium animate-bounce">
+                    Click to explore live demo →
+                  </div>
+                </div>
+              </div>
+              
+              {/* Overlay for demo link */}
+              <Link href="/dashboard" className="absolute inset-0 z-10">
+                <span className="sr-only">View live demo</span>
+              </Link>
             </div>
-            <div className="flex items-center gap-2">
-              <ClockIcon className="h-5 w-5 text-amber-500" />
-              <span>14 Days Full Access</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <UserGroupIcon className="h-5 w-5 text-amber-500" />
-              <span>500+ Companies Trust Us</span>
-            </div>
-          </div>
-
-          {/* Industry tags */}
-          <div className="flex flex-wrap gap-3 justify-center">
-            {['Kitchen Remodeling', 'Bathroom Renovation', 'Whole Home Remodels', 'Home Additions', 'Exterior Renovations', 'Custom Cabinetry'].map((tag) => (
-              <span key={tag} className="px-4 py-2 rounded-full border border-[var(--border)] bg-[var(--surface-2)] text-sm font-medium">
-                {tag}
-              </span>
-            ))}
           </div>
         </div>
       </section>
@@ -383,6 +456,32 @@ export default function HomePage() {
               <div key={index} className="space-y-2">
                 <div className="text-3xl md:text-4xl font-bold text-amber-600">{stat.value}</div>
                 <div className="text-sm font-medium text-[var(--text-dim)]">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Social Proof - Company Logos */}
+      <section className="py-12 bg-[var(--bg)]">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-8">
+            <p className="text-[var(--text-dim)] text-sm font-medium uppercase tracking-wider">
+              Trusted by Construction Leaders Nationwide
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-8 opacity-60">
+            {/* Company logo placeholders - you can replace with real logos */}
+            {[
+              'Elite Remodeling Co.',
+              'Coastal Construction',
+              'Premium Granite Solutions', 
+              'Master Builders Inc.',
+              'Heritage Renovation',
+              'Crown Construction'
+            ].map((company) => (
+              <div key={company} className="px-6 py-4 bg-[var(--surface-1)] border border-[var(--border)] rounded-lg">
+                <span className="text-sm font-semibold text-[var(--text-dim)]">{company}</span>
               </div>
             ))}
           </div>
@@ -434,8 +533,77 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* How It Works */}
+      <section className="py-20 bg-[var(--surface-1)]">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Get Started in <span className="gradient-amber">3 Simple Steps</span>
+            </h2>
+            <p className="text-xl text-[var(--text-dim)] max-w-3xl mx-auto">
+              Transform your construction business in minutes, not months.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 relative">
+            {/* Connection lines for desktop */}
+            <div className="hidden md:block absolute top-24 left-1/6 right-1/6 h-0.5 bg-gradient-to-r from-amber-500/30 via-amber-500/60 to-amber-500/30"></div>
+            
+            {[
+              {
+                step: '01',
+                title: 'Sign Up & Import',
+                description: 'Create your account and import existing clients and projects. Our smart import tool handles the heavy lifting.',
+                icon: UserGroupIcon,
+                time: '5 minutes'
+              },
+              {
+                step: '02', 
+                title: 'Customize & Configure',
+                description: 'Set up your services, pricing, and templates. Configure AI assistant with your business voice and style.',
+                icon: CogIcon,
+                time: '15 minutes'
+              },
+              {
+                step: '03',
+                title: 'Launch & Scale', 
+                description: 'Start creating estimates, managing projects, and let AI handle customer calls while you focus on building.',
+                icon: RocketLaunchIcon,
+                time: 'Ready to go!'
+              }
+            ].map((step, index) => (
+              <div key={index} className="relative text-center">
+                {/* Step number badge */}
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-600 text-white font-bold text-xl mb-6 relative z-10">
+                  {step.step}
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-600/15 ring-1 ring-amber-500/30 mb-4">
+                    <step.icon className="h-6 w-6 text-amber-600" />
+                  </div>
+                  <h3 className="text-xl font-bold">{step.title}</h3>
+                  <p className="text-[var(--text-dim)] leading-relaxed">{step.description}</p>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-600/10 border border-emerald-500/20 text-emerald-600 text-sm font-medium">
+                    <ClockIcon className="h-4 w-4" />
+                    <span>{step.time}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Link href="/auth/register" className="btn btn-amber text-lg px-8 py-4 group">
+              Start Your Setup Now
+              <ArrowRightIcon className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Core Features Grid */}
-      <section id="features" className="py-20 bg-[var(--surface-1)]">
+      <section id="features" className="py-20 bg-[var(--bg)]">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -448,8 +616,8 @@ export default function HomePage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {coreFeatures.map((feature, index) => (
-              <div key={index} className="p-6 rounded-xl bg-[var(--bg)] border border-[var(--border)] hover:border-amber-500/50 transition-colors">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-600/15 ring-1 ring-amber-500/30 mb-4">
+              <div key={index} className="group p-6 rounded-xl bg-[var(--surface-1)] border border-[var(--border)] hover:border-amber-500/50 hover:shadow-lg transition-all duration-300">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-600/15 ring-1 ring-amber-500/30 mb-4 group-hover:bg-amber-600/25 transition-colors">
                   <feature.icon className="h-6 w-6 text-amber-600" />
                 </div>
                 <h3 className="font-bold text-lg mb-2">
@@ -466,14 +634,29 @@ export default function HomePage() {
                     </li>
                   ))}
                 </ul>
+                
+                {/* Hover effect overlay */}
+                <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="text-xs text-amber-600 font-medium">Learn more →</div>
+                </div>
               </div>
             ))}
+          </div>
+
+          {/* Feature highlight callout */}
+          <div className="mt-16 text-center">
+            <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-amber-600/10 to-emerald-600/10 border border-amber-500/20 rounded-full">
+              <SpeakerWaveIcon className="h-5 w-5 text-amber-600" />
+              <span className="text-sm font-medium">
+                <span className="text-amber-600">NEW:</span> AI Voice Agent now available - Let Sarah handle your calls 24/7
+              </span>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Testimonials */}
-      <section id="testimonials" className="py-20">
+      <section id="testimonials" className="py-20 bg-[var(--surface-1)]">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -485,18 +668,33 @@ export default function HomePage() {
           </div>
 
           <div className="max-w-4xl mx-auto">
-            <div className="bg-[var(--surface-1)] rounded-2xl p-8 md:p-12 border border-[var(--border)] text-center">
-              <div className="flex justify-center mb-6">
-                {[...Array(5)].map((_, i) => (
-                  <StarIcon key={i} className="h-6 w-6 text-amber-400 fill-current" />
-                ))}
-              </div>
-              <blockquote className="text-xl md:text-2xl font-medium mb-8 leading-relaxed">
-                "{testimonials[activeTestimonial].content}"
-              </blockquote>
-              <div className="text-center">
-                <div className="font-semibold text-lg">{testimonials[activeTestimonial].name}</div>
-                <div className="text-[var(--text-dim)]">{testimonials[activeTestimonial].role}</div>
+            {/* Main testimonial card */}
+            <div className="bg-gradient-to-br from-amber-600/5 to-emerald-600/5 rounded-2xl p-8 md:p-12 border border-amber-500/20 text-center relative overflow-hidden">
+              {/* Background decoration */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-600/10 rounded-full -translate-y-16 translate-x-16"></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-emerald-600/10 rounded-full translate-y-12 -translate-x-12"></div>
+              
+              <div className="relative z-10">
+                <div className="flex justify-center mb-6">
+                  {[...Array(5)].map((_, i) => (
+                    <StarIcon key={i} className="h-6 w-6 text-amber-400 fill-current" />
+                  ))}
+                </div>
+                <blockquote className="text-xl md:text-2xl font-medium mb-8 leading-relaxed">
+                  "{testimonials[activeTestimonial].content}"
+                </blockquote>
+                <div className="flex items-center justify-center gap-4">
+                  {/* Avatar placeholder */}
+                  <div className="w-12 h-12 bg-amber-600/20 rounded-full flex items-center justify-center">
+                    <span className="text-amber-600 font-bold">
+                      {testimonials[activeTestimonial].name.split(' ').map(n => n[0]).join('')}
+                    </span>
+                  </div>
+                  <div className="text-left">
+                    <div className="font-semibold text-lg">{testimonials[activeTestimonial].name}</div>
+                    <div className="text-[var(--text-dim)]">{testimonials[activeTestimonial].role}</div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -507,9 +705,34 @@ export default function HomePage() {
                   key={index}
                   onClick={() => setActiveTestimonial(index)}
                   className={`w-3 h-3 rounded-full transition-colors ${
-                    index === activeTestimonial ? 'bg-amber-600' : 'bg-[var(--border)]'
+                    index === activeTestimonial ? 'bg-amber-600' : 'bg-[var(--border)] hover:bg-amber-600/50'
                   }`}
                 />
+              ))}
+            </div>
+
+            {/* Additional testimonials grid */}
+            <div className="grid md:grid-cols-3 gap-6 mt-12">
+              {testimonials.map((testimonial, index) => (
+                <div key={index} className={`p-6 rounded-xl border transition-all cursor-pointer ${
+                  index === activeTestimonial 
+                    ? 'bg-amber-600/10 border-amber-500/30' 
+                    : 'bg-[var(--bg)] border-[var(--border)] hover:border-amber-500/30'
+                }`}
+                onClick={() => setActiveTestimonial(index)}>
+                  <div className="flex mb-3">
+                    {[...Array(5)].map((_, i) => (
+                      <StarIcon key={i} className="h-4 w-4 text-amber-400 fill-current" />
+                    ))}
+                  </div>
+                  <p className="text-sm text-[var(--text-dim)] mb-4 line-clamp-3">
+                    "{testimonial.content}"
+                  </p>
+                  <div>
+                    <div className="font-medium text-sm">{testimonial.name}</div>
+                    <div className="text-xs text-[var(--text-dim)]">{testimonial.role}</div>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
