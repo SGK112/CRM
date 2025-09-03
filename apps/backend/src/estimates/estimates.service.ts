@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import PDFDocument from 'pdfkit';
+import PDFDocument = require('pdfkit');
 import { Client, ClientDocument } from '../clients/schemas/client.schema';
 import { PriceItem, PriceItemDocument } from '../pricing/schemas/price-item.schema';
 import { EmailService } from '../services/email.service';
