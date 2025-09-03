@@ -12,7 +12,7 @@ services:
       echo "✅ Backend build complete!"
     startCommand: cd apps/backend && npm run start:prod
     healthCheckPath: /api/health
-    autoDeploy: false
+    autoDeploy: true
   envVars:
       - key: NODE_ENV
         value: production
@@ -59,7 +59,7 @@ services:
       cd apps/frontend && pwd && ls -la fix-standalone.sh && chmod +x ./fix-standalone.sh && ./fix-standalone.sh && cd -
       echo "✅ Frontend build complete!"
     startCommand: cd apps/frontend && node .next/standalone/apps/frontend/server.js
-    autoDeploy: false
+    autoDeploy: true
   envVars:
       - key: NODE_ENV
         value: production
