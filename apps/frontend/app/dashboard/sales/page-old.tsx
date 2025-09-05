@@ -1,18 +1,13 @@
-/* eslint-disable no-extra-semi */
-'use client';
-
-import { useState, useMemo } from 'react';
-import Layout from '../../../components/Layout';
 import {
-  BanknotesIcon,
-  DocumentTextIcon,
-  ClockIcon,
-  ArrowTrendingUpIcon,
-  CreditCardIcon,
-  CurrencyDollarIcon,
-  FunnelIcon,
-  PlusCircleIcon,
+    ArrowTrendingUpIcon,
+    BanknotesIcon,
+    ClockIcon,
+    CreditCardIcon,
+    CurrencyDollarIcon,
+    DocumentTextIcon,
+    FunnelIcon,
 } from '@heroicons/react/24/outline';
+import { useMemo, useState } from 'react';
 
 interface Estimate {
   id: string;
@@ -44,105 +39,115 @@ interface Payment {
   createdAt: string;
 }
 
+type TabType = 'overview' | 'estimates' | 'invoices' | 'payments';
+type RangeType = '30d' | '60d' | '90d' | 'ytd';
+
 const currency = (n: number) => n.toLocaleString(undefined, { style: 'currency', currency: 'USD' });
 
+// Sample data moved outside component to prevent recreation on every render
+const SAMPLE_ESTIMATES: Estimate[] = [
+  {
+    id: 'EST-1001',
+    client: 'Smith Family',
+    project: 'Kitchen Renovation',
+    total: 18500,
+    status: 'sent',
+    createdAt: '2025-08-01',
+    validUntil: '2025-08-20',
+  },
+  {
+    id: 'EST-1002',
+    client: 'Johnson LLC',
+    project: 'Bathroom Remodel',
+    total: 9200,
+    status: 'accepted',
+    createdAt: '2025-08-02',
+    validUntil: '2025-08-18',
+  },
+  {
+    id: 'EST-1003',
+    client: 'Taylor Homes',
+    total: 44250,
+    status: 'draft',
+    createdAt: '2025-08-10',
+    validUntil: '2025-09-05',
+  },
+];
+
+const SAMPLE_INVOICES: Invoice[] = [
+  {
+    id: 'INV-24001',
+    client: 'Smith Family',
+    project: 'Kitchen Renovation',
+    total: 18500,
+    balance: 9250,
+    status: 'partial',
+    issuedAt: '2025-08-05',
+    dueAt: '2025-09-05',
+  },
+  {
+    id: 'INV-24002',
+    client: 'Johnson LLC',
+    project: 'Bathroom Remodel',
+    total: 9200,
+    balance: 0,
+    status: 'paid',
+    issuedAt: '2025-08-07',
+    dueAt: '2025-09-07',
+  },
+  {
+    id: 'INV-24003',
+    client: 'Taylor Homes',
+    total: 44250,
+    balance: 44250,
+    status: 'sent',
+    issuedAt: '2025-08-12',
+    dueAt: '2025-09-11',
+  },
+];
+
+const SAMPLE_PAYMENTS: Payment[] = [
+  {
+    id: 'PAY-5001',
+    client: 'Johnson LLC',
+    source: 'INV-24002',
+    invoiceId: 'INV-24002',
+    amount: 9200,
+    method: 'ach',
+    status: 'completed',
+    createdAt: '2025-08-08',
+  },
+  {
+    id: 'PAY-5002',
+    client: 'Smith Family',
+    source: 'INV-24001',
+    invoiceId: 'INV-24001',
+    amount: 9250,
+    method: 'card',
+    status: 'completed',
+    createdAt: '2025-08-09',
+  },
+  {
+    id: 'PAY-5003',
+    client: 'Taylor Homes',
+    source: 'Deposit',
+    amount: 10000,
+    method: 'wire',
+    status: 'pending',
+    createdAt: '2025-08-13',
+  },
+];
+
 export default function SalesPage() {
-  const [tab, setTab] = useState<'overview' | 'estimates' | 'invoices' | 'payments'>('overview');
+  const [tab, setTab] = useState<TabType>('overview');
   const [methodFilter, setMethodFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [range, setRange] = useState<'30d' | '60d' | '90d' | 'ytd'>('30d');
+  const [range, setRange] = useState<RangeType>('30d');
 
-  // Sample in-memory data (replace with API later)
-  const estimates: Estimate[] = [
-    {
-      id: 'EST-1001',
-      client: 'Smith Family',
-      project: 'Kitchen Renovation',
-      total: 18500,
-      status: 'sent',
-      createdAt: '2025-08-01',
-      validUntil: '2025-08-20',
-    },
-    {
-      id: 'EST-1002',
-      client: 'Johnson LLC',
-      project: 'Bathroom Remodel',
-      total: 9200,
-      status: 'accepted',
-      createdAt: '2025-08-02',
-      validUntil: '2025-08-18',
-    },
-    {
-      id: 'EST-1003',
-      client: 'Taylor Homes',
-      total: 44250,
-      status: 'draft',
-      createdAt: '2025-08-10',
-      validUntil: '2025-09-05',
-    },
-  ];
-  const invoices: Invoice[] = [
-    {
-      id: 'INV-24001',
-      client: 'Smith Family',
-      project: 'Kitchen Renovation',
-      total: 18500,
-      balance: 9250,
-      status: 'partial',
-      issuedAt: '2025-08-05',
-      dueAt: '2025-09-05',
-    },
-    {
-      id: 'INV-24002',
-      client: 'Johnson LLC',
-      project: 'Bathroom Remodel',
-      total: 9200,
-      balance: 0,
-      status: 'paid',
-      issuedAt: '2025-08-07',
-      dueAt: '2025-09-07',
-    },
-    {
-      id: 'INV-24003',
-      client: 'Taylor Homes',
-      total: 44250,
-      balance: 44250,
-      status: 'sent',
-      issuedAt: '2025-08-12',
-      dueAt: '2025-09-11',
-    },
-  ];
-  const payments: Payment[] = [
-    {
-      id: 'PAY-5001',
-      client: 'Johnson LLC',
-      source: 'INV-24002',
-      invoiceId: 'INV-24002',
-      amount: 9200,
-      method: 'ach',
-      status: 'completed',
-      createdAt: '2025-08-08',
-    },
-    {
-      id: 'PAY-5002',
-      client: 'Smith Family',
-      source: 'INV-24001',
-      invoiceId: 'INV-24001',
-      amount: 9250,
-      method: 'card',
-      status: 'completed',
-      createdAt: '2025-08-09',
-    },
-    {
-      id: 'PAY-5003',
-      client: 'Taylor Homes',
-      source: 'Deposit',
-      amount: 10000,
-      method: 'wire',
-      status: 'pending',
-      createdAt: '2025-08-13',
-    },
-  ];
+  // Use sample data (in real app, this would come from API)
+  const estimates = SAMPLE_ESTIMATES;
+  const invoices = SAMPLE_INVOICES;
+  const payments = SAMPLE_PAYMENTS;
 
   // Derived filtered payments for overview visualizations
   const filteredPayments = payments.filter(
@@ -250,7 +255,7 @@ export default function SalesPage() {
   };
 
   return (
-    <Layout>
+    <div className="max-w-7xl mx-auto p-6">
       <div className="space-y-8">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
@@ -263,7 +268,7 @@ export default function SalesPage() {
             {['overview', 'estimates', 'invoices', 'payments'].map(t => (
               <button
                 key={t}
-                onClick={() => setTab(t as any)}
+                onClick={() => setTab(t as TabType)}
                 className={`pill ${tab === t ? 'pill-tint-blue' : 'pill-tint-neutral'} sm`}
                 data-active={tab === t}
               >
@@ -293,7 +298,7 @@ export default function SalesPage() {
                   <FunnelIcon className="h-4 w-4" />
                   <select
                     value={range}
-                    onChange={e => setRange(e.target.value as any)}
+                    onChange={e => setRange(e.target.value as RangeType)}
                     className="bg-transparent focus:outline-none text-[11px]"
                   >
                     <option value="30d">30d</option>
@@ -640,14 +645,14 @@ export default function SalesPage() {
           </div>
         )}
       </div>
-    </Layout>
+    </div>
   );
 }
 
 interface StatCardProps {
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   label: string;
-  value: any;
+  value: string | number;
   sub?: string;
   tint?: 'blue' | 'green' | 'yellow' | 'purple' | 'indigo' | 'neutral' | 'red';
 }

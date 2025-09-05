@@ -24,7 +24,6 @@ import {
     PhoneIcon,
     QuestionMarkCircleIcon,
     ShieldCheckIcon,
-    ShoppingBagIcon,
     SparklesIcon,
     UserGroupIcon,
     WalletIcon,
@@ -285,54 +284,48 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <ThemeProvider>
       <AIProvider>
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-50 via-amber-50 to-orange-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+          {/* Animated background elements */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute -top-40 -left-40 h-80 w-80 rounded-full bg-gradient-to-r from-amber-400/10 to-orange-500/10 blur-3xl animate-pulse" />
+            <div className="absolute top-1/2 -right-40 h-96 w-96 rounded-full bg-gradient-to-r from-amber-400/8 to-orange-500/8 blur-3xl animate-pulse delay-1000" />
+            <div className="absolute bottom-0 left-1/2 h-64 w-64 rounded-full bg-gradient-to-r from-amber-400/6 to-orange-500/6 blur-3xl animate-pulse delay-500" />
+          </div>
+
           <RouteMemoryTracker />
 
           {/* Mobile sidebar backdrop */}
           {sidebarOpen && (
             <div className="fixed inset-0 z-40 lg:hidden">
               <div
-                className="fixed inset-0 bg-gray-600 bg-opacity-75"
+                className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm"
                 onClick={() => setSidebarOpen(false)}
               />
             </div>
           )}
 
-          {/* Mobile sidebar */}
+          {/* Mobile sidebar - Modern glassmorphism design */}
           <div
-            className={`fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-gray-800 shadow-2xl transform transition-transform duration-300 ease-in-out lg:hidden ${
+            className={`fixed inset-y-0 left-0 z-50 w-80 transform transition-all duration-300 ease-out lg:hidden ${
               sidebarOpen ? 'translate-x-0' : '-translate-x-full'
             }`}
           >
             <div className="flex flex-col h-full">
-              {/* Mobile header with enhanced styling */}
-              <div
-                className={mobile.navigation(
-                  'flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0'
-                )}
-              >
+              {/* Mobile header */}
+              <div className="flex items-center justify-between h-16 px-6 border-b border-slate-200/50 dark:border-slate-700/50 flex-shrink-0 bg-slate-800/90 backdrop-blur-sm">
                 <Logo />
                 <button
                   onClick={() => setSidebarOpen(false)}
-                  className={mobile.button(
-                    'p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700'
-                  )}
+                  className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-700/50 transition-all duration-200"
                   aria-label="Close sidebar"
                 >
-                  <XMarkIcon className="h-6 w-6" />
+                  <XMarkIcon className="h-5 w-5" />
                 </button>
               </div>
 
-              {/* Mobile navigation with enhanced scrolling */}
-              <nav
-                className={mobile.scrollContainer(
-                  'flex-1 overflow-y-auto overscroll-contain mt-2 px-3'
-                )}
-              >
-                <div
-                  className="pb-safe-bottom space-y-1"
-                  style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
-                >
+              {/* Mobile navigation */}
+              <nav className="flex-1 overflow-y-auto px-4 py-6">
+                <div className="space-y-8">
                   {navigationGroups
                     .filter(group => !group.hidden)
                     .map(group => {
@@ -343,8 +336,8 @@ export default function Layout({ children }: LayoutProps) {
                         group.items.some(gItem => gItem.href === i.href)
                       );
                       return (
-                        <div key={group.label} className="mb-6">
-                          <div className="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <div key={group.label} className="space-y-2">
+                          <div className="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
                             {group.label}
                           </div>
                           <div className="space-y-1">
@@ -365,22 +358,21 @@ export default function Layout({ children }: LayoutProps) {
                                   }
                                   onClick={() => setSidebarOpen(false)}
                                   className={classNames(
-                                    mobile.touchTarget(),
                                     'group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200',
                                     item.current
-                                      ? 'bg-amber-50 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 shadow-sm'
-                                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white active:scale-95',
-                                    isRestricted ? 'opacity-75' : ''
+                                      ? 'bg-amber-500/20 text-amber-300 shadow-lg shadow-amber-500/10 border border-amber-400/30'
+                                      : 'text-slate-300 hover:bg-slate-700/50 hover:text-white active:scale-95',
+                                    isRestricted ? 'opacity-60' : ''
                                   )}
                                 >
                                   <item.icon
                                     className={classNames(
-                                      'mr-3 h-5 w-5 flex-shrink-0',
+                                      'mr-4 h-5 w-5 flex-shrink-0',
                                       item.current
-                                        ? 'text-amber-600 dark:text-amber-400'
+                                        ? 'text-amber-400'
                                         : isRestricted
-                                          ? 'text-gray-400 dark:text-gray-500'
-                                          : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
+                                          ? 'text-slate-500'
+                                          : 'text-slate-400 group-hover:text-amber-400'
                                     )}
                                   />
                                   <span className="flex-1">{item.name}</span>
@@ -388,15 +380,8 @@ export default function Layout({ children }: LayoutProps) {
                                     <LockClosedIcon className="w-4 h-4 text-amber-500 ml-2" />
                                   )}
                                   {item.badge && item.badge > 0 && !isRestricted && (
-                                    <span
-                                      className={classNames(
-                                        'ml-auto inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium',
-                                        item.current
-                                          ? 'bg-amber-600 text-white shadow-sm'
-                                          : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
-                                      )}
-                                    >
-                                      {item.badge}
+                                    <span className="ml-auto inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-500 text-white shadow-sm">
+                                      {item.badge > 99 ? '99+' : item.badge}
                                     </span>
                                   )}
                                 </Link>
@@ -406,67 +391,105 @@ export default function Layout({ children }: LayoutProps) {
                         </div>
                       );
                     })}
-
-                  {/* PDF Download Section */}
-                  <div className="mb-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <div className="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      PDF Downloads
-                    </div>
-                    <div className="space-y-1">
-                      <Link
-                        href="/dashboard/estimates?download=pdf"
-                        onClick={() => setSidebarOpen(false)}
-                        className={classNames(
-                          mobile.touchTarget(),
-                          'group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200',
-                          'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white active:scale-95'
-                        )}
-                      >
-                        <DocumentTextIcon className="mr-3 h-5 w-5 flex-shrink-0 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300" />
-                        <span className="flex-1">Download Estimates PDF</span>
-                        <ArrowsPointingOutIcon className="w-4 h-4 text-gray-400 ml-2" />
-                      </Link>
-                      <Link
-                        href="/dashboard/invoices?download=pdf"
-                        onClick={() => setSidebarOpen(false)}
-                        className={classNames(
-                          mobile.touchTarget(),
-                          'group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200',
-                          'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white active:scale-95'
-                        )}
-                      >
-                        <ShoppingBagIcon className="mr-3 h-5 w-5 flex-shrink-0 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300" />
-                        <span className="flex-1">Download Invoices PDF</span>
-                        <ArrowsPointingOutIcon className="w-4 h-4 text-gray-400 ml-2" />
-                      </Link>
-                    </div>
-                  </div>
                 </div>
               </nav>
+
+              {/* User profile section - Mobile */}
+              <div className="flex-shrink-0 p-4 border-t border-slate-700/50 bg-slate-800/90 backdrop-blur-sm">
+                <div className="flex items-center space-x-3">
+                  <div className="h-10 w-10 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/25">
+                    <span className="text-sm font-medium text-white">
+                      {user.firstName?.[0]}{user.lastName?.[0]}
+                    </span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-white truncate">
+                      {user.firstName} {user.lastName}
+                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <p className="text-xs text-slate-400 truncate">
+                        {user.email}
+                      </p>
+                      <PlanBadge plan={userPlan} className="text-xs" />
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowUserMenu(!showUserMenu)}
+                    className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-700/50 transition-all duration-200"
+                  >
+                    <ChevronDownIcon className="h-4 w-4" />
+                  </button>
+                </div>
+
+                {showUserMenu && (
+                  <div className="mt-3 bg-slate-800/95 backdrop-blur-sm rounded-xl border border-slate-700/50 shadow-xl">
+                    <div className="p-2 space-y-1">
+                      <Link
+                        href="/dashboard/settings/profile"
+                        className="block px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors duration-200"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        Your Profile
+                      </Link>
+                      <Link
+                        href="/billing"
+                        className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors duration-200"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        <CreditCardIcon className="h-4 w-4" />
+                        Billing & Payments
+                      </Link>
+                      <Link
+                        href="/dashboard/settings"
+                        className="block px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors duration-200"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        Settings
+                      </Link>
+                      <button
+                        onClick={() => {
+                          setShowUserMenu(false);
+                          handleLogout();
+                        }}
+                        className="block w-full px-3 py-2 text-left text-sm text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors duration-200"
+                      >
+                        Sign out
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Desktop sidebar */}
+          {/* Desktop sidebar - Modern glassmorphism design */}
           <div
-            className={`hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col transition-all duration-300 ease-in-out ${
-              sidebarCollapsed ? 'lg:w-16' : 'lg:w-64'
+            className={`hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col transition-all duration-300 ease-out ${
+              sidebarCollapsed ? 'lg:w-20' : 'lg:w-72'
             }`}
           >
-            <div className="flex min-h-0 flex-1 flex-col bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
-              <div className="flex h-16 flex-shrink-0 items-center px-4 border-b border-gray-200 dark:border-gray-700">
-                <div
-                  className={`transition-all duration-300 ${sidebarCollapsed ? 'w-8' : 'w-auto'}`}
-                >
-                  {!sidebarCollapsed && (
-                    <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                      Navigation
-                    </h2>
-                  )}
-                </div>
+            <div className="flex min-h-0 flex-1 flex-col bg-slate-800/90 backdrop-blur-xl border-r border-slate-700/50 shadow-2xl shadow-slate-900/20">
+              {/* Desktop header */}
+              <div className="flex h-16 flex-shrink-0 items-center justify-between px-4 border-b border-slate-700/50">
+                {!sidebarCollapsed && (
+                  <div className="flex items-center space-x-3">
+                    <div className="h-8 w-8 rounded-lg bg-gradient-to-r from-amber-500 to-orange-600 flex items-center justify-center">
+                      <WrenchScrewdriverIcon className="h-4 w-4 text-white" />
+                    </div>
+                    <h2 className="text-sm font-semibold text-white">Navigation</h2>
+                  </div>
+                )}
+                {sidebarCollapsed && (
+                  <div className="mx-auto h-8 w-8 rounded-lg bg-gradient-to-r from-amber-500 to-orange-600 flex items-center justify-center">
+                    <WrenchScrewdriverIcon className="h-4 w-4 text-white" />
+                  </div>
+                )}
               </div>
+
+              {/* Desktop navigation */}
               <div className="flex flex-1 flex-col overflow-y-auto">
-                <nav className="flex-1 px-2 py-4">
-                  <div className="space-y-1">
+                <nav className="flex-1 px-3 py-6">
+                  <div className="space-y-8">
                     {navigationGroups
                       .filter(group => !group.hidden)
                       .map(group => {
@@ -477,9 +500,9 @@ export default function Layout({ children }: LayoutProps) {
                           group.items.some(gItem => gItem.href === i.href)
                         );
                         return (
-                          <div key={group.label} className="mb-6">
+                          <div key={group.label} className="space-y-2">
                             {!sidebarCollapsed && (
-                              <div className="px-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                              <div className="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
                                 {group.label}
                               </div>
                             )}
@@ -500,24 +523,24 @@ export default function Layout({ children }: LayoutProps) {
                                         : item.href
                                     }
                                     className={classNames(
-                                      'group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300',
-                                      sidebarCollapsed ? 'justify-center px-2' : '',
+                                      'group flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 relative',
+                                      sidebarCollapsed ? 'justify-center' : '',
                                       item.current
-                                        ? 'bg-amber-50 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300'
-                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white',
-                                      isRestricted ? 'opacity-75' : ''
+                                        ? 'bg-amber-500/20 text-amber-300 shadow-lg shadow-amber-500/10 border border-amber-400/30'
+                                        : 'text-slate-300 hover:bg-slate-700/50 hover:text-white active:scale-95',
+                                      isRestricted ? 'opacity-60' : ''
                                     )}
                                     title={sidebarCollapsed ? item.name : undefined}
                                   >
                                     <item.icon
                                       className={classNames(
                                         'h-5 w-5 flex-shrink-0 transition-all duration-300',
-                                        sidebarCollapsed ? 'mr-0' : 'mr-3',
+                                        sidebarCollapsed ? 'mr-0' : 'mr-4',
                                         item.current
-                                          ? 'text-amber-600 dark:text-amber-400'
+                                          ? 'text-amber-400'
                                           : isRestricted
-                                            ? 'text-gray-400 dark:text-gray-500'
-                                            : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
+                                            ? 'text-slate-500'
+                                            : 'text-slate-400 group-hover:text-amber-400'
                                       )}
                                     />
                                     {!sidebarCollapsed && (
@@ -530,15 +553,8 @@ export default function Layout({ children }: LayoutProps) {
                                       item.badge &&
                                       item.badge > 0 &&
                                       !isRestricted && (
-                                        <span
-                                          className={classNames(
-                                            'ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0',
-                                            item.current
-                                              ? 'bg-amber-600 text-white shadow-sm'
-                                              : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
-                                          )}
-                                        >
-                                          {item.badge}
+                                        <span className="ml-auto inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-500 text-white shadow-sm">
+                                          {item.badge > 99 ? '99+' : item.badge}
                                         </span>
                                       )}
                                   </Link>
@@ -551,13 +567,13 @@ export default function Layout({ children }: LayoutProps) {
                   </div>
                 </nav>
 
-                {/* User profile section */}
-                <div className="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-700">
+                {/* User profile section - Desktop */}
+                <div className="flex-shrink-0 p-4 border-t border-slate-700/50">
                   <div className="relative">
                     <button
                       onClick={() => setShowUserMenu(!showUserMenu)}
                       className={classNames(
-                        'group block w-full rounded-lg p-3 text-left text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition-all duration-300',
+                        'group block w-full rounded-xl p-3 text-left text-sm font-medium hover:bg-slate-700/50 focus:outline-none focus:ring-2 focus:ring-amber-500/50 transition-all duration-300',
                         sidebarCollapsed ? 'px-2' : ''
                       )}
                       title={sidebarCollapsed ? `${user.firstName} ${user.lastName}` : undefined}
@@ -566,20 +582,19 @@ export default function Layout({ children }: LayoutProps) {
                         className={`flex items-center ${sidebarCollapsed ? 'justify-center' : ''}`}
                       >
                         <div className="flex-shrink-0">
-                          <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
-                            <span className="text-sm font-medium text-amber-700 dark:text-amber-300">
-                              {user.firstName?.[0]}
-                              {user.lastName?.[0]}
+                          <div className="h-10 w-10 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/25">
+                            <span className="text-sm font-medium text-white">
+                              {user.firstName?.[0]}{user.lastName?.[0]}
                             </span>
                           </div>
                         </div>
                         {!sidebarCollapsed && (
                           <div className="ml-3 flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                            <p className="text-sm font-medium text-white truncate">
                               {user.firstName} {user.lastName}
                             </p>
                             <div className="flex items-center gap-2 mt-1">
-                              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                              <p className="text-xs text-slate-400 truncate">
                                 {user.email}
                               </p>
                               <PlanBadge plan={userPlan} className="text-xs flex-shrink-0" />
@@ -587,58 +602,60 @@ export default function Layout({ children }: LayoutProps) {
                           </div>
                         )}
                         {!sidebarCollapsed && (
-                          <ChevronDownIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                          <ChevronDownIcon className="h-4 w-4 text-slate-400 flex-shrink-0 transition-transform duration-200 group-hover:text-amber-400" />
                         )}
                       </div>
                     </button>
 
                     {showUserMenu && (
                       <div
-                        className={`absolute bottom-full mb-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg ring-1 ring-black/10 dark:ring-white/10 border border-gray-200 dark:border-gray-700 py-1 transition-all duration-300 ${
+                        className={`absolute bottom-full mb-2 bg-slate-800/95 backdrop-blur-xl rounded-xl shadow-xl ring-1 ring-slate-700/50 border border-slate-600/50 py-2 transition-all duration-300 ${
                           sidebarCollapsed ? 'left-0 right-0' : 'left-0 right-0'
                         }`}
                       >
                         {!sidebarCollapsed && (
-                          <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                          <div className="px-4 py-3 border-b border-slate-700/50">
                             <div className="flex items-center justify-between">
-                              <span className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                              <span className="text-xs uppercase tracking-wide text-slate-400">
                                 Appearance
                               </span>
                               <ThemeToggle variant="compact" />
                             </div>
                           </div>
                         )}
-                        <Link
-                          href="/dashboard/settings/profile"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-                          onClick={() => setShowUserMenu(false)}
-                        >
-                          Your Profile
-                        </Link>
-                        <Link
-                          href="/billing"
-                          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-                          onClick={() => setShowUserMenu(false)}
-                        >
-                          <CreditCardIcon className="h-4 w-4" />
-                          Billing & Payments
-                        </Link>
-                        <Link
-                          href="/dashboard/settings"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-                          onClick={() => setShowUserMenu(false)}
-                        >
-                          Settings
-                        </Link>
-                        <button
-                          onClick={() => {
-                            setShowUserMenu(false);
-                            handleLogout();
-                          }}
-                          className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-                        >
-                          Sign out
-                        </button>
+                        <div className="p-2 space-y-1">
+                          <Link
+                            href="/dashboard/settings/profile"
+                            className="block px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors duration-200"
+                            onClick={() => setShowUserMenu(false)}
+                          >
+                            Your Profile
+                          </Link>
+                          <Link
+                            href="/billing"
+                            className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors duration-200"
+                            onClick={() => setShowUserMenu(false)}
+                          >
+                            <CreditCardIcon className="h-4 w-4" />
+                            Billing & Payments
+                          </Link>
+                          <Link
+                            href="/dashboard/settings"
+                            className="block px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors duration-200"
+                            onClick={() => setShowUserMenu(false)}
+                          >
+                            Settings
+                          </Link>
+                          <button
+                            onClick={() => {
+                              setShowUserMenu(false);
+                              handleLogout();
+                            }}
+                            className="block w-full px-3 py-2 text-left text-sm text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors duration-200"
+                          >
+                            Sign out
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -649,19 +666,19 @@ export default function Layout({ children }: LayoutProps) {
 
           {/* Main content */}
           <div
-            className={`lg:flex lg:flex-col min-h-screen transition-all duration-300 ease-in-out ${
-              sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'
+            className={`lg:flex lg:flex-col min-h-screen transition-all duration-300 ease-out ${
+              sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-72'
             }`}
           >
             {/* Unified Header with Logo and Toolbar */}
-            <header className="sticky top-0 z-40 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+            <header className="sticky top-0 z-40 bg-slate-800/90 backdrop-blur-xl border-b border-slate-700/50 shadow-lg shadow-slate-900/10">
               <div className="flex h-16 items-center justify-between px-4 lg:px-6">
                 {/* Left Section: Logo + Navigation */}
                 <div className="flex items-center gap-4">
                   {/* Desktop sidebar toggle */}
                   <button
                     type="button"
-                    className="hidden lg:flex p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 rounded-lg transition-all duration-200 group"
+                    className="hidden lg:flex p-2 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-xl transition-all duration-200 group"
                     onClick={toggleSidebar}
                     title={
                       sidebarCollapsed ? 'Expand sidebar (Ctrl+B)' : 'Collapse sidebar (Ctrl+B)'
@@ -677,7 +694,7 @@ export default function Layout({ children }: LayoutProps) {
                   {/* Mobile menu button */}
                   <button
                     type="button"
-                    className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 rounded-lg lg:hidden"
+                    className="p-2 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-xl lg:hidden"
                     onClick={() => setSidebarOpen(true)}
                   >
                     <Bars3Icon className="h-5 w-5" />
@@ -689,8 +706,8 @@ export default function Layout({ children }: LayoutProps) {
                   </div>
 
                   {/* Breadcrumb/Current Page Indicator */}
-                  <div className="hidden md:flex items-center text-sm text-gray-600 dark:text-gray-400">
-                    <span className="font-medium text-gray-900 dark:text-gray-100">
+                  <div className="hidden md:flex items-center text-sm text-slate-400">
+                    <span className="font-medium text-white">
                       {(() => {
                         const pathSegments = pathname.split('/').filter(Boolean);
                         const lastSegment = pathSegments[pathSegments.length - 1];
@@ -708,7 +725,7 @@ export default function Layout({ children }: LayoutProps) {
                 </div>
 
                 {/* Right Section: Actions Toolbar */}
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-2">
                   {/* AI Enable Toggle */}
                   <div className="hidden sm:flex">
                     <AIEnable />
@@ -720,7 +737,7 @@ export default function Layout({ children }: LayoutProps) {
                   {/* Notifications */}
                   <button
                     onClick={() => router.push('/dashboard/inbox')}
-                    className="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 rounded-lg transition-all duration-200 hover:scale-105"
+                    className="relative p-2 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-xl transition-all duration-200 hover:scale-105"
                     title="Notifications"
                   >
                     <BellIcon className="h-5 w-5" />
@@ -736,7 +753,7 @@ export default function Layout({ children }: LayoutProps) {
 
                   {/* Help */}
                   <button
-                    className="hidden sm:flex items-center px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200 hover:scale-105"
+                    className="hidden sm:flex items-center px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-xl transition-all duration-200 hover:scale-105"
                     onClick={() => {
                       const evt = new CustomEvent('copilot:open');
                       window.dispatchEvent(evt);
@@ -751,10 +768,10 @@ export default function Layout({ children }: LayoutProps) {
             </header>
 
             {/* Page content with mobile optimization */}
-            <main className={mobile.scrollContainer('flex-1 py-4 sm:py-6 overflow-y-auto')}>
+            <main className="flex-1 py-6 overflow-y-auto">
               <div
                 className={classNames(
-                  mobile.spacing.page(),
+                  'px-4 sm:px-6 lg:px-8',
                   pathname.startsWith('/dashboard/clients') ? 'max-w-none' : 'max-w-7xl mx-auto'
                 )}
               >

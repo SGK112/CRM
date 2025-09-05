@@ -1,17 +1,16 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import {
-  CreditCardIcon,
-  ChartBarIcon,
-  CalendarIcon,
-  DocumentTextIcon,
-  UserGroupIcon,
-  CurrencyDollarIcon,
-} from '@heroicons/react/24/outline';
-import SubscriptionPage from '@/components/payments/SubscriptionPage';
 import CustomerPortal from '@/components/payments/CustomerPortal';
+import SubscriptionPage from '@/components/payments/SubscriptionPage';
+import {
+    CalendarIcon,
+    ChartBarIcon,
+    CreditCardIcon,
+    CurrencyDollarIcon,
+    DocumentTextIcon,
+    UserGroupIcon,
+} from '@heroicons/react/24/outline';
+import { useEffect, useState } from 'react';
 
 interface BillingStats {
   totalRevenue: number;
@@ -20,6 +19,18 @@ interface BillingStats {
   churnRate: number;
   averageRevenuePerUser: number;
   totalCustomers: number;
+}
+
+interface UserSubscription {
+  plan: {
+    id: string;
+    name: string;
+    amount: number;
+    currency: string;
+    interval: string;
+  };
+  status: 'active' | 'trialing' | 'canceled' | 'past_due';
+  currentPeriodEnd: string;
 }
 
 interface RecentActivity {
@@ -33,11 +44,10 @@ interface RecentActivity {
 }
 
 export default function BillingPage() {
-  const router = useRouter();
   const [activeView, setActiveView] = useState<'overview' | 'plans' | 'portal'>('overview');
   const [billingStats, setBillingStats] = useState<BillingStats | null>(null);
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
-  const [userSubscription, setUserSubscription] = useState<any>(null);
+  const [userSubscription, setUserSubscription] = useState<UserSubscription | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -90,7 +100,7 @@ export default function BillingPage() {
         }
       }
     } catch (error) {
-      console.error('Error fetching billing data:', error);
+      // Error fetching billing data - silently handle
     } finally {
       setLoading(false);
     }
@@ -168,7 +178,7 @@ export default function BillingPage() {
           ].map(tab => (
             <button
               key={tab.id}
-              onClick={() => setActiveView(tab.id as any)}
+              onClick={() => setActiveView(tab.id as 'overview' | 'plans' | 'portal')}
               className={`flex items-center py-2 px-1 border-b-2 font-medium text-sm ${
                 activeView === tab.id
                   ? 'border-blue-500 text-blue-600'

@@ -1,6 +1,6 @@
+import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { headers } from 'next/headers';
 
 function getStripe() {
   if (!process.env.STRIPE_SECRET_KEY) {
@@ -23,7 +23,6 @@ export async function POST(request: NextRequest) {
     const stripe = getStripe();
     event = stripe.webhooks.constructEvent(body, sig, endpointSecret!);
   } catch (err) {
-    console.error('Webhook signature verification failed:', err);
     return NextResponse.json({ error: 'Webhook signature verification failed' }, { status: 400 });
   }
 
@@ -55,12 +54,12 @@ export async function POST(request: NextRequest) {
       }
 
       default:
-        console.log(`Unhandled event type ${event.type}`);
+        // Unhandled event type - silently ignore
+        break;
     }
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error('Webhook handler error:', error);
     return NextResponse.json({ error: 'Webhook handler failed' }, { status: 500 });
   }
 }
@@ -70,13 +69,10 @@ async function handleSubscriptionChange(subscription: Stripe.Subscription) {
   const planId = subscription.metadata.planId;
 
   if (!userId || !planId) {
-    console.error('Missing metadata in subscription:', subscription.id);
     return;
   }
 
   // TODO: Update user's plan in your database
-  console.log(`Updating user ${userId} to plan ${planId}`);
-
   // For now, we'll store in localStorage on the frontend
   // In production, you'd update your user database here
 
@@ -88,19 +84,16 @@ async function handleSubscriptionCancellation(subscription: Stripe.Subscription)
   const userId = subscription.metadata.userId;
 
   if (!userId) {
-    console.error('Missing metadata in subscription:', subscription.id);
     return;
   }
 
   // TODO: Downgrade user to basic plan
-  console.log(`Downgrading user ${userId} to basic plan`);
-
   // You could also send a cancellation email here
   // await sendCancellationEmail(userId);
 }
 
 async function handlePaymentSuccess(invoice: Stripe.Invoice) {
-  const subscriptionId = (invoice as any).subscription as string;
+  const subscriptionId = (invoice as Stripe.Invoice & { subscription?: string }).subscription;
 
   if (!subscriptionId) return;
 
@@ -111,14 +104,12 @@ async function handlePaymentSuccess(invoice: Stripe.Invoice) {
   if (!userId) return;
 
   // TODO: Record successful payment in your database
-  console.log(`Payment succeeded for user ${userId}, amount: ${invoice.amount_paid}`);
-
   // You could send a receipt email here
   // await sendReceiptEmail(userId, invoice);
 }
 
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
-  const subscriptionId = (invoice as any).subscription as string;
+  const subscriptionId = (invoice as Stripe.Invoice & { subscription?: string }).subscription;
 
   if (!subscriptionId) return;
 
@@ -129,8 +120,6 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
   if (!userId) return;
 
   // TODO: Handle failed payment (notify user, retry, etc.)
-  console.log(`Payment failed for user ${userId}, amount: ${invoice.amount_due}`);
-
   // You could send a payment failure notification here
   // await sendPaymentFailureEmail(userId, invoice);
 }

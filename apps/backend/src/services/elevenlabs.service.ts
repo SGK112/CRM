@@ -1,9 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 
+interface ClientContext {
+  _id?: string;
+  firstName?: string;
+  lastName?: string;
+  workspaceId?: string;
+  purpose?: string;
+  [key: string]: unknown;
+}
+
 @Injectable()
 export class ElevenLabsService {
+  private logger = new Logger('ElevenLabsService');
+
   constructor(private config: ConfigService) {}
   get apiKey() {
     return this.config.get('ELEVENLABS_API_KEY');
@@ -26,18 +37,19 @@ export class ElevenLabsService {
         `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
         { text },
         {
-          headers: { 'xi-api-key': this.apiKey } as any,
+          headers: { 'xi-api-key': this.apiKey } as Record<string, string>,
           responseType: 'arraybuffer',
         }
       );
       return { audio: resp.data };
-    } catch (e: any) {
-      return { error: true, message: e.message };
+    } catch (e: unknown) {
+      const error = e as Error;
+      return { error: true, message: error.message };
     }
   }
 
   // Create an outbound call using ElevenLabs conversational AI
-  async createOutboundCall(phoneNumber: string, agentId?: string, clientContext?: any) {
+  async createOutboundCall(phoneNumber: string, agentId?: string, clientContext?: ClientContext) {
     if (!this.apiKey) {
       throw new Error('ElevenLabs API key not configured');
     }
@@ -76,10 +88,9 @@ export class ElevenLabsService {
         agentId: actualAgentId,
         status: response.data.status || 'initiated',
       };
-    } catch (error: any) {
-      console.error('ElevenLabs outbound call failed:', error.response?.data || error.message);
-
-      // Try alternative endpoint structure
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: unknown }; message?: string };
+      this.logger.error('ElevenLabs outbound call failed:', err.response?.data || err.message || 'Unknown error');      // Try alternative endpoint structure
       try {
         const altResponse = await axios.post(
           'https://api.elevenlabs.io/v1/conversations',
@@ -109,14 +120,15 @@ export class ElevenLabsService {
           agentId: actualAgentId,
           status: 'initiated',
         };
-      } catch (altError: any) {
-        console.error(
+      } catch (altError: unknown) {
+        const err = altError as { response?: { data?: { detail?: string } }; message?: string };
+        this.logger.error(
           'ElevenLabs alternative outbound call failed:',
-          altError.response?.data || altError.message
+          err.response?.data || err.message || 'Unknown error'
         );
         return {
           success: false,
-          error: altError.response?.data?.detail || altError.message,
+          error: err.response?.data?.detail || err.message || 'Unknown error',
         };
       }
     }
@@ -149,14 +161,15 @@ export class ElevenLabsService {
         conversationId: response.data.conversation_id,
         agentId: actualAgentId,
       };
-    } catch (error: any) {
-      console.error(
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { detail?: string } }; message?: string };
+      this.logger.error(
         'ElevenLabs conversational call failed:',
-        error.response?.data || error.message
+        err.response?.data || err.message || 'Unknown error'
       );
       return {
         success: false,
-        error: error.response?.data?.detail || error.message,
+        error: err.response?.data?.detail || err.message || 'Unknown error',
       };
     }
   }
@@ -177,8 +190,9 @@ export class ElevenLabsService {
       );
 
       return response.data;
-    } catch (error: any) {
-      console.error('Failed to get conversation status:', error.response?.data || error.message);
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: unknown }; message?: string };
+      this.logger.error('Failed to get conversation status:', err.response?.data || err.message || 'Unknown error');
       throw error;
     }
   }

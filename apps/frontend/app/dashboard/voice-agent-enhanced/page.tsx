@@ -1,25 +1,23 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { CapabilityGate, PlanBadge } from '@/components/CapabilityGate';
 import Layout from '@/components/Layout';
 import { PageHeader } from '@/components/ui/PageHeader';
-import {
-  PhoneIcon,
-  ArrowPathIcon,
-  MicrophoneIcon,
-  SpeakerWaveIcon,
-  PlayIcon,
-  PauseIcon,
-  UserGroupIcon,
-  ChartBarIcon,
-  CogIcon,
-  StarIcon,
-  ClockIcon,
-} from '@heroicons/react/24/outline';
-import { API_BASE } from '@/lib/api';
-import { CapabilityGate, PlanBadge } from '@/components/CapabilityGate';
 import ElevenLabsWidgetComponent from '@/components/voice/ElevenLabsWidgetComponent';
+import { API_BASE } from '@/lib/api';
 import { getUserPlan, hasCapability } from '@/lib/plans';
+import {
+    ArrowPathIcon,
+    ChartBarIcon,
+    ClockIcon,
+    CogIcon,
+    PhoneIcon,
+    PlayIcon,
+    SpeakerWaveIcon,
+    StarIcon,
+    UserGroupIcon,
+} from '@heroicons/react/24/outline';
+import { useEffect, useState } from 'react';
 
 interface OutboundResponse {
   sid: string;
@@ -114,7 +112,6 @@ export default function VoiceAgentPage() {
   const [activeTab, setActiveTab] = useState<'overview' | 'agents' | 'analytics' | 'settings'>(
     'overview'
   );
-  const [selectedClient, setSelectedClient] = useState<any>(null);
   const [showWidgetDemo, setShowWidgetDemo] = useState(false);
 
   const userPlan = getUserPlan();
@@ -129,7 +126,7 @@ export default function VoiceAgentPage() {
           setStatus(await res.json());
         }
       } catch (error) {
-        console.error('Failed to fetch voice agent status:', error);
+        // Silently handle error
       }
     })();
   }, []);
@@ -216,7 +213,7 @@ export default function VoiceAgentPage() {
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
+                  onClick={() => setActiveTab(tab.id as 'overview' | 'agents' | 'analytics' | 'settings')}
                   className={`flex items-center gap-2 py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
                     activeTab === tab.id
                       ? 'border-blue-500 text-blue-600 dark:text-blue-400'
@@ -255,8 +252,8 @@ export default function VoiceAgentPage() {
                   client={demoClient}
                   workspaceId="demo-workspace"
                   agentId={selectedAgent.id}
-                  onCallInitiated={callInfo => {
-                    console.log('Demo call initiated:', callInfo);
+                  onCallInitiated={() => {
+                    // Demo call initiated
                   }}
                 />
               </div>

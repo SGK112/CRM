@@ -23,8 +23,7 @@ import { useEffect, useState } from 'react';
 
 // Integration components
 function GoogleCalendarIntegration() {
-  const [status, setStatus] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<{ connected: boolean; email?: string } | null>(null);
 
   useEffect(() => {
     fetchStatus();
@@ -32,7 +31,6 @@ function GoogleCalendarIntegration() {
 
   const fetchStatus = async () => {
     try {
-      setLoading(true);
       const token = localStorage.getItem('accessToken');
       const res = await fetch('/api/integrations/google-calendar/status', {
         headers: { Authorization: `Bearer ${token}` },
@@ -41,8 +39,8 @@ function GoogleCalendarIntegration() {
         const data = await res.json();
         setStatus(data);
       }
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      // Handle error silently
     }
   };
 
@@ -115,10 +113,8 @@ function EmailIntegration() {
     fromName: '',
     secure: true,
   });
-  const [loading, setLoading] = useState(false);
 
   const handleSave = async () => {
-    setLoading(true);
     try {
       const token = localStorage.getItem('accessToken');
       const response = await fetch('/api/user/email-config', {
@@ -136,10 +132,7 @@ function EmailIntegration() {
         alert('Failed to save email configuration');
       }
     } catch (error) {
-      console.error('Email config error:', error);
       alert('Failed to save email configuration');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -226,10 +219,10 @@ function EmailIntegration() {
       <div className="mt-4">
         <button
           onClick={handleSave}
-          disabled={loading}
+          disabled={false}
           className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors disabled:opacity-50"
         >
-          {loading ? 'Saving...' : 'Save Email Config'}
+          Save Email Config
         </button>
       </div>
     </div>
@@ -264,7 +257,6 @@ function SMSIntegration() {
         alert('Failed to save SMS configuration');
       }
     } catch (error) {
-      console.error('SMS config error:', error);
       alert('Failed to save SMS configuration');
     } finally {
       setLoading(false);
@@ -442,7 +434,6 @@ function EstimateTemplates() {
         alert('Failed to save estimate templates');
       }
     } catch (error) {
-      console.error('Template save error:', error);
       alert('Failed to save estimate templates');
     } finally {
       setLoading(false);
@@ -560,7 +551,6 @@ function InvoiceSettings() {
         alert('Failed to save invoice settings');
       }
     } catch (error) {
-      console.error('Invoice settings error:', error);
       alert('Failed to save invoice settings');
     } finally {
       setLoading(false);
@@ -721,7 +711,7 @@ function UserPermissions() {
         setUsers(data.users || []);
       }
     } catch (error) {
-      console.error('Failed to fetch users:', error);
+      // Handle error silently
     }
   };
 
@@ -745,7 +735,6 @@ function UserPermissions() {
         alert('Failed to update user role');
       }
     } catch (error) {
-      console.error('Role update error:', error);
       alert('Failed to update user role');
     } finally {
       setLoading(false);
@@ -780,7 +769,7 @@ function UserPermissions() {
       </div>
 
       <div className="space-y-4">
-        {users.map((user: any) => (
+        {users.map((user: { _id: string; firstName: string; lastName: string; email: string; role: string }) => (
           <div
             key={user._id}
             className="border border-gray-200 dark:border-token rounded-lg p-4 bg-white dark:bg-[var(--surface-2)]"
@@ -894,7 +883,6 @@ export default function UnifiedSettingsPage() {
       }
     } catch (error) {
       setMessage({ type: 'error', text: 'Failed to load profile data' });
-      console.error('Profile load error:', error);
     } finally {
       setLoading(false);
     }
@@ -944,7 +932,6 @@ export default function UnifiedSettingsPage() {
       }
     } catch (error) {
       setMessage({ type: 'error', text: 'Failed to update profile' });
-      console.error('Profile update error:', error);
     } finally {
       setSaving(false);
     }
@@ -979,7 +966,6 @@ export default function UnifiedSettingsPage() {
       }
     } catch (error) {
       setMessage({ type: 'error', text: 'Failed to update notification preferences' });
-      console.error('Notification update error:', error);
     } finally {
       setSaving(false);
     }

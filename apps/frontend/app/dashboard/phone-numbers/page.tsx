@@ -1,27 +1,29 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import {
-  PhoneIcon,
-  PlusIcon,
-  TrashIcon,
-  StarIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  ExclamationTriangleIcon,
-  CogIcon,
-  ChartBarIcon,
-  ChatBubbleBottomCenterTextIcon,
+    StandardButton,
+    StandardCard,
+    StandardPageWrapper,
+    StandardSection,
+} from '@/components/ui/StandardPageWrapper';
+import {
+    ChartBarIcon,
+    ChatBubbleBottomCenterTextIcon,
+    CheckCircleIcon,
+    PhoneIcon,
+    PlusIcon,
+    StarIcon,
+    XCircleIcon,
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
-import {
-  StandardPageWrapper,
-  StandardCard,
-  StandardSection,
-  StandardButton,
-} from '@/components/ui/StandardPageWrapper';
+import { Trash2 } from 'lucide-react';
+import { useState } from 'react';
 
-// Mock data for phone numbers
+interface AvailableNumber {
+  phoneNumber: string;
+  type: string;
+  cost: number;
+}
 const mockPhoneNumbers = [
   {
     id: '1',
@@ -77,7 +79,7 @@ export default function PhoneNumbersPage() {
   const [availablePhoneNumbers, setAvailablePhoneNumbers] = useState(availableNumbers);
   const [loading, setLoading] = useState(false);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
-  const [selectedNumber, setSelectedNumber] = useState<any>(null);
+  const [selectedNumber, setSelectedNumber] = useState<AvailableNumber | null>(null);
 
   const handleSetDefault = async (id: string) => {
     setPhoneNumbers(numbers =>
@@ -94,7 +96,7 @@ export default function PhoneNumbersPage() {
     }
   };
 
-  const handlePurchaseNumber = async (number: any) => {
+  const handlePurchaseNumber = async (number: AvailableNumber) => {
     setLoading(true);
     // Simulate API call
     setTimeout(() => {
@@ -211,7 +213,7 @@ export default function PhoneNumbersPage() {
                       onClick={() => handleDeleteNumber(number.id)}
                       className="text-red-600 hover:text-red-700"
                     >
-                      <TrashIcon className="h-4 w-4" />
+                      <Trash2 className="h-4 w-4" />
                     </StandardButton>
                   </div>
                 </div>

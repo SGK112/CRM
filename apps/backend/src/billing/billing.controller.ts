@@ -1,22 +1,18 @@
 import {
-  Body,
-  Controller,
-  Post,
-  Get,
-  Query,
-  BadRequestException,
-  UseGuards,
-  Req,
+    BadRequestException, Body,
+    Controller, Get, Injectable, Logger, Post, Query, Req, UseGuards
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { InjectModel } from '@nestjs/mongoose';
-import { User, UserDocument } from '../users/schemas/user.schema';
-import { Model } from 'mongoose';
 import { ConfigService } from '@nestjs/config';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import Stripe from 'stripe';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { User, UserDocument } from '../users/schemas/user.schema';
 
+@Injectable()
 @Controller('billing')
 export class BillingController {
+  private readonly logger = new Logger(BillingController.name);
   private stripe: Stripe | null = null;
   private trialDays: number;
 
@@ -28,10 +24,9 @@ export class BillingController {
     if (secret) {
       this.stripe = new Stripe(secret, { apiVersion: '2023-08-16' });
     } else {
-      // Log once (console.log acceptable; could integrate Nest Logger if desired)
+      // Log once (could integrate Nest Logger if desired)
       // Avoid throwing so auth & other modules still work without billing configured.
-      // eslint-disable-next-line no-console
-      console.warn(
+      this.logger?.warn?.(
         '[Billing] STRIPE_SECRET_KEY not set – billing endpoints will return configuration errors until provided.'
       );
     }
@@ -83,7 +78,7 @@ export class BillingController {
       amount_total: session.amount_total,
       currency: session.currency,
       payment_status: session.payment_status,
-      trial_end: (session as any).trial_end || null,
+      trial_end: (session as Stripe.Checkout.Session & { trial_end?: number }).trial_end || null,
     };
   }
 

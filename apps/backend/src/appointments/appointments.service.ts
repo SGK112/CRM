@@ -18,8 +18,9 @@ import {
     CreateAppointmentDto,
     PaginationOptions,
     UpdateAppointmentDto,
+    AppointmentDocument,
 } from './dto/appointment.dto';
-import { Appointment, AppointmentDocument } from './schemas/appointment.schema';
+import { Appointment } from './schemas/appointment.schema';
 
 @Injectable()
 export class AppointmentsService {
@@ -63,10 +64,10 @@ export class AppointmentsService {
 
     // Send confirmation email if requested
     if (createAppointmentDto.sendReminders) {
-      await this.sendConfirmationEmail(saved);
+      await this.sendConfirmationEmail();
     }
 
-    return saved;
+    return saved as Appointment;
   }
 
   // Find all appointments with filters and pagination
@@ -74,7 +75,15 @@ export class AppointmentsService {
     filters: AppointmentFilters,
     pagination: PaginationOptions
   ): Promise<{ appointments: Appointment[]; total: number }> {
-    const query: Record<string, any> = { workspaceId: filters.workspaceId };
+    const query: {
+      workspaceId: string;
+      scheduledDate?: { $gte?: Date; $lte?: Date };
+      status?: string;
+      type?: string;
+      assignedTo?: string;
+      clientId?: string;
+      $or?: Array<Record<string, unknown>>;
+    } = { workspaceId: filters.workspaceId };
 
     // Apply date filters
     if (filters.startDate || filters.endDate) {
@@ -105,7 +114,7 @@ export class AppointmentsService {
       .limit(pagination.limit)
       .exec();
 
-    return { appointments, total };
+    return { appointments: appointments as Appointment[], total };
   }
 
   // Get calendar events formatted for FullCalendar
@@ -169,14 +178,14 @@ export class AppointmentsService {
     const now = new Date();
     const futureDate = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
 
-    return this.appointmentModel
+    return (await this.appointmentModel
       .find({
         workspaceId,
         scheduledDate: { $gte: now, $lte: futureDate },
         status: { $nin: ['cancelled', 'completed'] },
       })
       .sort({ scheduledDate: 1 })
-      .exec();
+      .exec()) as Appointment[];
   }
 
   // Get appointment statistics
@@ -230,12 +239,12 @@ export class AppointmentsService {
     ]);
 
     const byStatus: Record<string, number> = {};
-    statusCounts.forEach((item: any) => {
+    statusCounts.forEach((item: { _id: string; count: number }) => {
       byStatus[item._id] = item.count;
     });
 
     const byType: Record<string, number> = {};
-    typeCounts.forEach((item: any) => {
+    typeCounts.forEach((item: { _id: string; count: number }) => {
       byType[item._id] = item.count;
     });
 
@@ -253,13 +262,13 @@ export class AppointmentsService {
 
   // Find scheduling conflicts
   async findConflicts(workspaceId: string): Promise<Appointment[]> {
-    const appointments = await this.appointmentModel
+    const appointments = (await this.appointmentModel
       .find({
         workspaceId,
         status: { $nin: ['cancelled', 'completed'] },
       })
       .sort({ scheduledDate: 1 })
-      .exec();
+      .exec()) as Appointment[];
 
     const conflicts: Appointment[] = [];
 
@@ -270,10 +279,10 @@ export class AppointmentsService {
       const currentEnd = new Date(current.scheduledDate.getTime() + current.duration * 60000);
 
       if (current.assignedTo === next.assignedTo && currentEnd > next.scheduledDate) {
-        if (!conflicts.find(a => (a as any)._id.equals((current as any)._id))) {
+        if (!conflicts.find(a => a._id.toString() === current._id.toString())) {
           conflicts.push(current);
         }
-        if (!conflicts.find(a => (a as any)._id.equals((next as any)._id))) {
+        if (!conflicts.find(a => a._id.toString() === next._id.toString())) {
           conflicts.push(next);
         }
       }
@@ -284,7 +293,7 @@ export class AppointmentsService {
 
   // Find one appointment
   async findOne(id: string, workspaceId: string): Promise<Appointment | null> {
-    return this.appointmentModel.findOne({ _id: id, workspaceId }).exec();
+    return (await this.appointmentModel.findOne({ _id: id, workspaceId }).exec()) as Appointment | null;
   }
 
   // Update appointment
@@ -319,10 +328,11 @@ export class AppointmentsService {
       }
     }
 
-    const updateData: any = { ...updateAppointmentDto };
+    const updateData: Partial<Appointment> & { scheduledDate?: Date } = {};
     if (updateAppointmentDto.scheduledDate) {
       updateData.scheduledDate = new Date(updateAppointmentDto.scheduledDate);
     }
+    Object.assign(updateData, updateAppointmentDto);
 
     // Update metadata
     if (
@@ -354,7 +364,7 @@ export class AppointmentsService {
       throw new NotFoundException('Appointment not found');
     }
 
-    return updated;
+    return updated as Appointment;
   }
 
   // Update appointment status
@@ -364,7 +374,7 @@ export class AppointmentsService {
     workspaceId: string,
     notes?: string
   ): Promise<Appointment> {
-    const updateData: any = { status };
+    const updateData: { status: AppointmentStatus; notes?: string } = { status };
     if (notes) {
       updateData.notes = notes;
     }
@@ -377,7 +387,7 @@ export class AppointmentsService {
       throw new NotFoundException('Appointment not found');
     }
 
-    return updated;
+    return updated as Appointment;
   }
 
   // Reschedule appointment
@@ -426,9 +436,9 @@ export class AppointmentsService {
     }
 
     // Send reschedule notification
-    await this.sendRescheduleNotification(updated);
+    await this.sendRescheduleNotification();
 
-    return updated;
+    return updated as Appointment;
   }
 
   // Confirm appointment
@@ -445,7 +455,7 @@ export class AppointmentsService {
       throw new NotFoundException('Appointment not found');
     }
 
-    return updated;
+    return updated as Appointment;
   }
 
   // Send reminder
@@ -459,7 +469,7 @@ export class AppointmentsService {
     }
 
     try {
-      await this.sendReminderNotification(appointment);
+      await this.sendReminderNotification();
 
       await this.appointmentModel.findOneAndUpdate(
         { _id: id, workspaceId },
@@ -514,7 +524,7 @@ export class AppointmentsService {
     appointmentIds: string[],
     action: 'confirm' | 'cancel' | 'reschedule' | 'delete',
     workspaceId: string,
-    data?: any
+    data?: Record<string, unknown>
   ): Promise<{ success: number; failed: number; errors: string[] }> {
     const results = { success: 0, failed: 0, errors: [] as string[] };
 
@@ -529,7 +539,7 @@ export class AppointmentsService {
             break;
           case 'reschedule':
             if (data?.newDate) {
-              await this.reschedule(id, new Date(data.newDate), workspaceId, data.notes);
+              await this.reschedule(id, new Date(data.newDate as string), workspaceId, data.notes as string);
             } else {
               throw new Error('New date required for rescheduling');
             }
@@ -539,9 +549,9 @@ export class AppointmentsService {
             break;
         }
         results.success++;
-      } catch (error: any) {
+      } catch (error) {
         results.failed++;
-        results.errors.push(`${id}: ${error.message}`);
+        results.errors.push(`${id}: ${(error as Error).message}`);
       }
     }
 
@@ -557,7 +567,13 @@ export class AppointmentsService {
     assignedTo?: string,
     excludeId?: string
   ): Promise<ConflictCheckResult> {
-    const query: any = {
+    const query: {
+      workspaceId: string;
+      status: { $nin: string[] };
+      $or: Array<Record<string, unknown>>;
+      assignedTo?: string;
+      _id?: { $ne: string };
+    } = {
       workspaceId,
       status: { $nin: ['cancelled', 'completed'] },
       $or: [
@@ -587,7 +603,7 @@ export class AppointmentsService {
       query._id = { $ne: excludeId };
     }
 
-    const conflictingAppointments = await this.appointmentModel.find(query).exec();
+    const conflictingAppointments = (await this.appointmentModel.find(query).exec()) as Appointment[];
 
     return {
       hasConflict: conflictingAppointments.length > 0,
@@ -615,28 +631,23 @@ export class AppointmentsService {
       .replace(/\.\d{3}/, '');
   }
 
-  public async sendConfirmationEmail(appointment: Appointment): Promise<void> {
+  public async sendConfirmationEmail(): Promise<void> {
     // Implementation depends on your email service
-    // This is a placeholder
-    console.log(`Sending confirmation email for appointment ${(appointment as any)._id}`);
+    // This is a placeholder - logging removed for production
   }
 
-  private async sendRescheduleNotification(appointment: Appointment): Promise<void> {
+  private async sendRescheduleNotification(): Promise<void> {
     // Implementation depends on your notification service
-    console.log(`Sending reschedule notification for appointment ${(appointment as any)._id}`);
+    // This is a placeholder - logging removed for production
   }
 
-  private async sendReminderNotification(appointment: Appointment): Promise<void> {
+  private async sendReminderNotification(): Promise<void> {
     // Implementation depends on your notification service
-    console.log(`Sending reminder for appointment ${(appointment as any)._id}`);
+    // This is a placeholder - logging removed for production
   }
 
   // Legacy methods for backward compatibility
-  async sendReminderSMS(
-    appointmentId: string,
-    clientPhone: string,
-    clientName: string
-  ): Promise<boolean> {
+  async sendReminderSMS(): Promise<boolean> {
     try {
       // Implementation with TwilioService
       return true;
@@ -665,7 +676,7 @@ export class AppointmentsService {
       location: callData.location,
       notes: callData.notes,
       createdBy: 'voice_agent',
-      priority: 'medium' as any,
+      priority: 'medium' as 'low' | 'medium' | 'high' | 'urgent',
       preferredContactMethod: 'phone',
     };
 

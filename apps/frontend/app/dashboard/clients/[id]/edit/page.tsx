@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import PhoneInput from '@/components/forms/PhoneInput';
 import AddressInput from '@/components/forms/AddressInput';
+import PhoneInput from '@/components/forms/PhoneInput';
 import { API_BASE } from '@/lib/api';
 import { ArrowLeftIcon, CheckIcon } from '@heroicons/react/24/outline';
+import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 
 interface ClientUpdate {
   firstName: string;
@@ -41,11 +41,7 @@ export default function EditClientPage() {
     return base;
   };
 
-  useEffect(() => {
-    fetchClient();
-  }, [id]);
-
-  async function fetchClient() {
+  const fetchClient = useCallback(async () => {
     try {
       const res = await fetch(`${API_BASE}/clients/${id}`, { headers: authHeaders() });
       if (res.ok) {
@@ -70,18 +66,19 @@ export default function EditClientPage() {
       } else {
         setError('Failed to load client');
       }
-    } catch (e: any) {
+    } catch (error: unknown) {
       setError('Network error loading client');
     } finally {
       setLoading(false);
     }
-  }
+  }, [id, router]);
 
-  function updateField(name: string, value: any) {
+  useEffect(() => {
+    fetchClient();
+  }, [fetchClient]);
+
+  function updateField(name: string, value: string | string[]) {
     setForm(f => (f ? { ...f, [name]: value } : f));
-  }
-  function updateAddress(name: string, value: any) {
-    setForm(f => (f ? { ...f, address: { ...(f.address || {}), [name]: value } } : f));
   }
 
   function addTag() {
@@ -103,9 +100,9 @@ export default function EditClientPage() {
     setSaving(true);
     setError('');
     try {
-      const body: any = { ...form };
+      const body: Record<string, unknown> = { ...form };
       // Remove empty optional fields
-      ['phone', 'company', 'jobTitle', 'notes', 'source'].forEach(k => {
+      (['phone', 'company', 'jobTitle', 'notes', 'source'] as const).forEach(k => {
         if (!body[k]) delete body[k];
       });
       if (body.address) {
@@ -125,7 +122,7 @@ export default function EditClientPage() {
         const msg = await res.text();
         setError(`Save failed (${res.status}) ${msg}`);
       }
-    } catch (e: any) {
+    } catch (error: unknown) {
       setError('Network error saving');
     } finally {
       setSaving(false);

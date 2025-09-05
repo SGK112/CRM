@@ -65,8 +65,10 @@ export class GeminiProvider implements ChatProvider {
         usage: { inputTokens: undefined, outputTokens: undefined },
         provider: this.meta.name,
       } as ChatResponse;
-    } catch (e: any) {
-      throw new Error('Gemini chat error: ' + (e.response?.data?.error?.message || e.message));
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+      const apiError = axios.isAxiosError(e) ? e.response?.data?.error?.message : errorMessage;
+      throw new Error('Gemini chat error: ' + (apiError || errorMessage));
     }
   }
 }

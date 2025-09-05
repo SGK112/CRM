@@ -38,25 +38,32 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     profile: unknown,
     done: VerifyCallback
   ): Promise<void> {
-    const p = profile as {
-      id?: string;
-      name: { givenName: string; familyName: string };
-      emails: Array<{ value: string }>;
-      photos: Array<{ value: string }>;
-    };
-    const { name, emails, photos } = p;
+    try {
+      const p = profile as {
+        id?: string;
+        name?: { givenName?: string; familyName?: string };
+        emails?: Array<{ value?: string }>;
+        photos?: Array<{ value?: string }>;
+      };
 
-    const user = {
-      id: p?.id,
-      email: emails?.[0]?.value,
-      firstName: name?.givenName,
-      lastName: name?.familyName,
-      picture: photos?.[0]?.value,
-      accessToken,
-      refreshToken,
-    };
+      if (!p.emails?.[0]?.value) {
+        return done(new Error('No email found in Google profile'), null);
+      }
 
-    const existingUser = await this.authService.findOrCreateGoogleUser(user);
-    done(null, existingUser);
+      const user = {
+        id: p.id,
+        email: p.emails[0].value,
+        firstName: p.name?.givenName || '',
+        lastName: p.name?.familyName || '',
+        picture: p.photos?.[0]?.value,
+        accessToken,
+        refreshToken,
+      };
+
+      const existingUser = await this.authService.findOrCreateGoogleUser(user);
+      done(null, existingUser);
+    } catch (error) {
+      done(error instanceof Error ? error : new Error('Google authentication failed'), null);
+    }
   }
 }

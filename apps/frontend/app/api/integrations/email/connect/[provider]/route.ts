@@ -30,7 +30,6 @@ export async function GET(request: NextRequest, { params }: { params: { provider
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error(`Error getting OAuth URL for ${params.provider}:`, error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

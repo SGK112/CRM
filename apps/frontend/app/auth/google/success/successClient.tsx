@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function GoogleAuthSuccessInner() {
   const router = useRouter();
@@ -22,11 +22,10 @@ export default function GoogleAuthSuccessInner() {
           id: payload.sub,
           email: payload.email,
           workspaceId: payload.workspaceId,
-        } as any;
+        };
         localStorage.setItem('user', JSON.stringify(user));
         router.push('/dashboard');
       } catch (error) {
-        console.error('Error processing Google auth:', error);
         router.push('/auth/login?error=google_auth_failed');
       }
     } else {

@@ -1,43 +1,36 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { Calendar, momentLocalizer } from 'react-big-calendar';
-import moment from 'moment';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
 import {
-  CalendarDaysIcon,
-  ClockIcon,
-  UsersIcon,
-  MapPinIcon,
-  PlusIcon,
-  Cog6ToothIcon,
-  ArrowPathIcon,
-  FunnelIcon,
-  VideoCameraIcon,
-  PhoneIcon,
-  EnvelopeIcon,
-  StarIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  Squares2X2Icon,
-  ListBulletIcon,
-  EyeIcon,
-  ShareIcon,
-  ArrowDownTrayIcon,
-  BellIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  ExclamationTriangleIcon,
-} from '@heroicons/react/24/outline';
-import Link from 'next/link';
-import {
-  StandardPageWrapper,
-  StandardCard,
-  StandardSection,
-  StandardGrid,
-  StandardButton,
-  StandardStat,
+    StandardButton,
+    StandardCard,
+    StandardGrid,
+    StandardPageWrapper,
+    StandardStat,
 } from '@/components/ui/StandardPageWrapper';
+import {
+    ArrowDownTrayIcon,
+    ArrowPathIcon,
+    CalendarDaysIcon,
+    CheckCircleIcon,
+    ClockIcon,
+    ExclamationTriangleIcon,
+    EyeIcon,
+    FunnelIcon,
+    ListBulletIcon,
+    MapPinIcon,
+    PlusIcon,
+    ShareIcon,
+    Squares2X2Icon,
+    StarIcon,
+    UsersIcon,
+    VideoCameraIcon,
+    XCircleIcon,
+} from '@heroicons/react/24/outline';
+import moment from 'moment';
+import Link from 'next/link';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Calendar, momentLocalizer } from 'react-big-calendar';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 const localizer = momentLocalizer(moment);
 
@@ -101,7 +94,6 @@ export default function CalendarsPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [showEventModal, setShowEventModal] = useState(false);
-  const [showCreateModal, setShowCreateModal] = useState(false);
   const [viewMode, setViewMode] = useState<'month' | 'week' | 'day' | 'agenda'>('month');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [calendarView, setCalendarView] = useState<'calendar' | 'list'>('calendar');
@@ -114,10 +106,26 @@ export default function CalendarsPage() {
   const [sourceFilter, setSourceFilter] = useState<string>('all');
 
   // Integrations
+  // Integrations
   const [integrations, setIntegrations] = useState<CalendarIntegration[]>([]);
-  const [showIntegrationsModal, setShowIntegrationsModal] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+
+  const filterEvents = useCallback(() => {
+    const filtered = events.filter(event => {
+      const matchesType = typeFilter === 'all' || event.type === typeFilter;
+      const matchesStatus = statusFilter === 'all' || event.status === statusFilter;
+      const matchesPriority = priorityFilter === 'all' || event.priority === priorityFilter;
+      const matchesClient =
+        clientFilter === 'all' ||
+        (event.clientName && event.clientName.toLowerCase().includes(clientFilter.toLowerCase()));
+      const matchesSource = sourceFilter === 'all' || event.calendarSource === sourceFilter;
+
+      return matchesType && matchesStatus && matchesPriority && matchesClient && matchesSource;
+    });
+
+    setFilteredEvents(filtered);
+  }, [events, typeFilter, statusFilter, priorityFilter, clientFilter, sourceFilter]);
 
   useEffect(() => {
     fetchEvents();
@@ -126,7 +134,7 @@ export default function CalendarsPage() {
 
   useEffect(() => {
     filterEvents();
-  }, [events, typeFilter, statusFilter, priorityFilter, clientFilter, sourceFilter]);
+  }, [filterEvents]);
 
   const fetchEvents = async () => {
     try {
@@ -226,7 +234,6 @@ export default function CalendarsPage() {
 
       setEvents(mockEvents);
     } catch (error) {
-      console.error('Error fetching events:', error);
       setError('Failed to load calendar events');
     } finally {
       setLoading(false);
@@ -271,24 +278,8 @@ export default function CalendarsPage() {
 
       setIntegrations(mockIntegrations);
     } catch (error) {
-      console.error('Error fetching integrations:', error);
+      // Error fetching integrations
     }
-  };
-
-  const filterEvents = () => {
-    const filtered = events.filter(event => {
-      const matchesType = typeFilter === 'all' || event.type === typeFilter;
-      const matchesStatus = statusFilter === 'all' || event.status === statusFilter;
-      const matchesPriority = priorityFilter === 'all' || event.priority === priorityFilter;
-      const matchesClient =
-        clientFilter === 'all' ||
-        (event.clientName && event.clientName.toLowerCase().includes(clientFilter.toLowerCase()));
-      const matchesSource = sourceFilter === 'all' || event.calendarSource === sourceFilter;
-
-      return matchesType && matchesStatus && matchesPriority && matchesClient && matchesSource;
-    });
-
-    setFilteredEvents(filtered);
   };
 
   const handleSelectEvent = (event: CalendarEvent) => {
@@ -309,7 +300,7 @@ export default function CalendarsPage() {
 
       await fetchEvents();
     } catch (error) {
-      console.error('Sync failed:', error);
+      // Sync failed
     } finally {
       setSyncing(false);
     }
@@ -445,14 +436,6 @@ export default function CalendarsPage() {
               icon={<ArrowPathIcon className={`h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />}
             >
               {syncing ? 'Syncing...' : 'Sync All'}
-            </StandardButton>
-
-            <StandardButton
-              variant="secondary"
-              onClick={() => setShowIntegrationsModal(true)}
-              icon={<Cog6ToothIcon className="h-4 w-4" />}
-            >
-              Integrations
             </StandardButton>
 
             <StandardButton
@@ -632,7 +615,7 @@ export default function CalendarsPage() {
                     {['month', 'week', 'day', 'agenda'].map(mode => (
                       <button
                         key={mode}
-                        onClick={() => setViewMode(mode as any)}
+                        onClick={() => setViewMode(mode as 'month' | 'week' | 'day' | 'agenda')}
                         className={`px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
                           viewMode === mode
                             ? 'bg-red-500 text-white shadow-sm'
@@ -671,7 +654,7 @@ export default function CalendarsPage() {
                       onSelectEvent={handleSelectEvent}
                       eventPropGetter={eventStyleGetter}
                       view={viewMode}
-                      onView={view => setViewMode(view as any)}
+                      onView={view => setViewMode(view as 'month' | 'week' | 'day' | 'agenda')}
                       date={currentDate}
                       onNavigate={setCurrentDate}
                       popup
@@ -681,7 +664,7 @@ export default function CalendarsPage() {
                         backgroundColor: 'transparent',
                       }}
                       components={{
-                        event: ({ event }: any) => (
+                        event: ({ event }: { event: CalendarEvent }) => (
                           <div className="p-1 h-full">
                             <div className="flex items-center gap-1 mb-1">
                               <span className="text-xs">
@@ -926,9 +909,10 @@ export default function CalendarsPage() {
               <StandardButton
                 variant="secondary"
                 className="w-full mt-4"
-                onClick={() => setShowIntegrationsModal(true)}
+                onClick={handleSyncCalendars}
+                disabled={syncing}
               >
-                Manage Integrations
+                Sync Calendars
               </StandardButton>
             </StandardCard>
 

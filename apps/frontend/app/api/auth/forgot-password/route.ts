@@ -21,7 +21,6 @@ export async function POST(request: NextRequest) {
       const text = await response.text();
       data = text ? JSON.parse(text) : {};
     } catch (parseError) {
-      console.error('Failed to parse forgot-password response:', parseError);
       return NextResponse.json(
         { success: false, message: 'Invalid response from server' },
         { status: 500 }
@@ -34,7 +33,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Forgot password error:', error);
     return NextResponse.json(
       {
         success: false,

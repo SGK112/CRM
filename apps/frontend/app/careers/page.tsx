@@ -1,17 +1,22 @@
 'use client';
 
-import { Metadata } from 'next';
-import { useState } from 'react';
-import {
-  BriefcaseIcon,
-  MapPinIcon,
-  ClockIcon,
-  CurrencyDollarIcon,
-} from '@heroicons/react/24/outline';
 import JobApplicationModal from '@/components/JobApplicationModal';
+import {
+    BriefcaseIcon,
+    ClockIcon,
+    CurrencyDollarIcon,
+    MapPinIcon,
+} from '@heroicons/react/24/outline';
+import { useState } from 'react';
 
 // Note: Since this is now a client component, we'll handle metadata differently
 // You might want to move metadata to layout.tsx or use next/head
+
+interface SelectedJob {
+  title: string;
+  department: string;
+  location: string;
+}
 
 const benefits = [
   {
@@ -153,11 +158,7 @@ const values = [
 
 export default function CareersPage() {
   const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
-  const [selectedJob, setSelectedJob] = useState<{
-    title: string;
-    department: string;
-    location: string;
-  } | null>(null);
+  const [selectedJob, setSelectedJob] = useState<SelectedJob | null>(null);
 
   const handleApplyClick = (job: (typeof openings)[0]) => {
     setSelectedJob({

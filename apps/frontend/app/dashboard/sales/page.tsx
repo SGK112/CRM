@@ -1,31 +1,28 @@
 'use client';
 
-import { useState, useMemo } from 'react';
 import {
-  BanknotesIcon,
-  DocumentTextIcon,
-  ClockIcon,
-  ArrowTrendingUpIcon,
-  CreditCardIcon,
-  CurrencyDollarIcon,
-  FunnelIcon,
-  PlusCircleIcon,
-  EyeIcon,
-  PencilIcon,
-  TrashIcon,
-  MagnifyingGlassIcon,
-  CalendarIcon,
-  UserIcon,
+    StandardButton,
+    StandardCard,
+    StandardGrid,
+    StandardPageWrapper,
+    StandardStat,
+} from '@/components/ui/StandardPageWrapper';
+import {
+    ArrowTrendingUpIcon,
+    BanknotesIcon,
+    CalendarIcon,
+    ClockIcon,
+    CreditCardIcon,
+    CurrencyDollarIcon,
+    DocumentTextIcon,
+    EyeIcon,
+    MagnifyingGlassIcon,
+    PencilIcon,
+    PlusCircleIcon,
+    TrashIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import {
-  StandardPageWrapper,
-  StandardCard,
-  StandardSection,
-  StandardGrid,
-  StandardButton,
-  StandardStat,
-} from '@/components/ui/StandardPageWrapper';
+import { useMemo, useState } from 'react';
 
 interface Estimate {
   id: string;
@@ -69,7 +66,7 @@ export default function SalesPage() {
   const [searchTerm, setSearchTerm] = useState('');
 
   // Sample in-memory data (replace with API later)
-  const estimates: Estimate[] = [
+  const estimates: Estimate[] = useMemo(() => [
     {
       id: 'EST-1001',
       client: 'Smith Family',
@@ -96,9 +93,9 @@ export default function SalesPage() {
       createdAt: '2025-08-10',
       validUntil: '2025-09-05',
     },
-  ];
+  ], []);
 
-  const invoices: Invoice[] = [
+  const invoices: Invoice[] = useMemo(() => [
     {
       id: 'INV-24001',
       client: 'Smith Family',
@@ -128,9 +125,9 @@ export default function SalesPage() {
       issuedAt: '2025-08-12',
       dueAt: '2025-09-11',
     },
-  ];
+  ], []);
 
-  const payments: Payment[] = [
+  const payments: Payment[] = useMemo(() => [
     {
       id: 'PAY-5001',
       client: 'Johnson LLC',
@@ -160,13 +157,7 @@ export default function SalesPage() {
       status: 'pending',
       createdAt: '2025-08-13',
     },
-  ];
-
-  const filteredPayments = payments.filter(
-    p =>
-      (methodFilter === 'all' || p.method === methodFilter) &&
-      (statusFilter === 'all' || p.status === statusFilter)
-  );
+  ], []);
 
   const totals = useMemo(() => {
     const estPending = estimates.filter(e => ['sent', 'draft'].includes(e.status)).length;
@@ -183,52 +174,6 @@ export default function SalesPage() {
       .reduce((s, p) => s + p.amount, 0);
     return { estPending, estValueOpen, invOpen, aR, paidThisMonth, pendingPayments };
   }, [estimates, invoices, payments]);
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'draft':
-        return 'default';
-      case 'sent':
-        return 'blue';
-      case 'accepted':
-        return 'green';
-      case 'rejected':
-        return 'red';
-      case 'expired':
-        return 'orange';
-      case 'partial':
-        return 'orange';
-      case 'paid':
-        return 'green';
-      case 'overdue':
-        return 'red';
-      case 'pending':
-        return 'orange';
-      case 'completed':
-        return 'green';
-      case 'failed':
-        return 'red';
-      default:
-        return 'default';
-    }
-  };
-
-  const getMethodColor = (method: Payment['method']) => {
-    switch (method) {
-      case 'card':
-        return 'purple';
-      case 'ach':
-        return 'blue';
-      case 'cash':
-        return 'green';
-      case 'check':
-        return 'orange';
-      case 'wire':
-        return 'blue';
-      default:
-        return 'default';
-    }
-  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();
@@ -252,7 +197,7 @@ export default function SalesPage() {
                 key={t}
                 variant={tab === t ? 'primary' : 'secondary'}
                 size="sm"
-                onClick={() => setTab(t as any)}
+                onClick={() => setTab(t as 'overview' | 'estimates' | 'invoices' | 'payments')}
               >
                 {t.charAt(0).toUpperCase() + t.slice(1)}
               </StandardButton>
@@ -293,7 +238,7 @@ export default function SalesPage() {
                 <div className="flex items-center flex-wrap gap-3">
                   <select
                     value={range}
-                    onChange={e => setRange(e.target.value as any)}
+                    onChange={e => setRange(e.target.value as '30d' | '60d' | '90d' | 'ytd')}
                     className="px-3 py-2 border theme-border rounded-lg theme-surface-1 theme-text focus:ring-2 focus:ring-red-500 focus:border-red-500"
                   >
                     <option value="30d">Last 30 Days</option>

@@ -1,8 +1,8 @@
-import { Controller, Post, Body, UseGuards, Request, Get } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { UpdateEmailConfigDto, UpdatePdfTemplatesDto, UpdateTwilioConfigDto } from './dto/user-config.dto';
 import { UserConfigService } from './user-config.service';
-import { UpdateEmailConfigDto, UpdateTwilioConfigDto } from './dto/user-config.dto';
 
 @ApiTags('User Configuration')
 @Controller('user')
@@ -30,5 +30,12 @@ export class UserConfigController {
   @ApiResponse({ status: 200, description: 'Twilio configuration updated successfully' })
   updateTwilioConfig(@Body() updateTwilioConfigDto: UpdateTwilioConfigDto, @Request() req) {
     return this.userConfigService.updateTwilioConfig(req.user._id, updateTwilioConfigDto);
+  }
+
+  @Post('pdf-templates')
+  @ApiOperation({ summary: 'Update PDF template preferences' })
+  @ApiResponse({ status: 200, description: 'PDF template preferences updated successfully' })
+  updatePdfTemplates(@Body() updatePdfTemplatesDto: UpdatePdfTemplatesDto, @Request() req) {
+    return this.userConfigService.updatePdfTemplates(req.user._id, updatePdfTemplatesDto);
   }
 }

@@ -1,24 +1,22 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button, Card, Pill, Heading } from '@/components/ui/DesignSystem';
+import { Button, Card, Heading, Pill } from '@/components/ui/DesignSystem';
 import {
-  DocumentTextIcon,
-  FolderIcon,
-  CloudArrowUpIcon,
-  MagnifyingGlassIcon,
-  FunnelIcon,
-  EyeIcon,
-  ArrowDownTrayIcon,
-  TrashIcon,
-  PencilIcon,
-  PlusIcon,
-  DocumentIcon,
-  PhotoIcon,
-  VideoCameraIcon,
-  DocumentArrowUpIcon,
+    ArrowDownTrayIcon,
+    CloudArrowUpIcon,
+    DocumentArrowUpIcon,
+    DocumentIcon,
+    DocumentTextIcon,
+    EyeIcon,
+    FolderIcon,
+    MagnifyingGlassIcon,
+    PencilIcon,
+    PhotoIcon,
+    TrashIcon,
+    VideoCameraIcon
 } from '@heroicons/react/24/outline';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 interface Document {
   _id: string;

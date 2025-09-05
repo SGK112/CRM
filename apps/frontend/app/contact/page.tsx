@@ -1,9 +1,20 @@
 'use client';
 
+import { ClockIcon, EnvelopeIcon, MapPinIcon, PhoneIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
-import { PhoneIcon, EnvelopeIcon, MapPinIcon, ClockIcon } from '@heroicons/react/24/outline';
 
 // Note: Metadata handling moved to layout or use next/head for client components
+
+interface ContactFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  company: string;
+  inquiryType: string;
+  message: string;
+  newsletter: boolean;
+}
 
 const contactMethods = [
   {
@@ -67,7 +78,7 @@ const departments = [
 ];
 
 export default function ContactPage() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ContactFormData>({
     firstName: '',
     lastName: '',
     email: '',
@@ -131,6 +142,7 @@ export default function ContactPage() {
         setSubmitError(result.message || 'Failed to send message. Please try again.');
       }
     } catch (error) {
+      // Network error occurred during form submission
       setSubmitError('Network error. Please check your connection and try again.');
     } finally {
       setIsSubmitting(false);

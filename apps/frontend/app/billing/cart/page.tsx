@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 interface PlanOption {
   id: string; // Stripe price ID
@@ -67,8 +67,9 @@ export default function BillingCartPage({
       } else {
         throw new Error('Missing checkout redirect URL');
       }
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : 'An unexpected error occurred';
+      setError(errorMessage);
       setLoading(false);
     }
   };

@@ -36,7 +36,6 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Notification preferences update error:', error);
     return NextResponse.json(
       {
         success: false,

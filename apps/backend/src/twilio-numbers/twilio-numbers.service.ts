@@ -1,8 +1,8 @@
-import { Injectable, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { TwilioPhoneNumber, TwilioPhoneNumberDocument } from './schemas/twilio-phone-number.schema';
 import { TwilioService } from '../services/twilio.service';
+import { TwilioPhoneNumber, TwilioPhoneNumberDocument } from './schemas/twilio-phone-number.schema';
 
 export interface AvailablePhoneNumber {
   phoneNumber: string;
@@ -26,8 +26,19 @@ export interface PurchasePhoneNumberDto {
   setAsDefault?: boolean;
 }
 
+export interface PhoneNumberUsage {
+  phoneNumberId: string;
+  month: string;
+  smsSent: number;
+  smsReceived: number;
+  voiceMinutes: number;
+  totalCost: number;
+}
+
 @Injectable()
 export class TwilioNumbersService {
+  private readonly logger = new Logger(TwilioNumbersService.name);
+
   constructor(
     @InjectModel(TwilioPhoneNumber.name) private phoneNumberModel: Model<TwilioPhoneNumberDocument>,
     private readonly twilioService: TwilioService
@@ -87,7 +98,7 @@ export class TwilioNumbersService {
 
       return mockNumbers.filter(num => !contains || num.phoneNumber.includes(contains));
     } catch (error) {
-      console.error('Error searching available numbers:', error);
+      this.logger.error('Error searching available numbers:', error);
       throw new InternalServerErrorException('Failed to search available phone numbers');
     }
   }
@@ -145,7 +156,7 @@ export class TwilioNumbersService {
       await phoneNumber.save();
       return phoneNumber;
     } catch (error) {
-      console.error('Error purchasing phone number:', error);
+      this.logger.error('Error purchasing phone number:', error);
       if (error instanceof BadRequestException) {
         throw error;
       }
@@ -203,7 +214,7 @@ export class TwilioNumbersService {
     workspaceId: string,
     phoneNumberId: string,
     month?: string
-  ): Promise<any> {
+  ): Promise<PhoneNumberUsage> {
     // Mock usage data - in production, get from Twilio
     return {
       phoneNumberId,

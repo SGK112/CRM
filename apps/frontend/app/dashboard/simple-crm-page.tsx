@@ -1,15 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import SimpleCRMLayout from '@/components/SimpleCRMLayout';
 import {
-  UserGroupIcon,
-  ClipboardDocumentListIcon,
-  CurrencyDollarIcon,
-  CalendarDaysIcon,
-  PlusIcon,
+    CalendarDaysIcon,
+    ClipboardDocumentListIcon,
+    CurrencyDollarIcon,
+    PlusIcon,
+    UserGroupIcon,
 } from '@heroicons/react/24/outline';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 interface DashboardStats {
   totalClients: number;

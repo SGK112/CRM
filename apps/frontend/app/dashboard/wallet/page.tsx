@@ -1,32 +1,29 @@
 'use client';
 
-import { useState } from 'react';
 import {
-  WalletIcon,
-  CurrencyDollarIcon,
-  ArrowDownTrayIcon,
-  ArrowUpTrayIcon,
-  ClockIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  LinkIcon,
-  QrCodeIcon,
-  CreditCardIcon,
-  BanknotesIcon,
-  ChartBarIcon,
-  SparklesIcon,
-  ExclamationTriangleIcon,
-} from '@heroicons/react/24/outline';
-import {
-  StandardPageWrapper,
-  StandardCard,
-  StandardSection,
-  StandardGrid,
-  StandardButton,
+    StandardButton,
+    StandardCard,
+    StandardGrid,
+    StandardPageWrapper,
+    StandardSection,
 } from '@/components/ui/StandardPageWrapper';
-import { getUserPlan } from '@/lib/plans';
-import { CapabilityGate } from '@/components/CapabilityGate';
 import { useWallet } from '@/hooks/useWallet';
+import { getUserPlan } from '@/lib/plans';
+import {
+    ArrowDownTrayIcon,
+    ArrowUpTrayIcon,
+    BanknotesIcon,
+    ChartBarIcon,
+    CheckCircleIcon,
+    ClockIcon,
+    CreditCardIcon,
+    CurrencyDollarIcon,
+    ExclamationTriangleIcon,
+    LinkIcon,
+    WalletIcon,
+    XCircleIcon
+} from '@heroicons/react/24/outline';
+import { useState } from 'react';
 
 export default function WalletPage() {
   const [userPlan] = useState(getUserPlan());

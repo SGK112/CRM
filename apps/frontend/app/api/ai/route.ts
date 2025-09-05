@@ -14,8 +14,9 @@ export async function POST(req: NextRequest) {
       actions: [],
       timestamp: new Date().toISOString(),
     });
-  } catch (err: any) {
-    return NextResponse.json({ error: 'AI route error', detail: err?.message }, { status: 500 });
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    return NextResponse.json({ error: 'AI route error', detail: errorMessage }, { status: 500 });
   }
 }
 

@@ -1,7 +1,9 @@
+
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationDocument } from '../notifications/schemas/notification.schema';
 import { InboxMessage, InboxMessageDocument } from './schemas/inbox-message.schema';
 
 export interface CreateInboxMessageDto {
@@ -454,7 +456,7 @@ export class InboxService {
         this.notificationsService.getForUser(userId, workspaceId).then(notifications => ({
           total: notifications.length,
           unread: count,
-          read: notifications.filter((n: any) => n.read).length,
+          read: notifications.filter((n: NotificationDocument) => n.read).length,
         }))
       ),
     ]);

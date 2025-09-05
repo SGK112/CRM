@@ -1,9 +1,9 @@
 'use client';
-import { useEffect, useState, useMemo } from 'react';
-import { API_BASE } from '@/lib/api';
 import { PageHeader } from '@/components/ui/PageHeader';
-import { generateInvoicePDF, generateBulkPDF, downloadDataAsCSV } from '@/lib/pdf-generator';
+import { API_BASE } from '@/lib/api';
+import { downloadDataAsCSV, generateBulkPDF, generateInvoicePDF } from '@/lib/pdf-generator';
 import { Download } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 interface Invoice {
   _id: string;
@@ -22,18 +22,18 @@ export default function InvoicesPage() {
   const [error, setError] = useState<string | null>(null);
   const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : '';
 
-  const fetchList = async () => {
+  const fetchList = useCallback(async () => {
     setLoading(true);
     const res = await fetch(`${API_BASE}/invoices`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (res.ok) setList(await res.json());
     setLoading(false);
-  };
+  }, [token]);
 
   useEffect(() => {
     fetchList();
-  }, []);
+  }, [fetchList]);
 
   // PDF download handlers
   const handleDownloadPDF = async (invoice: Invoice) => {

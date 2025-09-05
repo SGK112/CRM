@@ -27,7 +27,6 @@ export async function GET(request: NextRequest) {
       const text = await response.text();
       data = text ? JSON.parse(text) : {};
     } catch (parseError) {
-      console.error('Failed to parse response:', parseError);
       return NextResponse.json(
         { success: false, message: 'Invalid response from server' },
         { status: 500 }
@@ -46,7 +45,6 @@ export async function GET(request: NextRequest) {
       user: data,
     });
   } catch (error) {
-    console.error('Profile fetch error:', error);
     return NextResponse.json(
       {
         success: false,
@@ -83,7 +81,6 @@ export async function PATCH(request: NextRequest) {
       const text = await response.text();
       data = text ? JSON.parse(text) : {};
     } catch (parseError) {
-      console.error('Failed to parse response:', parseError);
       return NextResponse.json(
         { success: false, message: 'Invalid response from server' },
         { status: 500 }
@@ -99,7 +96,6 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Profile update error:', error);
     return NextResponse.json(
       {
         success: false,

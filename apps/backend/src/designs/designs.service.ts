@@ -1,9 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Design, DesignDocument } from './schemas/design.schema';
-import { DesignTemplate, DesignTemplateDocument } from './schemas/design-template.schema';
 import { DesignRevision, DesignRevisionDocument } from './schemas/design-revision.schema';
+import { DesignTemplate, DesignTemplateDocument } from './schemas/design-template.schema';
+import { Design, DesignDocument } from './schemas/design.schema';
 
 @Injectable()
 export class DesignsService {
@@ -13,11 +13,11 @@ export class DesignsService {
     @InjectModel(DesignRevision.name) private revisionModel: Model<DesignRevisionDocument>
   ) {}
 
-  createTemplate(dto: any, workspaceId: string) {
+  createTemplate(dto: Record<string, unknown>, workspaceId: string) {
     return this.templateModel.create({ ...dto, workspaceId });
   }
-  listTemplates(workspaceId: string, query: any) {
-    const filter: any = { workspaceId, isActive: true };
+  listTemplates(workspaceId: string, query: Record<string, unknown>) {
+    const filter: Record<string, unknown> = { workspaceId, isActive: true };
     if (query.category && query.category !== 'all') filter.category = query.category;
     if (query.type && query.type !== 'all') filter.type = query.type;
     if (query.search) filter.name = { $regex: query.search, $options: 'i' };
@@ -28,7 +28,7 @@ export class DesignsService {
     if (!t) throw new NotFoundException('Template not found');
     return t;
   }
-  updateTemplate(id: string, dto: any, workspaceId: string) {
+  updateTemplate(id: string, dto: Record<string, unknown>, workspaceId: string) {
     return this.templateModel.findOneAndUpdate({ _id: id, workspaceId }, dto, { new: true });
   }
   deleteTemplate(id: string, workspaceId: string) {
@@ -39,9 +39,9 @@ export class DesignsService {
     );
   }
 
-  async createDesign(dto: any, user: any) {
-    const { templateId, title, baseData: directBaseData } = dto;
-    let baseData: any = directBaseData || {};
+  async createDesign(dto: Record<string, unknown>, user: { userId?: string; sub?: string; workspaceId: string }) {
+    const { templateId, title, baseData: directBaseData } = dto as { templateId?: string; title?: string; baseData?: Record<string, unknown> };
+    let baseData: Record<string, unknown> = directBaseData || {};
     if (templateId) {
       const template = await this.templateModel.findOne({
         _id: templateId,
@@ -78,8 +78,8 @@ export class DesignsService {
     return { design, revision };
   }
 
-  listDesigns(workspaceId: string, query: any, userId: string) {
-    const filter: any = { workspaceId, isActive: true };
+  listDesigns(workspaceId: string, query: Record<string, unknown>, userId: string) {
+    const filter: Record<string, unknown> = { workspaceId, isActive: true };
     if (query.status) filter.status = query.status;
     if (query.search) filter.title = { $regex: query.search, $options: 'i' };
     if (query.mine === '1') filter.ownerId = userId;
@@ -95,7 +95,7 @@ export class DesignsService {
     return { design: d, revision };
   }
 
-  updateDesign(id: string, dto: any, workspaceId: string) {
+  updateDesign(id: string, dto: Record<string, unknown>, workspaceId: string) {
     return this.designModel.findOneAndUpdate({ _id: id, workspaceId }, dto, { new: true });
   }
   archiveDesign(id: string, workspaceId: string) {
@@ -106,7 +106,7 @@ export class DesignsService {
     );
   }
 
-  async createRevision(designId: string, dto: any, user: any) {
+  async createRevision(designId: string, dto: Record<string, unknown>, user: { userId?: string; sub?: string; workspaceId: string }) {
     const design = await this.designModel.findOne({
       _id: designId,
       workspaceId: user.workspaceId,
@@ -118,8 +118,8 @@ export class DesignsService {
     const revision = await this.revisionModel.create({
       designId,
       index: nextIndex,
-      canvasData: dto.canvasData || {},
-      autosave: !!dto.autosave,
+      canvasData: (dto as { canvasData?: Record<string, unknown> }).canvasData || {},
+      autosave: !!(dto as { autosave?: boolean }).autosave,
       authorId: user.userId || user.sub,
       workspaceId: user.workspaceId,
     });
@@ -148,7 +148,7 @@ export class DesignsService {
     if (!rev) throw new NotFoundException('Revision not found');
     return rev;
   }
-  async restoreRevision(designId: string, revId: string, user: any) {
+  async restoreRevision(designId: string, revId: string, user: { userId?: string; sub?: string; workspaceId: string }) {
     const rev = await this.getRevision(designId, revId, user.workspaceId);
     return this.createRevision(designId, { canvasData: rev.canvasData, autosave: false }, user);
   }

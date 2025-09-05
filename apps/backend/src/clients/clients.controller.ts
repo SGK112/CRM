@@ -1,22 +1,22 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  UseGuards,
-  Request,
-  UploadedFile,
-  UseInterceptors,
-  Query,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Patch,
+    Post,
+    Query,
+    Request,
+    UploadedFile,
+    UseGuards,
+    UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { ClientsService } from './clients.service';
-import { ActiveSubscriptionGuard } from '../billing/billing.service';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ActiveSubscriptionGuard } from '../billing/billing.service';
+import { ClientsService } from './clients.service';
 
 @ApiTags('Clients')
 @Controller('clients')
@@ -134,6 +134,13 @@ export class ClientsController {
       synthEmailFromPhone: parseBool(synthEmailFromPhone, true),
       dedupeByPhone: parseBool(dedupeByPhone, true),
     });
+  }
+
+    @Post(':id/sync-quickbooks')
+  @ApiOperation({ summary: 'Sync client to QuickBooks' })
+  @ApiResponse({ status: 200, description: 'Client synced to QuickBooks successfully' })
+  syncToQuickBooks(@Param('id') id: string, @Request() req) {
+    return this.clientsService.syncToQuickBooks(id, req.user.workspaceId);
   }
 
   @Post('bulk')

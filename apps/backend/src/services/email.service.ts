@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as sgMail from '@sendgrid/mail';
 import * as nodemailer from 'nodemailer';
@@ -14,6 +14,7 @@ export interface SendEmailOptions {
 
 @Injectable()
 export class EmailService {
+  private logger = new Logger('EmailService');
   private transporter?: nodemailer.Transporter;
   private isConfigured = false;
   private useSendGridAPI = false;
@@ -52,8 +53,7 @@ export class EmailService {
         // Configure SENDGRID_API_KEY (preferred) or SMTP_HOST/SMTP_PORT/SMTP_USER/SMTP_PASS in env.
         // Optionally set SENDGRID_FROM_EMAIL or SMTP_FROM for the sender address.
         // Returning false ensures callers can surface a helpful error to the UI/logs.
-        // eslint-disable-next-line no-console
-        console.warn(
+        this.logger.warn(
           '[EmailService] Email provider is not configured. Set SENDGRID_API_KEY or SMTP_* env vars to enable email delivery.'
         );
         return false;

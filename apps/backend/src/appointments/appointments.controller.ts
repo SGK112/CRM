@@ -11,6 +11,7 @@ import {
     UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Request as ExpressRequest } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AppointmentsService } from './appointments.service';
 import {
@@ -21,6 +22,39 @@ import {
     UpdateAppointmentDto
 } from './dto/appointment.dto';
 import { UnifiedCalendarService } from './unified-calendar.service';
+
+interface AuthenticatedRequest extends ExpressRequest {
+  user: {
+    _id?: string;
+    id?: string;
+    sub?: string;
+    workspaceId: string;
+  };
+}
+
+interface AppointmentQuery {
+  startDate?: string;
+  endDate?: string;
+  status?: string;
+  type?: string;
+  assignedTo?: string;
+  clientId?: string;
+  search?: string;
+  limit?: string;
+  offset?: string;
+  start?: string;
+  end?: string;
+}
+
+interface BulkActionBody {
+  appointmentIds: string[];
+  action: 'confirm' | 'cancel' | 'reschedule' | 'delete';
+  data?: Record<string, unknown>;
+}
+
+interface GoogleCalendarSyncBody {
+  appointmentId: string;
+}
 
 @ApiTags('appointments')
 @ApiBearerAuth()
@@ -35,7 +69,7 @@ export class AppointmentsController {
   @Post()
   @ApiOperation({ summary: 'Create new appointment' })
   @ApiResponse({ status: 201, description: 'Appointment created successfully' })
-  async create(@Body() createAppointmentDto: CreateAppointmentDto, @Request() req: any) {
+  async create(@Body() createAppointmentDto: CreateAppointmentDto, @Request() req: AuthenticatedRequest) {
     createAppointmentDto.workspaceId = req.user.workspaceId;
     return await this.appointmentsService.create(createAppointmentDto);
   }
@@ -43,7 +77,7 @@ export class AppointmentsController {
   @Get()
   @ApiOperation({ summary: 'Get appointments with filters' })
   @ApiResponse({ status: 200, description: 'Appointments retrieved successfully' })
-  async findWithFilters(@Request() req: any, @Query() query: any) {
+  async findWithFilters(@Request() req: AuthenticatedRequest, @Query() query: AppointmentQuery) {
     const filters: AppointmentFilters = {
       workspaceId: req.user.workspaceId,
       startDate: query.startDate ? new Date(query.startDate) : undefined,
@@ -63,7 +97,7 @@ export class AppointmentsController {
 
   @Get('calendar')
   @ApiOperation({ summary: 'Get appointments formatted for calendar view' })
-  async getCalendarEvents(@Request() req: any, @Query() query: any) {
+  async getCalendarEvents(@Request() req: AuthenticatedRequest, @Query() query: AppointmentQuery) {
     const startDate = query.start ? new Date(query.start) : new Date();
     const endDate = query.end
       ? new Date(query.end)
@@ -80,14 +114,14 @@ export class AppointmentsController {
   @Get('stats')
   @ApiOperation({ summary: 'Get appointment statistics' })
   @ApiResponse({ status: 200, description: 'Statistics retrieved successfully' })
-  async getStats(@Request() req: any): Promise<AppointmentStats> {
+  async getStats(@Request() req: AuthenticatedRequest): Promise<AppointmentStats> {
     return await this.appointmentsService.getAppointmentStats(req.user.workspaceId);
   }
 
   @Get('upcoming')
   @ApiOperation({ summary: 'Get upcoming appointments' })
   @ApiResponse({ status: 200, description: 'Upcoming appointments retrieved' })
-  async getUpcoming(@Request() req: any, @Query('limit') limit?: string) {
+  async getUpcoming(@Request() req: AuthenticatedRequest, @Query('limit') limit?: string) {
     return await this.appointmentsService.getUpcomingAppointments(
       req.user.workspaceId,
       parseInt(limit) || 10
@@ -98,7 +132,7 @@ export class AppointmentsController {
   @ApiOperation({ summary: 'Get appointment by ID' })
   @ApiResponse({ status: 200, description: 'Appointment found' })
   @ApiResponse({ status: 404, description: 'Appointment not found' })
-  async findOne(@Param('id') id: string, @Request() req: any) {
+  async findOne(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
     return await this.appointmentsService.findOne(id, req.user.workspaceId);
   }
 
@@ -109,7 +143,7 @@ export class AppointmentsController {
   async update(
     @Param('id') id: string,
     @Body() updateAppointmentDto: UpdateAppointmentDto,
-    @Request() req: any
+    @Request() req: AuthenticatedRequest
   ) {
     return await this.appointmentsService.update(id, updateAppointmentDto, req.user.workspaceId);
   }
@@ -118,7 +152,7 @@ export class AppointmentsController {
   @ApiOperation({ summary: 'Delete appointment' })
   @ApiResponse({ status: 200, description: 'Appointment deleted successfully' })
   @ApiResponse({ status: 404, description: 'Appointment not found' })
-  async remove(@Param('id') id: string, @Request() req: any) {
+  async remove(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
     return await this.appointmentsService.remove(id, req.user.workspaceId);
   }
 
@@ -129,7 +163,7 @@ export class AppointmentsController {
     @Param('id') id: string,
     @Body('newDate') newDate: string,
     @Body('reason') reason: string,
-    @Request() req: any
+    @Request() req: AuthenticatedRequest
   ) {
     return await this.appointmentsService.reschedule(
       id,
@@ -142,7 +176,7 @@ export class AppointmentsController {
   @Post('bulk-actions')
   @ApiOperation({ summary: 'Perform bulk actions on appointments' })
   @ApiResponse({ status: 200, description: 'Bulk action completed' })
-  async bulkActions(@Body() data: any, @Request() req: any) {
+  async bulkActions(@Body() data: BulkActionBody, @Request() req: AuthenticatedRequest) {
     return await this.appointmentsService.bulkActions(
       data.appointmentIds,
       data.action,
@@ -154,28 +188,28 @@ export class AppointmentsController {
   @Get(':id/export/ics')
   @ApiOperation({ summary: 'Export appointment as ICS calendar file' })
   @ApiResponse({ status: 200, description: 'Calendar file generated' })
-  async exportICS(@Param('id') id: string, @Request() req: any) {
+  async exportICS(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
     return await this.appointmentsService.exportToICS(id, req.user.workspaceId);
   }
 
   @Post(':id/confirm')
   @ApiOperation({ summary: 'Confirm appointment' })
   @ApiResponse({ status: 200, description: 'Appointment confirmed' })
-  async confirm(@Param('id') id: string, @Request() req: any) {
+  async confirm(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
     return await this.appointmentsService.confirmAppointment(id, req.user.workspaceId);
   }
 
   @Post(':id/send-reminder')
   @ApiOperation({ summary: 'Send appointment reminder' })
   @ApiResponse({ status: 200, description: 'Reminder sent successfully' })
-  async sendReminder(@Param('id') id: string, @Request() req: any) {
+  async sendReminder(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
     return await this.appointmentsService.sendReminder(id, req.user.workspaceId);
   }
 
   @Post('google-calendar/sync')
   @ApiOperation({ summary: 'Sync CRM appointment to Google Calendar' })
   @ApiResponse({ status: 201, description: 'Event synced to Google Calendar' })
-  async syncToGoogleCalendar(@Body() data: { appointmentId: string }, @Request() req: any) {
+  async syncToGoogleCalendar(@Body() data: GoogleCalendarSyncBody, @Request() req: AuthenticatedRequest) {
     // Get the appointment details
     const appointment = await this.appointmentsService.findOne(
       data.appointmentId,
@@ -205,7 +239,7 @@ export class AppointmentsController {
   @Get('google-calendar/status')
   @ApiOperation({ summary: 'Get Google Calendar integration status' })
   @ApiResponse({ status: 200, description: 'Google Calendar status retrieved' })
-  async getGoogleCalendarStatus(@Request() req: any) {
+  async getGoogleCalendarStatus(@Request() req: AuthenticatedRequest) {
     return await this.unifiedCalendarService.getGoogleCalendarStatus(
       req.user._id || req.user.id || req.user.sub
     );

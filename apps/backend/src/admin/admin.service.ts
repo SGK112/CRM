@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '../users/schemas/user.schema';
@@ -19,7 +19,7 @@ export class AdminService {
     const skip = (page - 1) * limit;
 
     // Build search filter
-    const filter: any = {};
+    const filter: Record<string, unknown> = {};
 
     if (query.search) {
       const searchRegex = new RegExp(query.search, 'i');
@@ -84,8 +84,8 @@ export class AdminService {
       totalClients: 0, // You can implement this based on your clients collection
       totalEstimates: 0, // You can implement this based on your estimates collection
       lastLoginAt: user.lastLoginAt || null,
-      accountAge: (user as any).createdAt
-        ? Math.floor((Date.now() - (user as any).createdAt.getTime()) / (1000 * 60 * 60 * 24))
+      accountAge: (user as UserDocument & { createdAt?: Date }).createdAt
+        ? Math.floor((Date.now() - (user as UserDocument & { createdAt?: Date }).createdAt!.getTime()) / (1000 * 60 * 60 * 24))
         : 0,
     };
 
@@ -327,7 +327,7 @@ export class AdminService {
     const limit = parseInt(query.limit) || 50;
     const skip = (page - 1) * limit;
 
-    const filter: any = {};
+    const filter: Record<string, unknown> = {};
     if (query.userId) {
       filter._id = query.userId;
     }
@@ -344,14 +344,14 @@ export class AdminService {
     const activities = users.flatMap(user => {
       const logs = [];
 
-      if ((user as any).createdAt) {
+      if ((user as UserDocument & { createdAt?: Date }).createdAt) {
         logs.push({
           id: `${user._id}_created`,
           userId: user._id,
           userEmail: user.email,
           userName: `${user.firstName} ${user.lastName}`,
           action: 'user_created',
-          timestamp: (user as any).createdAt,
+          timestamp: (user as UserDocument & { createdAt?: Date }).createdAt,
           details: 'User account created',
         });
       }
@@ -411,12 +411,6 @@ export class AdminService {
     }
 
     // Log the notification (in a real app, you'd save this to a notifications collection)
-    console.log('Admin notification sent:', {
-      type: notificationData.type,
-      subject: notificationData.subject,
-      recipientCount: targetUsers.length,
-      priority: notificationData.priority || 'normal',
-    });
 
     return {
       success: true,
@@ -458,7 +452,7 @@ export class AdminService {
   async performBulkAction(actionData: {
     userIds: string[];
     action: 'suspend' | 'activate' | 'delete' | 'update-plan';
-    data?: any;
+    data?: Record<string, unknown>;
   }) {
     const { userIds, action, data } = actionData;
 
@@ -485,7 +479,7 @@ export class AdminService {
             if (!data || !data.subscriptionPlan) {
               throw new BadRequestException('Subscription plan required for update-plan action');
             }
-            result = await this.updateUser(userId, { subscriptionPlan: data.subscriptionPlan });
+            result = await this.updateUser(userId, { subscriptionPlan: data.subscriptionPlan as string });
             break;
           default:
             throw new BadRequestException(`Unsupported action: ${action}`);

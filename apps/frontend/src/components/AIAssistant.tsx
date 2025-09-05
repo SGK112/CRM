@@ -1,23 +1,23 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
 import { useSearch } from '@/hooks/useSearch';
-import { useRouter } from 'next/navigation';
-import {
-  SparklesIcon,
-  XMarkIcon,
-  PaperAirplaneIcon,
-  ClipboardDocumentListIcon,
-  UserGroupIcon,
-  CalendarDaysIcon,
-  DocumentTextIcon,
-  CogIcon,
-  PlusIcon,
-  TrashIcon,
-  EyeIcon,
-  ArrowTopRightOnSquareIcon,
-} from '@heroicons/react/24/outline';
 import { API_BASE } from '@/lib/api';
+import {
+    ArrowTopRightOnSquareIcon,
+    CalendarDaysIcon,
+    ClipboardDocumentListIcon,
+    CogIcon,
+    DocumentTextIcon,
+    EyeIcon,
+    PaperAirplaneIcon,
+    PlusIcon,
+    SparklesIcon,
+    TrashIcon,
+    UserGroupIcon,
+    XMarkIcon,
+} from '@heroicons/react/24/outline';
+import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 
 interface AIMessage {
   id: string;
@@ -33,7 +33,14 @@ interface AIAction {
   type: 'navigate' | 'create' | 'edit' | 'delete' | 'view' | 'execute' | 'command';
   label: string;
   description: string;
-  data: any;
+  data: {
+    path?: string;
+    cmd?: string;
+    type?: string;
+    id?: string;
+    name?: string;
+    [key: string]: unknown;
+  };
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   danger?: boolean;
 }
@@ -47,8 +54,8 @@ interface AIAssistantProps {
 export default function AIAssistant({ isOpen, onClose, initialMessage }: AIAssistantProps) {
   // Robust unique id generator to avoid duplicate React keys when multiple messages are added within the same millisecond
   const genId = () =>
-    typeof crypto !== 'undefined' && (crypto as any).randomUUID
-      ? (crypto as any).randomUUID()
+    typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
       : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const [messages, setMessages] = useState<AIMessage[]>([]);
   const [hasMoreHistory, setHasMoreHistory] = useState(false);
@@ -103,9 +110,9 @@ export default function AIAssistant({ isOpen, onClose, initialMessage }: AIAssis
       if (messages.length === 0) {
         const raw = localStorage.getItem(MEMORY_KEY);
         if (raw) {
-          const parsed: AIMessage[] = JSON.parse(raw).map((m: any) => ({
-            ...m,
-            timestamp: new Date(m.timestamp),
+          const parsed: AIMessage[] = JSON.parse(raw).map((m: unknown) => ({
+            ...m as AIMessage,
+            timestamp: new Date((m as AIMessage).timestamp),
           }));
           // Only load the most recent messages initially
           const recentMessages = parsed.slice(-INITIAL_LOAD_MESSAGES);
@@ -197,9 +204,9 @@ export default function AIAssistant({ isOpen, onClose, initialMessage }: AIAssis
     try {
       const raw = localStorage.getItem(MEMORY_KEY);
       if (raw) {
-        const parsed: AIMessage[] = JSON.parse(raw).map((m: any) => ({
-          ...m,
-          timestamp: new Date(m.timestamp),
+        const parsed: AIMessage[] = JSON.parse(raw).map((m: unknown) => ({
+          ...m as AIMessage,
+          timestamp: new Date((m as AIMessage).timestamp),
         }));
         const currentCount = messages.length;
         const nextBatch = parsed.slice(-(currentCount + 20), -currentCount);
@@ -212,7 +219,8 @@ export default function AIAssistant({ isOpen, onClose, initialMessage }: AIAssis
         }
       }
     } catch (err) {
-      console.error('Failed to load more history:', err);
+        // silent fail
+        void err;
     } finally {
       setLoadingHistory(false);
     }
@@ -313,7 +321,7 @@ export default function AIAssistant({ isOpen, onClose, initialMessage }: AIAssis
   };
 
   // Enhanced error handling functions
-  const handleAIError = (status: number, userQuery: string) => {
+  const handleAIError = (status: number) => {
     let errorMessage = '';
     const suggestions: string[] = [];
 
@@ -360,7 +368,7 @@ export default function AIAssistant({ isOpen, onClose, initialMessage }: AIAssis
     ]);
   };
 
-  const handleTimeoutError = (userQuery: string) => {
+  const handleTimeoutError = () => {
     setMessages(prev => [
       ...prev,
       {
@@ -383,7 +391,7 @@ export default function AIAssistant({ isOpen, onClose, initialMessage }: AIAssis
     ]);
   };
 
-  const handleConnectionError = (userQuery: string) => {
+  const handleConnectionError = () => {
     setMessages(prev => [
       ...prev,
       {
@@ -413,7 +421,7 @@ export default function AIAssistant({ isOpen, onClose, initialMessage }: AIAssis
     ]);
   };
 
-  const handleGenericError = (error: any, userQuery: string) => {
+  const handleGenericError = () => {
     setMessages(prev => [
       ...prev,
       {
@@ -860,21 +868,18 @@ export default function AIAssistant({ isOpen, onClose, initialMessage }: AIAssis
 
     // Skip AI call only if it's a direct navigation request AND not a business question
     if (hasActions && actionablePattern.test(input) && !businessQuestionPattern.test(input)) {
-      console.log('Skipping AI call for actionable request:', input, 'hasActions:', hasActions);
       setIsLoading(false);
       return; // Avoid duplicate conversational AI follow-up; user sees one concise response with actions.
     }
 
     // Additional catch for general help requests that have actions
     if (hasActions && /\b(help|what|how.*help|can.*help|show.*around)\b/i.test(input)) {
-      console.log('Skipping AI call for help request:', input, 'hasActions:', hasActions);
       setIsLoading(false);
       return;
     }
 
     // Catch-all: if we have actions and it's not a business question, skip AI
     if (hasActions && !businessQuestionPattern.test(input)) {
-      console.log('Skipping AI call for request with actions:', input, 'hasActions:', hasActions);
       setIsLoading(false);
       return;
     }
@@ -975,16 +980,17 @@ export default function AIAssistant({ isOpen, onClose, initialMessage }: AIAssis
         setMessages(prev => [...prev, aiResponse]);
       } else {
         // Enhanced error handling with graceful fallbacks
-        handleAIError(resp.status, userMessage.content);
+        handleAIError(resp.status);
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       // Graceful error handling for connection issues
-      if (e.name === 'AbortError') {
-        handleTimeoutError(userMessage.content);
-      } else if (e.message?.includes('fetch')) {
-        handleConnectionError(userMessage.content);
+      const error = e as Error;
+      if (error.name === 'AbortError') {
+        handleTimeoutError();
+      } else if (error.message?.includes('fetch')) {
+        handleConnectionError();
       } else {
-        handleGenericError(e, userMessage.content);
+        handleGenericError();
       }
     } finally {
       setIsLoading(false);
@@ -994,7 +1000,9 @@ export default function AIAssistant({ isOpen, onClose, initialMessage }: AIAssis
   const handleAction = (action: AIAction) => {
     switch (action.type) {
       case 'navigate':
-        router.push(action.data.path);
+        if (action.data.path) {
+          router.push(action.data.path);
+        }
         onClose(); // Close the assistant after navigation
         break;
       case 'command':
@@ -1158,7 +1166,7 @@ export default function AIAssistant({ isOpen, onClose, initialMessage }: AIAssis
             },
           ]);
         } else {
-          console.log('Create action:', action);
+          // silent fail
         }
         break;
       case 'edit':
@@ -1202,7 +1210,7 @@ export default function AIAssistant({ isOpen, onClose, initialMessage }: AIAssis
             },
           ]);
         } else {
-          console.log('Edit action:', action);
+          // silent fail
         }
         break;
       case 'delete':
@@ -1239,7 +1247,8 @@ export default function AIAssistant({ isOpen, onClose, initialMessage }: AIAssis
       case 'view':
         // Enhanced view actions for data inspection
         if (action.data?.type && action.data?.id) {
-          router.push(action.data.path || `/dashboard/${action.data.type}s/${action.data.id}`);
+          const path = action.data.path || `/dashboard/${action.data.type}s/${action.data.id}`;
+          router.push(path);
           onClose();
         }
         break;
@@ -1255,7 +1264,6 @@ export default function AIAssistant({ isOpen, onClose, initialMessage }: AIAssis
             suggestions: ['Show me around', 'Create new client', 'View projects', 'Open calendar'],
           },
         ]);
-        console.log('Unknown action:', action);
     }
   };
 

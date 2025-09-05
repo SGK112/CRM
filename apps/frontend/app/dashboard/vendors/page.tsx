@@ -1,14 +1,14 @@
 'use client';
-import { useEffect, useMemo, useState } from 'react';
-import { API_BASE } from '@/lib/api';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { API_BASE } from '@/lib/api';
 import {
-  ArrowPathIcon,
-  PlusIcon,
-  FunnelIcon,
-  MagnifyingGlassIcon,
-  TagIcon,
+    ArrowPathIcon,
+    FunnelIcon,
+    MagnifyingGlassIcon,
+    PlusIcon,
+    TagIcon,
 } from '@heroicons/react/24/outline';
+import { useEffect, useMemo, useState } from 'react';
 
 interface Vendor {
   _id: string;
@@ -52,8 +52,8 @@ export default function VendorsPage() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
       setVendors(json);
-    } catch (e: any) {
-      setError(e.message || 'Failed loading vendors');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed loading vendors');
     } finally {
       setLoading(false);
     }
@@ -65,7 +65,7 @@ export default function VendorsPage() {
   const addVendor = async () => {
     if (!draftName.trim()) return;
     try {
-      const payload: any = { name: draftName.trim() };
+      const payload: { name: string; categories?: string[] } = { name: draftName.trim() };
       if (draftCategory.trim()) payload.categories = [draftCategory.trim()];
       await fetch(`${API_BASE}/vendors`, {
         method: 'POST',
@@ -76,8 +76,8 @@ export default function VendorsPage() {
       setDraftCategory('');
       setShowNew(false);
       fetchVendors();
-    } catch {
-      /* ignore */
+    } catch (error) {
+      // Silently handle error
     }
   };
 
@@ -148,7 +148,7 @@ export default function VendorsPage() {
           </div>
           {/* Category */}
           <div className="flex flex-col">
-            <label className="text-[11px] font-medium uppercase tracking-wide block mb-1 text-slate-500 flex items-center gap-1">
+            <label className="text-[11px] font-medium uppercase tracking-wide flex items-center gap-1 mb-1 text-slate-500">
               <TagIcon className="h-3 w-3" />
               Category
             </label>

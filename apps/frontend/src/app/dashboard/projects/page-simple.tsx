@@ -10,7 +10,7 @@ import {
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { simple } from '../../../lib/simple-ui';
 
 interface Project {
@@ -41,11 +41,7 @@ export default function ProjectsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
 
-  useEffect(() => {
-    fetchProjects();
-  }, []);
-
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
@@ -64,15 +60,17 @@ export default function ProjectsPage() {
       if (response.ok) {
         const data = await response.json();
         setProjects(Array.isArray(data) ? data : data.projects || []);
-      } else {
-        console.error('Failed to fetch projects');
       }
     } catch (error) {
-      console.error('Error fetching projects:', error);
+      // Error handled silently
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
 
   const filteredProjects = projects.filter(project =>
     project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -106,7 +104,6 @@ export default function ProjectsPage() {
 
   return (
     <div className={simple.page()}>
-      {/* Header */}
       <div className="mb-8">
         <h1 className={simple.text.title()}>Projects</h1>
         <p className={simple.text.body()}>
@@ -126,7 +123,7 @@ export default function ProjectsPage() {
             placeholder="Search projects..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className={simple.input({ size: 'medium' }) + ' pl-10'}
+            className={simple.input('pl-10')}
           />
         </div>
 
@@ -168,10 +165,10 @@ export default function ProjectsPage() {
         </div>
         <div className={simple.card()}>
           <div className={simple.text.title()}>
-            {projects.filter(p => p.status === 'pending').length}
+            {projects.filter(p => p.status === 'planning').length}
           </div>
           <div className={simple.text.small()}>
-            Pending
+            Planning
           </div>
         </div>
       </div>
@@ -184,7 +181,7 @@ export default function ProjectsPage() {
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-2">
-                    <h3 className={simple.text('heading-sm')}>
+                    <h3 className={simple.text.subtitle()}>
                       {project.title}
                     </h3>
                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${statusColors[project.status]}`}>
@@ -192,7 +189,7 @@ export default function ProjectsPage() {
                     </span>
                   </div>
 
-                  <p className={simple.text('body') + ' mb-4'}>
+                  <p className={simple.text.body() + ' mb-4'}>
                     {project.description}
                   </p>
 
@@ -221,7 +218,7 @@ export default function ProjectsPage() {
                 <div className="ml-4">
                   <Link
                     href={`/dashboard/projects/${project._id}`}
-                    className={simple.button({ variant: 'secondary', size: 'small' })}
+                    className={simple.button('secondary', 'text-sm px-3 py-1')}
                   >
                     <EyeIcon className="h-4 w-4 mr-1" />
                     View
@@ -236,10 +233,10 @@ export default function ProjectsPage() {
           <div className="text-gray-400 mb-4">
             <BuildingOfficeIcon className="h-16 w-16 mx-auto" />
           </div>
-          <h3 className={simple.text('heading-sm') + ' mb-2'}>
+          <h3 className={simple.text.subtitle() + ' mb-2'}>
             {searchTerm ? 'No projects found' : 'No projects yet'}
           </h3>
-          <p className={simple.text('subtext') + ' mb-6'}>
+          <p className={simple.text.body() + ' mb-6'}>
             {searchTerm
               ? `No projects match "${searchTerm}". Try a different search term.`
               : 'Get started by creating your first project.'
@@ -248,7 +245,7 @@ export default function ProjectsPage() {
           {!searchTerm && (
             <Link
               href="/dashboard/projects/new"
-              className={simple.button({ variant: 'primary', size: 'medium' })}
+              className={simple.button('primary', 'text-sm px-3 py-1')}
             >
               <PlusIcon className="h-4 w-4 mr-2" />
               Create Your First Project

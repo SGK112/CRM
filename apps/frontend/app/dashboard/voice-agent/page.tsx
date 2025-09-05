@@ -1,15 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { CapabilityGate } from '@/components/CapabilityGate';
 import { PageHeader } from '@/components/ui/PageHeader';
-import {
-  PhoneIcon,
-  ArrowPathIcon,
-  MicrophoneIcon,
-  SpeakerWaveIcon,
-} from '@heroicons/react/24/outline';
 import { API_BASE } from '@/lib/api';
-import { CapabilityGate, PlanBadge } from '@/components/CapabilityGate';
+import {
+    ArrowPathIcon,
+    MicrophoneIcon,
+    PhoneIcon,
+    SpeakerWaveIcon,
+} from '@heroicons/react/24/outline';
+import { useEffect, useState } from 'react';
 
 interface OutboundResponse {
   sid: string;

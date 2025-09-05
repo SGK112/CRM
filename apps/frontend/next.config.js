@@ -42,6 +42,24 @@ const nextConfig = {
     // Normalize: remove trailing slash and any repeated trailing /api segments to avoid double prefixing
     const apiUrl = raw.replace(/\/$/, '').replace(/(?:\/api)+$/, '');
     return [
+      // Don't proxy client API routes for testing - handle them in the frontend
+      {
+        source: '/api/clients/:id/voice-calls',
+        destination: '/api/clients/:id/voice-calls',
+      },
+      {
+        source: '/api/clients/:id/appointments',
+        destination: '/api/clients/:id/appointments',
+      },
+      {
+        source: '/api/clients/:id/integrations',
+        destination: '/api/clients/:id/integrations',
+      },
+      {
+        source: '/api/clients/:id',
+        destination: '/api/clients/:id',
+      },
+      // Proxy all other API requests to backend
       {
         source: '/api/:path*',
         destination: `${apiUrl}/api/:path*`,

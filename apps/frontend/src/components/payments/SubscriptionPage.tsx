@@ -3,7 +3,7 @@
 import { CheckIcon, CreditCardIcon, SparklesIcon, StarIcon } from '@heroicons/react/24/outline';
 import { CardElement, Elements, useElements, useStripe } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import React, { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 // Initialize Stripe with fallback
 const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
@@ -72,8 +72,12 @@ function PaymentForm({ plan, onSuccess }: { plan: Plan; onSuccess: () => void })
       if (error) {
         throw new Error(error.message);
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unexpected error occurred');
+      }
     } finally {
       setLoading(false);
     }
@@ -184,8 +188,12 @@ function OneTimePaymentForm({
       if (paymentIntent?.status === 'succeeded') {
         onSuccess();
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unexpected error occurred');
+      }
     } finally {
       setLoading(false);
     }
@@ -247,15 +255,7 @@ export default function SubscriptionPage({
   const [oneTimeDescription, setOneTimeDescription] = useState('One-time payment');
   const [stripeError, setStripeError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchPlans();
-    // Check if Stripe is properly configured
-    if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
-      setStripeError('Payment system is not configured. Please contact support.');
-    }
-  }, []);
-
-  const fetchPlans = async () => {
+  const fetchPlans = useCallback(async () => {
     try {
       const response = await fetch('/api/billing/plans');
       const data = await response.json();
@@ -264,11 +264,19 @@ export default function SubscriptionPage({
         setPlans(data.plans);
       }
     } catch (error) {
-      console.error('Error fetching plans:', error);
+      // Error fetching plans - silently handle
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchPlans();
+    // Check if Stripe is properly configured
+    if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
+      setStripeError('Payment system is not configured. Please contact support.');
+    }
+  }, [fetchPlans]);
 
   const handlePlanSelect = (plan: Plan) => {
     if (stripeError) {

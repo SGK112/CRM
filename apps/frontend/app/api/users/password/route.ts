@@ -51,7 +51,6 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Password update error:', error);
     return NextResponse.json(
       {
         success: false,

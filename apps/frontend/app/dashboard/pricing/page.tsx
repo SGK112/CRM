@@ -1,16 +1,15 @@
 'use client';
-import { useEffect, useState, useRef } from 'react';
 import { API_BASE } from '@/lib/api';
 import {
-  PlusIcon,
-  CloudArrowUpIcon,
-  MagnifyingGlassIcon,
-  TagIcon,
-  CurrencyDollarIcon,
-  BuildingOfficeIcon,
-  DocumentTextIcon,
-  XMarkIcon,
+    BuildingOfficeIcon,
+    CloudArrowUpIcon,
+    CurrencyDollarIcon,
+    DocumentTextIcon,
+    MagnifyingGlassIcon,
+    TagIcon,
+    XMarkIcon
 } from '@heroicons/react/24/outline';
+import { useEffect, useState } from 'react';
 
 interface PriceItem {
   _id: string;

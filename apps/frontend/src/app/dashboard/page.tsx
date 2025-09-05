@@ -49,9 +49,13 @@ export default function DashboardPage() {
 
   useEffect(() => {
     // Load user data
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      setUser(JSON.parse(userData));
+    try {
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        setUser(JSON.parse(userData));
+      }
+    } catch (error) {
+      // Silently handle localStorage errors
     }
 
     // Load mock data

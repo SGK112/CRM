@@ -1,7 +1,7 @@
 'use client';
-import { EventInput } from '@fullcalendar/core';
+import { EventClickArg, EventInput } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
-import interactionPlugin from '@fullcalendar/interaction';
+import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -9,8 +9,8 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 interface CalendarViewProps {
   events: EventInput[];
   initialView?: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
-  onEventClick: (info: any) => void;
-  onDateClick: (info: any) => void;
+  onEventClick: (info: EventClickArg) => void;
+  onDateClick: (info: DateClickArg) => void;
   currentView?: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
 }
 

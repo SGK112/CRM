@@ -21,7 +21,6 @@ export async function POST(request: NextRequest) {
       const text = await response.text();
       data = text ? JSON.parse(text) : {};
     } catch (parseError) {
-      console.error('Failed to parse resend-verification response:', parseError);
       return NextResponse.json(
         { success: false, message: 'Invalid response from server' },
         { status: 500 }
@@ -34,7 +33,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Resend verification error:', error);
     return NextResponse.json(
       {
         success: false,

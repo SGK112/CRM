@@ -84,13 +84,7 @@ export async function POST(request: NextRequest) {
     // 5. Potentially integrate with ATS (Applicant Tracking System)
 
     // For now, we'll simulate processing and return success
-    console.log('Job Application Received:', {
-      ...applicationData,
-      resumeFileName: resumeFile.name,
-      resumeSize: resumeFile.size,
-      portfolioFileCount: portfolioFiles.length,
-      portfolioFileNames: portfolioFiles.map(f => f.name),
-    });
+    // Application data processed successfully
 
     // Simulate processing delay
     await new Promise(resolve => setTimeout(resolve, 1500));
@@ -103,7 +97,7 @@ export async function POST(request: NextRequest) {
     // - Send Slack notification to hiring team
 
     // Simulate email sending
-    await sendApplicationEmails(applicationData, resumeFile, portfolioFiles);
+    await sendApplicationEmails(applicationData);
 
     return NextResponse.json({
       message: 'Application submitted successfully',
@@ -111,7 +105,6 @@ export async function POST(request: NextRequest) {
       status: 'received',
     });
   } catch (error) {
-    console.error('Application submission error:', error);
     return NextResponse.json(
       { message: 'Failed to process application. Please try again.' },
       { status: 500 }
@@ -121,13 +114,30 @@ export async function POST(request: NextRequest) {
 
 // Simulate email sending function
 async function sendApplicationEmails(
-  applicationData: any,
-  resumeFile: File,
-  portfolioFiles: File[]
+  applicationData: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    location: string;
+    linkedIn: string;
+    portfolio: string;
+    experience: string;
+    jobTitle: string;
+    jobDepartment: string;
+    jobLocation: string;
+    coverLetter: string;
+    motivation: string;
+    availability: string;
+    salary: string;
+    referral: string;
+    additional: string;
+    submittedAt: string;
+    source: string;
+  }
 ) {
   // In production, implement actual email sending logic here
-  console.log('Sending confirmation email to:', applicationData.email);
-  console.log('Sending notification to HR team for position:', applicationData.jobTitle);
+  // Email sending logic would go here - applicationData is used here
 
   // Example structure for what you'd implement:
   /*

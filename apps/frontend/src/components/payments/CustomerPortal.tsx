@@ -99,7 +99,7 @@ export default function CustomerPortal() {
         setInvoices(invData.invoices);
       }
     } catch (error) {
-      console.error('Error fetching portal data:', error);
+      // Error fetching portal data - silently handle
     } finally {
       setLoading(false);
     }
@@ -131,7 +131,6 @@ export default function CustomerPortal() {
         alert(data.message || 'Failed to cancel subscription');
       }
     } catch (error) {
-      console.error('Error canceling subscription:', error);
       alert('Failed to cancel subscription');
     } finally {
       setActionLoading(null);
@@ -157,7 +156,6 @@ export default function CustomerPortal() {
         alert(data.message || 'Failed to reactivate subscription');
       }
     } catch (error) {
-      console.error('Error reactivating subscription:', error);
       alert('Failed to reactivate subscription');
     } finally {
       setActionLoading(null);
@@ -181,7 +179,6 @@ export default function CustomerPortal() {
         alert(data.message || 'Failed to open customer portal');
       }
     } catch (error) {
-      console.error('Error opening customer portal:', error);
       alert('Failed to open customer portal');
     } finally {
       setActionLoading(null);
@@ -245,7 +242,7 @@ export default function CustomerPortal() {
           ].map(tab => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => setActiveTab(tab.id as 'subscription' | 'billing' | 'invoices')}
               className={`flex items-center py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === tab.id
                   ? 'border-blue-500 text-blue-600'

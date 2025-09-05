@@ -153,13 +153,13 @@ export class VoiceAgentService {
           email: client.email,
         },
       };
-    } catch (e) {
-      this.logger.error('Failed to initiate outbound call', e as any);
+    } catch (e: unknown) {
+      this.logger.error('Failed to initiate outbound call', e);
 
       // Update call record with error
       await this.voiceCallModel.findByIdAndUpdate(savedCall._id, {
         status: 'failed',
-        notes: `Error: ${(e as Error).message}`,
+        notes: `Error: ${e instanceof Error ? e.message : 'Unknown error'}`,
       });
 
       throw e;
@@ -247,8 +247,6 @@ export class VoiceAgentService {
     const client = await this.clientModel.findById(voiceCall.clientId);
     if (!client) return;
 
-    const clientName = `${client.firstName} ${client.lastName}`;
-
     // Create a note from the call
     await this.notesService.createFromVoiceCall({
       workspaceId: voiceCall.workspaceId,
@@ -264,7 +262,7 @@ export class VoiceAgentService {
 
     // Schedule appointment if one was created
     if (voiceCall.callResult?.appointmentScheduled && voiceCall.callResult.appointmentDate) {
-      const appointment = await this.appointmentsService.scheduleFromVoiceCall({
+      await this.appointmentsService.scheduleFromVoiceCall({
         clientId: voiceCall.clientId,
         workspaceId: voiceCall.workspaceId,
         voiceCallId: voiceCall._id.toString(),
@@ -276,7 +274,7 @@ export class VoiceAgentService {
 
       // Send confirmation email if client has email
       if (client.email) {
-        await this.appointmentsService.sendConfirmationEmail(appointment);
+        await this.appointmentsService.sendConfirmationEmail();
       }
     }
 
@@ -316,7 +314,7 @@ export class VoiceAgentService {
             await this.emailService.sendEstimateFollowUp({
               clientEmail: client.email!,
               clientName,
-              estimateNumber: estimate.number || (estimate as any)._id.toString().slice(-6),
+              estimateNumber: estimate.number || estimate._id.toString().slice(-6),
               estimateAmount: estimate.total || 0,
               callNotes,
             });
@@ -362,7 +360,13 @@ export class VoiceAgentService {
       endDate?: Date;
     }
   ): Promise<VoiceCall[]> {
-    const query: any = { workspaceId };
+    const query: {
+      workspaceId: string;
+      clientId?: string;
+      status?: string;
+      callPurpose?: string;
+      startedAt?: { $gte?: Date; $lte?: Date };
+    } = { workspaceId };
 
     if (filters) {
       if (filters.clientId) query.clientId = filters.clientId;
@@ -594,9 +598,9 @@ export class VoiceAgentService {
         message: `Call initiated successfully via ${hasElevenLabsAgent ? 'ElevenLabs+Twilio integration' : 'Twilio'}`,
         clientContext: tempClientData,
       };
-    } catch (e) {
-      this.logger.error('Failed to initiate test outbound call', e as any);
-      throw new Error(`Failed to start call: ${(e as Error).message}`);
+    } catch (e: unknown) {
+      this.logger.error('Failed to initiate test outbound call', e);
+      throw new Error(`Failed to start call: ${e instanceof Error ? e.message : 'Unknown error'}`);
     }
   }
 

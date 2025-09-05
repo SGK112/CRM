@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ChatProvider } from './providers/base.provider';
-import { OpenAIProvider } from './providers/openai.provider';
 import { AnthropicProvider } from './providers/anthropic.provider';
+import { ChatProvider } from './providers/base.provider';
 import { GeminiProvider } from './providers/gemini.provider';
+import { OpenAIProvider } from './providers/openai.provider';
 import { XAIProvider } from './providers/xai.provider';
 
 export interface ChatMessage {
@@ -106,21 +106,31 @@ export class AiService {
     switch (strategy) {
       case 'cost':
         return enabled.sort(
-          (a, b) =>
-            a.meta.cost!.inputPer1K +
-            a.meta.cost!.outputPer1K -
-            (b.meta.cost!.inputPer1K + b.meta.cost!.outputPer1K)
+          (a, b) => {
+            const aCost = a.meta.cost ? a.meta.cost.inputPer1K + a.meta.cost.outputPer1K : 0;
+            const bCost = b.meta.cost ? b.meta.cost.inputPer1K + b.meta.cost.outputPer1K : 0;
+            return aCost - bCost;
+          }
         );
       case 'quality':
-        return enabled.sort((a, b) => b.meta.qualityTier! - a.meta.qualityTier!);
+        return enabled.sort((a, b) => {
+          const aQuality = a.meta.qualityTier || 0;
+          const bQuality = b.meta.qualityTier || 0;
+          return bQuality - aQuality;
+        });
       case 'balanced': {
-        const byQ = [...enabled].sort((a, b) => b.meta.qualityTier! - a.meta.qualityTier!);
+        const byQ = [...enabled].sort((a, b) => {
+          const aQuality = a.meta.qualityTier || 0;
+          const bQuality = b.meta.qualityTier || 0;
+          return bQuality - aQuality;
+        });
         const slice = byQ.slice(0, Math.max(1, Math.ceil(byQ.length / 2)));
         return slice.sort(
-          (a, b) =>
-            a.meta.cost!.inputPer1K +
-            a.meta.cost!.outputPer1K -
-            (b.meta.cost!.inputPer1K + b.meta.cost!.outputPer1K)
+          (a, b) => {
+            const aCost = a.meta.cost ? a.meta.cost.inputPer1K + a.meta.cost.outputPer1K : 0;
+            const bCost = b.meta.cost ? b.meta.cost.inputPer1K + b.meta.cost.outputPer1K : 0;
+            return aCost - bCost;
+          }
         );
       }
       default:
@@ -163,9 +173,10 @@ export class AiService {
         const elapsed = Date.now() - start;
         if (elapsed > 4000) this.logger.warn(`Provider ${p.meta.name} slow: ${elapsed}ms`);
         return out;
-      } catch (e: any) {
-        errors.push({ provider: p.meta.name, error: e.message || 'error' });
-        this.logger.warn(`Provider ${p.meta.name} failed: ${e.message}`);
+      } catch (e: unknown) {
+        const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+        errors.push({ provider: p.meta.name, error: errorMessage });
+        this.logger.warn(`Provider ${p.meta.name} failed: ${errorMessage}`);
       }
     }
     return {

@@ -56,9 +56,28 @@ export interface AppointmentDocument extends Document {
   voiceCallId?: string;
   createdBy?: string;
   attendees?: string[];
-  metadata?: Record<string, any>;
-  recurrence?: Record<string, any>;
-  notifications?: Record<string, any>;
+  metadata?: {
+    estimateId?: string;
+    invoiceId?: string;
+    priority?: 'low' | 'medium' | 'high' | 'urgent';
+    followUpRequired?: boolean;
+    preferredContactMethod?: 'phone' | 'email' | 'text';
+    tags?: string[];
+    customFields?: Record<string, string | number | boolean | Date>;
+  };
+  recurrence?: {
+    frequency?: 'daily' | 'weekly' | 'monthly' | 'yearly';
+    interval?: number;
+    endDate?: Date;
+    maxOccurrences?: number;
+    daysOfWeek?: number[];
+  };
+  notifications?: {
+    email?: boolean;
+    sms?: boolean;
+    push?: boolean;
+    reminderTimes?: number[];
+  };
 }
 
 // Export interfaces that are used externally

@@ -2,14 +2,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '../users/schemas/user.schema';
-import { UpdateEmailConfigDto, UpdateTwilioConfigDto } from './dto/user-config.dto';
+import { UpdateEmailConfigDto, UpdatePdfTemplatesDto, UpdateTwilioConfigDto } from './dto/user-config.dto';
 
 @Injectable()
 export class UserConfigService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async getUserConfig(userId: string) {
-    const user = await this.userModel.findById(userId).select('emailConfig twilioConfig').exec();
+    const user = await this.userModel.findById(userId).select('emailConfig twilioConfig pdfTemplates').exec();
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -17,6 +17,7 @@ export class UserConfigService {
     return {
       emailConfig: user.emailConfig || {},
       twilioConfig: user.twilioConfig || {},
+      pdfTemplates: user.pdfTemplates || { estimateTemplate: 'professional', invoiceTemplate: 'professional' },
     };
   }
 
@@ -75,6 +76,37 @@ export class UserConfigService {
       success: true,
       message: 'Twilio configuration updated successfully',
       twilioConfig: updatedUser?.twilioConfig,
+    };
+  }
+
+  async updatePdfTemplates(userId: string, updatePdfTemplatesDto: UpdatePdfTemplatesDto) {
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const updatedUser = await this.userModel
+      .findByIdAndUpdate(
+        userId,
+        {
+          $set: {
+            pdfTemplates: {
+              estimateTemplate: 'professional',
+              invoiceTemplate: 'professional',
+              ...user.pdfTemplates,
+              ...updatePdfTemplatesDto,
+            },
+          },
+        },
+        { new: true }
+      )
+      .select('pdfTemplates')
+      .exec();
+
+    return {
+      success: true,
+      message: 'PDF template preferences updated successfully',
+      pdfTemplates: updatedUser?.pdfTemplates,
     };
   }
 }

@@ -1,10 +1,10 @@
 'use client';
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect } from 'react';
+import { EyeIcon, EyeSlashIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { EyeIcon, EyeSlashIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline';
+import { useEffect, useState } from 'react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -26,9 +26,9 @@ export default function LoginPage() {
       // try rewrite first
       try {
         const res = await fetch('/api/health', { cache: 'no-store' });
-        if (!cancelled && res.ok) { 
-          setBackendUp(true); 
-          setCheckingHealth(false); 
+        if (!cancelled && res.ok) {
+          setBackendUp(true);
+          setCheckingHealth(false);
           return;
         }
       } catch {
@@ -53,10 +53,10 @@ export default function LoginPage() {
       }
     };
     ping();
-    return () => { 
+    return () => {
       cancelled = true;
     };
-  }, []);
+  }, [backendUp]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,27 +72,31 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
       });
 
-      let data: any = null;
-      try { 
-        data = await response.json(); 
-      } catch { 
-        /* ignore */ 
+      let data: { accessToken?: string; user?: unknown; message?: string; validation?: string[] } | null = null;
+      try {
+        data = await response.json();
+      } catch {
+        /* ignore */
       }
 
       if (response.ok) {
+        if (!data) {
+          setError('Invalid response from server');
+          return;
+        }
         // Store token in localStorage and cookie (cookie for middleware protection)
         try {
           // Set cookie with proper expiration and security settings
           const expiryDate = new Date();
           expiryDate.setDate(expiryDate.getDate() + 7); // 7 days from now
           document.cookie = `accessToken=${data.accessToken}; Path=/; SameSite=Lax; Expires=${expiryDate.toUTCString()}`;
-          console.log('Cookie set successfully');
+          // Cookie set successfully
         } catch (error) {
-          console.error('Cookie set failed:', error);
+          // Cookie set failed - silently handle
         }
-        localStorage.setItem('accessToken', data.accessToken);
+        localStorage.setItem('accessToken', data.accessToken!);
         localStorage.setItem('user', JSON.stringify(data.user));
-        console.log('Login successful, redirecting to dashboard');
+        // Login successful, redirecting to dashboard
         // Redirect to dashboard
         router.push('/dashboard');
       } else if (response.status === 400) {
@@ -116,7 +120,7 @@ export default function LoginPage() {
         setError(data?.message || 'Login failed. Please try again.');
       }
     } catch (error) {
-      console.error('Login error:', error);
+      // Network error occurred
       setError('Network error. Please check your connection and try again.');
     } finally {
       setIsLoading(false);
@@ -128,7 +132,7 @@ export default function LoginPage() {
       {/* Background decorative elements */}
       <div className="pointer-events-none select-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-amber-600/10 blur-3xl" />
       <div className="pointer-events-none select-none absolute top-1/3 -right-40 h-[28rem] w-[28rem] rounded-full bg-amber-500/5 blur-3xl" />
-      
+
       {/* Header Section */}
       <div className="w-full max-w-md mx-auto mb-6 sm:mb-8">
         <div className="flex justify-center mb-4 sm:mb-6">
@@ -142,14 +146,14 @@ export default function LoginPage() {
             </div>
           </div>
         </div>
-        
+
         <h2 className="text-center text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text)] mb-2">
           Welcome back
         </h2>
         <p className="text-center text-sm sm:text-base text-[var(--text-muted)] mb-4">
           Sign in to your workspace
         </p>
-        
+
         {!backendUp && (
           <div className="mb-4 text-center">
             <p className="text-xs text-red-400 mb-2">Backend offline or unreachable. Authentication may fail.</p>
@@ -161,8 +165,8 @@ export default function LoginPage() {
                   setCheckingHealth(true);
                   try {
                     const res = await fetch('/api/health', { cache: 'no-store' });
-                    if (res.ok) { 
-                      setBackendUp(true); 
+                    if (res.ok) {
+                      setBackendUp(true);
                       return;
                     }
                   } catch {
@@ -176,7 +180,7 @@ export default function LoginPage() {
                     setBackendUp(res2.ok);
                   } catch {
                     setBackendUp(false);
-                  } finally { 
+                  } finally {
                     setCheckingHealth(false);
                   }
                 };
@@ -189,7 +193,7 @@ export default function LoginPage() {
             </button>
           </div>
         )}
-        
+
         <p className="text-center text-sm text-[var(--text-dim)]">
           Or{' '}
           <Link href="/auth/register" className="font-medium text-amber-400 hover:text-amber-300 transition-colors">
@@ -207,7 +211,7 @@ export default function LoginPage() {
                 ✅ Email verified successfully! You can now log in to your account.
               </div>
             )}
-            
+
             {error && (
               <div className="bg-red-500/10 border border-red-500/40 text-red-300 px-3 sm:px-4 py-2 sm:py-3 rounded-md text-sm">
                 {error}

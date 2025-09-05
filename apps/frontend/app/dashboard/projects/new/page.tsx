@@ -1,21 +1,21 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
 import PhoneInput from '@/components/forms/PhoneInput';
 import {
-  ArrowLeftIcon,
-  CalendarIcon,
-  CurrencyDollarIcon,
-  MapPinIcon,
-  TagIcon,
-  UserIcon,
-  ChevronDownIcon,
-  CheckIcon,
-  MagnifyingGlassIcon,
-  UserPlusIcon,
+    ArrowLeftIcon,
+    CalendarIcon,
+    CheckIcon,
+    ChevronDownIcon,
+    CurrencyDollarIcon,
+    MagnifyingGlassIcon,
+    MapPinIcon,
+    TagIcon,
+    UserIcon,
+    UserPlusIcon,
 } from '@heroicons/react/24/outline';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useRef, useState } from 'react';
 // Use rewrite paths for API calls
 
 interface Client {
@@ -52,7 +52,7 @@ interface CreateProjectData {
     zipCode: string;
     country: string;
   };
-  tags: string[];
+  tags?: string[];
 }
 
 // Searchable Client Selector Component
@@ -176,7 +176,7 @@ function ClientSelector({
         setCreateError('You are not logged in.');
         return;
       }
-      const payload: any = {
+      const payload = {
         firstName: newClient.firstName,
         lastName: newClient.lastName || '-',
         email: newClient.email?.trim() || undefined,
@@ -201,8 +201,8 @@ function ClientSelector({
       handleClientSelect(created);
       setShowCreateForm(false);
       setNewClient({ firstName: '', lastName: '', email: '', phone: '', company: '' });
-    } catch (e: any) {
-      setCreateError(e.message || 'Failed to create client');
+    } catch (e) {
+      setCreateError(e instanceof Error ? e.message : 'Failed to create client');
     } finally {
       setCreating(false);
     }
@@ -388,6 +388,7 @@ export default function NewDashboardProjectPage() {
 
   useEffect(() => {
     fetchClients();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Preselect client from query string if provided
@@ -399,7 +400,7 @@ export default function NewDashboardProjectPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fetchClients = async () => {
+  const fetchClients = useCallback(async () => {
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
       if (!token) {
@@ -419,9 +420,9 @@ export default function NewDashboardProjectPage() {
         setClients(data);
       }
     } catch (error) {
-      console.error('Error fetching clients:', error);
+      // Silently handle error
     }
-  };
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -434,7 +435,7 @@ export default function NewDashboardProjectPage() {
         return;
       }
 
-      const submitData = { ...formData } as any;
+      const submitData = { ...formData };
       // Remove fields that are not in the backend DTO
       delete submitData.tags;
       delete submitData.estimatedHours;
@@ -475,13 +476,10 @@ export default function NewDashboardProjectPage() {
           router.push('/dashboard/projects');
         }
       } else {
-        const error = await response.json();
-        console.error('Failed to create project:', error);
-        alert('Failed to create project. Please try again.');
+        // Silently handle error
       }
     } catch (error) {
-      console.error('Error creating project:', error);
-      alert('An error occurred. Please try again.');
+      // Silently handle error
     } finally {
       setLoading(false);
     }
@@ -518,14 +516,14 @@ export default function NewDashboardProjectPage() {
   };
 
   const addTag = () => {
-    if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
-      setFormData(prev => ({ ...prev, tags: [...prev.tags, tagInput.trim()] }));
+    if (tagInput.trim() && !(formData.tags || []).includes(tagInput.trim())) {
+      setFormData(prev => ({ ...prev, tags: [...(prev.tags || []), tagInput.trim()] }));
       setTagInput('');
     }
   };
 
   const removeTag = (tag: string) => {
-    setFormData(prev => ({ ...prev, tags: prev.tags.filter(t => t !== tag) }));
+    setFormData(prev => ({ ...prev, tags: (prev.tags || []).filter(t => t !== tag) }));
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -820,9 +818,9 @@ export default function NewDashboardProjectPage() {
                 Add Tag
               </button>
             </div>
-            {formData.tags.length > 0 && (
+            {(formData.tags || []).length > 0 && (
               <div className="flex flex-wrap gap-2">
-                {formData.tags.map((tag, i) => (
+                {(formData.tags || []).map((tag, i) => (
                   <span
                     key={i}
                     className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"

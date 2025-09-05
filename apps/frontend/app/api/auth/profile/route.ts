@@ -27,7 +27,6 @@ export async function GET(request: NextRequest) {
       const text = await response.text();
       data = text ? JSON.parse(text) : {};
     } catch (parseError) {
-      console.error('Failed to parse profile response:', parseError);
       return NextResponse.json(
         { success: false, message: 'Invalid response from server' },
         { status: 500 }
@@ -40,7 +39,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Profile fetch error:', error);
     return NextResponse.json(
       {
         success: false,

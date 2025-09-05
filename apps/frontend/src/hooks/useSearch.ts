@@ -3,20 +3,30 @@
 import { useCallback, useEffect, useState } from 'react';
 import { listDesigns, listTemplates } from '../lib/designsApi';
 
-interface APIDesignSummary {
-  _id: string;
-  title?: string;
-  name?: string;
-  status?: string;
-}
-
 interface SearchResult {
   id: string;
   type: 'project' | 'client' | 'document' | 'message' | 'user' | 'design' | 'template';
   title: string;
   description: string;
   url: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, string | number | boolean>;
+}
+
+interface TemplateResponse {
+  _id: string;
+  name?: string;
+  title?: string;
+  description?: string;
+  category?: string;
+  features?: unknown[];
+  usesCount?: number;
+}
+
+interface DesignResponse {
+  _id: string;
+  title?: string;
+  status?: string;
+  templateId?: string;
 }
 
 // Mock data for demonstration
@@ -177,31 +187,35 @@ export function useSearch() {
         // Templates
         const templatesResp = await listTemplates({ search: searchQuery });
         if (Array.isArray(templatesResp)) {
-          const templateResults: SearchResult[] = templatesResp.map((t: any) => ({
+          const templateResults: SearchResult[] = templatesResp.map((t: TemplateResponse) => ({
             id: t._id,
             type: 'template',
             title: t.name || t.title || 'Untitled Template',
             description: t.description || 'Design Template',
             url: `/dashboard/designer?template=${t._id}`,
-            metadata: { category: t.category, features: t.features?.length, uses: t.usesCount },
+            metadata: { 
+              category: t.category || '', 
+              features: Array.isArray(t.features) ? t.features.length : 0, 
+              uses: t.usesCount || 0 
+            },
           }));
           aggregated = aggregated.concat(templateResults);
         }
         // Designs
         const designsResp = await listDesigns({ search: searchQuery });
         if (Array.isArray(designsResp)) {
-          const designResults: SearchResult[] = designsResp.map((d: any) => ({
+          const designResults: SearchResult[] = designsResp.map((d: DesignResponse) => ({
             id: d._id,
             type: 'design',
             title: d.title || 'Untitled Design',
             description: d.status ? `Design (${d.status})` : 'Design',
             url: `/dashboard/designer/editor?design=${d._id}`,
-            metadata: { status: d.status, templateId: d.templateId },
+            metadata: { status: d.status || '', templateId: d.templateId || '' },
           }));
           aggregated = aggregated.concat(designResults);
         }
-      } catch (e: any) {
-        if (typeof e?.message === 'string' && e.message.toLowerCase().includes('unauthorized')) {
+      } catch (e: unknown) {
+        if (e instanceof Error && e.message.toLowerCase().includes('unauthorized')) {
           setError('unauthorized');
         }
       }
@@ -241,7 +255,7 @@ export function useSearch() {
         saveRecentSearch(searchQuery);
       }
     },
-    [saveRecentSearch]
+    [saveRecentSearch, error]
   );
 
   // Clear search

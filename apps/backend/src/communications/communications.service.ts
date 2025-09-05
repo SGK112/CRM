@@ -46,10 +46,30 @@ export class CommunicationsService {
 
   async sendEmail(sendEmailDto: SendEmailDto, workspaceId: string, userId: string) {
     try {
-      // Get client details
-      const client = await this.clientModel.findById(sendEmailDto.clientId).exec();
-      if (!client) {
-        throw new BadRequestException('Client not found');
+      let client: ClientDocument;
+      let recipientEmail: string;
+
+      // If clientId is provided, use it directly
+      if (sendEmailDto.clientId) {
+        client = await this.clientModel.findById(sendEmailDto.clientId).exec();
+        if (!client) {
+          throw new BadRequestException('Client not found');
+        }
+        recipientEmail = client.email;
+      } else if (sendEmailDto.email) {
+        // If email is provided directly, find client by email or use the email directly
+        client = await this.clientModel.findOne({
+          workspaceId,
+          email: sendEmailDto.email,
+          isActive: true
+        }).exec();
+        recipientEmail = sendEmailDto.email;
+      } else {
+        throw new BadRequestException('Either clientId or email must be provided');
+      }
+
+      if (!recipientEmail) {
+        throw new BadRequestException('Recipient email address is required');
       }
 
       // Get user details for sender info
@@ -60,9 +80,9 @@ export class CommunicationsService {
 
       // Prepare email data
       const emailData = {
-        to: client.email,
+        to: recipientEmail,
         subject: sendEmailDto.subject,
-        html: this.formatEmailBody(sendEmailDto.message, user, client),
+        html: this.formatEmailBody(sendEmailDto.message, user, client || { firstName: 'Valued', lastName: 'Customer', email: recipientEmail }),
         from: user.emailConfig?.fromEmail || user.email,
         replyTo: user.email,
       };
@@ -73,7 +93,8 @@ export class CommunicationsService {
       // Log communication (you might want to create a communications log schema)
       await this.logCommunication({
         type: 'email',
-        clientId: sendEmailDto.clientId,
+        clientId: client?._id?.toString(),
+        recipientEmail,
         userId,
         workspaceId,
         subject: sendEmailDto.subject,
@@ -96,14 +117,30 @@ export class CommunicationsService {
 
   async sendSms(sendSmsDto: SendSmsDto, workspaceId: string, userId: string) {
     try {
-      // Get client details
-      const client = await this.clientModel.findById(sendSmsDto.clientId).exec();
-      if (!client) {
-        throw new BadRequestException('Client not found');
+      let client: ClientDocument;
+      let recipientPhone: string;
+
+      // If clientId is provided, use it directly
+      if (sendSmsDto.clientId) {
+        client = await this.clientModel.findById(sendSmsDto.clientId).exec();
+        if (!client) {
+          throw new BadRequestException('Client not found');
+        }
+        recipientPhone = client.phone;
+      } else if (sendSmsDto.phone) {
+        // If phone is provided directly, find client by phone or use the phone directly
+        client = await this.clientModel.findOne({
+          workspaceId,
+          phone: sendSmsDto.phone,
+          isActive: true
+        }).exec();
+        recipientPhone = sendSmsDto.phone;
+      } else {
+        throw new BadRequestException('Either clientId or phone must be provided');
       }
 
-      if (!client.phone) {
-        throw new BadRequestException('Client does not have a phone number');
+      if (!recipientPhone) {
+        throw new BadRequestException('Recipient phone number is required');
       }
 
       // Get user details for Twilio config
@@ -113,12 +150,13 @@ export class CommunicationsService {
       }
 
       // Send SMS
-      const result = await this.twilioService.sendSMS(client.phone, sendSmsDto.message);
+      const result = await this.twilioService.sendSMS(recipientPhone, sendSmsDto.message);
 
       // Log communication
       await this.logCommunication({
         type: 'sms',
         clientId: sendSmsDto.clientId,
+        recipientPhone,
         userId,
         workspaceId,
         message: sendSmsDto.message,

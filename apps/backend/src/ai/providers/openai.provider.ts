@@ -53,8 +53,10 @@ export class OpenAIProvider implements ChatProvider {
         },
         provider: this.meta.name,
       };
-    } catch (e: any) {
-      throw new Error('OpenAI chat error: ' + (e.response?.data?.error?.message || e.message));
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+      const apiError = axios.isAxiosError(e) ? e.response?.data?.error?.message : errorMessage;
+      throw new Error('OpenAI chat error: ' + (apiError || errorMessage));
     }
   }
 }

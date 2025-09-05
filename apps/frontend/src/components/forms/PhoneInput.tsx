@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
 import { PhoneIcon } from '@heroicons/react/24/outline';
+import { useCallback, useEffect, useState } from 'react';
 
 interface PhoneInputProps {
   value: string;
@@ -25,7 +25,7 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
   const [displayValue, setDisplayValue] = useState('');
 
   // Format phone number as user types
-  const formatPhoneNumber = (phone: string): string => {
+  const formatPhoneNumber = useCallback((phone: string): string => {
     // Remove all non-digits
     const digits = phone.replace(/\D/g, '');
 
@@ -45,10 +45,10 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
       if (digits.length <= 6) return `+1 (${digits.slice(0, 3)}) ${digits.slice(3)}`;
       return `+1 (${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
     }
-  };
+  }, []);
 
   // Extract clean phone number (digits only with country code)
-  const getCleanPhoneNumber = (formatted: string): string => {
+  const getCleanPhoneNumber = useCallback((formatted: string): string => {
     const digits = formatted.replace(/\D/g, '');
     if (digits.length === 0) return '';
 
@@ -58,7 +58,7 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
     } else {
       return '1' + digits;
     }
-  };
+  }, []);
 
   // Update display when value prop changes
   useEffect(() => {
@@ -67,7 +67,7 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
     } else {
       setDisplayValue('');
     }
-  }, [value]);
+  }, [value, formatPhoneNumber]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value;
@@ -79,21 +79,23 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const key = e.key;
+    const keyCode = e.keyCode;
+
     // Allow: backspace, delete, tab, escape, enter
     if (
-      [8, 9, 27, 13, 46].indexOf(e.keyCode) !== -1 ||
+      ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter'].includes(key) ||
+      [8, 9, 27, 13, 46].includes(keyCode) ||
       // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
-      (e.keyCode === 65 && e.ctrlKey === true) ||
-      (e.keyCode === 67 && e.ctrlKey === true) ||
-      (e.keyCode === 86 && e.ctrlKey === true) ||
-      (e.keyCode === 88 && e.ctrlKey === true) ||
+      ((key === 'a' || key === 'c' || key === 'v' || key === 'x') && e.ctrlKey) ||
       // Allow: home, end, left, right
-      (e.keyCode >= 35 && e.keyCode <= 39)
+      ['Home', 'End', 'ArrowLeft', 'ArrowRight'].includes(key) ||
+      (keyCode >= 35 && keyCode <= 39)
     ) {
       return;
     }
     // Ensure that it is a number and stop the keypress
-    if ((e.shiftKey || e.keyCode < 48 || e.keyCode > 57) && (e.keyCode < 96 || e.keyCode > 105)) {
+    if ((e.shiftKey || (keyCode < 48 || keyCode > 57)) && (keyCode < 96 || keyCode > 105)) {
       e.preventDefault();
     }
   };

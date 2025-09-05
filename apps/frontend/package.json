@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Next.js frontend for Remodely CRM",
   "scripts": {
-    "dev": "PORT=3005 next dev",
+    "dev": "PORT=3000 next dev",
     "build": "next build && ./fix-standalone.sh",
     "start": "next start",
     "start:render": "node .next/standalone/apps/frontend/server.js",

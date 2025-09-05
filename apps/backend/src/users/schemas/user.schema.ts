@@ -130,6 +130,18 @@ export class User {
     phoneNumber?: string;
     webhookUrl?: string;
   };
+
+  // PDF Template Preferences
+  @Prop({
+    type: {
+      estimateTemplate: { type: String, enum: ['professional', 'modern', 'classic'], default: 'professional' },
+      invoiceTemplate: { type: String, enum: ['professional', 'modern', 'classic'], default: 'professional' },
+    },
+  })
+  pdfTemplates?: {
+    estimateTemplate?: 'professional' | 'modern' | 'classic';
+    invoiceTemplate?: 'professional' | 'modern' | 'classic';
+  };
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

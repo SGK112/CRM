@@ -1,22 +1,16 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import {
-  PlusIcon,
-  XMarkIcon,
-  DocumentTextIcon,
-  CurrencyDollarIcon,
-  WrenchScrewdriverIcon,
-  ShoppingBagIcon,
-  TrashIcon,
-} from '@heroicons/react/24/outline';
-import { Trash2 } from 'lucide-react';
+import AIWritingAssistant from '@/components/AIWritingAssistant';
 import ClientSelector from '@/components/ClientSelector';
 import ImageUpload from '@/components/forms/ImageUpload';
 import Notes from '@/components/forms/Notes';
-import AIWritingAssistant from '@/components/AIWritingAssistant';
 import { useAI } from '@/hooks/useAI';
+import {
+    PlusIcon,
+} from '@heroicons/react/24/outline';
+import { Trash2 } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 
 interface Client {
   _id: string;
@@ -73,7 +67,9 @@ export default function NewInvoice() {
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [refreshClients, setRefreshClients] = useState(0);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [images, setImages] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [invoiceNotes, setInvoiceNotes] = useState<any[]>([]);
   const [categories, setCategories] = useState<string[]>([
     'Materials',
@@ -90,22 +86,7 @@ export default function NewInvoice() {
       ? localStorage.getItem('accessToken') || localStorage.getItem('token')
       : '';
 
-  // Pre-fill from URL params
-  useEffect(() => {
-    const clientId = searchParams?.get('clientId');
-    const projectId = searchParams?.get('projectId');
-    const fromEstimate = searchParams?.get('fromEstimate');
-
-    if (clientId) setSelectedClientId(clientId);
-    if (projectId) setSelectedProjectId(projectId);
-
-    // If coming from estimate, fetch estimate data
-    if (fromEstimate) {
-      fetchEstimateData(fromEstimate);
-    }
-  }, [searchParams]);
-
-  const fetchEstimateData = async (estimateId: string) => {
+  const fetchEstimateData = useCallback(async (estimateId: string) => {
     if (!token) return;
     try {
       const res = await fetch(`/api/estimates/${estimateId}`, {
@@ -121,17 +102,26 @@ export default function NewInvoice() {
         setNotes(estimate.notes || '');
       }
     } catch (err) {
-      console.error('Failed to fetch estimate data:', err);
+      // Silently handle error
     }
-  };
+  }, [token]);
 
-  // Fetch initial data
+  // Pre-fill from URL params
   useEffect(() => {
-    fetchClients();
-    fetchProjects();
-  }, [token, refreshClients]);
+    const clientId = searchParams?.get('clientId');
+    const projectId = searchParams?.get('projectId');
+    const fromEstimate = searchParams?.get('fromEstimate');
 
-  const fetchClients = async () => {
+    if (clientId) setSelectedClientId(clientId);
+    if (projectId) setSelectedProjectId(projectId);
+
+    // If coming from estimate, fetch estimate data
+    if (fromEstimate) {
+      fetchEstimateData(fromEstimate);
+    }
+  }, [searchParams, fetchEstimateData]);
+
+  const fetchClients = useCallback(async () => {
     if (!token) return;
     try {
       const clientsRes = await fetch('/api/clients', {
@@ -140,18 +130,18 @@ export default function NewInvoice() {
       if (clientsRes.ok) {
         const clientsData = await clientsRes.json();
         setClients(
-          clientsData.map((c: any) => ({
+          clientsData.map((c: { firstName: string; lastName: string; [key: string]: unknown }) => ({
             ...c,
             name: `${c.firstName} ${c.lastName}`.trim(),
           }))
         );
       }
     } catch (err) {
-      console.error('Failed to fetch clients:', err);
+      // Silently handle error
     }
-  };
+  }, [token]);
 
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     if (!token) return;
     try {
       const projectsRes = await fetch('/api/projects', {
@@ -162,9 +152,15 @@ export default function NewInvoice() {
         setProjects(projectsData);
       }
     } catch (err) {
-      console.error('Failed to fetch projects:', err);
+      // Silently handle error
     }
-  };
+  }, [token]);
+
+  // Fetch initial data
+  useEffect(() => {
+    fetchClients();
+    fetchProjects();
+  }, [token, refreshClients, fetchClients, fetchProjects]);
 
   // Filter projects by selected client
   const clientProjects = projects.filter(p => p.clientId === selectedClientId);
@@ -190,7 +186,7 @@ export default function NewInvoice() {
     }
   };
 
-  const updateItem = (index: number, field: keyof LineItem, value: any) => {
+  const updateItem = (index: number, field: keyof LineItem, value: string | number | boolean) => {
     const newItems = [...items];
     newItems[index] = { ...newItems[index], [field]: value };
 

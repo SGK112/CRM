@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import PDFDocument = require('pdfkit');
 import { Client, ClientDocument } from '../clients/schemas/client.schema';
 import { PriceItem, PriceItemDocument } from '../pricing/schemas/price-item.schema';
 import { EmailService } from '../services/email.service';
+import { PdfTemplatesService, TemplateType } from '../services/pdf-templates.service';
 import { Estimate, EstimateDocument } from './schemas/estimate.schema';
+import { User, UserDocument } from '../users/schemas/user.schema';
 
 export interface CreateEstimateDto {
   number?: string;
@@ -49,48 +50,36 @@ export class EstimatesService {
     @InjectModel(Estimate.name) private estimateModel: Model<EstimateDocument>,
     @InjectModel(PriceItem.name) private priceModel: Model<PriceItemDocument>,
     @InjectModel(Client.name) private clientModel: Model<ClientDocument>,
-    private emailService: EmailService
-    // Optionally inject ClientsService if needed for more client info
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    private emailService: EmailService,
+    private pdfTemplatesService: PdfTemplatesService
   ) {}
 
   private async generateEstimatePDF(
     estimate: EstimateDocument,
-    client: { firstName: string; lastName: string; email?: string; company?: string }
+    client: { firstName: string; lastName: string; email?: string; company?: string },
+    template: TemplateType = 'professional'
   ): Promise<Buffer> {
-    const doc = new PDFDocument();
-    const buffers: Buffer[] = [];
-    doc.on('data', buffers.push.bind(buffers));
-    doc.on('end', () => {});
+    const templateData = {
+      type: 'estimate' as const,
+      number: estimate.number,
+      client: {
+        _id: (estimate as EstimateDocument & { clientId: string }).clientId || 'unknown',
+        firstName: client.firstName,
+        lastName: client.lastName,
+        email: client.email,
+        company: client.company,
+      },
+      items: estimate.items,
+      subtotal: estimate.subtotalSell,
+      discountAmount: estimate.discountAmount,
+      taxAmount: estimate.taxAmount,
+      total: estimate.total,
+      notes: estimate.notes,
+      createdAt: (estimate as EstimateDocument & { createdAt: Date }).createdAt?.toISOString() || new Date().toISOString(),
+    };
 
-    doc.fontSize(20).text('Estimate', { align: 'center' });
-    doc.moveDown();
-    doc.fontSize(12).text(`Estimate #: ${estimate.number}`);
-    doc.text(`Client: ${client.firstName} ${client.lastName}`);
-    if (client.email) doc.text(`Email: ${client.email}`);
-    if (client.company) doc.text(`Company: ${client.company}`);
-    doc.moveDown();
-    doc.text('Items:');
-    estimate.items.forEach(
-      (item: { name: string; quantity: number; sellPrice?: number }, idx: number) => {
-        doc.text(
-          `${idx + 1}. ${item.name} - Qty: ${item.quantity} - $${item.sellPrice?.toFixed(2)}`
-        );
-      }
-    );
-    doc.moveDown();
-    if (typeof estimate.subtotalSell === 'number')
-      doc.text(`Subtotal: $${estimate.subtotalSell.toFixed(2)}`);
-    if (typeof estimate.discountAmount === 'number')
-      doc.text(`Discount: $${estimate.discountAmount.toFixed(2)}`);
-    if (typeof estimate.taxAmount === 'number') doc.text(`Tax: $${estimate.taxAmount.toFixed(2)}`);
-    if (typeof estimate.total === 'number') doc.text(`Total: $${estimate.total.toFixed(2)}`);
-    doc.end();
-    return await new Promise((resolve, reject) => {
-      doc.on('end', () => {
-        resolve(Buffer.concat(buffers));
-      });
-      doc.on('error', reject);
-    });
+    return this.pdfTemplatesService.generatePDF(template, templateData);
   }
 
   private computeTotals(doc: EstimateDocument) {
@@ -207,8 +196,12 @@ export class EstimatesService {
     const client = await this.clientModel.findOne({ _id: doc.clientId, workspaceId });
     if (!client || !client.email) return doc; // Can't send without client email
 
-    // Generate PDF
-    const pdfBuffer = await this.generateEstimatePDF(doc, client);
+    // Get user's template preference
+    const user = await this.userModel.findOne({ workspaceId });
+    const template = (user?.pdfTemplates?.estimateTemplate as TemplateType) || 'professional';
+
+    // Generate PDF with selected template
+    const pdfBuffer = await this.generateEstimatePDF(doc, client, template);
 
     // Send email with PDF attachment
     await this.emailService.sendEmail({
@@ -277,7 +270,12 @@ export class EstimatesService {
           company: client.company,
         }
       : { firstName: 'Client', lastName: '', email: undefined, company: undefined };
-    const buffer = await this.generateEstimatePDF(doc, clientInfo);
+
+    // Get user's template preference
+    const user = await this.userModel.findOne({ workspaceId });
+    const template = (user?.pdfTemplates?.estimateTemplate as TemplateType) || 'professional';
+
+    const buffer = await this.generateEstimatePDF(doc, clientInfo, template);
     const filename = `Estimate-${doc.number || id}.pdf`;
     return { buffer, filename };
   }

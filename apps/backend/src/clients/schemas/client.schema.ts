@@ -78,6 +78,15 @@ export class Client {
 
   @Prop({ default: true })
   isActive: boolean;
+
+  @Prop({ default: false })
+  quickbooksSynced?: boolean;
+
+  @Prop()
+  quickbooksSyncDate?: Date;
+
+  @Prop()
+  quickbooksId?: string;
 }
 
 export const ClientSchema = SchemaFactory.createForClass(Client);

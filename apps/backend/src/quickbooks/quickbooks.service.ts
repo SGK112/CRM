@@ -1,8 +1,97 @@
-import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import axios from 'axios';
 import { QuickBooksConfig, TestConnectionDto } from './dto/quickbooks.dto';
+
+// Define proper interfaces for QuickBooks responses
+interface QuickBooksCompanyInfo {
+  CompanyName: string;
+  CompanyAddr: {
+    Line1: string;
+    City: string;
+    CountrySubDivisionCode: string;
+    PostalCode: string;
+  };
+  Id: string;
+  SyncToken: string;
+  MetaData: {
+    CreateTime: string;
+    LastUpdatedTime: string;
+  };
+}
+
+interface QuickBooksEstimateResponse {
+  Estimate: {
+    Id: string;
+    SyncToken: string;
+    MetaData: {
+      CreateTime: string;
+      LastUpdatedTime: string;
+    };
+    DocNumber: string;
+    TxnDate: string;
+    ExpirationDate: string;
+    TotalAmt: number;
+  };
+}
+
+interface QuickBooksInvoiceResponse {
+  Invoice: {
+    Id: string;
+    SyncToken: string;
+    MetaData: {
+      CreateTime: string;
+      LastUpdatedTime: string;
+    };
+    DocNumber: string;
+    TxnDate: string;
+    DueDate: string;
+    TotalAmt: number;
+  };
+}
+
+interface QuickBooksCustomer {
+  Id: string;
+  Name: string;
+  CompanyName?: string;
+  GivenName?: string;
+  FamilyName?: string;
+  PrimaryEmailAddr?: {
+    Address: string;
+  };
+  PrimaryPhone?: {
+    FreeFormNumber: string;
+  };
+}
+
+interface QuickBooksItem {
+  Id: string;
+  Name: string;
+  Type: string;
+  UnitPrice?: number;
+  QtyOnHand?: number;
+}
+
+interface SyncResults {
+  customers: number;
+  items: number;
+  estimates: number;
+  invoices: number;
+  errors: string[];
+}
+
+interface EstimateItem {
+  description: string;
+  quantity: number;
+  unitCost: number;
+  totalCost: number;
+}
+
+interface InvoiceItem {
+  description: string;
+  quantity: number;
+  unitCost: number;
+  totalCost: number;
+}
 
 // Mock interfaces for the service (in a real app, these would come from your actual schemas)
 interface Estimate {
@@ -11,7 +100,7 @@ interface Estimate {
   clientName: string;
   clientId: string;
   totalAmount: number;
-  items: any[];
+  items: EstimateItem[];
   notes: string;
   projectScope: string;
   status: string;
@@ -29,7 +118,7 @@ interface Invoice {
   clientName: string;
   clientId: string;
   total: number;
-  items: any[];
+  items: InvoiceItem[];
   notes: string;
   status: string;
   createdAt: Date;

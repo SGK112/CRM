@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import PDFDocument = require('pdfkit');
 import { Client, ClientDocument } from '../clients/schemas/client.schema';
 import { Estimate, EstimateDocument } from '../estimates/schemas/estimate.schema';
 import { EmailService } from '../services/email.service';
+import { PdfTemplatesService, TemplateType } from '../services/pdf-templates.service';
 import { Invoice, InvoiceDocument } from './schemas/invoice.schema';
+import { User, UserDocument } from '../users/schemas/user.schema';
 
 export interface CreateInvoiceDto {
   clientId: string;
@@ -45,7 +46,9 @@ export class InvoicesService {
     @InjectModel(Invoice.name) private invoiceModel: Model<InvoiceDocument>,
     @InjectModel(Estimate.name) private estimateModel: Model<EstimateDocument>,
     @InjectModel(Client.name) private clientModel: Model<ClientDocument>,
-    private emailService: EmailService
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    private emailService: EmailService,
+    private pdfTemplatesService: PdfTemplatesService
   ) {}
 
   private compute(doc: InvoiceDocument) {
@@ -64,46 +67,34 @@ export class InvoicesService {
 
   private async generateInvoicePDF(
     invoice: InvoiceDocument,
-    client?: { firstName?: string; lastName?: string; email?: string; company?: string }
+    client?: { firstName?: string; lastName?: string; email?: string; company?: string },
+    template: TemplateType = 'professional'
   ): Promise<Buffer> {
-    const doc = new PDFDocument();
-    const buffers: Buffer[] = [];
-    doc.on('data', buffers.push.bind(buffers));
-    doc.on('end', () => {});
+    const templateData = {
+      type: 'invoice' as const,
+      number: invoice.number,
+      client: client ? {
+        _id: (invoice as InvoiceDocument & { clientId: string }).clientId || 'unknown',
+        firstName: client.firstName || 'Client',
+        lastName: client.lastName || '',
+        email: client.email,
+        company: client.company,
+      } : {
+        _id: 'unknown',
+        firstName: 'Client',
+        lastName: '',
+      },
+      items: invoice.items,
+      subtotal: invoice.subtotal,
+      discountAmount: 0, // Invoices don't have discounts in current schema
+      taxAmount: invoice.taxAmount,
+      total: invoice.total,
+      notes: invoice.notes,
+      dueDate: invoice.dueDate?.toISOString(),
+      createdAt: (invoice as InvoiceDocument & { createdAt: Date }).createdAt?.toISOString() || new Date().toISOString(),
+    };
 
-    doc.fontSize(20).text('Invoice', { align: 'center' });
-    doc.moveDown();
-    doc.fontSize(12).text(`Invoice #: ${invoice.number}`);
-    if (invoice.dueDate) doc.text(`Due: ${new Date(invoice.dueDate).toLocaleDateString()}`);
-    if (client) {
-      doc.text(`Client: ${(client.firstName || '') + ' ' + (client.lastName || '')}`);
-      if (client.email) doc.text(`Email: ${client.email}`);
-      if (client.company) doc.text(`Company: ${client.company}`);
-    }
-    doc.moveDown();
-    doc.text('Items:');
-    (invoice.items || []).forEach(
-      (
-        item: { name: string; quantity: number; unitPrice?: number; total?: number },
-        idx: number
-      ) => {
-        const unit = (item.unitPrice ?? 0).toFixed(2);
-        const lineTotal = (item.total ?? (item.quantity || 1) * (item.unitPrice || 0)).toFixed(2);
-        doc.text(
-          `${idx + 1}. ${item.name} - Qty: ${item.quantity} - Unit: $${unit} - Total: $${lineTotal}`
-        );
-      }
-    );
-    doc.moveDown();
-    if (typeof invoice.subtotal === 'number') doc.text(`Subtotal: $${invoice.subtotal.toFixed(2)}`);
-    if (typeof invoice.taxAmount === 'number') doc.text(`Tax: $${invoice.taxAmount.toFixed(2)}`);
-    if (typeof invoice.total === 'number') doc.text(`Total: $${invoice.total.toFixed(2)}`);
-    if (typeof invoice.amountPaid === 'number') doc.text(`Paid: $${invoice.amountPaid.toFixed(2)}`);
-    doc.end();
-    return await new Promise((resolve, reject) => {
-      doc.on('end', () => resolve(Buffer.concat(buffers)));
-      doc.on('error', reject);
-    });
+    return this.pdfTemplatesService.generatePDF(template, templateData);
   }
 
   private async nextNumber(workspaceId: string) {
@@ -201,8 +192,12 @@ export class InvoicesService {
     const client = await this.clientModel.findOne({ _id: doc.clientId, workspaceId });
     if (!client || !client.email) return doc; // Can't email without address
 
-    // Generate PDF
-    const pdfBuffer = await this.generateInvoicePDF(doc as unknown as InvoiceDocument, client);
+    // Get user's template preference
+    const user = await this.userModel.findOne({ workspaceId });
+    const template = (user?.pdfTemplates?.invoiceTemplate as TemplateType) || 'professional';
+
+    // Generate PDF with selected template
+    const pdfBuffer = await this.generateInvoicePDF(doc as unknown as InvoiceDocument, client, template);
 
     // Send email with PDF attachment
     await this.emailService.sendEmail({
@@ -250,7 +245,12 @@ export class InvoicesService {
           company: client.company,
         }
       : {};
-    const buffer = await this.generateInvoicePDF(inv as unknown as InvoiceDocument, clientInfo);
+
+    // Get user's template preference
+    const user = await this.userModel.findOne({ workspaceId });
+    const template = (user?.pdfTemplates?.invoiceTemplate as TemplateType) || 'professional';
+
+    const buffer = await this.generateInvoicePDF(inv as unknown as InvoiceDocument, clientInfo, template);
     const filename = `Invoice-${inv.number || id}.pdf`;
     return { buffer, filename };
   }

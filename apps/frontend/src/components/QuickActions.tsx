@@ -95,8 +95,7 @@ export default function QuickActions({ isOpen, onToggle }: QuickActionsProps) {
         input.onchange = e => {
           const file = (e.target as HTMLInputElement).files?.[0];
           if (file) {
-            // Handle file upload
-            console.log('Photo captured:', file);
+            // Handle file upload - silently process
           }
         };
         input.click();

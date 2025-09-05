@@ -9,27 +9,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Use CSS custom properties for theme variables
-        surface: {
-          1: 'var(--surface-1)',
-          2: 'var(--surface-2)',
-          3: 'var(--surface-3)',
-        },
-        text: {
-          DEFAULT: 'var(--text)',
-          dim: 'var(--text-dim)',
-          faint: 'var(--text-faint)',
-        },
-        border: {
-          DEFAULT: 'var(--border)',
-          strong: 'var(--border-strong)',
-        },
-        accent: {
-          DEFAULT: 'var(--accent)',
-          hover: 'var(--accent-hover)',
-          alt: 'var(--accent-alt)',
-          'alt-hover': 'var(--accent-alt-hover)',
-        },
+        // Primary brand colors
         primary: {
           50: '#eff6ff',
           100: '#dbeafe',
@@ -42,18 +22,22 @@ module.exports = {
           800: '#1e40af',
           900: '#1e3a8a',
         },
-        gray: {
-          50: '#f9fafb',
-          100: '#f3f4f6',
-          200: '#e5e7eb',
-          300: '#d1d5db',
-          400: '#9ca3af',
-          500: '#6b7280',
-          600: '#4b5563',
-          700: '#374151',
-          800: '#1f2937',
-          900: '#111827',
+
+        // Secondary/Accent colors
+        secondary: {
+          50: '#f8fafc',
+          100: '#f1f5f9',
+          200: '#e2e8f0',
+          300: '#cbd5e1',
+          400: '#94a3b8',
+          500: '#64748b',
+          600: '#475569',
+          700: '#334155',
+          800: '#1e293b',
+          900: '#0f172a',
         },
+
+        // Success colors
         success: {
           50: '#f0fdf4',
           100: '#dcfce7',
@@ -66,6 +50,8 @@ module.exports = {
           800: '#166534',
           900: '#14532d',
         },
+
+        // Warning colors
         warning: {
           50: '#fffbeb',
           100: '#fef3c7',
@@ -78,6 +64,8 @@ module.exports = {
           800: '#92400e',
           900: '#78350f',
         },
+
+        // Danger/Error colors
         danger: {
           50: '#fef2f2',
           100: '#fee2e2',
@@ -90,6 +78,7 @@ module.exports = {
           800: '#991b1b',
           900: '#7f1d1d',
         },
+
         // Branded orange for Remodely CRM
         brand: {
           50: '#fff7ed',
@@ -103,25 +92,79 @@ module.exports = {
           800: '#b45309',
           900: '#9a3412',
         },
+
+        // Neutral gray scale
+        gray: {
+          50: '#f9fafb',
+          100: '#f3f4f6',
+          200: '#e5e7eb',
+          300: '#d1d5db',
+          400: '#9ca3af',
+          500: '#6b7280',
+          600: '#4b5563',
+          700: '#374151',
+          800: '#1f2937',
+          900: '#111827',
+        },
+
+        // Theme-aware colors using CSS custom properties
+        surface: {
+          1: 'var(--surface-1)',
+          2: 'var(--surface-2)',
+          3: 'var(--surface-3)',
+        },
+        text: {
+          DEFAULT: 'var(--text)',
+          dim: 'var(--text-dim)',
+          faint: 'var(--text-faint)',
+          muted: 'var(--text-muted)',
+        },
+        border: {
+          DEFAULT: 'var(--border)',
+          strong: 'var(--border-strong)',
+        },
+        accent: {
+          DEFAULT: 'var(--accent)',
+          hover: 'var(--accent-hover)',
+          alt: 'var(--accent-alt)',
+          'alt-hover': 'var(--accent-alt-hover)',
+        },
+
+        // Input background
+        input: {
+          bg: 'var(--input-bg)',
+        },
+
+        // Background
+        bg: 'var(--bg)',
       },
+
+      // Text color utilities
       textColor: {
         theme: 'var(--text)',
         'theme-muted': 'var(--text-muted)',
+        'theme-dim': 'var(--text-dim)',
         'theme-faint': 'var(--text-faint)',
       },
+
+      // Background color utilities
       backgroundColor: {
         primary: 'var(--bg)',
         'surface-1': 'var(--surface-1)',
         'surface-2': 'var(--surface-2)',
         'surface-3': 'var(--surface-3)',
+        'input-bg': 'var(--input-bg)',
       },
+
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
+
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
       },
+
       // Mobile-specific spacing and sizing
       spacing: {
         'safe-top': 'env(safe-area-inset-top)',
@@ -129,29 +172,35 @@ module.exports = {
         'safe-left': 'env(safe-area-inset-left)',
         'safe-right': 'env(safe-area-inset-right)',
       },
+
       minHeight: {
         'screen-safe': 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom))',
         touch: '44px', // Minimum touch target size
       },
+
       minWidth: {
         touch: '44px', // Minimum touch target size
       },
+
       // App-like border radius
       borderRadius: {
         app: '1.5rem',
         'app-lg': '2rem',
       },
+
       // Mobile-optimized shadows
       boxShadow: {
         app: '0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
         'app-lg': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
       },
+
       // Mobile-friendly transitions
       transitionDuration: {
         fast: '150ms',
         normal: '200ms',
         slow: '300ms',
       },
+
       // Mobile viewport units
       height: {
         'screen-dynamic': '100dvh',
@@ -160,6 +209,7 @@ module.exports = {
       },
     },
   },
+
   plugins: [
     // Custom utilities for mobile optimization
     function ({ addUtilities }) {

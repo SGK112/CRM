@@ -1,5 +1,5 @@
-import { IsString, IsNumber, IsBoolean, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsBoolean, IsIn, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class UpdateEmailConfigDto {
   @ApiProperty({ description: 'Email provider', example: 'smtp' })
@@ -63,4 +63,26 @@ export class UpdateTwilioConfigDto {
   @IsString()
   @IsOptional()
   webhookUrl?: string;
+}
+
+export class UpdatePdfTemplatesDto {
+  @ApiProperty({
+    description: 'Default template for estimates',
+    example: 'professional',
+    enum: ['professional', 'modern', 'classic']
+  })
+  @IsString()
+  @IsOptional()
+  @IsIn(['professional', 'modern', 'classic'])
+  estimateTemplate?: 'professional' | 'modern' | 'classic';
+
+  @ApiProperty({
+    description: 'Default template for invoices',
+    example: 'professional',
+    enum: ['professional', 'modern', 'classic']
+  })
+  @IsString()
+  @IsOptional()
+  @IsIn(['professional', 'modern', 'classic'])
+  invoiceTemplate?: 'professional' | 'modern' | 'classic';
 }

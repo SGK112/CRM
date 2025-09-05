@@ -1,22 +1,46 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import {
-  PlusIcon,
-  XMarkIcon,
-  DocumentTextIcon,
-  CurrencyDollarIcon,
-  WrenchScrewdriverIcon,
-  ShoppingBagIcon,
-  TrashIcon,
-} from '@heroicons/react/24/outline';
-import { Trash2 } from 'lucide-react';
-import ClientSelector from '@/components/ClientSelector';
+import AIWritingAssistant from '@/components/AIWritingAssistant';
 import ImageUpload from '@/components/forms/ImageUpload';
 import Notes from '@/components/forms/Notes';
-import AIWritingAssistant from '@/components/AIWritingAssistant';
 import { useAI } from '@/hooks/useAI';
+import {
+    PlusIcon,
+    TrashIcon,
+} from '@heroicons/react/24/outline';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
+// Import types from components
+interface ImageFile {
+  id: string;
+  file: File;
+  preview: string;
+  uploaded?: boolean;
+  caption?: string;
+  category?: 'before' | 'progress' | 'after' | 'reference' | 'damage' | 'other';
+}
+
+interface Note {
+  id: string;
+  content: string;
+  author: string;
+  authorId: string;
+  timestamp: Date;
+  category?: 'general' | 'client' | 'progress' | 'issue' | 'reminder' | 'invoice' | 'material';
+  tags?: string[];
+  isPrivate?: boolean;
+  attachments?: string[];
+}
+
+interface ClientApiResponse {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  company?: string;
+  email?: string;
+  phone?: string;
+}
 
 interface Client {
   _id: string;
@@ -55,7 +79,6 @@ export default function NewEstimatePage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedClientId, setSelectedClientId] = useState<string>('');
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
-  const [projectType, setProjectType] = useState<string>('kitchen');
   const [items, setItems] = useState<LineItem[]>([
     {
       name: '',
@@ -72,9 +95,8 @@ export default function NewEstimatePage() {
   const [notes, setNotes] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
-  const [refreshClients, setRefreshClients] = useState(0);
-  const [images, setImages] = useState<any[]>([]);
-  const [estimateNotes, setEstimateNotes] = useState<any[]>([]);
+  const [images, setImages] = useState<ImageFile[]>([]);
+  const [estimateNotes, setEstimateNotes] = useState<Note[]>([]);
   const [categories, setCategories] = useState<string[]>([
     'Materials',
     'Labor',
@@ -110,9 +132,9 @@ export default function NewEstimatePage() {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (clientsRes.ok) {
-          const clientsData = await clientsRes.json();
+          const clientsData: ClientApiResponse[] = await clientsRes.json();
           setClients(
-            clientsData.map((c: any) => ({
+            clientsData.map((c) => ({
               ...c,
               name: `${c.firstName} ${c.lastName}`.trim(),
             }))
@@ -128,7 +150,7 @@ export default function NewEstimatePage() {
           setProjects(projectsData);
         }
       } catch (err) {
-        console.error('Failed to fetch data:', err);
+        // Error fetching data - silently handle
       }
     };
 
@@ -159,7 +181,7 @@ export default function NewEstimatePage() {
     }
   };
 
-  const updateItem = (index: number, field: keyof LineItem, value: any) => {
+  const updateItem = (index: number, field: keyof LineItem, value: string | number | boolean) => {
     const newItems = [...items];
     newItems[index] = { ...newItems[index], [field]: value };
 
@@ -717,41 +739,19 @@ export default function NewEstimatePage() {
           </div>
         </div>
 
-        {/* Estimate Summary */}
+        {/* General Notes */}
         <div className="surface-solid p-6">
-          <h2 className="text-lg font-medium mb-4">Estimate Summary</h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span>Subtotal (Cost):</span>
-                <span>${totals.subtotalCost.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Subtotal (Sell):</span>
-                <span>${totals.subtotalSell.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-green-600">
-                <span>Total Margin:</span>
-                <span>
-                  ${totals.totalMargin.toFixed(2)} ({totals.marginPercent.toFixed(1)}%)
-                </span>
-              </div>
-            </div>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span>Discount:</span>
-                <span>-${totals.discountAmount.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Tax ({taxRate}%):</span>
-                <span>${totals.taxAmount.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between font-bold text-lg pt-2 border-t border-[var(--border)]">
-                <span>Total:</span>
-                <span>${totals.total.toFixed(2)}</span>
-              </div>
-            </div>
-          </div>
+          <h2 className="text-lg font-medium mb-4">General Notes</h2>
+          <p className="text-sm text-[var(--text-dim)] mb-4">
+            Add any general notes or terms for this estimate
+          </p>
+          <textarea
+            value={notes}
+            onChange={e => setNotes(e.target.value)}
+            placeholder="Enter general notes, terms, or conditions..."
+            className="w-full p-3 bg-[var(--input-bg)] border border-[var(--border)] rounded-lg text-[var(--text)] focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent min-h-[100px] resize-y"
+            rows={4}
+          />
         </div>
 
         {/* Images & Project Documentation */}

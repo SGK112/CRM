@@ -3,6 +3,7 @@
 import {
     BellIcon,
     CreditCardIcon,
+    DocumentTextIcon,
     EnvelopeIcon,
     KeyIcon,
     ShieldCheckIcon,
@@ -32,6 +33,10 @@ export default function SettingsPage() {
     company: '',
     timezone: 'America/Los_Angeles',
     language: 'en',
+    pdfTemplates: {
+      estimateTemplate: 'professional' as 'professional' | 'modern' | 'classic',
+      invoiceTemplate: 'professional' as 'professional' | 'modern' | 'classic',
+    },
     notifications: {
       email: true,
       sms: true,
@@ -76,6 +81,7 @@ export default function SettingsPage() {
           email: user.email || '',
           phone: user.phone || '',
           company: user.workspaceName || user.company || '',
+          pdfTemplates: user.pdfTemplates || prev.pdfTemplates,
           notifications: user.notificationPreferences || prev.notifications,
         }));
       } else {
@@ -83,8 +89,6 @@ export default function SettingsPage() {
       }
     } catch (error) {
       setMessage({ type: 'error', text: 'Failed to load profile data' });
-  // eslint-disable-next-line no-console
-  console.error('Profile load error:', error);
     } finally {
       setLoading(false);
     }
@@ -134,8 +138,6 @@ export default function SettingsPage() {
       }
     } catch (error) {
       setMessage({ type: 'error', text: 'Failed to update profile' });
-  // eslint-disable-next-line no-console
-  console.error('Profile update error:', error);
     } finally {
       setSaving(false);
     }
@@ -170,8 +172,40 @@ export default function SettingsPage() {
       }
     } catch (error) {
       setMessage({ type: 'error', text: 'Failed to update notification preferences' });
-  // eslint-disable-next-line no-console
-  console.error('Notification update error:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSavePdfTemplates = async () => {
+    setSaving(true);
+    setMessage(null);
+
+    try {
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        setMessage({ type: 'error', text: 'No authentication token found' });
+        return;
+      }
+
+      const response = await fetch('/api/users/pdf-templates', {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData.pdfTemplates),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setMessage({ type: 'success', text: 'PDF template preferences updated!' });
+      } else {
+        setMessage({ type: 'error', text: data.message || 'Failed to update PDF templates' });
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Failed to update PDF template preferences' });
     } finally {
       setSaving(false);
     }
@@ -181,6 +215,7 @@ export default function SettingsPage() {
 
   const tabs = [
     { id: 'general', name: 'General', icon: UserIcon },
+    { id: 'pdf-templates', name: 'PDF Templates', icon: DocumentTextIcon },
     { id: 'colors', name: 'Colors', icon: SwatchIcon },
     { id: 'notifications', name: 'Notifications', icon: BellIcon },
     { id: 'security', name: 'Security', icon: ShieldCheckIcon },
@@ -466,10 +501,111 @@ export default function SettingsPage() {
     </div>
   );
 
+  const renderPdfTemplatesTab = () => (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-[var(--text)] mb-4">PDF Template Preferences</h3>
+        <p className="text-sm text-gray-800 dark:text-[var(--text-dim)] mb-6">
+          Choose your preferred PDF templates for estimates and invoices. These templates will be used when generating and emailing documents.
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-[var(--text)] mb-3">Estimate Template</label>
+            <div className="space-y-3">
+              {[
+                { value: 'professional', label: 'Professional', description: 'Clean, corporate style with formal layout' },
+                { value: 'modern', label: 'Modern', description: 'Contemporary design with subtle styling' },
+                { value: 'classic', label: 'Classic', description: 'Traditional layout with elegant typography' }
+              ].map((template) => (
+                <div key={template.value} className="relative">
+                  <input
+                    type="radio"
+                    id={`estimate-${template.value}`}
+                    name="estimateTemplate"
+                    value={template.value}
+                    checked={formData.pdfTemplates.estimateTemplate === template.value}
+                    onChange={(e) => handleNestedInputChange('pdfTemplates', 'estimateTemplate', e.target.value)}
+                    className="sr-only"
+                  />
+                  <label
+                    htmlFor={`estimate-${template.value}`}
+                    className={`block p-4 border rounded-lg cursor-pointer transition-colors ${
+                      formData.pdfTemplates.estimateTemplate === template.value
+                        ? 'border-blue-600 bg-blue-50 dark:bg-blue-600/20 dark:border-blue-500'
+                        : 'border-gray-200 dark:border-token hover:border-gray-300 dark:hover:border-blue-500'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium text-gray-900 dark:text-[var(--text)]">{template.label}</h4>
+                        <p className="text-sm text-gray-800 dark:text-[var(--text-dim)]">{template.description}</p>
+                      </div>
+                      {formData.pdfTemplates.estimateTemplate === template.value && (
+                        <div className="w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center">
+                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                        </div>
+                      )}
+                    </div>
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-[var(--text)] mb-3">Invoice Template</label>
+            <div className="space-y-3">
+              {[
+                { value: 'professional', label: 'Professional', description: 'Clean, corporate style with formal layout' },
+                { value: 'modern', label: 'Modern', description: 'Contemporary design with subtle styling' },
+                { value: 'classic', label: 'Classic', description: 'Traditional layout with elegant typography' }
+              ].map((template) => (
+                <div key={template.value} className="relative">
+                  <input
+                    type="radio"
+                    id={`invoice-${template.value}`}
+                    name="invoiceTemplate"
+                    value={template.value}
+                    checked={formData.pdfTemplates.invoiceTemplate === template.value}
+                    onChange={(e) => handleNestedInputChange('pdfTemplates', 'invoiceTemplate', e.target.value)}
+                    className="sr-only"
+                  />
+                  <label
+                    htmlFor={`invoice-${template.value}`}
+                    className={`block p-4 border rounded-lg cursor-pointer transition-colors ${
+                      formData.pdfTemplates.invoiceTemplate === template.value
+                        ? 'border-blue-600 bg-blue-50 dark:bg-blue-600/20 dark:border-blue-500'
+                        : 'border-gray-200 dark:border-token hover:border-gray-300 dark:hover:border-blue-500'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium text-gray-900 dark:text-[var(--text)]">{template.label}</h4>
+                        <p className="text-sm text-gray-800 dark:text-[var(--text-dim)]">{template.description}</p>
+                      </div>
+                      {formData.pdfTemplates.invoiceTemplate === template.value && (
+                        <div className="w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center">
+                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                        </div>
+                      )}
+                    </div>
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'general':
         return renderGeneralTab();
+      case 'pdf-templates':
+        return renderPdfTemplatesTab();
       case 'colors':
         router.push('/dashboard/settings/colors');
         return null;
@@ -557,6 +693,8 @@ export default function SettingsPage() {
                       handleSaveProfile();
                     } else if (activeTab === 'notifications') {
                       handleSaveNotifications();
+                    } else if (activeTab === 'pdf-templates') {
+                      handleSavePdfTemplates();
                     }
                   }}
                   disabled={saving}

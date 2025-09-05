@@ -1,24 +1,24 @@
 import {
-  Body,
-  Controller,
-  Get,
-  Post,
-  Res,
-  HttpException,
-  HttpStatus,
-  Query,
-  Param,
+    Body,
+    Controller,
+    Get,
+    HttpException,
+    HttpStatus,
+    Logger,
+    Param,
+    Post,
+    Query,
+    Res,
 } from '@nestjs/common';
-import { Response } from 'express';
-import { VoiceAgentService } from './voice-agent.service';
-import {
-  ElevenLabsPureCallingService,
-  ElevenLabsPureCallResponse,
-} from './elevenlabs-pure-calling.service';
 import { ConfigService } from '@nestjs/config';
-import { TwilioService } from '../services/twilio.service';
+import { Response } from 'express';
 import { ElevenLabsService } from '../services/elevenlabs.service';
+import { TwilioService } from '../services/twilio.service';
 import { ElevenLabsIntegrationService } from './elevenlabs-integration.service';
+import {
+    ElevenLabsPureCallingService
+} from './elevenlabs-pure-calling.service';
+import { VoiceAgentService } from './voice-agent.service';
 
 interface OutboundCallDto {
   to: string;
@@ -32,8 +32,42 @@ interface CRMOutboundCallDto {
   workspaceId: string;
   callPurpose: 'appointment_scheduling' | 'estimate_follow_up' | 'follow_up' | 'general';
   agentId?: string;
-  callData?: any;
+  callData?: Record<string, unknown>;
 }
+
+interface ElevenLabsCallRequest {
+  phoneNumber: string;
+  clientName?: string;
+  purpose?: string;
+  context?: string;
+  agentId?: string;
+  clientId?: string;
+  workspaceId?: string;
+}
+
+interface ElevenLabsWidgetRequest {
+  phoneNumber?: string;
+  clientName?: string;
+  purpose?: string;
+  context?: string;
+  agentId?: string;
+}
+
+interface CallHistoryFilters {
+  clientId?: string;
+  status?: string;
+  purpose?: string;
+  startDate?: Date;
+  endDate?: Date;
+}
+
+interface TwilioWebhookBody {
+  SpeechResult?: string;
+  Confidence?: number;
+  [key: string]: unknown;
+}
+
+type CallStatus = 'initiated' | 'ringing' | 'answered' | 'busy' | 'failed' | 'completed' | 'no-answer';
 
 interface AppointmentCallDto {
   clientId: string;
@@ -66,6 +100,8 @@ interface CallHistoryQuery {
 
 @Controller('voice-agent')
 export class VoiceAgentController {
+  private readonly logger = new Logger(VoiceAgentController.name);
+
   constructor(
     private voiceAgent: VoiceAgentService,
     private elevenLabsPureCalling: ElevenLabsPureCallingService,
@@ -79,38 +115,29 @@ export class VoiceAgentController {
   async createOutbound(@Body() body: OutboundCallDto) {
     if (!body.to) throw new HttpException('Destination number required', HttpStatus.BAD_REQUEST);
 
-    // For testing purposes, create a temporary client record
-    const tempClientData = {
-      _id: 'temp-client-' + Date.now(),
-      firstName: 'Test',
-      lastName: 'Client',
-      phone: body.to,
-      email: 'test@example.com',
-    };
-
     // Create a temporary voice call for testing
     return this.voiceAgent.testOutboundCall(body.to, body.agentId, body.purpose, body.context);
   }
 
   @Post('elevenlabs-pure-call')
-  async createPureElevenLabsCall(@Body() body: any) {
-    console.log('🚀 CONTROLLER: createPureElevenLabsCall method called');
-    console.log('🔧 ElevenLabsPureCallingService instance:', this.elevenLabsPureCalling);
-    console.log('📦 Request payload:', JSON.stringify(body, null, 2));
+  async createPureElevenLabsCall(@Body() body: ElevenLabsCallRequest) {
+    this.logger.log('🚀 CONTROLLER: createPureElevenLabsCall method called');
+    this.logger.debug('🔧 ElevenLabsPureCallingService instance available');
+    this.logger.debug('📦 Request payload:', JSON.stringify(body, null, 2));
 
     try {
       const result = await this.elevenLabsPureCalling.initiatePureElevenLabsCall(body);
       return result;
     } catch (error) {
-      console.error('❌ Controller error:', error);
+      this.logger.error('❌ Controller error:', error);
       throw error;
     }
   }
 
   @Post('elevenlabs-widget-call')
-  async createElevenLabsWidgetCall(@Body() body: any) {
-    console.log('🎯 WIDGET CONTROLLER: ElevenLabs widget call requested');
-    console.log('� Widget payload:', JSON.stringify(body, null, 2));
+  async createElevenLabsWidgetCall(@Body() body: ElevenLabsWidgetRequest) {
+    this.logger.log('🎯 WIDGET CONTROLLER: ElevenLabs widget call requested');
+    this.logger.debug('📦 Widget payload:', JSON.stringify(body, null, 2));
 
     const { phoneNumber, clientName, purpose, context, agentId } = body;
     const resolvedAgentId = agentId || this.eleven.getDefaultAgentId();
@@ -146,13 +173,13 @@ export class VoiceAgentController {
       ],
     };
 
-    console.log('🎉 Widget configuration generated:', widgetConfig);
+    this.logger.log('🎉 Widget configuration generated successfully');
     return widgetConfig;
   }
 
-  // Return ElevenLabs batch calling instructions (white-label friendly)
+      // Return ElevenLabs batch calling instructions (white-label friendly)
   @Post('elevenlabs-call')
-  async createElevenLabsCall(@Body() body: any): Promise<any> {
+  async createElevenLabsCall(@Body() body: ElevenLabsCallRequest): Promise<unknown> {
     const { clientId, clientName, phoneNumber, workspaceId, purpose, context, agentId } =
       body || {};
     if (!clientId || !workspaceId || !phoneNumber || !clientName || !purpose) {
@@ -245,7 +272,7 @@ export class VoiceAgentController {
       throw new HttpException('Workspace ID required', HttpStatus.BAD_REQUEST);
     }
 
-    const filters: any = {};
+    const filters: CallHistoryFilters = {};
     if (query.clientId) filters.clientId = query.clientId;
     if (query.status) filters.status = query.status;
     if (query.purpose) filters.purpose = query.purpose;
@@ -264,7 +291,7 @@ export class VoiceAgentController {
       throw new HttpException('Call ID and status required', HttpStatus.BAD_REQUEST);
     }
 
-    return this.voiceAgent.updateCallStatus(callId, body.status as any, body.notes);
+    return this.voiceAgent.updateCallStatus(callId, body.status as CallStatus, body.notes);
   }
 
   @Post('webhook')
@@ -283,12 +310,12 @@ export class VoiceAgentController {
   }
 
   @Post('gather')
-  async handleGather(@Body() body: any, @Res() res: Response, @Query('callId') callId?: string) {
+  async handleGather(@Body() body: TwilioWebhookBody, @Res() res: Response) {
     const speechResult = body.SpeechResult || '';
     const confidence = body.Confidence || 0;
 
     // Log the speech input for debugging
-    console.log('Speech input received:', speechResult, 'Confidence:', confidence);
+    this.logger.debug('Speech input received:', speechResult, 'Confidence:', confidence);
 
     // Generate response based on speech input
     let response = '';
@@ -297,29 +324,29 @@ export class VoiceAgentController {
       speechResult.toLowerCase().includes('appointment') ||
       speechResult.toLowerCase().includes('schedule')
     ) {
-      response = `Great! I'd be happy to help you schedule an appointment. We have availability this week for consultations. 
-                 Our team will follow up with you within 24 hours to confirm your preferred time. 
+      response = `Great! I'd be happy to help you schedule an appointment. We have availability this week for consultations.
+                 Our team will follow up with you within 24 hours to confirm your preferred time.
                  Is there anything specific you'd like to discuss during your consultation?`;
     } else if (
       speechResult.toLowerCase().includes('estimate') ||
       speechResult.toLowerCase().includes('quote')
     ) {
-      response = `I understand you're interested in getting an estimate. We provide free estimates for all our services. 
-                 Our team will contact you within one business day to schedule a consultation and site visit. 
+      response = `I understand you're interested in getting an estimate. We provide free estimates for all our services.
+                 Our team will contact you within one business day to schedule a consultation and site visit.
                  Thank you for considering Remodely for your project!`;
     } else if (
       speechResult.toLowerCase().includes('help') ||
       speechResult.toLowerCase().includes('question')
     ) {
-      response = `I'm here to help! Our customer service team is available to answer any questions you may have. 
-                 Someone will reach out to you shortly to assist with your inquiry. 
+      response = `I'm here to help! Our customer service team is available to answer any questions you may have.
+                 Someone will reach out to you shortly to assist with your inquiry.
                  Thank you for calling Remodely!`;
     } else if (speechResult.trim() === '' || confidence < 0.5) {
-      response = `I'm sorry, I didn't quite catch that. Let me connect you with our customer service team 
+      response = `I'm sorry, I didn't quite catch that. Let me connect you with our customer service team
                  who can better assist you. Thank you for calling Remodely!`;
     } else {
-      response = `Thank you for sharing that information. I've noted your request: "${speechResult}". 
-                 Our team will review your message and get back to you within 24 hours. 
+      response = `Thank you for sharing that information. I've noted your request: "${speechResult}".
+                 Our team will review your message and get back to you within 24 hours.
                  Is there anything else I can help you with today?`;
     }
 
@@ -339,10 +366,10 @@ export class VoiceAgentController {
   }
 
   @Post('final')
-  async handleFinal(@Body() body: any, @Res() res: Response) {
+  async handleFinal(@Body() body: TwilioWebhookBody, @Res() res: Response) {
     const speechResult = body.SpeechResult || '';
 
-    console.log('Final speech input:', speechResult);
+    this.logger.debug('Final speech input:', speechResult);
 
     let response = '';
 

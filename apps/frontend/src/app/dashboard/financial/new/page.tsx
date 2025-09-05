@@ -8,7 +8,7 @@ import {
     Trash2,
     Zap
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import EstimateInvoiceToggle from '@/components/EstimateInvoiceToggle';
 // import AIWritingAssistant from '../../../components/AIWritingAssistant';
 // import { quickBooksAPI, QuickBooksService } from '../../../lib/quickbooks';
@@ -28,7 +28,6 @@ type DocumentMode = 'estimate' | 'invoice';
 
 export default function NewFinancialDocumentPage() {
   const [mode, setMode] = useState<DocumentMode>('estimate');
-  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [qbEnabled, setQbEnabled] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -64,15 +63,6 @@ export default function NewFinancialDocumentPage() {
     }
   ]);
 
-  useEffect(() => {
-    checkQuickBooksStatus();
-    generateDefaults();
-  }, [mode]);
-
-  useEffect(() => {
-    calculateTotals();
-  }, [items, formData.markup, formData.tax]);
-
   const checkQuickBooksStatus = async () => {
     try {
       const settings = localStorage.getItem('integrationSettings');
@@ -81,11 +71,11 @@ export default function NewFinancialDocumentPage() {
         setQbEnabled(parsed.quickbooks?.enabled || false);
       }
     } catch (error) {
-      console.error('Failed to check QuickBooks status:', error);
+      // Silently handle localStorage parsing errors
     }
   };
 
-  const generateDefaults = () => {
+  const generateDefaults = useCallback(() => {
     const today = new Date();
     const validUntil = new Date();
     validUntil.setDate(today.getDate() + 30);
@@ -103,9 +93,14 @@ export default function NewFinancialDocumentPage() {
         ? 'Payment: 50% deposit, 25% at rough-in, 25% on completion. All materials guaranteed.'
         : 'Net 30 payment terms. Late fees apply after 30 days.'
     }));
-  };
+  }, [mode]);
 
-  const calculateTotals = () => {
+  useEffect(() => {
+    checkQuickBooksStatus();
+    generateDefaults();
+  }, [mode, generateDefaults]);
+
+  const calculateTotals = useCallback(() => {
     // Recalculate line totals to ensure accuracy
     const recalculatedSubtotal = items.reduce((sum, item) => {
       const lineTotal = Number((item.quantity * item.unitCost).toFixed(2));
@@ -123,7 +118,11 @@ export default function NewFinancialDocumentPage() {
       taxAmount,
       total
     };
-  };
+  }, [items, formData.markup, formData.tax, mode]);
+
+  useEffect(() => {
+    calculateTotals();
+  }, [items, formData.markup, formData.tax, calculateTotals]);
 
   const addLineItem = () => {
     const newItem: LineItem = {
@@ -138,15 +137,15 @@ export default function NewFinancialDocumentPage() {
     setItems([...items, newItem]);
   };
 
-  const updateLineItem = (id: string, field: string, value: any) => {
+  const updateLineItem = (id: string, field: string, value: string | number) => {
     setItems(prevItems =>
       prevItems.map(item => {
         if (item.id === id) {
           const updatedItem = { ...item, [field]: value };
           // Always recalculate totalCost when quantity or unitCost changes
           if (field === 'quantity' || field === 'unitCost') {
-            const quantity = field === 'quantity' ? value : updatedItem.quantity;
-            const unitCost = field === 'unitCost' ? value : updatedItem.unitCost;
+            const quantity = field === 'quantity' ? (value as number) : updatedItem.quantity;
+            const unitCost = field === 'unitCost' ? (value as number) : updatedItem.unitCost;
             updatedItem.totalCost = Number((quantity * unitCost).toFixed(2));
           }
           return updatedItem;
@@ -216,7 +215,7 @@ export default function NewFinancialDocumentPage() {
             //   await quickBooksAPI.syncInvoice(result.id);
             // }
           } catch (qbError) {
-            console.warn('QuickBooks sync failed:', qbError);
+            // Silently handle QuickBooks sync failures
           }
         }
 
@@ -229,7 +228,7 @@ export default function NewFinancialDocumentPage() {
       }
     } catch (error) {
       setError(`Failed to save ${mode}`);
-      console.error('Save error:', error);
+      // Error is handled by setting the error state
     } finally {
       setSaving(false);
     }
@@ -334,7 +333,7 @@ export default function NewFinancialDocumentPage() {
                 </label>
                 <select
                   value={formData.projectType}
-                  onChange={(e) => setFormData(prev => ({ ...prev, projectType: e.target.value as any }))}
+                  onChange={(e) => setFormData(prev => ({ ...prev, projectType: e.target.value as 'kitchen' | 'bathroom' | 'full-house' | 'addition' | 'exterior' | 'commercial' }))}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
                   <option value="kitchen">Kitchen</option>
@@ -352,7 +351,7 @@ export default function NewFinancialDocumentPage() {
                 </label>
                 <select
                   value={formData.priority}
-                  onChange={(e) => setFormData(prev => ({ ...prev, priority: e.target.value as any }))}
+                  onChange={(e) => setFormData(prev => ({ ...prev, priority: e.target.value as 'low' | 'medium' | 'high' }))}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
                   <option value="low">Low</option>
@@ -429,7 +428,7 @@ export default function NewFinancialDocumentPage() {
             </div>
 
             <div className="space-y-4">
-              {items.map((item, index) => (
+              {items.map((item) => (
                 <div key={item.id} className="grid grid-cols-12 gap-3 items-end p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                   <div className="col-span-4">
                     <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">

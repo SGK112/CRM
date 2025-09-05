@@ -11,8 +11,18 @@ import {
     UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Request as ExpressRequest } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { InboxFilterOptions, InboxService } from './inbox.service';
+
+interface AuthenticatedRequest extends ExpressRequest {
+  user: {
+    _id?: string;
+    id?: string;
+    sub?: string;
+    workspaceId: string;
+  };
+}
 
 @ApiTags('Inbox')
 @Controller('inbox')
@@ -33,7 +43,7 @@ export class InboxController {
   @ApiQuery({ name: 'relatedEntityType', required: false, type: String })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
-  async getMessages(@Req() req, @Query() query: InboxFilterOptions) {
+  async getMessages(@Req() req: AuthenticatedRequest, @Query() query: InboxFilterOptions) {
     const workspaceId = req.user.workspaceId;
     const userId = req.user.sub || req.user._id;
 
@@ -43,7 +53,7 @@ export class InboxController {
   @Get('stats')
   @ApiOperation({ summary: 'Get inbox statistics' })
   @ApiResponse({ status: 200, description: 'Statistics retrieved successfully' })
-  async getStats(@Req() req) {
+  async getStats(@Req() req: AuthenticatedRequest) {
     const workspaceId = req.user.workspaceId;
     const userId = req.user.sub || req.user._id;
 
@@ -55,7 +65,7 @@ export class InboxController {
   @ApiResponse({ status: 200, description: 'Unread count retrieved successfully' })
   @ApiQuery({ name: 'type', required: false, enum: ['email', 'notification', 'sms', 'system'] })
   async getUnreadCount(
-    @Req() req,
+    @Req() req: AuthenticatedRequest,
     @Query('type') type?: 'email' | 'notification' | 'sms' | 'system'
   ) {
     const workspaceId = req.user.workspaceId;
@@ -68,7 +78,7 @@ export class InboxController {
   @Get('thread/:threadId')
   @ApiOperation({ summary: 'Get messages in a thread' })
   @ApiResponse({ status: 200, description: 'Thread messages retrieved successfully' })
-  async getThreadMessages(@Req() req, @Param('threadId') threadId: string) {
+  async getThreadMessages(@Req() req: AuthenticatedRequest, @Param('threadId') threadId: string) {
     const workspaceId = req.user.workspaceId;
     const userId = req.user.sub || req.user._id;
 
@@ -80,7 +90,7 @@ export class InboxController {
   @ApiOperation({ summary: 'Get a specific message' })
   @ApiResponse({ status: 200, description: 'Message retrieved successfully' })
   @ApiResponse({ status: 404, description: 'Message not found' })
-  async getMessage(@Req() req, @Param('id') id: string) {
+  async getMessage(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
     const workspaceId = req.user.workspaceId;
     const userId = req.user.sub || req.user._id;
 
@@ -95,7 +105,7 @@ export class InboxController {
   @Patch(':id/read')
   @ApiOperation({ summary: 'Mark message as read' })
   @ApiResponse({ status: 200, description: 'Message marked as read' })
-  async markAsRead(@Req() req, @Param('id') id: string) {
+  async markAsRead(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
     const workspaceId = req.user.workspaceId;
     const userId = req.user.sub || req.user._id;
 
@@ -106,7 +116,7 @@ export class InboxController {
   @Patch(':id/unread')
   @ApiOperation({ summary: 'Mark message as unread' })
   @ApiResponse({ status: 200, description: 'Message marked as unread' })
-  async markAsUnread(@Req() req, @Param('id') id: string) {
+  async markAsUnread(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
     const workspaceId = req.user.workspaceId;
     const userId = req.user.sub || req.user._id;
 
@@ -117,7 +127,7 @@ export class InboxController {
   @Patch(':id/star')
   @ApiOperation({ summary: 'Toggle message star status' })
   @ApiResponse({ status: 200, description: 'Message star status toggled' })
-  async toggleStar(@Req() req, @Param('id') id: string) {
+  async toggleStar(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
     const workspaceId = req.user.workspaceId;
     const userId = req.user.sub || req.user._id;
 
@@ -128,7 +138,7 @@ export class InboxController {
   @Patch(':id/archive')
   @ApiOperation({ summary: 'Archive message' })
   @ApiResponse({ status: 200, description: 'Message archived' })
-  async archiveMessage(@Req() req, @Param('id') id: string) {
+  async archiveMessage(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
     const workspaceId = req.user.workspaceId;
     const userId = req.user.sub || req.user._id;
 
@@ -139,7 +149,7 @@ export class InboxController {
   @Delete(':id')
   @ApiOperation({ summary: 'Delete message' })
   @ApiResponse({ status: 200, description: 'Message deleted' })
-  async deleteMessage(@Req() req, @Param('id') id: string) {
+  async deleteMessage(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
     const workspaceId = req.user.workspaceId;
     const userId = req.user.sub || req.user._id;
 
@@ -151,7 +161,7 @@ export class InboxController {
   @ApiOperation({ summary: 'Send a new message (email or SMS)' })
   @ApiResponse({ status: 201, description: 'Message sent successfully' })
   async sendMessage(
-    @Req() req,
+    @Req() req: AuthenticatedRequest,
     @Body()
     messageData: {
       type: 'email' | 'sms';
@@ -178,7 +188,7 @@ export class InboxController {
   @ApiOperation({ summary: 'Mark all messages as read' })
   @ApiResponse({ status: 200, description: 'All messages marked as read' })
   async markAllAsRead(
-    @Req() req,
+    @Req() req: AuthenticatedRequest,
     @Body()
     body: {
       type?: 'email' | 'notification' | 'sms' | 'system';
@@ -200,7 +210,7 @@ export class InboxController {
   @ApiOperation({ summary: 'Create a notification message (for system use)' })
   @ApiResponse({ status: 201, description: 'Notification created successfully' })
   async createNotification(
-    @Req() req,
+    @Req() req: AuthenticatedRequest,
     @Body()
     notificationData: {
       title: string;

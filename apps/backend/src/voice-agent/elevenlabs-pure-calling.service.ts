@@ -2,13 +2,29 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 
-interface ElevenLabsPureCallRequest {
+interface ElevenLabsCallData {
   phoneNumber: string;
-  clientName: string;
-  agentId: string;
-  purpose: string;
+  clientId?: string;
+  clientName?: string;
+  workspaceId?: string;
+  purpose?: string;
   context?: string;
-  clientData?: any;
+}
+
+interface DirectCallData {
+  phoneNumber: string;
+  clientName?: string;
+  purpose?: string;
+  context?: string;
+  clientId?: string;
+  workspaceId?: string;
+}
+
+interface AgentInfo {
+  agent_id: string;
+  name: string;
+  description: string;
+  [key: string]: unknown;
 }
 
 export interface ElevenLabsPureCallResponse {
@@ -41,18 +57,18 @@ export class ElevenLabsPureCallingService {
    * Initiate a pure ElevenLabs call using their natural voices
    * This bypasses Twilio entirely to get the actual ElevenLabs voice quality
    */
-  async initiatePureElevenLabsCall(data: any) {
+  async initiatePureElevenLabsCall(data: ElevenLabsCallData) {
     const { phoneNumber, clientId, clientName, workspaceId, purpose, context } = data;
 
     // Log the call initiation
-    console.log(`🎯 PURE ELEVENLABS CALL INITIATED`);
-    console.log(`📞 Phone: ${phoneNumber}`);
-    console.log(`👤 Client: ${clientName || clientId}`);
-    console.log(`🎯 Purpose: ${purpose}`);
-    console.log(`📝 Context: ${context}`);
+    this.logger.log(`🎯 PURE ELEVENLABS CALL INITIATED`);
+    this.logger.log(`📞 Phone: ${phoneNumber}`);
+    this.logger.log(`👤 Client: ${clientName || clientId}`);
+    this.logger.log(`🎯 Purpose: ${purpose}`);
+    this.logger.log(`📝 Context: ${context}`);
 
     // Try to make actual ElevenLabs API call first
-    console.log(`🔄 Attempting direct ElevenLabs API calls...`);
+    this.logger.log(`🔄 Attempting direct ElevenLabs API calls...`);
     const apiResult = await this.tryDirectElevenLabsCall({
       phoneNumber,
       clientName,
@@ -62,11 +78,11 @@ export class ElevenLabsPureCallingService {
       workspaceId,
     });
 
-    console.log(`📊 API Result:`, JSON.stringify(apiResult, null, 2));
+    this.logger.log(`📊 API Result:`, JSON.stringify(apiResult, null, 2));
 
     // If API call succeeded, return success with call details
     if (apiResult.success) {
-      console.log(`✅ API call succeeded, returning success response`);
+      this.logger.log(`✅ API call succeeded, returning success response`);
       return {
         success: true,
         callType: 'elevenlabs_direct_api',
@@ -92,7 +108,7 @@ export class ElevenLabsPureCallingService {
       workspaceId,
       purpose,
       context,
-    } as any);
+    } as ElevenLabsCallData);
 
     return {
       success: true,
@@ -122,7 +138,7 @@ export class ElevenLabsPureCallingService {
   /**
    * Try direct ElevenLabs API calls for immediate outbound calling
    */
-  private async tryDirectElevenLabsCall(data: any) {
+  private async tryDirectElevenLabsCall(data: DirectCallData) {
     const { phoneNumber, clientName, purpose, context, clientId, workspaceId } = data;
     const apiKey = this.config.get('ELEVENLABS_API_KEY');
     const agentId = this.config.get('ELEVENLABS_AGENT_ID');
@@ -135,8 +151,8 @@ export class ElevenLabsPureCallingService {
       };
     }
 
-    console.log(`🔑 Using ElevenLabs API Key: ${apiKey.substring(0, 10)}...`);
-    console.log(`🤖 Using Agent ID: ${agentId}`);
+    this.logger.log(`🔑 Using ElevenLabs API Key: ${apiKey.substring(0, 10)}...`);
+    this.logger.log(`🤖 Using Agent ID: ${agentId}`);
 
     // Try multiple ElevenLabs API endpoints for outbound calls
     const endpoints = [
@@ -188,7 +204,7 @@ export class ElevenLabsPureCallingService {
     // Try each endpoint
     for (const endpoint of endpoints) {
       try {
-        console.log(`🔄 Trying ${endpoint.name} endpoint...`);
+        this.logger.log(`🔄 Trying ${endpoint.name} endpoint...`);
 
         const response = await axios({
           method: endpoint.method,
@@ -201,7 +217,7 @@ export class ElevenLabsPureCallingService {
           timeout: 10000, // 10 second timeout
         });
 
-        console.log(`✅ ${endpoint.name} SUCCESS:`, response.data);
+        this.logger.log(`✅ ${endpoint.name} SUCCESS:`, response.data);
 
         return {
           success: true,
@@ -212,8 +228,9 @@ export class ElevenLabsPureCallingService {
           data: response.data,
           method: 'direct_api',
         };
-      } catch (error: any) {
-        console.log(`❌ ${endpoint.name} failed:`, error.response?.data || error.message);
+      } catch (error: unknown) {
+        const err = error as { response?: { data?: unknown }; message?: string };
+        this.logger.warn(`❌ ${endpoint.name} failed:`, err.response?.data || err.message);
         continue; // Try next endpoint
       }
     }
@@ -233,7 +250,7 @@ export class ElevenLabsPureCallingService {
   private generateBatchCallingInstructions(
     phoneNumber: string,
     agentId: string,
-    request: ElevenLabsPureCallRequest
+    request: ElevenLabsCallData
   ): ElevenLabsPureCallResponse {
     const batchId = `batch_${Date.now()}`;
     const instructions = `
@@ -290,7 +307,7 @@ export class ElevenLabsPureCallingService {
   /**
    * Get ElevenLabs agent information
    */
-  async getAgentInfo(agentId?: string): Promise<any> {
+  async getAgentInfo(agentId?: string): Promise<AgentInfo> {
     const actualAgentId = agentId || this.defaultAgentId;
 
     try {
@@ -304,8 +321,9 @@ export class ElevenLabsPureCallingService {
       );
 
       return response.data;
-    } catch (error: any) {
-      this.logger.warn('Could not fetch agent info:', error.response?.data || error.message);
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: unknown }; message?: string };
+      this.logger.warn('Could not fetch agent info:', err.response?.data || err.message);
       return {
         agent_id: actualAgentId,
         name: 'Sarah - Surprise Granite Specialist',

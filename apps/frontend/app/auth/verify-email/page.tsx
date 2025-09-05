@@ -1,14 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, XCircle, Mail, Loader2 } from 'lucide-react';
+import { CheckCircle, Loader2, Mail, XCircle } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 export default function VerifyEmailPage() {
-  const [isVerifying, setIsVerifying] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const [verificationStatus, setVerificationStatus] = useState<
     'pending' | 'success' | 'error' | null
@@ -22,18 +21,7 @@ export default function VerifyEmailPage() {
   const token = searchParams.get('token');
   const emailParam = searchParams.get('email');
 
-  useEffect(() => {
-    if (emailParam) {
-      setEmail(emailParam);
-    }
-
-    if (token) {
-      verifyEmail(token);
-    }
-  }, [token, emailParam]);
-
-  const verifyEmail = async (verificationToken: string) => {
-    setIsVerifying(true);
+  const verifyEmail = useCallback(async (verificationToken: string) => {
     setVerificationStatus('pending');
 
     try {
@@ -62,14 +50,21 @@ export default function VerifyEmailPage() {
         toast.error(data.message || 'Verification failed');
       }
     } catch (error) {
-      console.error('Verification error:', error);
       setVerificationStatus('error');
       setMessage('An error occurred during verification.');
       toast.error('Verification failed');
-    } finally {
-      setIsVerifying(false);
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    if (emailParam) {
+      setEmail(emailParam);
+    }
+
+    if (token) {
+      verifyEmail(token);
+    }
+  }, [token, emailParam, verifyEmail]);
 
   const resendVerificationEmail = async () => {
     if (!email) {
@@ -97,7 +92,6 @@ export default function VerifyEmailPage() {
         toast.error(data.message || 'Failed to send verification email');
       }
     } catch (error) {
-      console.error('Resend error:', error);
       toast.error('Failed to send verification email');
     } finally {
       setIsResending(false);

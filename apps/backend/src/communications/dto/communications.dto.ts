@@ -3,12 +3,22 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class SendEmailDto {
   @ApiProperty({
-    description: 'The ID of the client to send email to',
+    description: 'The ID of the client to send email to (optional if email is provided)',
     example: '64a8b123c456789012345678',
+    required: false,
   })
+  @IsOptional()
   @IsMongoId()
-  @IsNotEmpty()
-  clientId: string;
+  clientId?: string;
+
+  @ApiProperty({
+    description: 'Email address to send to (optional if clientId is provided)',
+    example: 'client@example.com',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  email?: string;
 
   @ApiProperty({
     description: 'Email subject line',
@@ -38,12 +48,22 @@ export class SendEmailDto {
 
 export class SendSmsDto {
   @ApiProperty({
-    description: 'The ID of the client to send SMS to',
+    description: 'The ID of the client to send SMS to (optional if phone is provided)',
     example: '64a8b123c456789012345678',
+    required: false,
   })
+  @IsOptional()
   @IsMongoId()
-  @IsNotEmpty()
-  clientId: string;
+  clientId?: string;
+
+  @ApiProperty({
+    description: 'Phone number to send SMS to (optional if clientId is provided)',
+    example: '+1234567890',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  phone?: string;
 
   @ApiProperty({
     description: 'SMS message content (max 160 characters for single SMS)',

@@ -1,20 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { PlanBadge } from '@/components/CapabilityGate';
 import Layout from '@/components/Layout';
-import { PageHeader } from '@/components/ui/PageHeader';
 import PlanSwitcher from '@/components/PlanSwitcher';
-import { CapabilityGate, PlanBadge } from '@/components/CapabilityGate';
-import { getUserPlan, setUserPlan, PLANS, type PlanTier } from '@/lib/plans';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { getUserPlan, PLANS, setUserPlan, type PlanTier } from '@/lib/plans';
 import {
-  CreditCardIcon,
-  ClockIcon,
-  CheckCircleIcon,
-  ExclamationTriangleIcon,
-  CogIcon,
-  ArrowRightIcon,
+    ArrowRightIcon,
+    CheckCircleIcon,
+    ClockIcon,
+    CogIcon,
+    CreditCardIcon,
+    ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 // Mock billing history data
 const billingHistory = [

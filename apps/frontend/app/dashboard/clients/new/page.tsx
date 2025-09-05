@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
 import { ArrowLeftIcon, CheckIcon } from '@heroicons/react/24/outline';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
 
 interface ClientCreate {
   firstName: string;
@@ -20,6 +20,7 @@ export default function NewClientPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const returnTo = searchParams.get('returnTo') || '/dashboard/clients';
+  const contactType = (searchParams.get('type') as string) || 'client';
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,14 +52,15 @@ export default function NewClientPage() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, type: contactType }),
       });
 
       if (response.ok) {
         const created = await response.json();
         const id = created?._id || created?.id;
         if (id) {
-          router.push(`/dashboard/clients/${id}`);
+          // Redirect back to listing with createdId so it can fetch and prepend
+          router.push(`/dashboard/clients?createdId=${id}`);
         } else {
           router.push(returnTo);
         }

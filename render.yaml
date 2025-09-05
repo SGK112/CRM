@@ -12,7 +12,7 @@ services:
       echo "✅ Backend build complete!"
     startCommand: cd apps/backend && npm run start:prod
     healthCheckPath: /api/health
-    autoDeploy: true
+    autoDeploy: false # Manual deploy required
     envVars:
       - key: NODE_ENV
         value: production
@@ -45,7 +45,7 @@ services:
       - key: ENABLE_REQUEST_LOGGING
         value: true
 
-  # Frontend Web Service  
+  # Frontend Web Service
   - type: web
     name: remodely-crm-frontend
     env: node
@@ -59,7 +59,7 @@ services:
       cd apps/frontend && pwd && ls -la fix-standalone.sh && chmod +x ./fix-standalone.sh && ./fix-standalone.sh && cd -
       echo "✅ Frontend build complete!"
     startCommand: cd apps/frontend && node .next/standalone/apps/frontend/server.js
-    autoDeploy: true
+    autoDeploy: false # Manual deploy required
     envVars:
       - key: NODE_ENV
         value: production

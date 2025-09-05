@@ -1,7 +1,5 @@
 "use client";
 
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
 import CalendarView from '@/components/ui/CalendarView';
 import { EventClickArg } from '@fullcalendar/core';
 import { DateClickArg } from '@fullcalendar/interaction';
@@ -22,6 +20,8 @@ import {
     ViewColumnsIcon,
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon as CheckCircleSolidIcon } from '@heroicons/react/24/solid';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface Appointment {
   _id: string;

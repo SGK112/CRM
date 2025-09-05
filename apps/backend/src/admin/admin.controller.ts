@@ -1,21 +1,35 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Patch,
-  Delete,
-  Body,
-  Param,
-  Query,
-  Request,
-  UseGuards,
-  ForbiddenException,
+    Body,
+    Controller,
+    Delete,
+    ForbiddenException,
+    Get,
+    Param,
+    Patch,
+    Post,
+    Query,
+    Request,
+    UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import { AdminService } from './admin.service';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AdminService } from './admin.service';
 
-export const dynamic = 'force-dynamic';
+interface AdminUser {
+  id: string;
+  role: string;
+  email: string;
+}
+
+interface AdminRequest {
+  user: AdminUser;
+}
+
+interface BulkActionData {
+  userIds: string[];
+  action: 'suspend' | 'activate' | 'delete' | 'update-plan';
+  data?: Record<string, unknown>;
+}
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -24,7 +38,7 @@ export const dynamic = 'force-dynamic';
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
-  private async checkAdminAccess(req: any) {
+  private async checkAdminAccess(req: AdminRequest) {
     const user = req.user;
     const isAdmin =
       user.role === 'owner' || user.role === 'admin' || user.email === 'help.remodely@gmail.com';
@@ -47,7 +61,7 @@ export class AdminController {
   })
   @ApiResponse({ status: 200, description: 'Users retrieved successfully' })
   async getUsers(
-    @Request() req,
+    @Request() req: AdminRequest,
     @Query()
     query: {
       page?: string;
@@ -183,13 +197,8 @@ export class AdminController {
   @ApiOperation({ summary: 'Perform bulk actions on users' })
   @ApiResponse({ status: 200, description: 'Bulk action completed successfully' })
   async performBulkAction(
-    @Request() req,
-    @Body()
-    actionData: {
-      userIds: string[];
-      action: 'suspend' | 'activate' | 'delete' | 'update-plan';
-      data?: any;
-    }
+    @Request() req: AdminRequest,
+    @Body() actionData: BulkActionData
   ) {
     await this.checkAdminAccess(req);
     return await this.adminService.performBulkAction(actionData);
