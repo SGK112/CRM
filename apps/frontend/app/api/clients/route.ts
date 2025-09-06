@@ -7,11 +7,37 @@ export async function GET(request: NextRequest) {
   try {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
 
-    if (!token) {
-      if (process.env.NODE_ENV !== 'production') {
+    // In development mode, always use local storage first
+    if (process.env.NODE_ENV !== 'production') {
+      // If no token, definitely use local storage
+      if (!token) {
         return NextResponse.json({ clients: clientStorage.getAll() });
       }
+      
+      // If token exists, try backend first, fall back to local storage
+      try {
+        const { searchParams } = new URL(request.url);
+        const queryString = searchParams.toString();
+        const url = queryString ? `${BACKEND_URL}/api/clients?${queryString}` : `${BACKEND_URL}/api/clients`;
 
+        const response = await fetch(url, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          return NextResponse.json(data);
+        }
+      } catch (error) {
+        // Backend failed, fall back to local storage
+      }
+      
+      // Fallback to local storage for development
+      return NextResponse.json({ clients: clientStorage.getAll() });
+    }
+
+    // Production mode - require valid token
+    if (!token) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

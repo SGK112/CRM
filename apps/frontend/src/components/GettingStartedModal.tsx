@@ -53,8 +53,7 @@ export default function GettingStartedModal({ onClose }: { onClose: () => void }
     },
   ]);
 
-  const [currentStep, setCurrentStep] = useState(0);
-  const [showDemo, setShowDemo] = useState(false);
+
 
   useEffect(() => {
     // Check localStorage for completion status
@@ -70,6 +69,9 @@ export default function GettingStartedModal({ onClose }: { onClose: () => void }
     }
   }, []);
 
+  // Function to mark steps as completed when user visits pages
+  // Currently unused but ready for future integration
+  /*
   const markStepCompleted = (stepId: string) => {
     setSteps(prev => {
       const updated = prev.map(step => (step.id === stepId ? { ...step, completed: true } : step));
@@ -87,6 +89,7 @@ export default function GettingStartedModal({ onClose }: { onClose: () => void }
       return updated;
     });
   };
+  */
 
   const handleActionClick = (step: OnboardingStep) => {
     if (step.href) {
@@ -145,7 +148,7 @@ export default function GettingStartedModal({ onClose }: { onClose: () => void }
 
               {/* Steps */}
               <div className="space-y-4 mb-6">
-                {steps.map((step, index) => (
+                {steps.map((step) => (
                   <div
                     key={step.id}
                     className={`p-4 rounded-lg border transition-all ${

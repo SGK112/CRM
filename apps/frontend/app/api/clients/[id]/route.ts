@@ -10,22 +10,51 @@ export async function GET(
   try {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
 
-    if (!token) {
-      if (process.env.NODE_ENV !== 'production') {
-        // Find the client in our shared storage
+    // In development mode, always use local storage first
+    if (process.env.NODE_ENV !== 'production') {
+      // If no token, definitely use local storage
+      if (!token) {
         const client = clientStorage.getById(params.id);
-        
         if (client) {
           return NextResponse.json(client);
         }
-
-        // Return 404 if not found
         return NextResponse.json(
           { error: 'Client not found' },
           { status: 404 }
         );
       }
+      
+      // If token exists, try backend first, fall back to local storage
+      try {
+        const response = await fetch(`${BACKEND_URL}/api/clients/${params.id}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
 
+        if (response.ok) {
+          const data = await response.json();
+          return NextResponse.json(data);
+        }
+      } catch (error) {
+        // Backend failed, fall back to local storage
+      }
+      
+      // Fallback to local storage for development
+      const client = clientStorage.getById(params.id);
+      if (client) {
+        return NextResponse.json(client);
+      }
+      return NextResponse.json(
+        { error: 'Client not found' },
+        { status: 404 }
+      );
+    }
+
+    // Production mode - require valid token
+    if (!token) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
