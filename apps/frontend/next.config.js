@@ -102,20 +102,47 @@ const nextConfig = {
 
   // Headers for better caching
   async headers() {
-    // In development, avoid aggressive caching to prevent stale chunks
-    if (process.env.NODE_ENV !== 'production') {
-      return [];
-    }
     return [
+      // Ensure manifest.json is served with correct headers
       {
-        source: '/_next/static/:path*',
+        source: '/manifest.json',
         headers: [
           {
+            key: 'Content-Type',
+            value: 'application/manifest+json',
+          },
+          {
             key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
+            value: 'public, max-age=3600',
           },
         ],
       },
+      // Favicon headers
+      {
+        source: '/favicon.svg',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'image/svg+xml',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=86400',
+          },
+        ],
+      },
+      // In development, avoid aggressive caching to prevent stale chunks
+      ...(process.env.NODE_ENV === 'production' ? [
+        {
+          source: '/_next/static/:path*',
+          headers: [
+            {
+              key: 'Cache-Control',
+              value: 'public, max-age=31536000, immutable',
+            },
+          ],
+        },
+      ] : []),
     ];
   },
 };

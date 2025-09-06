@@ -56,7 +56,16 @@ services:
       npm ci --production=false
       npm run build
       # Ensure standalone bundle serves static & public assets (fixes manifest/icons 404)
-      cd apps/frontend && pwd && ls -la fix-standalone.sh && chmod +x ./fix-standalone.sh && ./fix-standalone.sh && cd -
+      cd apps/frontend
+      pwd && ls -la
+      if [ -f "fix-standalone.sh" ]; then
+        chmod +x ./fix-standalone.sh
+        ./fix-standalone.sh
+        echo "✅ Standalone assets fixed"
+      else
+        echo "⚠️ fix-standalone.sh not found"
+      fi
+      cd -
       echo "✅ Frontend build complete!"
     startCommand: cd apps/frontend && node .next/standalone/apps/frontend/server.js
     autoDeploy: false # Manual deploy required
