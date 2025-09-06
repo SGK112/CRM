@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
 
     // Development mode fallback - return local storage data if no valid token
-    if (!token || process.env.NODE_ENV !== 'production') {
+    if (!token || process.env.NODE_ENV !== 'production' || !BACKEND_URL || BACKEND_URL.includes('localhost')) {
       // Try to get from local storage first in dev mode
       const localProjects = projectStorage.getAll();
       if (!token) {

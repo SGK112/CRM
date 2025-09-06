@@ -70,7 +70,11 @@ services:
           property: port
       - key: NEXT_PUBLIC_API_URL
         value: https://remodely-backend-api.onrender.com
+      - key: NEXT_PUBLIC_BACKEND_URL
+        value: https://remodely-backend-api.onrender.com
       - key: NEXT_PUBLIC_SOCKET_URL
+        value: https://remodely-backend-api.onrender.com
+      - key: BACKEND_URL
         value: https://remodely-backend-api.onrender.com
       # Performance optimizations
       - key: WEB_CONCURRENCY

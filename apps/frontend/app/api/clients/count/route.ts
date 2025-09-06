@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
 
     // Enhanced authentication logic for development mode
     if (!token || token === 'null' || token === 'undefined' || token.length <= 10) {
-      if (process.env.NODE_ENV !== 'production') {
+      if (process.env.NODE_ENV !== 'production' || !BACKEND_URL || BACKEND_URL.includes('localhost')) {
         // Get count from shared storage
         const clients = clientStorage.getAll();
         return NextResponse.json({ count: clients.length });
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
       }
 
       // If backend fails, fall back to frontend storage in development
-      if (process.env.NODE_ENV !== 'production') {
+      if (process.env.NODE_ENV !== 'production' || !BACKEND_URL || BACKEND_URL.includes('localhost')) {
         const clients = clientStorage.getAll();
         return NextResponse.json({ count: clients.length });
       }
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
       );
     } catch (backendError) {
       // Backend connection failed, use frontend storage in development
-      if (process.env.NODE_ENV !== 'production') {
+      if (process.env.NODE_ENV !== 'production' || !BACKEND_URL || BACKEND_URL.includes('localhost')) {
         const clients = clientStorage.getAll();
         return NextResponse.json({ count: clients.length });
       }
