@@ -247,5 +247,10 @@ class WalletService {
   }
 }
 
-export const walletService = new WalletService();
+// Lazily instantiate WalletService on client only
+export const walletService = typeof window !== 'undefined' ? new WalletService() : undefined;
+
+export function getWalletService(): WalletService | undefined {
+  return walletService;
+}
 export type { Wallet, Transaction, WalletStats, PaymentRequest, PaymentResponse };

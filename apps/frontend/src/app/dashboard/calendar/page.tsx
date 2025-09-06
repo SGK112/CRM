@@ -44,6 +44,7 @@ interface Appointment {
 
 export default function CalendarPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [contacts, setContacts] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek'>('dayGridMonth');
   const [searchTerm, setSearchTerm] = useState('');
@@ -55,19 +56,15 @@ export default function CalendarPage() {
   useEffect(() => {
     const fetchCalendarEvents = async () => {
       try {
-        const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
-        if (!token) {
-          router.push('/auth/login');
-          return;
-        }
+  const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
 
-        const response = await fetch('/api/appointments/calendar', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
+  // If token exists, include it. If not, still fetch in dev so the frontend dev proxy can return mock data.
+  const headers: Record<string, string> = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
 
-        if (response.ok) {
+  const response = await fetch('/api/appointments/calendar', { headers });
+
+  if (response.ok) {
           const events = await response.json();
           // Transform API events to frontend format
           const transformedAppointments: Appointment[] = events.map((event: {
@@ -113,7 +110,28 @@ export default function CalendarPage() {
       }
     };
 
+    const fetchClients = async () => {
+      try {
+        const resp = await fetch('/api/clients');
+        if (resp.ok) {
+          const data = await resp.json();
+          // Expecting array of clients with id and name
+          setContacts(
+            Array.isArray(data)
+              ? data.map((c: { id?: string; _id?: string; clientId?: string; name?: string; fullName?: string; displayName?: string }) => ({ id: c.id || c._id || c.clientId || '', name: c.name || c.fullName || c.displayName || '' }))
+              : []
+          );
+        } else {
+          setContacts([]);
+        }
+      } catch (e) {
+        setContacts([]);
+      }
+    };
+
+    // Run both in parallel
     fetchCalendarEvents();
+    fetchClients();
   }, [router]);
 
   const getEventColor = (appointment: Appointment) => {
@@ -436,12 +454,41 @@ export default function CalendarPage() {
                 events={calendarEvents}
                 initialView={view}
                 currentView={view}
+                contacts={contacts}
                 onEventClick={(info) => {
                   const appointment = info.event.extendedProps.appointment;
                   router.push(`/dashboard/calendar/${appointment._id}`);
                 }}
                 onDateClick={(info) => {
                   router.push(`/dashboard/calendar/new?date=${info.dateStr}`);
+                }}
+                onCreateEvent={async (payload) => {
+                  const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+                  // If user is not authenticated (dev/no token), add locally for quick QA
+                  if (!token) {
+                    const localId = `local-${Date.now()}`;
+                    setAppointments(prev => [
+                      ...prev,
+                      {
+                        _id: localId,
+                        title: payload.title,
+                        description: '',
+                        appointmentType: 'meeting',
+                        status: 'scheduled',
+                        startDateTime: payload.start,
+                        endDateTime: payload.end || '',
+                      } as Appointment,
+                    ]);
+                    return;
+                  }
+
+                  // If authenticated, redirect to the full new-appointment page to ensure all required fields are provided
+                  const params = new URLSearchParams();
+                  if (payload.title) params.set('title', payload.title);
+                  if (payload.start) params.set('start', payload.start);
+                  if (payload.end) params.set('end', payload.end || '');
+                  if (payload.contactIds && payload.contactIds.length) params.set('contactIds', payload.contactIds.join(','));
+                  router.push(`/dashboard/calendar/new?${params.toString()}`);
                 }}
               />
             </div>

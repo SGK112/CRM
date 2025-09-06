@@ -15,7 +15,7 @@ interface OnboardingStep {
   id: string;
   title: string;
   description: string;
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   action: string;
   completed: boolean;
   href?: string;
@@ -26,12 +26,12 @@ export default function GettingStartedModal({ onClose }: { onClose: () => void }
   const [steps, setSteps] = useState<OnboardingStep[]>([
     {
       id: 'clients',
-      title: 'Add Your First Client',
-      description: 'Start by adding client information to organize your customers',
+      title: 'Add Your First Contact',
+      description: 'Start by adding contact information to organize your customers',
       icon: UserGroupIcon,
-      action: 'Add Client',
+      action: 'Add Contact',
       completed: false,
-      href: '/dashboard/clients?action=new',
+      href: '/dashboard/contacts?action=new',
     },
     {
       id: 'estimate',

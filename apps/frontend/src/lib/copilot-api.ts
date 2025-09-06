@@ -1,6 +1,6 @@
 import { API_BASE } from './api';
 
-interface CopilotAPIResponse<T = any> {
+interface CopilotAPIResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -82,11 +82,15 @@ class CopilotAPI {
       });
 
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json();
+      const raw = (await response.json()) as unknown;
+      if (!Array.isArray(raw)) {
+        return { success: false, error: 'Unexpected calendar data' };
+      }
 
-      return { success: true, data: data.map(this.mapToCalendarEvent) };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+      return { success: true, data: raw.map(this.mapToCalendarEvent) };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      return { success: false, error: message };
     }
   }
 
@@ -104,7 +108,6 @@ class CopilotAPI {
 
       const existingEvents = eventsResponse.data || [];
       const businessHours = { start: 9, end: 17 }; // 9 AM to 5 PM
-      const slotDuration = duration;
       const availableSlots: string[] = [];
 
       // Generate possible time slots
@@ -128,8 +131,9 @@ class CopilotAPI {
       }
 
       return { success: true, data: availableSlots };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      return { success: false, error: message };
     }
   }
 
@@ -151,11 +155,12 @@ class CopilotAPI {
       });
 
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json();
+      const raw = (await response.json()) as unknown;
 
-      return { success: true, data: this.mapToCalendarEvent(data) };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+      return { success: true, data: this.mapToCalendarEvent(raw) };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      return { success: false, error: message };
     }
   }
 
@@ -168,11 +173,12 @@ class CopilotAPI {
       });
 
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json();
+      const raw = (await response.json()) as unknown;
 
-      return { success: true, data };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+      return { success: true, data: raw as Client[] };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      return { success: false, error: message };
     }
   }
 
@@ -183,11 +189,12 @@ class CopilotAPI {
       });
 
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json();
+      const raw = (await response.json()) as unknown;
 
-      return { success: true, data };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+      return { success: true, data: raw as Client };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      return { success: false, error: message };
     }
   }
 
@@ -200,11 +207,12 @@ class CopilotAPI {
       });
 
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json();
+      const raw = (await response.json()) as unknown;
 
-      return { success: true, data };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+      return { success: true, data: raw as Project[] };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      return { success: false, error: message };
     }
   }
 
@@ -217,11 +225,12 @@ class CopilotAPI {
       });
 
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json();
+      const raw = (await response.json()) as unknown;
 
-      return { success: true, data };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+      return { success: true, data: raw as Project };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      return { success: false, error: message };
     }
   }
 
@@ -239,17 +248,19 @@ class CopilotAPI {
           preview,
         },
       };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      return { success: false, error: message };
     }
   }
 
-  async sendEmail(emailId: string): Promise<CopilotAPIResponse<{ sent: boolean }>> {
+  async sendEmail(): Promise<CopilotAPIResponse<{ sent: boolean }>> {
     try {
       // In production, this would send the email via your email service
       return { success: true, data: { sent: true } };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      return { success: false, error: message };
     }
   }
 
@@ -264,40 +275,56 @@ class CopilotAPI {
     }>
   > {
     try {
-      const [projects, clients, appointments] = await Promise.all([
+      const [projectsResp, clientsResp, appointmentsResp] = await Promise.all([
         this.getProjects(),
         this.getClients(),
         this.getCalendarEvents(),
       ]);
 
       const stats = {
-        projectsActive: projects.data?.filter(p => p.status === 'active').length || 0,
-        projectsCompleted: projects.data?.filter(p => p.status === 'completed').length || 0,
-        clientsTotal: clients.data?.length || 0,
+        projectsActive: projectsResp.data?.filter(p => p.status === 'active').length || 0,
+        projectsCompleted: projectsResp.data?.filter(p => p.status === 'completed').length || 0,
+        clientsTotal: clientsResp.data?.length || 0,
         revenueThisMonth: 0, // Would calculate from projects/invoices
-        appointmentsThisWeek: appointments.data?.length || 0,
+        appointmentsThisWeek: appointmentsResp.data?.length || 0,
       };
 
       return { success: true, data: stats };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      return { success: false, error: message };
     }
   }
 
   // Helper method to map API response to CalendarEvent
-  private mapToCalendarEvent(apiEvent: any): CalendarEvent {
+  private mapToCalendarEvent(apiEvent: unknown): CalendarEvent {
+    const e = (apiEvent ?? {}) as Record<string, unknown>;
+    const id = (e._id ?? e.id) as string | undefined;
+    const title = (e.title as string) ?? String(e.id ?? '');
+    const description = (e.description as string) ?? undefined;
+    const startTime = (e.startTime as string) ?? (e.date as string) ?? '';
+    const endTime = (e.endTime as string) ?? (e.date as string) ?? '';
+    const attendees = Array.isArray(e.attendees) ? (e.attendees as string[]) : [];
+    const location = (e.location as string) ?? undefined;
+    const type = ((e.type as CalendarEvent['type']) || 'meeting') as CalendarEvent['type'];
+
     return {
-      id: apiEvent._id || apiEvent.id,
-      title: apiEvent.title,
-      description: apiEvent.description,
-      startTime: apiEvent.startTime || apiEvent.date,
-      endTime: apiEvent.endTime || apiEvent.date,
-      attendees: apiEvent.attendees || [],
-      location: apiEvent.location,
-      type: apiEvent.type || 'meeting',
+      id: id ?? String(Date.now()),
+      title,
+      description,
+      startTime,
+      endTime,
+      attendees,
+      location,
+      type,
     };
   }
 }
 
-export const copilotAPI = new CopilotAPI();
+// Lazily instantiate only on the client to avoid server-side serialization issues
+export const copilotAPI = typeof window !== 'undefined' ? new CopilotAPI() : undefined;
+
+export function getCopilotAPI(): CopilotAPI | undefined {
+  return copilotAPI;
+}
 export type { CalendarEvent, Client, Project, EmailDraft, AppointmentBooking };

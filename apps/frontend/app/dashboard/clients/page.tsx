@@ -1,13 +1,10 @@
 'use client';
 
-import { simple } from '@/lib/simple-ui';
 import {
     ArrowPathIcon,
     BellIcon,
-    BuildingStorefrontIcon,
     ChatBubbleLeftRightIcon,
     ClockIcon,
-    CurrencyDollarIcon,
     DocumentTextIcon,
     EnvelopeIcon,
     ExclamationTriangleIcon,
@@ -18,13 +15,32 @@ import {
     UserGroupIcon
 } from '@heroicons/react/24/outline';
 import {
-    BellIcon as BellIconSolid,
     CheckCircleIcon as CheckCircleIconSolid
 } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import CreateContactSlideOver from '../../../src/components/clients/CreateContactSlideOver';
+
+interface ClientData {
+  _id?: string;
+  id?: string;
+  name?: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  status?: string;
+  contactType?: string;
+  company?: string;
+  totalProjects?: number;
+  totalValue?: number;
+  lastContact?: string;
+  updatedAt?: string;
+  unreadNotifications?: number;
+  quickbooksSynced?: boolean;
+  estimatesSent?: number;
+  estimatesViewed?: number;
+}
 
 interface Client {
   id: string;
@@ -32,6 +48,7 @@ interface Client {
   email: string;
   phone: string;
   status: 'active' | 'inactive' | 'lead';
+  contactType?: 'client' | 'subcontractor' | 'vendor' | 'contributor' | 'team';
   projectsCount: number;
   totalValue: number;
   lastContact?: string;
@@ -40,6 +57,9 @@ interface Client {
   estimatesSent?: number;
   estimatesViewed?: number;
   lastEstimateViewed?: string;
+  firstName?: string;
+  lastName?: string;
+  company?: string;
 }
 
 interface Notification {
@@ -53,7 +73,7 @@ interface Notification {
   clientName?: string;
 }
 
-export default function ClientsPage() {
+export default function ContactsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -62,48 +82,11 @@ export default function ClientsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
-  const [syncingClient, setSyncingClient] = useState<string | null>(null);
-  const [showCreateSlideOver, setShowCreateSlideOver] = useState(false);
-
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  // If we were redirected back after creating a new contact, fetch it and prepend
-  useEffect(() => {
-    const createdId = searchParams?.get?.('createdId');
-    if (!createdId) return;
-
-    const fetchCreated = async () => {
-      try {
-        const res = await fetch(`/api/clients/${createdId}`);
-        if (!res.ok) return;
-        const data = await res.json();
-        // Don't duplicate if already in list
-        setClients(prev => (prev.some(c => c.id === data.id || c.id === data._id) ? prev : [{
-          id: data._id || data.id,
-          name: `${data.firstName ? data.firstName + ' ' : ''}${data.lastName ?? ''}`.trim() || data.name || 'New Contact',
-          email: data.email || '',
-          phone: data.phone || '',
-          status: String((data as unknown as { status?: string }).status || 'active') as Client['status'],
-          projectsCount: data.totalProjects || 0,
-          totalValue: data.totalValue || 0,
-          lastContact: data.lastContact || data.updatedAt || new Date().toISOString(),
-          unreadNotifications: 0,
-        }, ...prev]));
-
-        // Clean the URL
-        router.replace('/dashboard/clients');
-      } catch (e) {
-        // ignore
-      }
-    };
-
-    fetchCreated();
-  }, [searchParams, router]);
+  const [refreshing, setRefreshing] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   const loadData = async () => {
-    setLoading(true);
+    if (!refreshing) setLoading(true);
 
     try {
       // Load clients from API
@@ -114,10 +97,29 @@ export default function ClientsPage() {
       const notificationsResponse = await fetch('/api/notifications');
       const notificationsData = await notificationsResponse.json();
 
-      setClients(clientsData.clients || []);
+      const processedClients = (clientsData.clients || []).map((client: ClientData) => ({
+        id: client._id || client.id || '',
+        name: client.name || `${client.firstName || ''} ${client.lastName || ''}`.trim() || 'Unnamed Contact',
+        email: client.email || '',
+        phone: client.phone || '',
+        status: (client.status || 'active') as Client['status'],
+        contactType: client.contactType as Client['contactType'] || 'client',
+        projectsCount: client.totalProjects || 0,
+        totalValue: client.totalValue || 0,
+        lastContact: client.lastContact || client.updatedAt,
+        unreadNotifications: client.unreadNotifications || 0,
+        quickbooksSynced: client.quickbooksSynced || false,
+        estimatesSent: client.estimatesSent || 0,
+        estimatesViewed: client.estimatesViewed || 0,
+        firstName: client.firstName,
+        lastName: client.lastName,
+        company: client.company,
+      }));
+
+      setClients(processedClients);
       setNotifications(notificationsData.notifications || []);
     } catch (error) {
-      // Fallback to mock data
+      // Enhanced fallback data
       setClients([
         {
           id: '1',
@@ -125,6 +127,7 @@ export default function ClientsPage() {
           email: 'contact@johnsonfamily.com',
           phone: '(555) 123-4567',
           status: 'active',
+          contactType: 'client',
           projectsCount: 2,
           totalValue: 45000,
           lastContact: '2024-09-03T10:30:00Z',
@@ -140,6 +143,7 @@ export default function ClientsPage() {
           email: 'info@martinezconstruction.com',
           phone: '(555) 234-5678',
           status: 'active',
+          contactType: 'subcontractor',
           projectsCount: 1,
           totalValue: 28000,
           lastContact: '2024-09-01T09:15:00Z',
@@ -155,6 +159,7 @@ export default function ClientsPage() {
           email: 'hello@wilsonenterprises.com',
           phone: '(555) 345-6789',
           status: 'lead',
+          contactType: 'vendor',
           projectsCount: 0,
           totalValue: 0,
           lastContact: '2024-08-28T11:00:00Z',
@@ -190,96 +195,81 @@ export default function ClientsPage() {
     }
 
     setLoading(false);
+    setRefreshing(false);
   };
 
-  const syncToQuickBooks = async (clientId: string) => {
-    setSyncingClient(clientId);
-    try {
-      const response = await fetch(`/api/clients/${clientId}/sync-quickbooks`, {
-        method: 'POST'
-      });
+  useEffect(() => {
+    loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-      if (response.ok) {
-        // Try to use returned client object to update state if provided
-        const updated = await response.json().catch(() => null);
-        if (updated && (updated._id || updated.id)) {
-          const id = updated._id || updated.id;
-          setClients(prev => prev.map(client => client.id === clientId ? ({
-            id,
-            name: updated.name || client.name,
-            email: updated.email || client.email,
-            phone: updated.phone || client.phone,
-            status: (updated.status || client.status) as Client['status'],
-            projectsCount: updated.totalProjects ?? client.projectsCount,
-            totalValue: updated.totalValue ?? client.totalValue,
-            lastContact: updated.lastContact ?? client.lastContact,
-            unreadNotifications: updated.unreadNotifications ?? client.unreadNotifications,
-            quickbooksSynced: updated.quickbooksSynced ?? true,
-            estimatesSent: updated.estimatesSent ?? client.estimatesSent,
-            estimatesViewed: updated.estimatesViewed ?? client.estimatesViewed,
-          }) : client));
-        } else {
-          // Fallback: mark as synced
-          setClients(prev => prev.map(client =>
-            client.id === clientId
-              ? { ...client, quickbooksSynced: true }
-              : client
-          ));
-        }
-      } else {
-        // Server returned non-OK
-      }
-    } catch (error) {
-      // network or parse error - ignore for now
-    } finally {
-      setSyncingClient(null);
+  // Show success message and handle newly created contacts
+  useEffect(() => {
+    const created = searchParams?.get?.('created');
+    
+    if (created === 'true') {
+      setShowSuccessMessage(true);
+      // Auto-hide success message after 5 seconds
+      const timer = setTimeout(() => {
+        setShowSuccessMessage(false);
+        router.replace('/dashboard/clients'); // Clean URL
+      }, 5000);
+      return () => clearTimeout(timer);
     }
-  };
+  }, [searchParams, router]);
 
-  // Handle a created contact from the slide-over or the create page.
-  // Prepend an optimistic item, then fetch the full record and replace it.
-  const handleCreated = async (created: { id?: string; _id?: string; name?: string; firstName?: string; lastName?: string; email?: string; phone?: string; status?: string; totalProjects?: number; totalValue?: number }) => {
-    const id = created._id || created.id || String(Date.now());
-    const name = created.name || `${created.firstName || ''} ${created.lastName || ''}`.trim() || 'New Contact';
+  // Fetch newly created contact and update the list
+  useEffect(() => {
+    const createdId = searchParams?.get?.('createdId');
+    if (!createdId) return;
 
-    const optimistic: Client = {
-      id,
-      name,
-      email: created.email || '',
-      phone: created.phone || '',
-      status: (created.status || 'active') as Client['status'],
-      projectsCount: created.totalProjects || 0,
-      totalValue: created.totalValue || 0,
+    const fetchCreated = async () => {
+      try {
+        const res = await fetch(`/api/clients/${createdId}`);
+        if (!res.ok) {
+          // If individual fetch fails, refresh the whole list
+          await loadData();
+          return;
+        }
+        const data = await res.json();
+        
+        const newContact: Client = {
+          id: data._id || data.id || createdId,
+          name: data.name || `${data.firstName || ''} ${data.lastName || ''}`.trim() || 'New Contact',
+          email: data.email || '',
+          phone: data.phone || '',
+          status: (data.status || 'active') as Client['status'],
+          contactType: data.contactType || 'client',
+          projectsCount: data.totalProjects || 0,
+          totalValue: data.totalValue || 0,
+          lastContact: data.lastContact || data.updatedAt || new Date().toISOString(),
+          unreadNotifications: 0,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          company: data.company,
+        };
+
+        // Don't duplicate if already in list
+        setClients(prev => {
+          const exists = prev.some(c => c.id === newContact.id);
+          return exists ? prev : [newContact, ...prev];
+        });
+
+        // Clean the URL
+        router.replace('/dashboard/clients');
+      } catch (e) {
+        // Fallback to full refresh
+        await loadData();
+      }
     };
 
-    // Prepend optimistic entry
-    setClients(prev => [optimistic, ...prev]);
+    fetchCreated();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, router]);
 
-    // Try to fetch authoritative record from API and replace optimistic
-    try {
-      const res = await fetch(`/api/clients/${id}`);
-      if (!res.ok) return;
-      const full = await res.json();
-      const fullId = full._id || full.id || id;
-      const replaced: Client = {
-        id: fullId,
-        name: full.name || `${full.firstName || ''} ${full.lastName || ''}`.trim() || optimistic.name,
-        email: full.email || optimistic.email,
-        phone: full.phone || optimistic.phone,
-        status: (full.status || optimistic.status) as Client['status'],
-        projectsCount: full.totalProjects || optimistic.projectsCount || 0,
-        totalValue: full.totalValue || optimistic.totalValue || 0,
-        lastContact: full.lastContact || full.updatedAt || optimistic.lastContact,
-        unreadNotifications: full.unreadNotifications ?? optimistic.unreadNotifications ?? 0,
-        quickbooksSynced: full.quickbooksSynced ?? optimistic.quickbooksSynced,
-        estimatesSent: full.estimatesSent ?? optimistic.estimatesSent,
-        estimatesViewed: full.estimatesViewed ?? optimistic.estimatesViewed,
-      };
-
-      setClients(prev => prev.map(c => (c.id === optimistic.id ? replaced : c)));
-    } catch (e) {
-      // ignore - keep optimistic
-    }
+  const refreshData = async () => {
+    setRefreshing(true);
+    await loadData();
   };
 
   const sendNotification = async (clientId: string, type: 'email' | 'sms', message: string) => {
@@ -295,7 +285,6 @@ export default function ClientsPage() {
         body: JSON.stringify(payload)
       });
 
-      // Add notification to list
       const newNotification: Notification = {
         id: Date.now().toString(),
         type,
@@ -309,7 +298,7 @@ export default function ClientsPage() {
 
       setNotifications(prev => [newNotification, ...prev]);
     } catch (error) {
-      // Handle error silently or show user feedback
+      // Handle error silently
     }
   };
 
@@ -323,13 +312,14 @@ export default function ClientsPage() {
         notif.id === notificationId ? { ...notif, read: true } : notif
       ));
     } catch (error) {
-      // Handle error silently or show user feedback
+      // Handle error silently
     }
   };
 
   const filteredClients = clients.filter(client =>
     client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    client.email.toLowerCase().includes(searchTerm.toLowerCase())
+    client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (client.company && client.company.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const unreadNotifications = notifications.filter(n => !n.read).length;
@@ -340,7 +330,10 @@ export default function ClientsPage() {
     leads: clients.filter(c => c.status === 'lead').length,
     totalValue: clients.reduce((sum, c) => sum + c.totalValue, 0),
     totalNotifications: unreadNotifications,
-    estimatesViewed: clients.reduce((sum, c) => sum + (c.estimatesViewed || 0), 0)
+    estimatesViewed: clients.reduce((sum, c) => sum + (c.estimatesViewed || 0), 0),
+    clients: clients.filter(c => c.contactType === 'client').length,
+    subcontractors: clients.filter(c => c.contactType === 'subcontractor').length,
+    vendors: clients.filter(c => c.contactType === 'vendor').length,
   };
 
   const getStatusIcon = (status: string) => {
@@ -349,6 +342,17 @@ export default function ClientsPage() {
       case 'lead': return <ClockIcon className="h-4 w-4 text-yellow-500" />;
       case 'inactive': return <ExclamationTriangleIcon className="h-4 w-4 text-red-500" />;
       default: return <ClockIcon className="h-4 w-4 text-gray-500" />;
+    }
+  };
+
+  const getContactTypeColor = (type: string) => {
+    switch (type) {
+      case 'client': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'subcontractor': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'vendor': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+      case 'contributor': return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
+      case 'team': return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   };
 
@@ -364,228 +368,247 @@ export default function ClientsPage() {
 
   if (loading) {
     return (
-      <div className={simple.page()}>
-        <div className={simple.loading.container}>
-          <div className={`${simple.loading.spinner} h-8 w-8`} />
-          <p className={simple.text.body('mt-4')}>Loading clients...</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+          <p className="mt-4 text-lg text-slate-600 dark:text-slate-400">Loading contacts...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={simple.page()}>
-      {/* Header */}
-  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
-        <div className="flex items-center gap-4">
-          <div>
-            <h1 className={simple.text.title('flex items-center gap-3')}>
-              <UserGroupIcon className="h-8 w-8 text-blue-600" />
-              Clients
-            </h1>
-            <p className={simple.text.body()}>Manage client relationships and communications</p>
-          </div>
-        </div>
-
-  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-          {/* Notifications Button */}
-          <button
-            onClick={() => setShowNotifications(!showNotifications)}
-            className={simple.button('secondary', 'relative flex items-center gap-2 w-full sm:w-auto')}
-            aria-expanded={showNotifications}
-          >
-            <BellIcon className="h-4 w-4" />
-            Notifications
-            {unreadNotifications > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                {unreadNotifications}
-              </span>
-            )}
-          </button>
-
-          <div>
-            <button
-              onClick={() => setShowCreateSlideOver(true)}
-              className={simple.button('primary', 'flex items-center gap-2 w-full sm:w-auto')}
-            >
-              <PlusIcon className="h-4 w-4" />
-              Add
-            </button>
-          </div>
-        </div>
-      </div>
-
-        <CreateContactSlideOver
-          open={showCreateSlideOver}
-          onClose={() => setShowCreateSlideOver(false)}
-          onCreated={handleCreated}
-        />
-
-      {/* Notifications Panel */}
-      {showNotifications && (
-        <div className={`${simple.card('mb-6')} max-h-96 overflow-y-auto`}>
-          <div className={simple.section()}>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className={simple.text.subtitle('flex items-center gap-2')}>
-                <BellIcon className="h-5 w-5" />
-                Recent Notifications
-              </h3>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+      {/* Success Message Banner */}
+      {showSuccessMessage && (
+        <div className="fixed top-4 left-4 right-4 z-50 max-w-md mx-auto">
+          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4 shadow-lg">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <CheckCircleIconSolid className="h-5 w-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-green-900 dark:text-green-100">
+                  Contact Created Successfully!
+                </h3>
+                <p className="text-sm text-green-700 dark:text-green-200 mt-1">
+                  Your new contact has been added and all integrations are being set up.
+                </p>
+              </div>
               <button
-                onClick={() => setShowNotifications(false)}
-                className="text-gray-400 hover:text-gray-600"
+                onClick={() => setShowSuccessMessage(false)}
+                className="text-green-400 hover:text-green-600 dark:hover:text-green-300"
               >
                 ✕
               </button>
             </div>
-
-            {notifications.length > 0 ? (
-              <div className="space-y-3">
-                {notifications.slice(0, 10).map((notification) => (
-                  <div
-                    key={notification.id}
-                    className={`flex items-start gap-3 p-3 rounded-lg border ${
-                      notification.read
-                        ? 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
-                        : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
-                    }`}
-                  >
-                    {getNotificationIcon(notification.type)}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <p className="font-medium text-sm text-gray-900 dark:text-white">
-                          {notification.title}
-                        </p>
-                        {!notification.read && (
-                          <button
-                            onClick={() => markNotificationRead(notification.id)}
-                            className="text-blue-600 hover:text-blue-700 text-sm"
-                          >
-                            Mark Read
-                          </button>
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                        {notification.message}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {new Date(notification.timestamp).toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className={simple.empty.container}>
-                <BellIcon className={simple.empty.icon} />
-                <p className={simple.empty.description}>No notifications yet</p>
-              </div>
-            )}
           </div>
         </div>
       )}
 
-      {/* Stats Grid - mobile-first stacked */}
-      <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8`}>
-        <div className={`${simple.card()} w-full`}>
-          <div className={simple.section('flex items-center justify-between')}>
-            <div>
-              <p className={simple.text.small('mb-1')}>Total Clients</p>
-              <p className={simple.text.title('text-2xl')}>{stats.total}</p>
+      {/* Mobile-First Header */}
+      <div className="sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 z-40">
+        <div className="px-4 py-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-xl">
+                <UserGroupIcon className="h-6 w-6 text-orange-600" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+                  Contacts
+                </h1>
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  {stats.total} total contacts
+                </p>
+              </div>
             </div>
-            <UserGroupIcon className="h-8 w-8 text-blue-600 opacity-80" />
-          </div>
-  </div>
 
-  <div className={`${simple.card()} w-full`}>
-          <div className={simple.section('flex items-center justify-between')}>
-            <div>
-              <p className={simple.text.small('mb-1')}>Active</p>
-              <p className={simple.text.title('text-2xl')}>{stats.active}</p>
-            </div>
-            <CheckCircleIconSolid className="h-8 w-8 text-green-600 opacity-80" />
-          </div>
-  </div>
+            <div className="flex items-center gap-2">
+              {/* Notifications */}
+              <button
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="relative p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+              >
+                <BellIcon className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+                {unreadNotifications > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                    {unreadNotifications}
+                  </span>
+                )}
+              </button>
 
-  <div className={`${simple.card()} w-full`}>
-          <div className={simple.section('flex items-center justify-between')}>
-            <div>
-              <p className={simple.text.small('mb-1')}>Leads</p>
-              <p className={simple.text.title('text-2xl')}>{stats.leads}</p>
+              {/* Add Contact */}
+              <Link
+                href="/dashboard/clients/new"
+                className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-medium transition-colors"
+              >
+                <PlusIcon className="h-4 w-4" />
+                <span className="hidden sm:inline">Add Contact</span>
+              </Link>
             </div>
-            <ClockIcon className="h-8 w-8 text-yellow-600 opacity-80" />
           </div>
-  </div>
 
-  <div className={`${simple.card()} w-full`}>
-          <div className={simple.section('flex items-center justify-between')}>
-            <div>
-              <p className={simple.text.small('mb-1')}>Total Value</p>
-              <p className={simple.text.title('text-2xl')}>${(stats.totalValue / 1000).toFixed(0)}k</p>
-            </div>
-            <CurrencyDollarIcon className="h-8 w-8 text-green-600 opacity-80" />
-          </div>
-        </div>
-
-        <div className={simple.card()}>
-          <div className={simple.section('flex items-center justify-between')}>
-            <div>
-              <p className={simple.text.small('mb-1')}>Notifications</p>
-              <p className={simple.text.title('text-2xl')}>{stats.totalNotifications}</p>
-            </div>
-            <BellIconSolid className="h-8 w-8 text-red-600 opacity-80" />
-          </div>
-        </div>
-
-        <div className={`${simple.card()} w-full`}>
-          <div className={simple.section('flex items-center justify-between')}>
-            <div>
-              <p className={simple.text.small('mb-1')}>Notifications</p>
-              <p className={simple.text.title('text-2xl')}>{stats.totalNotifications}</p>
-            </div>
-            <BellIconSolid className="h-8 w-8 text-red-600 opacity-80" />
+          {/* Search Bar */}
+          <div className="relative">
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search contacts..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 bg-slate-100 dark:bg-slate-800 border-0 rounded-xl text-slate-900 dark:text-white placeholder-slate-500 focus:ring-2 focus:ring-orange-500 focus:bg-white dark:focus:bg-slate-700 transition-all"
+            />
           </div>
         </div>
       </div>
 
-      {/* Search and Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div className="flex-1 relative max-w-md">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search clients..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className={simple.input('pl-10')}
-          />
+      {/* Notifications Panel */}
+      {showNotifications && (
+        <div className="fixed inset-x-0 top-24 z-50 mx-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 max-h-96 overflow-hidden">
+            <div className="p-4 border-b border-slate-200 dark:border-slate-700">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-slate-900 dark:text-white">Notifications</h3>
+                <button
+                  onClick={() => setShowNotifications(false)}
+                  className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-y-auto max-h-80">
+              {notifications.length > 0 ? (
+                <div className="divide-y divide-slate-200 dark:divide-slate-700">
+                  {notifications.slice(0, 10).map((notification) => (
+                    <div
+                      key={notification.id}
+                      className={`p-4 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors ${
+                        !notification.read ? 'bg-orange-50 dark:bg-orange-900/10' : ''
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        {getNotificationIcon(notification.type)}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <p className="font-medium text-sm text-slate-900 dark:text-white">
+                              {notification.title}
+                            </p>
+                            {!notification.read && (
+                              <button
+                                onClick={() => markNotificationRead(notification.id)}
+                                className="text-orange-600 hover:text-orange-700 text-sm font-medium"
+                              >
+                                Mark Read
+                              </button>
+                            )}
+                          </div>
+                          <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                            {notification.message}
+                          </p>
+                          <p className="text-xs text-slate-500 mt-1">
+                            {new Date(notification.timestamp).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-8 text-center">
+                  <BellIcon className="h-12 w-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+                  <p className="text-slate-500 dark:text-slate-400">No notifications yet</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile-First Stats Grid */}
+      <div className="px-4 py-6">
+        <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-slate-900 dark:text-white">{stats.total}</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">Total</p>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-green-600">{stats.active}</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">Active</p>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-yellow-600">{stats.leads}</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">Leads</p>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-blue-600">{stats.clients}</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">Clients</p>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-purple-600">{stats.vendors}</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">Vendors</p>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-orange-600">${(stats.totalValue / 1000).toFixed(0)}k</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">Value</p>
+            </div>
+          </div>
         </div>
 
-        <div className="flex gap-2">
-          <button className={simple.button('secondary', 'flex items-center gap-2')}>
-            <ArrowPathIcon className="h-4 w-4" />
-            Refresh
-          </button>
-        </div>
-      </div>
-
-      {/* Client List */}
-      {filteredClients.length > 0 ? (
-  // Mobile-first: single column by default, expand to two/three columns on larger screens
-  <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4`}>
-          {filteredClients.map((client) => (
-            <div
-              key={client.id}
-              className={simple.card('hover:scale-[1.02] transition-all duration-200 group')}
+        {/* Quick Actions Bar */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={refreshData}
+              disabled={refreshing}
+              className="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl text-slate-700 dark:text-slate-300 transition-colors disabled:opacity-50"
             >
-              <div className={simple.section()}>
-                {/* Client Header - stacked mobile-first */}
-    <div className="flex flex-col sm:flex-row items-start gap-3 mb-4">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0">
+              <ArrowPathIcon className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+              <span className="text-sm font-medium">Refresh</span>
+            </button>
+          </div>
+
+          <div className="text-sm text-slate-600 dark:text-slate-400">
+            {filteredClients.length} of {stats.total} contacts
+          </div>
+        </div>
+
+        {/* Contact Cards Grid */}
+        {filteredClients.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredClients.map((client) => (
+              <div
+                key={client.id}
+                className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 hover:shadow-lg hover:-translate-y-1 transition-all duration-200"
+              >
+                {/* Contact Header */}
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
                     {client.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                   </div>
-                  <div className="flex-1">
-                    <h3 className={simple.text.subtitle('mb-1')}>{client.name}</h3>
-                    <div className="flex items-center gap-2">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-slate-900 dark:text-white truncate">
+                      {client.name}
+                    </h3>
+                    <div className="flex items-center gap-2 mt-1">
                       {getStatusIcon(client.status)}
                       <span className={`text-xs font-medium capitalize ${
                         client.status === 'active' ? 'text-green-600' :
@@ -593,146 +616,107 @@ export default function ClientsPage() {
                       }`}>
                         {client.status}
                       </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Contact Info */}
-                <div className={`${simple.spacing.xs} mb-4`}>
-                  <div className="flex items-center gap-2">
-                    <EnvelopeIcon className="h-4 w-4 text-gray-400" />
-                    <span className={simple.text.small()}>{client.email}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <PhoneIcon className="h-4 w-4 text-gray-400" />
-                    <span className={simple.text.small()}>{client.phone}</span>
-                  </div>
-                </div>
-
-                {/* Stats and QuickBooks Status */}
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <span className={simple.text.small()}>Projects</span>
-                    <p className="font-medium text-gray-900 dark:text-white">{client.projectsCount}</p>
-                  </div>
-                  <div>
-                    <span className={simple.text.small()}>Value</span>
-                    <p className="font-medium text-gray-900 dark:text-white">
-                      ${client.totalValue.toLocaleString()}
-                    </p>
-                  </div>
-                  <div>
-                    <span className={simple.text.small()}>Estimates</span>
-                    <p className="font-medium text-gray-900 dark:text-white">
-                      {client.estimatesSent || 0} sent
-                    </p>
-                  </div>
-                  <div>
-                    <span className={simple.text.small()}>QuickBooks</span>
-                    <div className="flex items-center gap-1">
-                      {client.quickbooksSynced ? (
-                        <>
-                          <CheckCircleIconSolid className="h-4 w-4 text-green-500" />
-                          <span className="text-xs text-green-600">Synced</span>
-                        </>
-                      ) : (
-                        <>
-                          <ExclamationTriangleIcon className="h-4 w-4 text-yellow-500" />
-                          <span className="text-xs text-yellow-600">Not synced</span>
-                        </>
+                      {client.contactType && (
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getContactTypeColor(client.contactType)}`}>
+                          {client.contactType}
+                        </span>
                       )}
                     </div>
                   </div>
                 </div>
 
-                {/* Last Activity */}
-                <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center justify-between">
-                    <span className={simple.text.small()}>
-                      Last contact: {client.lastContact ? new Date(client.lastContact).toLocaleDateString() : 'Never'}
-                    </span>
-                    {client.unreadNotifications && client.unreadNotifications > 0 && (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-xs rounded-full">
-                        <BellIcon className="h-3 w-3" />
-                        {client.unreadNotifications}
-                      </span>
-                    )}
+                {/* Contact Info */}
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                    <EnvelopeIcon className="h-4 w-4 flex-shrink-0" />
+                    <span className="truncate">{client.email || 'No email'}</span>
                   </div>
+                  <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                    <PhoneIcon className="h-4 w-4 flex-shrink-0" />
+                    <span className="truncate">{client.phone || 'No phone'}</span>
+                  </div>
+                </div>
 
-                  {/* Quick Actions - mobile-first stacked buttons */}
-                  <div className="flex flex-col sm:flex-row gap-2 mt-3">
+                {/* Stats */}
+                <div className="grid grid-cols-2 gap-4 mb-4 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
+                  <div className="text-center">
+                    <p className="text-lg font-bold text-slate-900 dark:text-white">{client.projectsCount}</p>
+                    <p className="text-xs text-slate-600 dark:text-slate-400">Projects</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-lg font-bold text-slate-900 dark:text-white">
+                      ${(client.totalValue / 1000).toFixed(0)}k
+                    </p>
+                    <p className="text-xs text-slate-600 dark:text-slate-400">Value</p>
+                  </div>
+                </div>
+
+                {/* Quick Actions */}
+                <div className="flex flex-col gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={() => sendNotification(client.id, 'email', 'Following up on your project...')}
-                      className="w-full sm:w-auto text-left px-3 py-2 rounded-md bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 text-sm flex items-center gap-2"
+                      className="flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-sm font-medium transition-colors"
                     >
-                      <EnvelopeIcon className="h-4 w-4 text-blue-600" />
-                      <span>Send Email</span>
+                      <EnvelopeIcon className="h-4 w-4" />
+                      Email
                     </button>
 
                     <button
                       onClick={() => sendNotification(client.id, 'sms', 'Hi! Just checking in on your project.')}
-                      className="w-full sm:w-auto text-left px-3 py-2 rounded-md bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 text-sm flex items-center gap-2"
+                      className="flex items-center justify-center gap-2 px-3 py-2 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg text-sm font-medium transition-colors"
                     >
-                      <ChatBubbleLeftRightIcon className="h-4 w-4 text-green-600" />
-                      <span>Send SMS</span>
+                      <ChatBubbleLeftRightIcon className="h-4 w-4" />
+                      SMS
                     </button>
-
-                    {!client.quickbooksSynced && (
-                      <button
-                        onClick={() => syncToQuickBooks(client.id)}
-                        disabled={syncingClient === client.id}
-                        className="w-full sm:w-auto text-left px-3 py-2 rounded-md bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 text-sm flex items-center gap-2 disabled:opacity-50"
-                      >
-                        {syncingClient === client.id ? (
-                          <ArrowPathIcon className="h-4 w-4 animate-spin text-purple-600" />
-                        ) : (
-                          <BuildingStorefrontIcon className="h-4 w-4 text-purple-600" />
-                        )}
-                        <span>Sync QuickBooks</span>
-                      </button>
-                    )}
                   </div>
 
-                  {/* Action Buttons - stacked on mobile */}
-                  <div className="flex flex-col sm:flex-row gap-2 mt-4">
-                    <Link
-                      href={`/dashboard/clients/${client.id}`}
-                      className={`${simple.button('secondary', 'w-full sm:flex-1 text-center')}`}
-                    >
-                      View Details
-                    </Link>
-                    <Link
-                      href={`/dashboard/clients/${client.id}/estimates`}
-                      className={`${simple.button('secondary', 'w-full sm:flex-1 text-center')}`}
-                    >
-                      Estimates
-                    </Link>
-                  </div>
+                  <Link
+                    href={`/dashboard/clients/${client.id}`}
+                    className="w-full text-center px-3 py-2 bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100 dark:hover:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-lg text-sm font-medium transition-colors"
+                  >
+                    View Details
+                  </Link>
+                </div>
+
+                {/* Last Contact & Notifications */}
+                <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                  <span className="text-xs text-slate-500">
+                    {client.lastContact ? `Last: ${new Date(client.lastContact).toLocaleDateString()}` : 'Never contacted'}
+                  </span>
+                  {client.unreadNotifications && client.unreadNotifications > 0 && (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-xs rounded-full font-medium">
+                      <BellIcon className="h-3 w-3" />
+                      {client.unreadNotifications}
+                    </span>
+                  )}
                 </div>
               </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <div className="w-24 h-24 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+              <UserGroupIcon className="h-12 w-12 text-slate-400" />
             </div>
-          ))}
-        </div>
-      ) : (
-        <div className={simple.empty.container}>
-          <UserGroupIcon className={simple.empty.icon} />
-          <h3 className={simple.empty.title}>
-            {searchTerm ? 'No clients found' : 'No clients yet'}
-          </h3>
-          <p className={simple.empty.description}>
-            {searchTerm ? 'Try adjusting your search terms' : 'Get started by adding your first client'}
-          </p>
-          {!searchTerm && (
-            <Link
-              href="/dashboard/clients/new"
-              className={simple.button('primary', 'inline-flex items-center gap-2')}
-            >
-              <PlusIcon className="h-4 w-4" />
-              Add Your First Client
-            </Link>
-          )}
-        </div>
-      )}
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
+              {searchTerm ? 'No contacts found' : 'No contacts yet'}
+            </h3>
+            <p className="text-slate-600 dark:text-slate-400 mb-6">
+              {searchTerm ? 'Try adjusting your search terms' : 'Get started by adding your first contact'}
+            </p>
+            {!searchTerm && (
+              <Link
+                href="/dashboard/clients/new"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-medium transition-colors"
+              >
+                <PlusIcon className="h-5 w-5" />
+                Add Your First Contact
+              </Link>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

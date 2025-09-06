@@ -80,7 +80,32 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Providers>
               <div className="flex min-h-screen flex-col bg-[var(--bg)] text-[var(--text)]">
                 <ConditionalTopBar />
-                <main className="flex-1">{children}</main>
+
+                {/* Mobile-first container: stacked content, full-width on small devices */}
+                <main className="flex-1 w-full px-4 sm:px-6 md:px-8 py-4">{children}</main>
+
+                {/* Mobile bottom navigation (stacked) */}
+                <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[var(--bg)] border-t border-[var(--border)] md:hidden">
+                  <div className="max-w-4xl mx-auto px-4 py-2 flex items-center justify-between">
+                    <a href="/dashboard" className="flex flex-col items-center text-xs text-secondary hover:text-amber-600">
+                      <svg className="h-5 w-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M13 5v6h6"/></svg>
+                      Dashboard
+                    </a>
+                    <a href="/dashboard/contacts" className="flex flex-col items-center text-xs text-secondary hover:text-amber-600">
+                      <svg className="h-5 w-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M5.121 17.804A6 6 0 1118.879 6.196 6 6 0 015.121 17.804z"/></svg>
+                      Contacts
+                    </a>
+                    <a href="/dashboard/projects" className="flex flex-col items-center text-xs text-secondary hover:text-amber-600">
+                      <svg className="h-5 w-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M3 7h18M3 12h18M3 17h18"/></svg>
+                      Projects
+                    </a>
+                    <a href="/dashboard/quick-actions" className="flex flex-col items-center text-xs text-secondary hover:text-amber-600">
+                      <svg className="h-5 w-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/></svg>
+                      Quick
+                    </a>
+                  </div>
+                </nav>
+
                 <ConditionalFooter>
                   {/* Minimal Professional Footer */}
                   <footer className="border-t border-[var(--border)] mt-auto">

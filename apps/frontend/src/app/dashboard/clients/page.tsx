@@ -23,6 +23,7 @@ import {
 } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import CreateContactSlideOver from '@/components/clients/CreateContactSlideOver';
 
 interface Client {
   id: string;
@@ -58,6 +59,7 @@ export default function ClientsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
   const [syncingClient, setSyncingClient] = useState<string | null>(null);
+  const [showCreate, setShowCreate] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -229,6 +231,32 @@ export default function ClientsPage() {
 
   const unreadNotifications = notifications.filter(n => !n.read).length;
 
+  const handleCreated = (created: Record<string, unknown>) => {
+    // Normalize created payload into Client shape as best-effort and optimistically add to state
+    const d = created as unknown;
+  const asRecord = (obj: unknown): Record<string, unknown> => (typeof obj === 'object' && obj !== null ? obj as Record<string, unknown> : {});
+  const rec = asRecord(d);
+  const fallbackName = ((((rec.firstName as string | undefined) ?? '') + ' ' + ((rec.lastName as string | undefined) ?? '')).trim()) || (rec.company as string | undefined) || 'New Client';
+  const name = (rec.name as string | undefined) ?? fallbackName;
+    const newClient: Client = {
+      id: (rec.id as string | undefined) ?? String(Date.now()),
+      name,
+      email: (rec.email as string | undefined) ?? '',
+      phone: (rec.phone as string | undefined) ?? '',
+      status: (rec.status as Client['status']) ?? 'active',
+      projectsCount: Number((rec.projectsCount as number | string | undefined) ?? 0),
+      totalValue: Number((rec.totalValue as number | string | undefined) ?? 0),
+      lastContact: (rec.lastContact as string | undefined) ?? undefined,
+      unreadNotifications: Number((rec.unreadNotifications as number | string | undefined) ?? 0),
+      quickbooksSynced: Boolean((rec.quickbooksSynced as boolean | undefined) ?? false),
+      estimatesSent: Number((rec.estimatesSent as number | string | undefined) ?? 0),
+      estimatesViewed: Number((rec.estimatesViewed as number | string | undefined) ?? 0),
+      lastEstimateViewed: (rec.lastEstimateViewed as string | undefined) ?? undefined,
+    };
+
+    setClients(prev => [newClient, ...prev]);
+  };
+
   const stats = {
     total: clients.length,
     active: clients.filter(c => c.status === 'active').length,
@@ -276,9 +304,9 @@ export default function ClientsPage() {
           <div>
             <h1 className={simple.text.title('flex items-center gap-3')}>
               <UserGroupIcon className="h-8 w-8 text-blue-600" />
-              Clients
+              Contacts
             </h1>
-            <p className={simple.text.body()}>Manage client relationships and communications</p>
+            <p className={simple.text.body()}>Manage contacts, vendors, and collaborators</p>
           </div>
         </div>
 
@@ -297,13 +325,10 @@ export default function ClientsPage() {
             )}
           </button>
 
-          <Link
-            href="/dashboard/clients/new"
-            className={simple.button('primary', 'flex items-center gap-2')}
-          >
+          <button onClick={() => setShowCreate(true)} className={simple.button('primary', 'flex items-center gap-2')}>
             <PlusIcon className="h-4 w-4" />
-            Add Client
-          </Link>
+            Add Contact
+          </button>
         </div>
       </div>
 
@@ -460,9 +485,22 @@ export default function ClientsPage() {
                       {client.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                     </div>
                     <div>
-                      <h3 className={simple.text.subtitle('mb-1 group-hover:text-blue-600 transition-colors')}>
-                        {client.name}
-                      </h3>
+                      <div className="flex items-center gap-3">
+                        <h3 className={simple.text.subtitle('mb-1 group-hover:text-blue-600 transition-colors')}>
+                          {client.name}
+                        </h3>
+                        <select
+                          aria-label="Contact type"
+                          defaultValue="client"
+                          className="text-xs bg-transparent border rounded px-2 py-1"
+                          onChange={() => { /* type selection can be wired later */ }}
+                        >
+                          <option value="client">Client</option>
+                          <option value="vendor">Vendor</option>
+                          <option value="subcontractor">Subcontractor</option>
+                          <option value="lead">Lead</option>
+                        </select>
+                      </div>
                       <div className="flex items-center gap-2">
                         {getStatusIcon(client.status)}
                         <span className={`text-xs font-medium capitalize ${
@@ -574,13 +612,13 @@ export default function ClientsPage() {
                 {/* Action Buttons */}
                 <div className="flex gap-2 mt-4">
                   <Link
-                    href={`/dashboard/clients/${client.id}`}
+                    href={`/dashboard/contacts/${client.id}`}
                     className={simple.button('secondary', 'flex-1 text-center')}
                   >
                     View Details
                   </Link>
                   <Link
-                    href={`/dashboard/clients/${client.id}/estimates`}
+                    href={`/dashboard/contacts/${client.id}/estimates`}
                     className={simple.button('secondary', 'flex-1 text-center')}
                   >
                     Estimates
@@ -600,16 +638,16 @@ export default function ClientsPage() {
             {searchTerm ? 'Try adjusting your search terms' : 'Get started by adding your first client'}
           </p>
           {!searchTerm && (
-            <Link
-              href="/dashboard/clients/new"
-              className={simple.button('primary', 'inline-flex items-center gap-2')}
-            >
+            <button onClick={() => setShowCreate(true)} className={simple.button('primary', 'inline-flex items-center gap-2')}>
               <PlusIcon className="h-4 w-4" />
               Add Your First Client
-            </Link>
+            </button>
           )}
         </div>
       )}
+
+      {/* Create contact slide-over (optimistic create) */}
+      <CreateContactSlideOver open={showCreate} onClose={() => setShowCreate(false)} onCreated={(c) => { handleCreated(c); setShowCreate(false); }} />
     </div>
   );
 }

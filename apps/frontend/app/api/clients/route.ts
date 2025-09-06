@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { clientStorage } from '@/lib/shared-storage';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
 
@@ -7,6 +8,10 @@ export async function GET(request: NextRequest) {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
 
     if (!token) {
+      if (process.env.NODE_ENV !== 'production') {
+        return NextResponse.json({ clients: clientStorage.getAll() });
+      }
+
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -42,12 +47,17 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
+    const body = await request.json();
 
     if (!token) {
+      if (process.env.NODE_ENV !== 'production') {
+        // Create contact using shared storage
+        const newContact = clientStorage.create(body);
+        return NextResponse.json(newContact, { status: 201 });
+      }
+
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-
-    const body = await request.json();
 
     const response = await fetch(`${BACKEND_URL}/api/clients`, {
       method: 'POST',

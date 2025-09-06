@@ -40,11 +40,11 @@ export default function QuickActions({ isOpen, onToggle }: QuickActionsProps) {
       description: 'Start a new construction project',
     },
     {
-      name: 'Add Client',
-      href: '/dashboard/clients/new',
+  name: 'Add Contact',
+  href: '/dashboard/contacts/new',
       icon: UserGroupIcon,
       color: 'bg-green-500',
-      description: 'Register a new client',
+  description: 'Register a new contact (client, vendor, or collaborator)',
     },
     {
       name: 'Schedule Meeting',
@@ -68,11 +68,11 @@ export default function QuickActions({ isOpen, onToggle }: QuickActionsProps) {
       description: 'Design floor plans and layouts',
     },
     {
-      name: 'Send Message',
-      href: '/dashboard/inbox?compose=1',
+  name: 'Send Message',
+  href: '/dashboard/inbox?compose=1',
       icon: ChatBubbleLeftRightIcon,
       color: 'bg-indigo-500',
-      description: 'Message a client or team member',
+  description: 'Message a contact or team member',
     },
     {
       name: 'Generate Invoice',
@@ -102,10 +102,10 @@ export default function QuickActions({ isOpen, onToggle }: QuickActionsProps) {
       },
     },
     {
-      name: 'Call Client',
+  name: 'Call Contact',
       icon: PhoneIcon,
       color: 'bg-teal-500',
-      description: 'Quick call to client',
+  description: 'Quick call to contact',
       onClick: () => {
         // Open phone dialer or show client list
         window.location.href = 'tel:';

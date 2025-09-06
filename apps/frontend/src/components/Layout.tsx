@@ -199,8 +199,8 @@ export default function Layout({ children }: LayoutProps) {
           badge: counts?.projects,
         },
         {
-          name: 'Clients',
-          href: '/dashboard/clients',
+          name: 'Contacts',
+          href: '/dashboard/contacts',
           icon: UserGroupIcon,
           badge: counts?.clients,
         },
@@ -875,8 +875,8 @@ function FooterCopilot() {
                   href: '/dashboard/projects',
                   icon: ClipboardDocumentListIcon,
                 }, {
-                  name: 'Clients',
-                  href: '/dashboard/clients',
+                  name: 'Contacts',
+                  href: '/dashboard/contacts',
                   icon: UserGroupIcon,
                 }, {
                   name: 'Calendar',
@@ -929,7 +929,7 @@ function FooterCopilot() {
                   </span>
                   {[
                     { label: 'Projects', action: 'Show my remodeling projects' },
-                    { label: 'Clients', action: 'Show my clients' },
+                    { label: 'Contacts', action: 'Show my contacts' },
                     { label: 'New Kitchen', action: 'Create a new kitchen remodel project' },
                     { label: 'New Bathroom', action: 'Create a new bathroom remodel project' },
                     {
@@ -1052,7 +1052,7 @@ function QuickCreate() {
           <div className="absolute right-0 mt-2 w-44 rounded-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg py-1 z-20 text-sm overflow-hidden transform transition-all duration-200 scale-100 opacity-100">
             {[
               { label: 'Project', href: '/dashboard/projects?new=1' },
-              { label: 'Client', href: '/dashboard/clients?new=1' },
+              { label: 'Contact', href: '/dashboard/contacts?new=1' },
               { label: 'Design', href: '/dashboard/designer?view=new' },
               { label: 'Message', href: '/dashboard/inbox?compose=1' },
             ].map(item => (

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { clientStorage } from '@/lib/shared-storage';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
 
@@ -7,34 +8,44 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Return mock data for testing the UI
-    const mockClient = {
-      _id: params.id,
-      firstName: "John",
-      lastName: "Doe",
-      email: "john.doe@example.com",
-      phone: "(555) 123-4567",
-      company: "Doe Construction",
-      address: {
-        street: "123 Main St",
-        city: "Springfield",
-        state: "IL",
-        zipCode: "62701",
-        country: "USA"
-      },
-      notes: "Important client with multiple ongoing projects.",
-      tags: ["VIP", "Commercial", "Returning"],
-      status: "Active",
-      source: "Website",
-      createdAt: "2024-01-15T08:00:00.000Z",
-      updatedAt: "2024-09-04T18:00:00.000Z",
-      lastContactDate: "2024-09-01T10:30:00.000Z",
-      totalProjects: 5,
-      totalValue: 125000,
-      averageProjectValue: 25000
-    };
+    const token = request.headers.get('authorization')?.replace('Bearer ', '');
 
-    return NextResponse.json(mockClient);
+    if (!token) {
+      if (process.env.NODE_ENV !== 'production') {
+        // Find the client in our shared storage
+        const client = clientStorage.getById(params.id);
+        
+        if (client) {
+          return NextResponse.json(client);
+        }
+
+        // Return 404 if not found
+        return NextResponse.json(
+          { error: 'Client not found' },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const response = await fetch(`${BACKEND_URL}/api/clients/${params.id}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      return NextResponse.json(
+        { error: 'Client not found' },
+        { status: response.status }
+      );
+    }
+
+    const data = await response.json();
+    return NextResponse.json(data);
   } catch (error) {
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -49,32 +60,129 @@ export async function PATCH(
 ) {
   try {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
+    const body = await request.json();
 
-    if (!token) {
+    // Enhanced authentication logic for development mode
+    if (!token || token === 'null' || token === 'undefined' || token.length <= 10) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('[DEV MODE] Updating contact in frontend storage:', params.id);
+        
+        // Find the existing contact
+        const existingContact = clientStorage.getById(params.id);
+        
+        if (!existingContact) {
+          return NextResponse.json(
+            { error: 'Contact not found' },
+            { status: 404 }
+          );
+        }
+
+        // Update the contact with new data
+        const updatedContact = {
+          ...existingContact,
+          ...body,
+          id: params.id, // Preserve the ID
+          updatedAt: new Date().toISOString(),
+        };
+
+        // Update in storage
+        const updated = clientStorage.update(params.id, updatedContact);
+        
+        if (updated) {
+          console.log('[DEV MODE] Contact updated successfully:', updated);
+          return NextResponse.json(updated);
+        } else {
+          return NextResponse.json(
+            { error: 'Failed to update contact' },
+            { status: 500 }
+          );
+        }
+      }
+
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
+    // For authenticated users, try backend first
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/clients/${params.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
 
-    const response = await fetch(`${BACKEND_URL}/api/clients/${params.id}`, {
-      method: 'PATCH',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    });
+      if (response.ok) {
+        const data = await response.json();
+        return NextResponse.json(data);
+      }
 
-    if (!response.ok) {
+      // If backend fails, fall back to frontend storage in development
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('[DEV MODE] Backend update failed, using frontend storage fallback');
+        
+        const existingContact = clientStorage.getById(params.id);
+        
+        if (!existingContact) {
+          return NextResponse.json(
+            { error: 'Contact not found' },
+            { status: 404 }
+          );
+        }
+
+        const updatedContact = {
+          ...existingContact,
+          ...body,
+          id: params.id,
+          updatedAt: new Date().toISOString(),
+        };
+
+        const updated = clientStorage.update(params.id, updatedContact);
+        
+        if (updated) {
+          console.log('[DEV MODE] Contact updated successfully via fallback:', updated);
+          return NextResponse.json(updated);
+        }
+      }
+
       return NextResponse.json(
         { error: 'Failed to update client' },
         { status: response.status }
       );
-    }
+    } catch (backendError) {
+      // Backend connection failed, use frontend storage in development
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('[DEV MODE] Backend unreachable, using frontend storage:', backendError);
+        
+        const existingContact = clientStorage.getById(params.id);
+        
+        if (!existingContact) {
+          return NextResponse.json(
+            { error: 'Contact not found' },
+            { status: 404 }
+          );
+        }
 
-    const data = await response.json();
-    return NextResponse.json(data);
+        const updatedContact = {
+          ...existingContact,
+          ...body,
+          id: params.id,
+          updatedAt: new Date().toISOString(),
+        };
+
+        const updated = clientStorage.update(params.id, updatedContact);
+        
+        if (updated) {
+          console.log('[DEV MODE] Contact updated successfully via fallback:', updated);
+          return NextResponse.json(updated);
+        }
+      }
+
+      throw backendError;
+    }
   } catch (error) {
+    console.error('[API] Error updating contact:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

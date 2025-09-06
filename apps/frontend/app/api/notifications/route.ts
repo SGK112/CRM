@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+export const dynamic = 'force-dynamic';
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 const DEV_MOCK_NOTIFICATIONS = [
   {
@@ -11,7 +13,7 @@ const DEV_MOCK_NOTIFICATIONS = [
     timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
     read: false,
     clientId: '1',
-    clientName: 'Johnson Family'
+    clientName: 'Johnson Family',
   },
   {
     id: '2',
@@ -21,13 +23,13 @@ const DEV_MOCK_NOTIFICATIONS = [
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
     read: true,
     clientId: '2',
-    clientName: 'Martinez Construction'
-  }
+    clientName: 'Martinez Construction',
+  },
 ];
 
 export async function GET(request: NextRequest) {
   try {
-    const token = request.headers.get('authorization')?.replace('Bearer ', '');
+    const token = request.headers.get('authorization')?.replace('Bearer ', '') || request.cookies.get('accessToken')?.value;
 
     if (!token) {
       if (process.env.NODE_ENV !== 'production') {
@@ -40,20 +42,28 @@ export async function GET(request: NextRequest) {
     const response = await fetch(`${BACKEND_URL}/api/notifications`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
     });
 
     if (!response.ok) {
-      // Return mock data for development if backend is not available
-      return NextResponse.json({ notifications: DEV_MOCK_NOTIFICATIONS });
+      // If backend fails, return development mock data when possible
+      if (process.env.NODE_ENV !== 'production') {
+        return NextResponse.json({ notifications: DEV_MOCK_NOTIFICATIONS });
+      }
+
+      const err = await response.json().catch(() => ({ error: 'Failed to fetch notifications' }));
+      return NextResponse.json(err, { status: response.status });
     }
 
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    // Return mock data for development
-    return NextResponse.json({ notifications: DEV_MOCK_NOTIFICATIONS });
+    if (process.env.NODE_ENV !== 'production') {
+      return NextResponse.json({ notifications: DEV_MOCK_NOTIFICATIONS });
+    }
+
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }

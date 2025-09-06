@@ -161,11 +161,11 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className={simple.card()}>
+    <div className={simple.card()}>
           <div className={simple.section('flex items-center justify-between')}>
             <div>
-              <p className={simple.text.small('mb-1')}>Total Clients</p>
-              <p className={simple.text.title('text-2xl')}>{stats.totalClients}</p>
+      <p className={simple.text.small('mb-1')}>Total Contacts</p>
+      <p className={simple.text.title('text-2xl')}>{stats.totalClients}</p>
             </div>
             <UserGroupIcon className="h-8 w-8 text-blue-600 opacity-80" />
           </div>
@@ -244,13 +244,13 @@ export default function DashboardPage() {
         </Link>
 
         <Link
-          href="/dashboard/clients"
+          href="/dashboard/contacts"
           className={`${simple.card('hover:scale-[1.02] transition-transform')} text-center`}
         >
           <div className={simple.section()}>
             <UserGroupIcon className="h-8 w-8 mx-auto mb-3 text-green-600" />
-            <div className="font-medium text-gray-900 dark:text-white">Manage Clients</div>
-            <p className={simple.text.small('mt-1')}>View and manage client relationships</p>
+            <div className="font-medium text-gray-900 dark:text-white">Manage Contacts</div>
+            <p className={simple.text.small('mt-1')}>View and manage contacts, vendors, and collaborators</p>
           </div>
         </Link>
 

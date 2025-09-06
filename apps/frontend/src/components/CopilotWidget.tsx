@@ -132,7 +132,7 @@ export default function CopilotWidget() {
               </div>
             </div>
             <div className="flex flex-wrap gap-1">
-              {['/dashboard/projects', '/dashboard/clients', '/new-project'].map(s => (
+              {['/dashboard/projects', '/dashboard/contacts', '/new-project'].map(s => (
                 <button
                   key={s}
                   onClick={() => setCommandAndOpen(s)}

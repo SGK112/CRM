@@ -49,6 +49,32 @@ export interface ProjectData {
   propertyDetails?: string;
 }
 
+interface GenerateInsightsRequest {
+  projectType: string;
+  projectScope: string;
+  totalAmount: number;
+  items: AIEstimateItem[];
+  clientPreferences?: string;
+  timeline?: unknown;
+}
+
+interface MarketAnalysisResult {
+  averageCost: number;
+  costRange: { low: number; high: number };
+  marketTrends: string;
+  regionalFactors: string;
+  recommendations: string[];
+}
+
+interface TimelineEstimateResult {
+  optimistic: number;
+  realistic: number;
+  pessimistic: number;
+  complexity?: string;
+  phases?: unknown[];
+  riskFactors?: string[];
+}
+
 class AIEstimateService {
   private baseUrl = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3001';
 
@@ -80,10 +106,12 @@ class AIEstimateService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
-      return data.items || [];
-    } catch (error) {
-      console.error('Failed to generate AI estimate items:', error);
+      const raw = (await response.json()) as unknown;
+      if (!raw || typeof raw !== 'object') return this.getFallbackItems(projectData.projectType);
+      const items = (raw as Record<string, unknown>).items;
+      if (!Array.isArray(items)) return this.getFallbackItems(projectData.projectType);
+      return items as AIEstimateItem[];
+    } catch (_err) {
       return this.getFallbackItems(projectData.projectType);
     }
   }
@@ -91,14 +119,7 @@ class AIEstimateService {
   /**
    * Generate AI insights for an estimate
    */
-  async generateInsights(estimateData: {
-    projectType: string;
-    projectScope: string;
-    totalAmount: number;
-    items: any[];
-    clientPreferences?: string;
-    timeline?: any;
-  }): Promise<EstimateAIInsights> {
+  async generateInsights(estimateData: GenerateInsightsRequest): Promise<EstimateAIInsights> {
     try {
       const response = await fetch(`${this.baseUrl}/api/ai/estimates/generate-insights`, {
         method: 'POST',
@@ -110,18 +131,18 @@ class AIEstimateService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
-      return data.insights;
-    } catch (error) {
-      console.error('Failed to generate AI insights:', error);
-      return this.getFallbackInsights(estimateData);
+      const raw = (await response.json()) as unknown;
+  if (!raw || typeof raw !== 'object') return this.getFallbackInsights(estimateData);
+  return ((raw as Record<string, unknown>).insights as EstimateAIInsights) ?? this.getFallbackInsights(estimateData);
+    } catch (_err) {
+  return this.getFallbackInsights(estimateData);
     }
   }
 
   /**
    * Enhance existing descriptions with AI
    */
-  async enhanceDescriptions(items: any[]): Promise<any[]> {
+  async enhanceDescriptions(items: AIEstimateItem[]): Promise<AIEstimateItem[]> {
     try {
       const response = await fetch(`${this.baseUrl}/api/ai/estimates/enhance-descriptions`, {
         method: 'POST',
@@ -133,10 +154,10 @@ class AIEstimateService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
-      return data.items || items;
-    } catch (error) {
-      console.error('Failed to enhance descriptions:', error);
+      const raw = (await response.json()) as unknown;
+      const out = raw && typeof raw === 'object' ? (raw as Record<string, unknown>).items : undefined;
+      return Array.isArray(out) ? (out as AIEstimateItem[]) : items;
+    } catch (_err) {
       return items;
     }
   }
@@ -148,7 +169,7 @@ class AIEstimateService {
     projectType: string;
     projectScope: string;
     location?: string;
-  }): Promise<any> {
+  }): Promise<MarketAnalysisResult> {
     try {
       const response = await fetch(`${this.baseUrl}/api/ai/estimates/market-analysis`, {
         method: 'POST',
@@ -160,10 +181,17 @@ class AIEstimateService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
-      return data.analysis;
-    } catch (error) {
-      console.error('Failed to get market analysis:', error);
+      const raw = (await response.json()) as unknown;
+      const analysis = raw && typeof raw === 'object' ? (raw as Record<string, unknown>).analysis : undefined;
+      if (analysis && typeof analysis === 'object') return analysis as MarketAnalysisResult;
+      return {
+        averageCost: 35000,
+        costRange: { low: 25000, high: 55000 },
+        marketTrends: 'Market analysis unavailable',
+        regionalFactors: 'Regional data unavailable',
+        recommendations: ['Contact local suppliers for current pricing'],
+      };
+    } catch (_err) {
       return {
         averageCost: 35000,
         costRange: { low: 25000, high: 55000 },
@@ -181,7 +209,7 @@ class AIEstimateService {
     projectType: string;
     projectScope: string;
     totalAmount: number;
-  }): Promise<any> {
+  }): Promise<TimelineEstimateResult> {
     try {
       const response = await fetch(`${this.baseUrl}/api/ai/estimates/timeline-estimate`, {
         method: 'POST',
@@ -193,10 +221,18 @@ class AIEstimateService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
-      return data.timeline;
-    } catch (error) {
-      console.error('Failed to get timeline estimate:', error);
+      const raw = (await response.json()) as unknown;
+      const timeline = raw && typeof raw === 'object' ? (raw as Record<string, unknown>).timeline : undefined;
+      if (timeline && typeof timeline === 'object') return timeline as TimelineEstimateResult;
+      return {
+        optimistic: 14,
+        realistic: 21,
+        pessimistic: 35,
+        complexity: 'medium',
+        phases: [],
+        riskFactors: ['Standard project risks'],
+      };
+    } catch (_err) {
       return {
         optimistic: 14,
         realistic: 21,
@@ -224,9 +260,10 @@ class AIEstimateService {
       marketData: 0.15,
     };
 
-    const score = Object.entries(factors).reduce((total, [key, value]) => {
-      return total + value * weights[key as keyof typeof weights];
-    }, 0);
+    const score = (factors.itemDetailLevel * weights.itemDetailLevel +
+      factors.priceAccuracy * weights.priceAccuracy +
+      factors.scopeClarity * weights.scopeClarity +
+      factors.marketData * weights.marketData);
 
     return Math.min(1, Math.max(0, score));
   }
@@ -234,18 +271,20 @@ class AIEstimateService {
   /**
    * Analyze estimate completeness and provide recommendations
    */
-  analyzeEstimateCompleteness(items: any[]): {
+  analyzeEstimateCompleteness(items: AIEstimateItem[]): {
     completenessScore: number;
     missingCategories: string[];
     recommendations: string[];
   } {
-    const requiredCategories = ['labor', 'materials'];
-    const recommendedCategories = ['permits', 'overhead'];
+    const requiredCategories: AIEstimateItem['category'][] = ['labor', 'materials'];
+    const recommendedCategories: AIEstimateItem['category'][] = ['permits', 'overhead'];
     const presentCategories = Array.from(new Set(items.map(item => item.category)));
 
-    const missingRequired = requiredCategories.filter(cat => !presentCategories.includes(cat));
+    const missingRequired = requiredCategories.filter(
+      (cat) => !presentCategories.includes(cat)
+    );
     const missingRecommended = recommendedCategories.filter(
-      cat => !presentCategories.includes(cat)
+      (cat) => !presentCategories.includes(cat)
     );
 
     const completenessScore = 1 - (missingRequired.length * 0.3 + missingRecommended.length * 0.1);
@@ -259,7 +298,7 @@ class AIEstimateService {
         `Consider adding ${missingRecommended.join(', ')} for more accurate pricing`
       );
     }
-    if (items.length < 5) {
+  if (items.length < 5) {
       recommendations.push('Add more detailed line items for better accuracy');
     }
 
@@ -324,7 +363,7 @@ class AIEstimateService {
   /**
    * Fallback insights when AI service is unavailable
    */
-  private getFallbackInsights(estimateData: any): EstimateAIInsights {
+  private getFallbackInsights(estimateData: GenerateInsightsRequest): EstimateAIInsights {
     const marketVariance = (Math.random() - 0.5) * 0.2; // -10% to +10%
 
     return {
@@ -367,4 +406,9 @@ class AIEstimateService {
 }
 
 // Export singleton instance
-export const aiEstimateService = new AIEstimateService();
+// Lazily instantiate on the client to avoid server-side serialization during RSC render
+export const aiEstimateService = typeof window !== 'undefined' ? new AIEstimateService() : undefined;
+
+export function getAIEstimateService(): AIEstimateService | undefined {
+  return aiEstimateService;
+}
