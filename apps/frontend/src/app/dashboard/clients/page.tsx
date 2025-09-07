@@ -612,13 +612,13 @@ export default function ClientsPage() {
                 {/* Action Buttons */}
                 <div className="flex gap-2 mt-4">
                   <Link
-                    href={`/dashboard/contacts/${client.id}`}
+                    href={`/dashboard/clients/${client.id}/profile`}
                     className={simple.button('secondary', 'flex-1 text-center')}
                   >
-                    View Details
+                    View Profile
                   </Link>
                   <Link
-                    href={`/dashboard/contacts/${client.id}/estimates`}
+                    href={`/dashboard/clients/${client.id}/profile?tab=estimates`}
                     className={simple.button('secondary', 'flex-1 text-center')}
                   >
                     Estimates

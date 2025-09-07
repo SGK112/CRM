@@ -84,8 +84,8 @@ export default function SimpleCRMLayout({ children }: SimpleCRMLayoutProps) {
         { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
         { name: 'Inbox', href: '/dashboard/inbox', icon: EnvelopeIcon },
         {
-          name: 'Contacts',
-          href: '/dashboard/contacts',
+          name: 'Clients',
+          href: '/dashboard/clients',
           icon: UserGroupIcon,
           badge: counts?.clients,
         },

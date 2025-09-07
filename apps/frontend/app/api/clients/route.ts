@@ -10,32 +10,9 @@ export async function GET(request: NextRequest) {
     // Always try local storage first as fallback for production deployment issues
     const localClients = clientStorage.getAll();
 
-    // In development mode, always use local storage first
+    // In development mode, ALWAYS use local storage for better local testing
     if (process.env.NODE_ENV !== 'production') {
-      // If no token, definitely use local storage
-      if (!token) {
-        return NextResponse.json({ clients: localClients });
-      }
-      
-      // If token exists, try backend first, fall back to local storage
-      try {
-        const { searchParams } = new URL(request.url);
-        const queryString = searchParams.toString();
-        const url = queryString ? `${BACKEND_URL}/api/clients?${queryString}` : `${BACKEND_URL}/api/clients`;
-
-        const response = await fetch(url, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          return NextResponse.json(data);
-        }
-      } catch (error) {
-        // Backend failed, fall back to local storage
-      }
-      
-      // Fallback to local storage for development
+      // Always use local storage in development - no backend dependency
       return NextResponse.json({ clients: localClients });
     }
 
@@ -80,6 +57,12 @@ export async function POST(request: NextRequest) {
   try {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
     const body = await request.json();
+
+    // In development mode, ALWAYS use local storage for better local testing
+    if (process.env.NODE_ENV !== 'production') {
+      const newContact = clientStorage.create(body);
+      return NextResponse.json(newContact, { status: 201 });
+    }
 
     if (!token) {
       // Always allow creating clients in production without authentication

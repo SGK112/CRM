@@ -7,6 +7,12 @@ export async function GET(request: NextRequest) {
   try {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
 
+    // In development mode, ALWAYS use local storage for better local testing
+    if (process.env.NODE_ENV !== 'production') {
+      const clients = clientStorage.getAll();
+      return NextResponse.json({ count: clients.length });
+    }
+
     // Enhanced authentication logic for development mode
     if (!token || token === 'null' || token === 'undefined' || token.length <= 10) {
       // Always use local storage in production without valid auth

@@ -672,10 +672,10 @@ export default function ContactsPage() {
                   </div>
 
                   <Link
-                    href={`/dashboard/clients/${client.id}`}
+                    href={`/dashboard/clients/${client.id}/profile`}
                     className="w-full text-center px-3 py-2 bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100 dark:hover:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-lg text-sm font-medium transition-colors"
                   >
-                    View Details
+                    View Profile
                   </Link>
                 </div>
 

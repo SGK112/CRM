@@ -244,13 +244,13 @@ export default function DashboardPage() {
         </Link>
 
         <Link
-          href="/dashboard/contacts"
+          href="/dashboard/clients"
           className={`${simple.card('hover:scale-[1.02] transition-transform')} text-center`}
         >
           <div className={simple.section()}>
             <UserGroupIcon className="h-8 w-8 mx-auto mb-3 text-green-600" />
-            <div className="font-medium text-gray-900 dark:text-white">Manage Contacts</div>
-            <p className={simple.text.small('mt-1')}>View and manage contacts, vendors, and collaborators</p>
+            <div className="font-medium text-gray-900 dark:text-white">Manage Clients</div>
+            <p className={simple.text.small('mt-1')}>View and manage clients, vendors, and collaborators</p>
           </div>
         </Link>
 

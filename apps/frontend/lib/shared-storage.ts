@@ -26,6 +26,76 @@ export interface ClientData {
   accountType?: string;
   source?: string;
   notes?: string;
+  
+  // Enhanced profile data
+  website?: string;
+  businessAddress?: {
+    street?: string;
+    city?: string;
+    state?: string;
+    zip?: string;
+    country?: string;
+  };
+  shippingAddress?: {
+    street?: string;
+    city?: string;
+    state?: string;
+    zip?: string;
+    country?: string;
+  };
+  billingAddress?: {
+    street?: string;
+    city?: string;
+    state?: string;
+    zip?: string;
+    country?: string;
+  };
+  taxId?: string;
+  businessLicense?: string;
+  insuranceInfo?: {
+    provider?: string;
+    policyNumber?: string;
+    expirationDate?: string;
+    coverage?: string;
+  };
+  certifications?: Array<{
+    name: string;
+    number?: string;
+    issuer?: string;
+    expirationDate?: string;
+  }>;
+  
+  // Contact preferences
+  preferredContact?: 'email' | 'phone' | 'text' | 'app';
+  bestTimeToContact?: string;
+  communicationNotes?: string;
+  
+  // Financial
+  creditLimit?: number;
+  paymentTerms?: string;
+  paymentMethod?: string;
+  
+  // Residential specific
+  homeOwner?: boolean;
+  propertyType?: 'single-family' | 'condo' | 'townhouse' | 'apartment' | 'mobile-home';
+  occupancy?: 'owner-occupied' | 'rental' | 'vacation';
+  
+  // Vendor/Sub specific
+  specialty?: string[];
+  serviceArea?: string;
+  hourlyRate?: number;
+  availability?: string;
+  equipment?: string;
+  
+  // Team specific
+  role?: string;
+  department?: string;
+  startDate?: string;
+  employeeId?: string;
+  
+  // Metadata
+  createdAt?: string;
+  profileCompleteness?: number;
 }
 
 // In-memory storage (simulates database persistence)
@@ -98,6 +168,7 @@ export const clientStorage = {
       totalProjects: 0,
       totalValue: 0,
       lastContact: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       unreadNotifications: 0,
       quickbooksSynced: false,
@@ -106,6 +177,7 @@ export const clientStorage = {
       accountType: clientData.accountType || '',
       source: clientData.source || '',
       notes: clientData.notes || '',
+      profileCompleteness: 0,
       ...clientData
     };
 

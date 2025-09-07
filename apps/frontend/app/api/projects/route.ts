@@ -7,6 +7,12 @@ export async function GET(request: NextRequest) {
   try {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
 
+    // In development mode, ALWAYS use local storage for better local testing
+    if (process.env.NODE_ENV !== 'production') {
+      const localProjects = projectStorage.getAll();
+      return NextResponse.json(localProjects);
+    }
+
     // Always use local storage as primary in production deployment
     const localProjects = projectStorage.getAll();
     
@@ -47,37 +53,16 @@ export async function POST(request: NextRequest) {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
     const body = await request.json();
 
-    // Development mode fallback - create in local storage if no valid token
-    if (!token || process.env.NODE_ENV !== 'production') {
-      if (!token) {
-        const newProject = projectStorage.create(body);
-        return NextResponse.json(newProject, { status: 201 });
-      }
-      
-      // If we have a token, try backend but fallback to local if it fails
-      try {
-        const response = await fetch(`${BACKEND_URL}/projects`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(body),
-        });
+    // In development mode, ALWAYS use local storage for better local testing
+    if (process.env.NODE_ENV !== 'production') {
+      const newProject = projectStorage.create(body);
+      return NextResponse.json(newProject, { status: 201 });
+    }
 
-        if (response.ok) {
-          const data = await response.json();
-          return NextResponse.json(data);
-        } else {
-          // Backend failed, create in local storage
-          const newProject = projectStorage.create(body);
-          return NextResponse.json(newProject, { status: 201 });
-        }
-      } catch (error) {
-        // Backend error, create in local storage
-        const newProject = projectStorage.create(body);
-        return NextResponse.json(newProject, { status: 201 });
-      }
+    // Development mode fallback - create in local storage if no valid token
+    if (!token) {
+      const newProject = projectStorage.create(body);
+      return NextResponse.json(newProject, { status: 201 });
     }
 
     // Production mode with valid token
