@@ -45,8 +45,8 @@ export const FormField = <T extends FieldValues = FieldValues>({
     placeholder-slate-500 dark:placeholder-slate-400
     focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent
     disabled:opacity-50 disabled:cursor-not-allowed
-    ${error 
-      ? 'border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/10' 
+    ${error
+      ? 'border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/10'
       : 'border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500'
     }
     ${icon ? 'pl-12' : ''}
@@ -63,14 +63,14 @@ export const FormField = <T extends FieldValues = FieldValues>({
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
       </label>
-      
+
       <div className="relative">
         {icon && (
           <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 pointer-events-none">
             {icon}
           </div>
         )}
-        
+
         {type === 'textarea' ? (
           <textarea
             id={name}
@@ -109,14 +109,14 @@ export const FormField = <T extends FieldValues = FieldValues>({
           />
         )}
       </div>
-      
+
       {error && (
         <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
           <ExclamationTriangleIcon className="h-4 w-4 flex-shrink-0" />
           <span>{error.message}</span>
         </div>
       )}
-      
+
       {helpText && !error && (
         <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
           <InformationCircleIcon className="h-4 w-4 flex-shrink-0" />
@@ -152,15 +152,15 @@ export const FormSection: React.FC<FormSectionProps> = ({
 
   return (
     <div className={`bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden ${className}`}>
-      <div 
+      <div
         className={`p-4 border-b border-slate-200 dark:border-slate-700 ${collapsible ? 'cursor-pointer' : ''}`}
         onClick={collapsible ? () => setIsCollapsed(!isCollapsed) : undefined}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-              completed 
-                ? 'bg-green-100 dark:bg-green-900/30' 
+              completed
+                ? 'bg-green-100 dark:bg-green-900/30'
                 : 'bg-slate-100 dark:bg-slate-700'
             }`}>
               {completed ? (
@@ -183,10 +183,10 @@ export const FormSection: React.FC<FormSectionProps> = ({
           </div>
           {collapsible && (
             <div className="text-slate-400">
-              <svg 
+              <svg
                 className={`w-5 h-5 transition-transform ${isCollapsed ? 'rotate-0' : 'rotate-180'}`}
-                fill="none" 
-                viewBox="0 0 24 24" 
+                fill="none"
+                viewBox="0 0 24 24"
                 stroke="currentColor"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -195,7 +195,7 @@ export const FormSection: React.FC<FormSectionProps> = ({
           )}
         </div>
       </div>
-      
+
       {(!collapsible || !isCollapsed) && (
         <div className="p-4 space-y-4">
           {children}
@@ -238,14 +238,14 @@ export const FormProgress: React.FC<FormProgressProps> = ({
           </div>
         </div>
       </div>
-      
+
       <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 mb-3">
         <div
           className="bg-gradient-to-r from-orange-500 to-orange-600 h-2 rounded-full transition-all duration-500"
           style={{ width: `${percentage}%` }}
         />
       </div>
-      
+
       <div className="grid grid-cols-2 gap-2">
         {sections.map((section) => (
           <div key={section.id} className="flex items-center gap-2 text-xs">
@@ -286,7 +286,7 @@ export const QuickStartForm: React.FC<QuickStartFormProps> = ({
       <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-lg rounded-3xl border border-white/20 dark:border-slate-700/20 shadow-xl shadow-black/10 p-6">
         <form onSubmit={onSubmit} className="space-y-6">
           {children}
-          
+
           <div className="pt-4">
             <button
               type="submit"

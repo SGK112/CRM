@@ -2,173 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
 
-// Simple appointment interface for development mode
-interface Appointment {
-  id: string;
-  clientId?: string;
-  clientName?: string;
-  projectId?: string;
-  title: string;
-  description?: string;
-  startTime: string;
-  endTime: string;
-  status: 'scheduled' | 'confirmed' | 'completed' | 'cancelled';
-  type: 'consultation' | 'follow-up' | 'installation' | 'inspection' | 'other';
-  location?: string;
-  notes?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Global storage for development mode
-declare global {
-  var __DEV_APPOINTMENT_STORAGE__: Appointment[] | undefined;
-}
-
-const appointmentStorage = {
-  getAll(): Appointment[] {
-    if (typeof global !== 'undefined') {
-      global.__DEV_APPOINTMENT_STORAGE__ = global.__DEV_APPOINTMENT_STORAGE__ || [];
-      return global.__DEV_APPOINTMENT_STORAGE__;
-    }
-    return [];
-  },
-
-  getById(id: string): Appointment | undefined {
-    const appointments = this.getAll();
-    return appointments.find(appointment => appointment.id === id);
-  },
-
-  create(appointmentData: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>): Appointment {
-    const appointments = this.getAll();
-    const newAppointment: Appointment = {
-      ...appointmentData,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    appointments.push(newAppointment);
-    return newAppointment;
-  },
-
-  update(id: string, updates: Partial<Appointment>): Appointment | null {
-    const appointments = this.getAll();
-    const index = appointments.findIndex(appointment => appointment.id === id);
-    if (index === -1) return null;
-    
-    appointments[index] = {
-      ...appointments[index],
-      ...updates,
-      updatedAt: new Date().toISOString()
-    };
-    return appointments[index];
-  },
-
-  delete(id: string): boolean {
-    const appointments = this.getAll();
-    const index = appointments.findIndex(appointment => appointment.id === id);
-    if (index === -1) return false;
-    
-    appointments.splice(index, 1);
-    return true;
-  }
-};
-
-export async function GET(request: NextRequest) {
-  try {
-    const token = request.headers.get('authorization')?.replace('Bearer ', '');
-
-    // Development mode fallback - return local storage data if no valid token
-    if (!token || process.env.NODE_ENV !== 'production') {
-      const localAppointments = appointmentStorage.getAll();
-      if (!token) {
-        return NextResponse.json(localAppointments);
-      }
-      
-      // If we have a token, try backend but fallback to local if it fails
-      try {
-        const response = await fetch(`${BACKEND_URL}/api/appointments`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          return NextResponse.json(data);
-        } else {
-          return NextResponse.json(localAppointments);
-        }
-      } catch (error) {
-        return NextResponse.json(localAppointments);
-      }
-    }
-
-    // Production mode with valid token
-    const response = await fetch(`${BACKEND_URL}/api/appointments`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      return NextResponse.json(
-        { error: 'Failed to fetch appointments' },
-        { status: response.status }
-      );
-    }
-
-    const data = await response.json();
-    return NextResponse.json(data);
-  } catch (error) {
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
-}
-
 export async function POST(request: NextRequest) {
   try {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
     const body = await request.json();
 
-    // Development mode fallback - create in local storage if no valid token
-    if (!token || process.env.NODE_ENV !== 'production') {
-      if (!token) {
-        const newAppointment = appointmentStorage.create(body);
-        return NextResponse.json(newAppointment, { status: 201 });
+    if (!token) {
+      if (process.env.NODE_ENV !== 'production') {
+        const created = { id: `local-${Date.now()}`, ...body };
+        return NextResponse.json(created, { status: 201 });
       }
-      
-      // If we have a token, try backend but fallback to local if it fails
-      try {
-        const response = await fetch(`${BACKEND_URL}/api/appointments`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(body),
-        });
 
-        if (response.ok) {
-          const data = await response.json();
-          return NextResponse.json(data);
-        } else {
-          const newAppointment = appointmentStorage.create(body);
-          return NextResponse.json(newAppointment, { status: 201 });
-        }
-      } catch (error) {
-        const newAppointment = appointmentStorage.create(body);
-        return NextResponse.json(newAppointment, { status: 201 });
-      }
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Production mode with valid token
     const response = await fetch(`${BACKEND_URL}/api/appointments`, {
       method: 'POST',
       headers: {
@@ -178,19 +25,9 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(body),
     });
 
-    if (!response.ok) {
-      return NextResponse.json(
-        { error: 'Failed to create appointment' },
-        { status: response.status }
-      );
-    }
-
     const data = await response.json();
-    return NextResponse.json(data);
+    return NextResponse.json(data, { status: response.status });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

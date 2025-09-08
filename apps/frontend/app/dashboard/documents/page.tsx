@@ -1,10 +1,8 @@
 'use client';
 
-import { Button, Card, Heading, Pill } from '@/components/ui/DesignSystem';
 import {
     ArrowDownTrayIcon,
     CloudArrowUpIcon,
-    DocumentArrowUpIcon,
     DocumentIcon,
     DocumentTextIcon,
     EyeIcon,
@@ -15,7 +13,6 @@ import {
     TrashIcon,
     VideoCameraIcon
 } from '@heroicons/react/24/outline';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 interface Document {
@@ -143,8 +140,6 @@ export default function DocumentsPage() {
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
 
-  const router = useRouter();
-
   const filteredDocuments = documents.filter(doc => {
     const matchesSearch =
       doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -170,295 +165,257 @@ export default function DocumentsPage() {
   };
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-        <div>
-          <Heading level={1} className="mb-2 text-brand-700 dark:text-brand-400">
-            Document Management
-          </Heading>
-          <p className="text-sm text-[var(--text-dim)]">
-            Organize and manage your project documents
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="segment-group">
-            <button data-active={viewMode === 'list'} onClick={() => setViewMode('list')}>
-              List
-            </button>
-            <button data-active={viewMode === 'grid'} onClick={() => setViewMode('grid')}>
-              Grid
-            </button>
+    <div className="min-h-screen bg-black">
+      {/* Mobile-First Header */}
+      <div className="sticky top-0 z-50 bg-black border-b border-slate-800">
+        <div className="px-4 py-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-amber-500/20 rounded-lg">
+                <DocumentTextIcon className="h-6 w-6 text-amber-400" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-white">Documents</h1>
+                <p className="text-sm text-slate-400">File management & sharing</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+                className="p-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-lg transition-colors"
+              >
+                {viewMode === 'grid' ? (
+                  <FolderIcon className="h-4 w-4 text-slate-400" />
+                ) : (
+                  <DocumentIcon className="h-4 w-4 text-slate-400" />
+                )}
+              </button>
+              <button
+                onClick={() => setUploadModalOpen(true)}
+                className="p-2 bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors"
+              >
+                <CloudArrowUpIcon className="h-5 w-5 text-black" />
+              </button>
+            </div>
           </div>
-          <Button
-            tone="accent"
-            leftIcon={<CloudArrowUpIcon className="h-5 w-5" />}
-            onClick={() => setUploadModalOpen(true)}
-          >
-            Upload Files
-          </Button>
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-4 gap-2 text-center">
+            <div className="bg-slate-900 rounded-lg p-3">
+              <div className="text-lg font-bold text-white">{documents.length}</div>
+              <div className="text-xs text-slate-400">Files</div>
+            </div>
+            <div className="bg-slate-900 rounded-lg p-3">
+              <div className="text-lg font-bold text-white">
+                {new Set(documents.map(d => d.category)).size}
+              </div>
+              <div className="text-xs text-slate-400">Categories</div>
+            </div>
+            <div className="bg-slate-900 rounded-lg p-3">
+              <div className="text-lg font-bold text-white">
+                {documents.filter(d => d.status === 'review').length}
+              </div>
+              <div className="text-xs text-slate-400">Review</div>
+            </div>
+            <div className="bg-slate-900 rounded-lg p-3">
+              <div className="text-lg font-bold text-white">
+                {formatFileSize(documents.reduce((total, doc) => total + doc.fileSize, 0))}
+              </div>
+              <div className="text-xs text-slate-400">Storage</div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-        <Card padding="md" className="flex items-center gap-4">
-          <div className="p-2 rounded-full border pill-tint-blue">
-            <DocumentTextIcon className="h-6 w-6 text-blue-400" />
-          </div>
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-[var(--text-dim)]">
-              Total Documents
-            </p>
-            <p className="text-2xl font-semibold text-[var(--text)]">{documents.length}</p>
-          </div>
-        </Card>
-        <Card padding="md" className="flex items-center gap-4">
-          <div className="p-2 rounded-full border pill-tint-green">
-            <FolderIcon className="h-6 w-6 text-green-400" />
-          </div>
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-[var(--text-dim)]">
-              Categories
-            </p>
-            <p className="text-2xl font-semibold text-[var(--text)]">
-              {new Set(documents.map(d => d.category)).size}
-            </p>
-          </div>
-        </Card>
-        <Card padding="md" className="flex items-center gap-4">
-          <div className="p-2 rounded-full border pill-tint-yellow">
-            <DocumentArrowUpIcon className="h-6 w-6 text-yellow-400" />
-          </div>
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-[var(--text-dim)]">
-              Pending Review
-            </p>
-            <p className="text-2xl font-semibold text-[var(--text)]">
-              {documents.filter(d => d.status === 'review').length}
-            </p>
-          </div>
-        </Card>
-        <Card padding="md" className="flex items-center gap-4">
-          <div className="p-2 rounded-full border pill-tint-purple">
-            <CloudArrowUpIcon className="h-6 w-6 text-purple-400" />
-          </div>
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-[var(--text-dim)]">
-              Storage Used
-            </p>
-            <p className="text-2xl font-semibold text-[var(--text)]">
-              {formatFileSize(documents.reduce((total, doc) => total + doc.fileSize, 0))}
-            </p>
-          </div>
-        </Card>
-      </div>
-
-      {/* Filters */}
-      <Card className="mb-2" padding="md">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-start">
+      <div className="px-4 py-4">
+        {/* Search and Filters */}
+        <div className="mb-4 space-y-3">
           <div className="relative">
-            <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--text-dim)]" />
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
             <input
               type="text"
               placeholder="Search documents..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="input pl-10"
+              className="w-full pl-10 pr-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
             />
           </div>
+          
+          <div className="grid grid-cols-2 gap-2">
+            <select
+              value={categoryFilter}
+              onChange={e => setCategoryFilter(e.target.value)}
+              className="px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white text-sm focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+            >
+              <option value="all">All Categories</option>
+              <option value="contract">Contracts</option>
+              <option value="invoice">Invoices</option>
+              <option value="blueprint">Blueprints</option>
+              <option value="image">Images</option>
+              <option value="video">Videos</option>
+              <option value="proposal">Proposals</option>
+              <option value="permit">Permits</option>
+              <option value="other">Other</option>
+            </select>
 
-          <select
-            value={categoryFilter}
-            onChange={e => setCategoryFilter(e.target.value)}
-            className="input"
-          >
-            <option value="all">All Categories</option>
-            <option value="contract">Contracts</option>
-            <option value="invoice">Invoices</option>
-            <option value="blueprint">Blueprints</option>
-            <option value="image">Images</option>
-            <option value="video">Videos</option>
-            <option value="proposal">Proposals</option>
-            <option value="permit">Permits</option>
-            <option value="other">Other</option>
-          </select>
-
-          <select
-            value={statusFilter}
-            onChange={e => setStatusFilter(e.target.value)}
-            className="input"
-          >
-            <option value="all">All Statuses</option>
-            <option value="draft">Draft</option>
-            <option value="review">Review</option>
-            <option value="approved">Approved</option>
-            <option value="signed">Signed</option>
-            <option value="archived">Archived</option>
-          </select>
+            <select
+              value={statusFilter}
+              onChange={e => setStatusFilter(e.target.value)}
+              className="px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white text-sm focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+            >
+              <option value="all">All Statuses</option>
+              <option value="draft">Draft</option>
+              <option value="review">Review</option>
+              <option value="approved">Approved</option>
+              <option value="signed">Signed</option>
+              <option value="archived">Archived</option>
+            </select>
+          </div>
 
           {selectedFiles.length > 0 && (
-            <Button
-              tone="danger"
+            <button
               onClick={handleBulkDelete}
-              leftIcon={<TrashIcon className="h-5 w-5" />}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-400 rounded-lg transition-colors"
             >
+              <TrashIcon className="h-4 w-4" />
               Delete ({selectedFiles.length})
-            </Button>
+            </button>
           )}
         </div>
-      </Card>
 
-      {/* Documents List */}
-      <div className="space-y-4">
+        {/* Documents Grid/List */}
         {filteredDocuments.length === 0 ? (
           <div className="text-center py-12">
-            <DocumentTextIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No documents found</h3>
-            <p className="text-gray-800 mb-4">Upload your first document to get started.</p>
+            <DocumentTextIcon className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-white mb-2">No documents found</h3>
+            <p className="text-slate-400 mb-4">
+              {searchTerm || categoryFilter !== 'all' || statusFilter !== 'all'
+                ? 'Try adjusting your search or filter criteria.'
+                : 'Upload your first document to get started.'
+              }
+            </p>
             <button
               onClick={() => setUploadModalOpen(true)}
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-lg font-medium transition-colors"
             >
-              <CloudArrowUpIcon className="h-5 w-5 mr-2" />
               Upload Files
             </button>
           </div>
         ) : (
-          <div
-            className={
-              viewMode === 'grid'
-                ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
-                : 'space-y-4'
-            }
-          >
+          <div className={viewMode === 'grid' ? 'grid grid-cols-2 gap-3' : 'space-y-3'}>
             {filteredDocuments.map(document => {
               const FileIcon = getFileIcon(document.mimeType);
-
+              
               return (
-                <Card
+                <div
                   key={document._id}
-                  padding={viewMode === 'grid' ? 'md' : 'sm'}
-                  className="transition-shadow hover:shadow-md"
+                  className="bg-slate-900 rounded-lg border border-slate-700 p-4"
                 >
-                  <div
-                    className={`flex ${viewMode === 'grid' ? 'flex-col' : 'items-center justify-between'}`}
-                  >
-                    <div
-                      className={`flex ${viewMode === 'grid' ? 'flex-col items-center text-center' : 'items-center'} flex-1`}
-                    >
-                      <div className={`flex items-center ${viewMode === 'grid' ? 'mb-4' : 'mr-4'}`}>
-                        <input
-                          type="checkbox"
-                          checked={selectedFiles.includes(document._id)}
-                          onChange={() => handleFileSelect(document._id)}
-                          className="mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-[var(--border)] rounded bg-[var(--surface-1)]"
-                        />
-                        <div className="p-2 rounded-lg border pill-tint-neutral">
-                          <FileIcon className="h-6 w-6 text-gray-400" />
-                        </div>
+                  <div className={`flex ${viewMode === 'grid' ? 'flex-col' : 'items-center justify-between'}`}>
+                    <div className={`flex ${viewMode === 'grid' ? 'items-center mb-3' : 'items-center flex-1'}`}>
+                      <input
+                        type="checkbox"
+                        checked={selectedFiles.includes(document._id)}
+                        onChange={() => handleFileSelect(document._id)}
+                        className="mr-3 h-4 w-4 text-amber-500 focus:ring-amber-500 border-slate-600 rounded bg-slate-800"
+                      />
+                      <div className="p-2 bg-slate-800 rounded-lg mr-3">
+                        <FileIcon className="h-5 w-5 text-slate-400" />
                       </div>
-
-                      <div className={`${viewMode === 'grid' ? '' : 'ml-0'} flex-1`}>
-                        <h3
-                          className={`font-semibold text-[var(--text)] ${viewMode === 'grid' ? 'mb-2' : 'mb-1'}`}
-                        >
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-sm font-medium text-white truncate mb-1">
                           {document.name}
                         </h3>
                         {document.description && (
-                          <p className="text-sm text-[var(--text-dim)] mb-2">
+                          <p className="text-xs text-slate-400 mb-2 line-clamp-2">
                             {document.description}
                           </p>
                         )}
-
-                        <div
-                          className={`flex ${viewMode === 'grid' ? 'flex-col space-y-2' : 'space-x-4'} text-xs text-[var(--text-dim)]`}
-                        >
+                        <div className="flex flex-wrap gap-2 text-xs text-slate-500">
                           <span>{formatFileSize(document.fileSize)}</span>
                           <span>v{document.version}</span>
                           <span>{new Date(document.updatedAt).toLocaleDateString()}</span>
                         </div>
-
-                        <div
-                          className={`flex ${viewMode === 'grid' ? 'justify-center' : ''} space-x-2 mt-2`}
-                        >
-                          <Pill tint={categoryTint[document.category]} size="sm">
-                            {document.category}
-                          </Pill>
-                          <Pill tint={statusTint[document.status]} size="sm">
-                            {document.status}
-                          </Pill>
-                        </div>
                       </div>
                     </div>
 
-                    <div
-                      className={`flex ${viewMode === 'grid' ? 'justify-center mt-4' : ''} space-x-2`}
-                    >
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        aria-label="View"
-                        leftIcon={<EyeIcon className="h-4 w-4" />}
-                      />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        aria-label="Download"
-                        leftIcon={<ArrowDownTrayIcon className="h-4 w-4" />}
-                      />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        aria-label="Edit"
-                        leftIcon={<PencilIcon className="h-4 w-4" />}
-                      />
-                      <Button
-                        variant="ghost"
-                        tone="danger"
-                        size="sm"
-                        aria-label="Delete"
-                        leftIcon={<TrashIcon className="h-4 w-4" />}
-                      />
+                    <div className={`flex ${viewMode === 'grid' ? 'justify-between items-center' : 'flex-col items-end'} gap-2`}>
+                      <div className="flex gap-1">
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${categoryTint[document.category] || 'bg-slate-700 text-slate-300'}`}>
+                          {document.category}
+                        </span>
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${statusTint[document.status] || 'bg-slate-700 text-slate-300'}`}>
+                          {document.status}
+                        </span>
+                      </div>
+                      
+                      <div className="flex gap-1">
+                        <button className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded transition-colors">
+                          <EyeIcon className="h-3.5 w-3.5" />
+                        </button>
+                        <button className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded transition-colors">
+                          <ArrowDownTrayIcon className="h-3.5 w-3.5" />
+                        </button>
+                        <button className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded transition-colors">
+                          <PencilIcon className="h-3.5 w-3.5" />
+                        </button>
+                        <button className="p-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded transition-colors">
+                          <TrashIcon className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </Card>
+                </div>
               );
             })}
           </div>
         )}
       </div>
 
-      {/* Upload Modal Placeholder */}
+      {/* Upload Modal */}
       {uploadModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-md" padding="md">
-            <Heading level={3} className="mb-4">
-              Upload Documents
-            </Heading>
-            <div className="border-2 border-dashed border-[var(--border)] rounded-lg p-8 text-center surface-2">
-              <CloudArrowUpIcon className="h-12 w-12 text-[var(--text-dim)] mx-auto mb-4" />
-              <p className="text-[var(--text-dim)] mb-2">
-                Drag and drop files here, or click to select
-              </p>
-              <p className="text-xs text-[var(--text-dim)]">
-                Supports PDF, DOC, DOCX, JPG, PNG, DWG
-              </p>
-            </div>
-            <div className="flex justify-end gap-3 mt-6">
-              <Button variant="outline" onClick={() => setUploadModalOpen(false)}>
-                Cancel
-              </Button>
-              <Button
-                tone="accent"
-                onClick={() => {
-                  setUploadModalOpen(false); /* TODO: Implement file upload */
-                }}
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-900 rounded-lg max-w-md w-full border border-slate-700">
+            <div className="flex items-center justify-between p-4 border-b border-slate-700">
+              <h3 className="text-lg font-medium text-white">Upload Documents</h3>
+              <button
+                onClick={() => setUploadModalOpen(false)}
+                className="text-slate-400 hover:text-white"
               >
-                Upload
-              </Button>
+                ✕
+              </button>
             </div>
-          </Card>
+            
+            <div className="p-6">
+              <div className="border-2 border-dashed border-slate-700 rounded-lg p-8 text-center bg-slate-800/50">
+                <CloudArrowUpIcon className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+                <p className="text-slate-300 mb-2">
+                  Drag and drop files here, or click to select
+                </p>
+                <p className="text-xs text-slate-400">
+                  Supports PDF, DOC, DOCX, JPG, PNG, DWG
+                </p>
+              </div>
+              
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setUploadModalOpen(false)}
+                  className="flex-1 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    setUploadModalOpen(false);
+                    // TODO: Implement file upload
+                  }}
+                  className="flex-1 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-lg font-medium transition-colors"
+                >
+                  Upload
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -28,158 +28,126 @@ export interface ClientData {
   notes?: string;
 }
 
-export interface Contact {
-  id: string;
-  _id?: string;
-  firstName?: string;
-  lastName?: string;
-  name?: string;
-  email?: string;
-  phone?: string;
-  company?: string;
-  contactType?: 'client' | 'subcontractor' | 'vendor' | 'contributor' | 'team';
-  status?: string;
-  physicalAddress?: {
-    street?: string;
-    city?: string;
-    state?: string;
-    zipCode?: string;
-    country?: string;
-  };
-  shippingAddress?: {
-    street?: string;
-    city?: string;
-    state?: string;
-    zipCode?: string;
-    country?: string;
-  };
-  businessInfo?: {
-    businessName?: string;
-    taxId?: string;
-    website?: string;
-    industry?: string;
-  };
-  tags?: string[];
-  notes?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-// Global storage for development mode
+// Global storage that persists across modules (in Node.js environment)
 declare global {
-  var __DEV_CLIENT_STORAGE__: Contact[] | undefined;
-  var __DEV_PROJECT_STORAGE__: Project[] | undefined;
+  // eslint-disable-next-line no-var
+  var __DEV_CLIENT_STORAGE__: ClientData[] | undefined;
 }
 
-export interface Project {
-  id: string;
-  name: string;
-  description?: string;
-  clientId?: string;
-  clientName?: string;
-  status: 'active' | 'completed' | 'on-hold' | 'cancelled';
-  startDate?: string;
-  endDate?: string;
-  budget?: number;
-  priority: 'low' | 'medium' | 'high';
-  createdAt: string;
-  updatedAt: string;
+// Initialize storage
+if (!global.__DEV_CLIENT_STORAGE__) {
+  global.__DEV_CLIENT_STORAGE__ = [
+    {
+      id: '1',
+      _id: '1',
+      name: 'Johnson Family',
+      firstName: 'John',
+      lastName: 'Johnson',
+      email: 'contact@johnsonfamily.com',
+      phone: '(555) 123-4567',
+      status: 'active',
+      contactType: 'client',
+      projectsCount: 2,
+      totalProjects: 2,
+      totalValue: 45000,
+      lastContact: '2024-09-03T10:30:00Z',
+      updatedAt: '2024-09-03T10:30:00Z',
+      unreadNotifications: 3,
+      quickbooksSynced: true,
+      estimatesSent: 2,
+      estimatesViewed: 1,
+    },
+    {
+      id: '2',
+      _id: '2',
+      name: 'Martinez Construction',
+      firstName: 'Carlos',
+      lastName: 'Martinez',
+      company: 'Martinez Construction',
+      email: 'info@martinezconstruction.com',
+      phone: '(555) 234-5678',
+      status: 'active',
+      contactType: 'subcontractor',
+      projectsCount: 1,
+      totalProjects: 1,
+      totalValue: 28000,
+      lastContact: '2024-09-01T09:15:00Z',
+      updatedAt: '2024-09-01T09:15:00Z',
+      unreadNotifications: 1,
+      quickbooksSynced: false,
+      estimatesSent: 1,
+      estimatesViewed: 1,
+    }
+  ];
 }
 
 export const clientStorage = {
-  getAll(): Contact[] {
-    if (typeof global !== 'undefined') {
-      global.__DEV_CLIENT_STORAGE__ = global.__DEV_CLIENT_STORAGE__ || [];
-      return global.__DEV_CLIENT_STORAGE__;
-    }
-    return [];
+  getAll: (): ClientData[] => {
+    return [...(global.__DEV_CLIENT_STORAGE__ || [])];
   },
 
-  getById(id: string): Contact | undefined {
-    const clients = this.getAll();
-    return clients.find(client => client.id === id || client._id === id);
+  getById: (id: string): ClientData | undefined => {
+    return global.__DEV_CLIENT_STORAGE__?.find(c => c.id === id || c._id === id);
   },
 
-  create(clientData: Omit<Contact, 'id' | 'createdAt' | 'updatedAt'>): Contact {
-    const clients = this.getAll();
-    const newClient: Contact = {
-      ...clientData,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+  create: (clientData: Partial<ClientData>): ClientData => {
+    const newClient: ClientData = {
+      id: String(Date.now()),
+      _id: String(Date.now()),
+      name: clientData.name || `${clientData.firstName || ''} ${clientData.lastName || ''}`.trim() || 'New Contact',
+      firstName: clientData.firstName || '',
+      lastName: clientData.lastName || '',
+      email: clientData.email || '',
+      phone: clientData.phone || '',
+      company: clientData.company || '',
+      status: clientData.status || 'active',
+      contactType: clientData.contactType || clientData.type as ClientData['contactType'] || 'client',
+      projectsCount: 0,
+      totalProjects: 0,
+      totalValue: 0,
+      lastContact: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      unreadNotifications: 0,
+      quickbooksSynced: false,
+      estimatesSent: 0,
+      estimatesViewed: 0,
+      accountType: clientData.accountType || '',
+      source: clientData.source || '',
+      notes: clientData.notes || '',
+      ...clientData
     };
-    clients.push(newClient);
+
+    // Add to the beginning of the global array
+    if (!global.__DEV_CLIENT_STORAGE__) {
+      global.__DEV_CLIENT_STORAGE__ = [];
+    }
+    global.__DEV_CLIENT_STORAGE__.unshift(newClient);
+
     return newClient;
   },
 
-  update(id: string, updates: Partial<Contact>): Contact | null {
-    const clients = this.getAll();
-    const index = clients.findIndex(client => client.id === id || client._id === id);
+  update: (id: string, updateData: Partial<ClientData>): ClientData | null => {
+    if (!global.__DEV_CLIENT_STORAGE__) return null;
+
+    const index = global.__DEV_CLIENT_STORAGE__.findIndex(c => c.id === id || c._id === id);
     if (index === -1) return null;
-    
-    clients[index] = {
-      ...clients[index],
-      ...updates,
+
+    global.__DEV_CLIENT_STORAGE__[index] = {
+      ...global.__DEV_CLIENT_STORAGE__[index],
+      ...updateData,
       updatedAt: new Date().toISOString()
     };
-    return clients[index];
+
+    return global.__DEV_CLIENT_STORAGE__[index];
   },
 
-  delete(id: string): boolean {
-    const clients = this.getAll();
-    const index = clients.findIndex(client => client.id === id || client._id === id);
+  delete: (id: string): boolean => {
+    if (!global.__DEV_CLIENT_STORAGE__) return false;
+
+    const index = global.__DEV_CLIENT_STORAGE__.findIndex(c => c.id === id || c._id === id);
     if (index === -1) return false;
-    
-    clients.splice(index, 1);
-    return true;
-  }
-};
 
-export const projectStorage = {
-  getAll(): Project[] {
-    if (typeof global !== 'undefined') {
-      global.__DEV_PROJECT_STORAGE__ = global.__DEV_PROJECT_STORAGE__ || [];
-      return global.__DEV_PROJECT_STORAGE__;
-    }
-    return [];
-  },
-
-  getById(id: string): Project | undefined {
-    const projects = this.getAll();
-    return projects.find(project => project.id === id);
-  },
-
-  create(projectData: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>): Project {
-    const projects = this.getAll();
-    const newProject: Project = {
-      ...projectData,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    projects.push(newProject);
-    return newProject;
-  },
-
-  update(id: string, updates: Partial<Project>): Project | null {
-    const projects = this.getAll();
-    const index = projects.findIndex(project => project.id === id);
-    if (index === -1) return null;
-    
-    projects[index] = {
-      ...projects[index],
-      ...updates,
-      updatedAt: new Date().toISOString()
-    };
-    return projects[index];
-  },
-
-  delete(id: string): boolean {
-    const projects = this.getAll();
-    const index = projects.findIndex(project => project.id === id);
-    if (index === -1) return false;
-    
-    projects.splice(index, 1);
+    global.__DEV_CLIENT_STORAGE__.splice(index, 1);
     return true;
   }
 };

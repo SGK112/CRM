@@ -40,11 +40,11 @@ export default function QuickActions({ isOpen, onToggle }: QuickActionsProps) {
       description: 'Start a new construction project',
     },
     {
-  name: 'Add Client',
-  href: '/dashboard/clients/new',
+  name: 'Add Contact',
+  href: '/dashboard/contacts/new',
       icon: UserGroupIcon,
       color: 'bg-green-500',
-  description: 'Register a new client, vendor, or contact',
+  description: 'Register a new contact (client, vendor, or collaborator)',
     },
     {
       name: 'Schedule Meeting',

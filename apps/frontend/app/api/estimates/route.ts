@@ -59,7 +59,7 @@ const estimateStorage = {
     const estimates = this.getAll();
     const index = estimates.findIndex(estimate => estimate.id === id);
     if (index === -1) return null;
-    
+
     estimates[index] = {
       ...estimates[index],
       ...updates,
@@ -72,7 +72,7 @@ const estimateStorage = {
     const estimates = this.getAll();
     const index = estimates.findIndex(estimate => estimate.id === id);
     if (index === -1) return false;
-    
+
     estimates.splice(index, 1);
     return true;
   }
@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
       if (!token) {
         return NextResponse.json(localEstimates);
       }
-      
+
       // If we have a token, try backend but fallback to local if it fails
       try {
         const response = await fetch(`${BACKEND_URL}/api/estimates`, {
@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
         const newEstimate = estimateStorage.create(body);
         return NextResponse.json(newEstimate, { status: 201 });
       }
-      
+
       // If we have a token, try backend but fallback to local if it fails
       try {
         const response = await fetch(`${BACKEND_URL}/api/estimates`, {

@@ -38,10 +38,10 @@ export async function POST(
     if (!response.ok) {
       const errorText = await response.text();
       return NextResponse.json(
-        { 
+        {
           success: false,
           error: 'Failed to sync client to QuickBooks',
-          details: errorText 
+          details: errorText
         },
         { status: response.status }
       );
@@ -56,7 +56,7 @@ export async function POST(
 
   } catch (error) {
     return NextResponse.json(
-      { 
+      {
         success: false,
         error: 'Internal server error during QuickBooks sync',
         details: error instanceof Error ? error.message : 'Unknown error'

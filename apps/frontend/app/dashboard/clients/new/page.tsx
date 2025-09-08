@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 export default function NewClientPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   useEffect(() => {
     // Redirect to enhanced contact creation page with all parameters preserved
     const params = new URLSearchParams(searchParams.toString());

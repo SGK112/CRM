@@ -25,10 +25,10 @@ export async function GET(request: NextRequest) {
     }
 
     if (!token) {
-      return NextResponse.json({ 
+      return NextResponse.json({
         enabled: false,
         connected: false,
-        error: 'Authentication required' 
+        error: 'Authentication required'
       }, { status: 401 });
     }
 

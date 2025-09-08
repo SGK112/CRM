@@ -29,7 +29,8 @@ import {
   CheckCircleIcon as CheckCircleIconSolid,
   StarIcon as StarIconSolid
 } from '@heroicons/react/24/solid';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 interface Contact {
   id: string;
@@ -67,21 +68,6 @@ interface ChatMessage {
   };
 }
 
-interface NotificationService {
-  sendEmail: (to: string, subject: string, content: string) => Promise<boolean>;
-  sendSMS: (to: string, message: string) => Promise<boolean>;
-}
-
-interface SchedulingService {
-  createMeeting: (data: any) => Promise<any>;
-  getAvailability: (date: string) => Promise<any>;
-}
-
-interface MapsService {
-  getLocation: (address: string) => Promise<{ lat: number; lng: number }>;
-  getDirections: (from: string, to: string) => Promise<any>;
-}
-
 interface ProfileSectionData {
   id: string;
   title: string;
@@ -98,28 +84,83 @@ interface ProfileSectionData {
 }
 
 export default function ContactProfilePage({ params }: { params: { id: string } }) {
-  const [contact, setContact] = useState<Contact>({
-    id: params.id,
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    phone: '+1 (555) 123-4567',
-    company: 'ABC Corporation',
-    jobTitle: 'Operations Manager',
-    contactType: 'client',
-    status: 'active',
-    priority: 'high',
-    rating: 4,
-    address: '123 Main Street',
-    city: 'San Francisco',
-    state: 'CA',
-    zipCode: '94105',
-    website: 'https://abccorp.com',
-    notes: 'Reliable client, prefers email communication. Budget range $50k-$100k.',
-    tags: ['VIP', 'Priority', 'Contractor'],
-    createdAt: '2024-01-15',
-    lastContact: '2024-09-01'
-  });
+  const searchParams = useSearchParams();
+  const [contact, setContact] = useState<Contact | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch contact data on mount
+  useEffect(() => {
+    const fetchContact = async () => {
+      try {
+        setLoading(true);
+        const authToken = localStorage.getItem('accessToken');
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+        };
+
+        if (authToken && authToken !== 'null' && authToken !== 'undefined' && authToken.length > 10) {
+          headers.Authorization = `Bearer ${authToken}`;
+        }
+
+        const response = await fetch(`/api/clients/${params.id}`, {
+          headers,
+        });
+
+        if (response.ok) {
+          const contactData = await response.json();
+          setContact(contactData);
+        } else {
+          setError('Failed to load contact data');
+        }
+      } catch (err) {
+        setError('Error loading contact data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContact();
+  }, [params.id]);
+
+  // Check if we just created this contact
+  const justCreated = searchParams.get('created') === 'true';
+  const contactType = searchParams.get('type');
+  const quickMode = searchParams.get('quick') === 'true';
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">Loading Contact Profile</h2>
+          <p className="text-slate-600 dark:text-slate-400">Please wait while we fetch the contact information...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error || !contact) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <ExclamationTriangleIcon className="h-16 w-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">Contact Not Found</h2>
+          <p className="text-slate-600 dark:text-slate-400 mb-4">
+            {error || 'The contact you\'re looking for doesn\'t exist or has been removed.'}
+          </p>
+          <button
+            onClick={() => window.history.back()}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Chat state management
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -501,42 +542,42 @@ export default function ContactProfilePage({ params }: { params: { id: string } 
         </div>
       </div>
 
-      <div className="flex min-h-screen">
-        {/* Main Content - Single Large Tool Card with Integrated Chat */}
-        <div className="flex-1 p-4 sm:p-6">
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden grid grid-cols-1 xl:grid-cols-3 gap-0">
-            {/* Contact Profile Section - Takes 2/3 width on large screens */}
-            <div className="xl:col-span-2">
-              {/* Header */}
-              <div className="p-4 sm:p-6 border-b border-orange-200 bg-gradient-to-r from-orange-500 to-orange-600">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-lg sm:text-xl font-bold text-white">Contact Profile</h2>
-                    <p className="text-orange-100 text-sm">Manage contact information and details</p>
-                  </div>
-                  <div className="w-10 h-10 bg-white/20 backdrop-blur-sm text-white rounded-lg flex items-center justify-center">
-                    <UserIcon className="h-5 w-5" />
-                  </div>
+      {/* Main Content with Integrated Chat */}
+      <div className="p-4 sm:p-6">
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden grid grid-cols-1 lg:grid-cols-3 gap-0">
+          
+          {/* Contact Profile Section - Takes 2/3 width on large screens */}
+          <div className="lg:col-span-2">
+            {/* Header */}
+            <div className="p-4 sm:p-6 border-b border-orange-200 bg-gradient-to-r from-orange-500 to-orange-600">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg sm:text-xl font-bold text-white">Contact Profile</h2>
+                  <p className="text-orange-100 text-sm">Manage contact information and details</p>
+                </div>
+                <div className="w-10 h-10 bg-white/20 backdrop-blur-sm text-white rounded-lg flex items-center justify-center">
+                  <UserIcon className="h-5 w-5" />
                 </div>
               </div>
-              
-              {/* Profile Sections Grid */}
-              <div className="p-4 sm:p-6">
-                <div className="grid gap-6">
-                  {profileSections.map((section) => (
-                    <div key={section.id} className="border border-slate-200 dark:border-slate-700 rounded-xl p-6 bg-slate-50 dark:bg-slate-700/30">
-                      <div className="flex items-center gap-4 mb-6">
-                        <div className={`w-10 h-10 ${section.color} rounded-xl flex items-center justify-center`}>
-                          {section.icon}
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-bold text-slate-900 dark:text-white text-lg">{section.title}</h3>
-                          <p className="text-sm text-slate-600 dark:text-slate-400">{section.description}</p>
-                        </div>
-                        {section.completed && (
-                          <CheckCircleIconSolid className="h-5 w-5 text-green-600" />
-                        )}
+            </div>
+            
+            {/* Profile Sections Grid */}
+            <div className="p-4 sm:p-6">
+              <div className="grid gap-6">
+                {profileSections.map((section) => (
+                  <div key={section.id} className="border border-slate-200 dark:border-slate-700 rounded-xl p-6 bg-slate-50 dark:bg-slate-700/30">
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className={`w-10 h-10 ${section.color} rounded-xl flex items-center justify-center`}>
+                        {section.icon}
                       </div>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-slate-900 dark:text-white text-lg">{section.title}</h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">{section.description}</p>
+                      </div>
+                      {section.completed && (
+                        <CheckCircleIconSolid className="h-5 w-5 text-green-600" />
+                      )}
+                    </div>
                     
                     {editingSection === section.id ? (
                       <div className="bg-white dark:bg-slate-800 rounded-xl p-6 h-full">
@@ -654,182 +695,182 @@ export default function ContactProfilePage({ params }: { params: { id: string } 
               )}
             </div>
           </div>
-        </div>
 
-        {/* Integrated Chat UI - Takes 1/3 width on large screens */}
-        <div className="xl:col-span-1 border-l border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 flex flex-col">
-          {/* Chat Header */}
-          <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <ChatBubbleLeftRightIcon className="h-5 w-5" />
-                <div>
-                  <h3 className="font-medium">Chat with {contact.firstName}</h3>
-                  <p className="text-xs text-blue-100">AI Assistant • Online</p>
+          {/* Integrated Chat UI - Takes 1/3 width on large screens */}
+          <div className="lg:col-span-1 border-l border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 flex flex-col min-h-[600px]">
+            {/* Chat Header */}
+            <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <ChatBubbleLeftRightIcon className="h-5 w-5" />
+                  <div>
+                    <h3 className="font-medium">Chat with {contact.firstName}</h3>
+                    <p className="text-xs text-blue-100">AI Assistant • Online</p>
+                  </div>
                 </div>
+                <button
+                  onClick={() => setShowQuickActions(!showQuickActions)}
+                  className="p-1 hover:bg-white/20 rounded-lg transition-colors"
+                >
+                  <EllipsisVerticalIcon className="h-4 w-4" />
+                </button>
               </div>
-              <button
-                onClick={() => setShowQuickActions(!showQuickActions)}
-                className="p-1 hover:bg-white/20 rounded-lg transition-colors"
-              >
-                <EllipsisVerticalIcon className="h-4 w-4" />
-              </button>
+              
+              {/* Quick Actions Panel */}
+              {showQuickActions && (
+                <div className="mt-3 p-3 bg-white/10 rounded-lg backdrop-blur-sm">
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => sendQuickAction('schedule')}
+                      className="flex items-center gap-2 p-2 text-xs bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+                    >
+                      <CalendarIcon className="h-3 w-3" />
+                      Schedule
+                    </button>
+                    <button
+                      onClick={() => sendQuickAction('location')}
+                      className="flex items-center gap-2 p-2 text-xs bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+                    >
+                      <MapIcon className="h-3 w-3" />
+                      Location
+                    </button>
+                    <button
+                      onClick={() => sendQuickAction('email')}
+                      className="flex items-center gap-2 p-2 text-xs bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+                    >
+                      <EnvelopeIcon className="h-3 w-3" />
+                      Email
+                    </button>
+                    <button
+                      onClick={() => sendQuickAction('sms')}
+                      className="flex items-center gap-2 p-2 text-xs bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+                    >
+                      <PhoneIcon className="h-3 w-3" />
+                      SMS
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
             
-            {/* Quick Actions Panel */}
-            {showQuickActions && (
-              <div className="mt-3 p-3 bg-white/10 rounded-lg backdrop-blur-sm">
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => sendQuickAction('schedule')}
-                    className="flex items-center gap-2 p-2 text-xs bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
-                  >
-                    <CalendarIcon className="h-3 w-3" />
-                    Schedule
-                  </button>
-                  <button
-                    onClick={() => sendQuickAction('location')}
-                    className="flex items-center gap-2 p-2 text-xs bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
-                  >
-                    <MapIcon className="h-3 w-3" />
-                    Location
-                  </button>
-                  <button
-                    onClick={() => sendQuickAction('email')}
-                    className="flex items-center gap-2 p-2 text-xs bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
-                  >
-                    <EnvelopeIcon className="h-3 w-3" />
-                    Email
-                  </button>
-                  <button
-                    onClick={() => sendQuickAction('sms')}
-                    className="flex items-center gap-2 p-2 text-xs bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
-                  >
-                    <PhoneIcon className="h-3 w-3" />
-                    SMS
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-          
-          {/* Chat Messages */}
-          <div className="flex-1 p-4 overflow-y-auto bg-white dark:bg-slate-800">
-            {messages.length === 0 ? (
-              <div className="text-center text-slate-500 dark:text-slate-400">
-                <ChatBubbleLeftRightIcon className="h-12 w-12 mx-auto mb-3 text-slate-300 dark:text-slate-600" />
-                <p className="text-sm mb-2">No messages yet</p>
-                <p className="text-xs mb-4">Start a conversation or try commands:</p>
-                <div className="text-xs space-y-1 text-left bg-slate-50 dark:bg-slate-700 p-3 rounded-lg">
-                  <p><code>/notify email [message]</code> - Send email</p>
-                  <p><code>/notify sms [message]</code> - Send SMS</p>
-                  <p><code>/schedule YYYY-MM-DD</code> - Schedule meeting</p>
-                  <p><code>/location</code> - Get location info</p>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      className={`max-w-[80%] p-3 rounded-lg text-sm ${
-                        message.sender === 'user'
-                          ? 'bg-blue-600 text-white'
-                          : message.type === 'notification'
-                          ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200'
-                          : 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white'
-                      }`}
-                    >
-                      <p>{message.text}</p>
-                      <p className="text-xs mt-1 opacity-70">
-                        {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </p>
-                    </div>
+            {/* Chat Messages */}
+            <div className="flex-1 p-4 overflow-y-auto bg-white dark:bg-slate-800">
+              {messages.length === 0 ? (
+                <div className="text-center text-slate-500 dark:text-slate-400">
+                  <ChatBubbleLeftRightIcon className="h-12 w-12 mx-auto mb-3 text-slate-300 dark:text-slate-600" />
+                  <p className="text-sm mb-2">No messages yet</p>
+                  <p className="text-xs mb-4">Start a conversation or try commands:</p>
+                  <div className="text-xs space-y-1 text-left bg-slate-50 dark:bg-slate-700 p-3 rounded-lg">
+                    <p><code>/notify email [message]</code> - Send email</p>
+                    <p><code>/notify sms [message]</code> - Send SMS</p>
+                    <p><code>/schedule YYYY-MM-DD</code> - Schedule meeting</p>
+                    <p><code>/location</code> - Get location info</p>
                   </div>
-                ))}
-                {isTyping && (
-                  <div className="flex justify-start">
-                    <div className="bg-slate-100 dark:bg-slate-700 p-3 rounded-lg">
-                      <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                        <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {messages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div
+                        className={`max-w-[80%] p-3 rounded-lg text-sm ${
+                          message.sender === 'user'
+                            ? 'bg-blue-600 text-white'
+                            : message.type === 'notification'
+                            ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200'
+                            : 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white'
+                        }`}
+                      >
+                        <p>{message.text}</p>
+                        <p className="text-xs mt-1 opacity-70">
+                          {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-          
-          {/* Enhanced Chat Input */}
-          <div className="p-4 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
-            {/* Attachment Options */}
-            <div className="flex gap-2 mb-3">
-              <button
-                onClick={() => sendQuickAction('schedule')}
-                className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
-                title="Schedule Appointment"
-              >
-                <CalendarIcon className="h-3 w-3" />
-                Schedule
-              </button>
-              <button
-                onClick={() => sendQuickAction('location')}
-                className="flex items-center gap-1 px-2 py-1 text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors"
-                title="Share Location"
-              >
-                <MapIcon className="h-3 w-3" />
-                Location
-              </button>
-              <button
-                onClick={() => {
-                  if (contact.phone) {
-                    window.open(`tel:${contact.phone}`);
-                  }
-                }}
-                className="flex items-center gap-1 px-2 py-1 text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors"
-                title="Start Video Call"
-              >
-                <VideoCameraIcon className="h-3 w-3" />
-                Call
-              </button>
+                  ))}
+                  {isTyping && (
+                    <div className="flex justify-start">
+                      <div className="bg-slate-100 dark:bg-slate-700 p-3 rounded-lg">
+                        <div className="flex space-x-1">
+                          <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                          <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
             
-            {/* Message Input */}
-            <div className="flex gap-2">
-              <button className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
-                <PaperClipIcon className="h-4 w-4" />
-              </button>
-              <input
-                type="text"
-                value={currentMessage}
-                onChange={(e) => setCurrentMessage(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                placeholder="Type a message or command..."
-                className="flex-1 px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-              <button
-                onClick={sendMessage}
-                disabled={!currentMessage.trim()}
-                className="px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
-              >
-                <PaperAirplaneIcon className="h-4 w-4" />
-              </button>
-            </div>
-            
-            {/* Notification Status */}
-            <div className="flex items-center justify-between mt-2 text-xs text-slate-500 dark:text-slate-400">
-              <div className="flex items-center gap-2">
-                <BellIcon className="h-3 w-3" />
-                <span>Notifications: {contact.email && contact.phone ? 'Email & SMS' : contact.email ? 'Email' : contact.phone ? 'SMS' : 'None'}</span>
+            {/* Enhanced Chat Input */}
+            <div className="p-4 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+              {/* Attachment Options */}
+              <div className="flex gap-2 mb-3">
+                <button
+                  onClick={() => sendQuickAction('schedule')}
+                  className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                  title="Schedule Appointment"
+                >
+                  <CalendarIcon className="h-3 w-3" />
+                  Schedule
+                </button>
+                <button
+                  onClick={() => sendQuickAction('location')}
+                  className="flex items-center gap-1 px-2 py-1 text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors"
+                  title="Share Location"
+                >
+                  <MapIcon className="h-3 w-3" />
+                  Location
+                </button>
+                <button
+                  onClick={() => {
+                    if (contact.phone) {
+                      window.open(`tel:${contact.phone}`);
+                    }
+                  }}
+                  className="flex items-center gap-1 px-2 py-1 text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors"
+                  title="Start Video Call"
+                >
+                  <VideoCameraIcon className="h-3 w-3" />
+                  Call
+                </button>
               </div>
-              <div className="flex items-center gap-1">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span>Online</span>
+              
+              {/* Message Input */}
+              <div className="flex gap-2">
+                <button className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+                  <PaperClipIcon className="h-4 w-4" />
+                </button>
+                <input
+                  type="text"
+                  value={currentMessage}
+                  onChange={(e) => setCurrentMessage(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                  placeholder="Type a message or command..."
+                  className="flex-1 px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+                <button
+                  onClick={sendMessage}
+                  disabled={!currentMessage.trim()}
+                  className="px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                >
+                  <PaperAirplaneIcon className="h-4 w-4" />
+                </button>
+              </div>
+              
+              {/* Notification Status */}
+              <div className="flex items-center justify-between mt-2 text-xs text-slate-500 dark:text-slate-400">
+                <div className="flex items-center gap-2">
+                  <BellIcon className="h-3 w-3" />
+                  <span>Notifications: {contact.email && contact.phone ? 'Email & SMS' : contact.email ? 'Email' : contact.phone ? 'SMS' : 'None'}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span>Online</span>
+                </div>
               </div>
             </div>
           </div>

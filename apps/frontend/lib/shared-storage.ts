@@ -10,6 +10,13 @@ export interface ClientData {
   email?: string;
   phone?: string;
   company?: string;
+  website?: string;
+  orderPortalUrl?: string;
+  catalogUrl?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
   status?: string;
   contactType?: 'client' | 'subcontractor' | 'vendor' | 'contributor' | 'team';
   projectsCount?: number;
@@ -26,76 +33,8 @@ export interface ClientData {
   accountType?: string;
   source?: string;
   notes?: string;
-  
-  // Enhanced profile data
-  website?: string;
-  businessAddress?: {
-    street?: string;
-    city?: string;
-    state?: string;
-    zip?: string;
-    country?: string;
-  };
-  shippingAddress?: {
-    street?: string;
-    city?: string;
-    state?: string;
-    zip?: string;
-    country?: string;
-  };
-  billingAddress?: {
-    street?: string;
-    city?: string;
-    state?: string;
-    zip?: string;
-    country?: string;
-  };
-  taxId?: string;
-  businessLicense?: string;
-  insuranceInfo?: {
-    provider?: string;
-    policyNumber?: string;
-    expirationDate?: string;
-    coverage?: string;
-  };
-  certifications?: Array<{
-    name: string;
-    number?: string;
-    issuer?: string;
-    expirationDate?: string;
-  }>;
-  
-  // Contact preferences
-  preferredContact?: 'email' | 'phone' | 'text' | 'app';
-  bestTimeToContact?: string;
-  communicationNotes?: string;
-  
-  // Financial
-  creditLimit?: number;
-  paymentTerms?: string;
-  paymentMethod?: string;
-  
-  // Residential specific
-  homeOwner?: boolean;
-  propertyType?: 'single-family' | 'condo' | 'townhouse' | 'apartment' | 'mobile-home';
-  occupancy?: 'owner-occupied' | 'rental' | 'vacation';
-  
-  // Vendor/Sub specific
-  specialty?: string[];
-  serviceArea?: string;
-  hourlyRate?: number;
-  availability?: string;
-  equipment?: string;
-  
-  // Team specific
-  role?: string;
-  department?: string;
-  startDate?: string;
-  employeeId?: string;
-  
-  // Metadata
-  createdAt?: string;
-  profileCompleteness?: number;
+  specialties?: string[];
+  certifications?: string[];
 }
 
 // In-memory storage (simulates database persistence)
@@ -108,6 +47,10 @@ const devMockClients: ClientData[] = [
     lastName: 'Johnson',
     email: 'contact@johnsonfamily.com',
     phone: '(555) 123-4567',
+    address: '123 Oak Street',
+    city: 'New York',
+    state: 'NY',
+    zipCode: '10001',
     status: 'active',
     contactType: 'client',
     projectsCount: 2,
@@ -119,6 +62,7 @@ const devMockClients: ClientData[] = [
     quickbooksSynced: true,
     estimatesSent: 2,
     estimatesViewed: 1,
+    notes: 'Kitchen remodel project - premium finishes requested. Second project for bathroom renovation scheduled for Q4.'
   },
   {
     id: '2',
@@ -129,6 +73,11 @@ const devMockClients: ClientData[] = [
     company: 'Martinez Construction',
     email: 'info@martinezconstruction.com',
     phone: '(555) 234-5678',
+    website: 'www.martinezconstruction.com',
+    address: '456 Pine Avenue',
+    city: 'Los Angeles',
+    state: 'CA',
+    zipCode: '90210',
     status: 'active',
     contactType: 'subcontractor',
     projectsCount: 1,
@@ -140,6 +89,36 @@ const devMockClients: ClientData[] = [
     quickbooksSynced: false,
     estimatesSent: 1,
     estimatesViewed: 1,
+    specialties: ['Electrical', 'HVAC', 'Plumbing'],
+    certifications: ['Licensed Electrician', 'OSHA Certified'],
+    notes: 'Reliable electrical contractor specializing in residential projects. Great communication and punctual delivery.'
+  },
+  {
+    id: '3',
+    _id: '3',
+    name: 'Home Depot Pro',
+    company: 'Home Depot',
+    email: 'pro@homedepot.com',
+    phone: '(555) 345-6789',
+    website: 'www.homedepot.com',
+    orderPortalUrl: 'https://pro.homedepot.com/orders',
+    catalogUrl: 'https://pro.homedepot.com/catalog',
+    address: '789 Builder Blvd',
+    city: 'Atlanta',
+    state: 'GA',
+    zipCode: '30309',
+    status: 'active',
+    contactType: 'vendor',
+    projectsCount: 0,
+    totalProjects: 0,
+    totalValue: 15000,
+    lastContact: '2024-08-28T14:20:00Z',
+    updatedAt: '2024-08-28T14:20:00Z',
+    unreadNotifications: 0,
+    quickbooksSynced: true,
+    estimatesSent: 0,
+    estimatesViewed: 0,
+    notes: 'Primary supplier for lumber, hardware, and construction materials. Pro account with bulk pricing.'
   }
 ];
 
@@ -162,13 +141,19 @@ export const clientStorage = {
       email: clientData.email || '',
       phone: clientData.phone || '',
       company: clientData.company || '',
+      website: clientData.website || '',
+      orderPortalUrl: clientData.orderPortalUrl || '',
+      catalogUrl: clientData.catalogUrl || '',
+      address: clientData.address || '',
+      city: clientData.city || '',
+      state: clientData.state || '',
+      zipCode: clientData.zipCode || '',
       status: clientData.status || 'active',
       contactType: clientData.contactType || clientData.type as ClientData['contactType'] || 'client',
       projectsCount: 0,
       totalProjects: 0,
       totalValue: 0,
       lastContact: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       unreadNotifications: 0,
       quickbooksSynced: false,
@@ -177,13 +162,14 @@ export const clientStorage = {
       accountType: clientData.accountType || '',
       source: clientData.source || '',
       notes: clientData.notes || '',
-      profileCompleteness: 0,
+      specialties: clientData.specialties || [],
+      certifications: clientData.certifications || [],
       ...clientData
     };
 
     // Add to the beginning of the array
     devMockClients.unshift(newClient);
-    
+
     return newClient;
   },
 

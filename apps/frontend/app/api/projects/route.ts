@@ -15,11 +15,11 @@ export async function GET(request: NextRequest) {
 
     // Always use local storage as primary in production deployment
     const localProjects = projectStorage.getAll();
-    
+
     if (!token) {
       return NextResponse.json(localProjects);
     }
-    
+
     // If we have a token, try backend but fallback to local if it fails
     try {
       const response = await fetch(`${BACKEND_URL}/projects`, {

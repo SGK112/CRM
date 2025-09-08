@@ -24,28 +24,28 @@ interface ContactData {
   company?: string;
   status?: string;
   contactType?: string;
-  
+
   // Address fields
   streetAddress?: string;
   city?: string;
   state?: string;
   zipCode?: string;
   country?: string;
-  
+
   // Shipping/Billing address
   shippingAddress?: string;
   shippingCity?: string;
   shippingState?: string;
   shippingZipCode?: string;
   shippingCountry?: string;
-  
+
   // Additional fields
   website?: string;
   notes?: string;
   accountType?: string;
   source?: string;
   tags?: string[];
-  
+
   // Business fields
   businessLicense?: string;
   taxId?: string;
@@ -71,13 +71,13 @@ export default function EditContactPage() {
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
-      
+
       if (authToken && authToken !== 'null' && authToken !== 'undefined' && authToken.length > 10) {
         headers.Authorization = `Bearer ${authToken}`;
       }
 
       const response = await fetch(`/api/clients/${contactId}`, { headers });
-      
+
       if (response.ok) {
         const data = await response.json();
         setContact(data);
@@ -89,21 +89,21 @@ export default function EditContactPage() {
           company: data.company || '',
           status: data.status || 'active',
           contactType: data.contactType || 'client',
-          
+
           // Address fields
           streetAddress: data.streetAddress || '',
           city: data.city || '',
           state: data.state || '',
           zipCode: data.zipCode || '',
           country: data.country || 'United States',
-          
+
           // Shipping address
           shippingAddress: data.shippingAddress || '',
           shippingCity: data.shippingCity || '',
           shippingState: data.shippingState || '',
           shippingZipCode: data.shippingZipCode || '',
           shippingCountry: data.shippingCountry || 'United States',
-          
+
           // Additional fields
           website: data.website || '',
           notes: data.notes || '',
@@ -181,7 +181,7 @@ export default function EditContactPage() {
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
-      
+
       if (authToken && authToken !== 'null' && authToken !== 'undefined' && authToken.length > 10) {
         headers.Authorization = `Bearer ${authToken}`;
       }
@@ -661,7 +661,7 @@ export default function EditContactPage() {
           {/* Tags */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700">
             <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Tags</h2>
-            
+
             <div className="flex gap-2 mb-4">
               <input
                 type="text"

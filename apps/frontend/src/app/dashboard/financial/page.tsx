@@ -145,100 +145,69 @@ export default function SimplifiedFinancialHub() {
   }
 
   return (
-    <div className={simple.page()}>
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className={simple.text.title()}>Sales</h1>
-          <p className={simple.text.body()}>All your monetization tools in one place</p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Link
-            href="/dashboard/estimates/new"
-            className={simple.button('primary', 'flex items-center gap-2')}
-          >
-            <PlusIcon className="h-4 w-4" />
-            New Estimate
-          </Link>
-          <Link
-            href="/dashboard/invoices/new"
-            className={simple.button('secondary', 'flex items-center gap-2')}
-          >
-            <PlusIcon className="h-4 w-4" />
-            New Invoice
-          </Link>
-        </div>
-      </div>
-
-      {/* Stats Cards */}
-      <div className={`${simple.grid.cols4} gap-4 sm:gap-6 mb-6`}>
-        <div className={simple.card()}>
-          <div className={simple.section('py-4 sm:py-5')}>
-          <div className="flex items-center gap-3">
-            <DocumentTextIcon className="h-8 w-8 text-blue-600" />
-            <div>
-              <p className={simple.text.small()}>Estimates</p>
-              <p className={simple.text.title('text-2xl')}>{stats.totalEstimates}</p>
-              <p className={simple.text.small('text-yellow-600')}>{stats.pendingEstimates} pending</p>
+    <div className="min-h-screen bg-black">
+      {/* Mobile-First Header */}
+      <div className="sticky top-0 z-50 bg-black border-b border-slate-800">
+        <div className="px-4 py-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-amber-500/20 rounded-lg">
+                <CurrencyDollarIcon className="h-6 w-6 text-amber-400" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-white">Sales</h1>
+                <p className="text-sm text-slate-400">All monetization tools</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Link
+                href="/dashboard/estimates/new"
+                className="p-2 bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors"
+              >
+                <PlusIcon className="h-4 w-4 text-black" />
+              </Link>
             </div>
           </div>
-          </div>
-        </div>
 
-        <div className={simple.card()}>
-          <div className={simple.section('py-4 sm:py-5')}>
-          <div className="flex items-center gap-3">
-            <ShoppingBagIcon className="h-8 w-8 text-green-600" />
-            <div>
-              <p className={simple.text.small()}>Invoices</p>
-              <p className={simple.text.title('text-2xl')}>{stats.totalInvoices}</p>
-              <p className={simple.text.small('text-green-600')}>{stats.paidInvoices} paid</p>
+          {/* Stats Cards */}
+          <div className="grid grid-cols-4 gap-2">
+            <div className="bg-slate-900 rounded-lg p-3 text-center">
+              <div className="text-lg font-bold text-white">{stats.totalEstimates}</div>
+              <div className="text-xs text-slate-400">Estimates</div>
+              <div className="text-xs text-amber-400">{stats.pendingEstimates} pending</div>
             </div>
-          </div>
-          </div>
-        </div>
-
-        <div className={simple.card()}>
-          <div className={simple.section('py-4 sm:py-5')}>
-          <div className="flex items-center gap-3">
-            <CreditCardIcon className="h-8 w-8 text-purple-600" />
-            <div>
-              <p className={simple.text.small()}>Revenue</p>
-              <p className={simple.text.title('text-2xl')}>${(stats.totalRevenue / 1000).toFixed(0)}k</p>
-              <p className={simple.text.small('text-gray-600')}>${(stats.pendingRevenue / 1000).toFixed(0)}k pending</p>
+            <div className="bg-slate-900 rounded-lg p-3 text-center">
+              <div className="text-lg font-bold text-white">{stats.totalInvoices}</div>
+              <div className="text-xs text-slate-400">Invoices</div>
+              <div className="text-xs text-green-400">{stats.paidInvoices} paid</div>
             </div>
-          </div>
-          </div>
-        </div>
-
-        <div className={simple.card()}>
-          <div className={simple.section('py-4 sm:py-5')}>
-          <div className="flex items-center gap-3">
-            <WrenchScrewdriverIcon className="h-8 w-8 text-orange-600" />
-            <div>
-              <p className={simple.text.small()}>Materials</p>
-              <p className={simple.text.title('text-2xl')}>{stats.materialItems}</p>
-              <p className={simple.text.small('text-orange-600')}>{stats.lowStock} low stock</p>
+            <div className="bg-slate-900 rounded-lg p-3 text-center">
+              <div className="text-lg font-bold text-amber-400">${(stats.totalRevenue / 1000).toFixed(0)}k</div>
+              <div className="text-xs text-slate-400">Revenue</div>
+              <div className="text-xs text-slate-400">${(stats.pendingRevenue / 1000).toFixed(0)}k pending</div>
             </div>
-          </div>
+            <div className="bg-slate-900 rounded-lg p-3 text-center">
+              <div className="text-lg font-bold text-white">{stats.materialItems}</div>
+              <div className="text-xs text-slate-400">Materials</div>
+              <div className="text-xs text-orange-400">{stats.lowStock} low</div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Tab Navigation */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div className="flex bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-1 overflow-x-auto whitespace-nowrap">
+      <div className="px-4 py-4">
+        {/* Mobile Tab Navigation */}
+        <div className="flex bg-slate-900 rounded-lg p-1 mb-4 overflow-x-auto">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key as 'overview' | 'estimates' | 'invoices' | 'materials')}
-                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded transition-colors whitespace-nowrap ${
                   activeTab === tab.key
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    ? 'bg-amber-500 text-black'
+                    : 'text-slate-400 hover:text-white'
                 }`}
               >
                 <Icon className="h-4 w-4" />
@@ -249,208 +218,213 @@ export default function SimplifiedFinancialHub() {
         </div>
 
         {/* Search */}
-        <div className="relative max-w-md">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <div className="relative mb-4">
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
           <input
             type="text"
             placeholder="Search..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className={simple.input('pl-10')}
+            className="w-full pl-10 pr-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
           />
         </div>
-      </div>
 
-      {/* Content */}
-      {activeTab === 'overview' ? (
-        /* Overview Tab */
-        <div className={`${simple.spacing.md}`}>
-          {/* Recent Activity */}
-          <div className={simple.card()}>
-            <div className={simple.section()}>
-              <h2 className={simple.text.subtitle('mb-4')}>Recent Activity</h2>
-              <div className="space-y-3">
-                {items.slice(0, 8).map((item) => (
-                  <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      {item.type === 'estimate' && <DocumentTextIcon className="h-5 w-5 text-blue-600" />}
-                      {item.type === 'invoice' && <ShoppingBagIcon className="h-5 w-5 text-green-600" />}
-                      {item.type === 'material' && <WrenchScrewdriverIcon className="h-5 w-5 text-orange-600" />}
-                      <div>
-                        <h3 className="font-medium text-gray-900 dark:text-white">{item.title}</h3>
-                        {item.clientName && (
-                          <p className={simple.text.small()}>{item.clientName}</p>
+        {/* Content */}
+        {activeTab === 'overview' ? (
+          <div className="space-y-4">
+            {/* Recent Activity */}
+            <div className="bg-slate-900 rounded-lg border border-slate-700 overflow-hidden">
+              <div className="p-4 border-b border-slate-700">
+                <h2 className="text-lg font-semibold text-white">Recent Activity</h2>
+              </div>
+              <div className="p-4">
+                <div className="space-y-3">
+                  {items.slice(0, 8).map((item) => (
+                    <div key={item.id} className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        {item.type === 'estimate' && <DocumentTextIcon className="h-5 w-5 text-blue-400" />}
+                        {item.type === 'invoice' && <ShoppingBagIcon className="h-5 w-5 text-green-400" />}
+                        {item.type === 'material' && <WrenchScrewdriverIcon className="h-5 w-5 text-orange-400" />}
+                        <div>
+                          <h3 className="font-medium text-white text-sm">{item.title}</h3>
+                          {item.clientName && (
+                            <p className="text-xs text-slate-400">{item.clientName}</p>
+                          )}
+                          {item.category && (
+                            <p className="text-xs text-slate-400">{item.category}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        {item.amount && (
+                          <p className="font-medium text-white text-sm">
+                            ${item.amount.toLocaleString()}
+                          </p>
                         )}
-                        {item.category && (
-                          <p className={simple.text.small()}>{item.category}</p>
+                        {item.unitPrice && (
+                          <p className="font-medium text-white text-sm">
+                            ${item.unitPrice}/unit
+                          </p>
                         )}
+                        <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
+                          item.status === 'paid' || item.status === 'approved' || item.status === 'in-stock'
+                            ? 'bg-green-500/20 text-green-400'
+                            : item.status === 'pending' || item.status === 'sent'
+                            ? 'bg-yellow-500/20 text-yellow-400'
+                            : 'bg-red-500/20 text-red-400'
+                        }`}>
+                          {item.status}
+                        </span>
                       </div>
                     </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="bg-slate-900 rounded-lg border border-slate-700 overflow-hidden">
+              <div className="p-4 border-b border-slate-700">
+                <h2 className="text-lg font-semibold text-white">Quick Actions</h2>
+              </div>
+              <div className="p-4">
+                <div className="grid grid-cols-1 gap-3">
+                  <Link
+                    href="/dashboard/estimates/new"
+                    className="flex items-center gap-3 p-3 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors"
+                  >
+                    <DocumentTextIcon className="h-6 w-6 text-blue-400" />
+                    <div>
+                      <h3 className="font-medium text-white">Create Estimate</h3>
+                      <p className="text-sm text-slate-400">Generate professional estimates</p>
+                    </div>
+                  </Link>
+
+                  <Link
+                    href="/dashboard/invoices/new"
+                    className="flex items-center gap-3 p-3 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors"
+                  >
+                    <ShoppingBagIcon className="h-6 w-6 text-green-400" />
+                    <div>
+                      <h3 className="font-medium text-white">Create Invoice</h3>
+                      <p className="text-sm text-slate-400">Send invoices to clients</p>
+                    </div>
+                  </Link>
+
+                  <Link
+                    href="/dashboard/catalog"
+                    className="flex items-center gap-3 p-3 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors"
+                  >
+                    <WrenchScrewdriverIcon className="h-6 w-6 text-orange-400" />
+                    <div>
+                      <h3 className="font-medium text-white">Manage Materials</h3>
+                      <p className="text-sm text-slate-400">Update price sheets</p>
+                    </div>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* List View for specific tabs */
+          <div className="bg-slate-900 rounded-lg border border-slate-700 overflow-hidden">
+            <div className="p-4 border-b border-slate-700">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-white">
+                  {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
+                </h2>
+                <Link
+                  href={`/dashboard/${activeTab}/new`}
+                  className="flex items-center gap-2 px-3 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-lg text-sm font-medium transition-colors"
+                >
+                  <PlusIcon className="h-4 w-4" />
+                  Add
+                </Link>
+              </div>
+            </div>
+
+            <div className="p-4">
+              <div className="space-y-3">
+                {filteredItems.map((item) => (
+                  <Link
+                    key={item.id}
+                    href={`/dashboard/${item.type}s/${item.id}`}
+                    className="flex items-center justify-between p-3 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      {item.type === 'estimate' && <DocumentTextIcon className="h-5 w-5 text-blue-400" />}
+                      {item.type === 'invoice' && <ShoppingBagIcon className="h-5 w-5 text-green-400" />}
+                      {item.type === 'material' && <WrenchScrewdriverIcon className="h-5 w-5 text-orange-400" />}
+                      <div>
+                        <h3 className="font-medium text-white text-sm">{item.title}</h3>
+                        {item.clientName && (
+                          <p className="text-xs text-slate-400">{item.clientName}</p>
+                        )}
+                        {item.category && (
+                          <p className="text-xs text-slate-400">Category: {item.category}</p>
+                        )}
+                        {item.stock && (
+                          <p className="text-xs text-slate-400">Stock: {item.stock} units</p>
+                        )}
+                        <p className="text-xs text-slate-400">Created: {item.createdAt}</p>
+                      </div>
+                    </div>
+
                     <div className="text-right">
                       {item.amount && (
-                        <p className="font-medium text-gray-900 dark:text-white">
+                        <p className="font-medium text-white mb-1 text-sm">
                           ${item.amount.toLocaleString()}
                         </p>
                       )}
                       {item.unitPrice && (
-                        <p className="font-medium text-gray-900 dark:text-white">
+                        <p className="font-medium text-white mb-1 text-sm">
                           ${item.unitPrice}/unit
                         </p>
                       )}
                       <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
                         item.status === 'paid' || item.status === 'approved' || item.status === 'in-stock'
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                          ? 'bg-green-500/20 text-green-400'
                           : item.status === 'pending' || item.status === 'sent'
-                          ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
-                          : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+                          ? 'bg-yellow-500/20 text-yellow-400'
+                          : 'bg-red-500/20 text-red-400'
                       }`}>
                         {item.status}
                       </span>
+                      <div className="flex items-center gap-2 mt-1">
+                        <EyeIcon className="h-4 w-4 text-slate-400" />
+                        <span className="text-xs text-slate-400">View</span>
+                      </div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
+
+                {filteredItems.length === 0 && (
+                  <div className="text-center py-12">
+                    <div className="mx-auto h-12 w-12 text-slate-400 mb-4">
+                      {activeTab === 'estimates' && <DocumentTextIcon className="h-12 w-12" />}
+                      {activeTab === 'invoices' && <ShoppingBagIcon className="h-12 w-12" />}
+                      {activeTab === 'materials' && <WrenchScrewdriverIcon className="h-12 w-12" />}
+                    </div>
+                    <h3 className="text-lg font-medium text-white mb-2">No {activeTab} found</h3>
+                    <p className="text-slate-400 mb-4">
+                      {searchTerm ? 'Try adjusting your search terms' : `Get started by creating your first ${activeTab.slice(0, -1)}`}
+                    </p>
+                    {!searchTerm && (
+                      <Link
+                        href={`/dashboard/${activeTab}/new`}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-lg font-medium transition-colors"
+                      >
+                        <PlusIcon className="h-4 w-4" />
+                        Create {activeTab.slice(0, -1)}
+                      </Link>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
-
-          {/* Quick Actions */}
-          <div className={simple.card()}>
-            <div className={simple.section()}>
-              <h2 className={simple.text.subtitle('mb-4')}>Quick Actions</h2>
-              <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6`}>
-                <Link
-                  href="/dashboard/estimates/new"
-                  className={simple.card('hover:scale-[1.02] transition-transform text-center')}
-                >
-                  <div className={simple.section('py-6')}>
-                    <DocumentTextIcon className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                    <h3 className={simple.text.subtitle('mb-1')}>Create Estimate</h3>
-                    <p className={simple.text.small()}>Generate professional estimates</p>
-                  </div>
-                </Link>
-
-                <Link
-                  href="/dashboard/invoices/new"
-                  className={simple.card('hover:scale-[1.02] transition-transform text-center')}
-                >
-                  <div className={simple.section('py-6')}>
-                    <ShoppingBagIcon className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                    <h3 className={simple.text.subtitle('mb-1')}>Create Invoice</h3>
-                    <p className={simple.text.small()}>Send invoices to clients</p>
-                  </div>
-                </Link>
-
-                <Link
-                  href="/dashboard/catalog"
-                  className={simple.card('hover:scale-[1.02] transition-transform text-center')}
-                >
-                  <div className={simple.section('py-6')}>
-                    <WrenchScrewdriverIcon className="h-8 w-8 text-orange-600 mx-auto mb-2" />
-                    <h3 className={simple.text.subtitle('mb-1')}>Manage Materials</h3>
-                    <p className={simple.text.small()}>Update price sheets</p>
-                  </div>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        /* List View for specific tabs */
-        <div className={simple.card()}>
-          <div className={simple.section()}>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className={simple.text.subtitle()}>
-                {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
-              </h2>
-              <Link
-                href={`/dashboard/${activeTab}/new`}
-                className={simple.button('primary', 'flex items-center gap-2')}
-              >
-                <PlusIcon className="h-4 w-4" />
-                Add {activeTab.slice(0, -1)}
-              </Link>
-            </div>
-
-            <div className="space-y-3">
-              {filteredItems.map((item) => (
-                <Link
-                  key={item.id}
-                  href={`/dashboard/${item.type}s/${item.id}`}
-                  className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    {item.type === 'estimate' && <DocumentTextIcon className="h-5 w-5 text-blue-600" />}
-                    {item.type === 'invoice' && <ShoppingBagIcon className="h-5 w-5 text-green-600" />}
-                    {item.type === 'material' && <WrenchScrewdriverIcon className="h-5 w-5 text-orange-600" />}
-                    <div>
-                      <h3 className="font-medium text-gray-900 dark:text-white">{item.title}</h3>
-                      {item.clientName && (
-                        <p className={simple.text.small()}>{item.clientName}</p>
-                      )}
-                      {item.category && (
-                        <p className={simple.text.small()}>Category: {item.category}</p>
-                      )}
-                      {item.stock && (
-                        <p className={simple.text.small()}>Stock: {item.stock} units</p>
-                      )}
-                      <p className={simple.text.small()}>Created: {item.createdAt}</p>
-                    </div>
-                  </div>
-
-                  <div className="text-right">
-                    {item.amount && (
-                      <p className="font-medium text-gray-900 dark:text-white mb-1">
-                        ${item.amount.toLocaleString()}
-                      </p>
-                    )}
-                    {item.unitPrice && (
-                      <p className="font-medium text-gray-900 dark:text-white mb-1">
-                        ${item.unitPrice}/unit
-                      </p>
-                    )}
-                    <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
-                      item.status === 'paid' || item.status === 'approved' || item.status === 'in-stock'
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-                        : item.status === 'pending' || item.status === 'sent'
-                        ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
-                        : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
-                    }`}>
-                      {item.status}
-                    </span>
-                    <div className="flex items-center gap-2 mt-2">
-                      <EyeIcon className="h-4 w-4 text-gray-400" />
-                      <span className={simple.text.small()}>View</span>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-
-              {filteredItems.length === 0 && (
-                <div className="text-center py-12">
-                  <div className="mx-auto h-12 w-12 text-gray-400 mb-4">
-                    {activeTab === 'estimates' && <DocumentTextIcon className="h-12 w-12" />}
-                    {activeTab === 'invoices' && <ShoppingBagIcon className="h-12 w-12" />}
-                    {activeTab === 'materials' && <WrenchScrewdriverIcon className="h-12 w-12" />}
-                  </div>
-                  <h3 className={simple.text.subtitle('mb-2')}>No {activeTab} found</h3>
-                  <p className={simple.text.body('mb-4')}>
-                    {searchTerm ? 'Try adjusting your search terms' : `Get started by creating your first ${activeTab.slice(0, -1)}`}
-                  </p>
-                  {!searchTerm && (
-                    <Link
-                      href={`/dashboard/${activeTab}/new`}
-                      className={simple.button('primary', 'inline-flex items-center gap-2')}
-                    >
-                      <PlusIcon className="h-4 w-4" />
-                      Create {activeTab.slice(0, -1)}
-                    </Link>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

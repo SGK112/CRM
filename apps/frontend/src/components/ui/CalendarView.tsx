@@ -263,7 +263,7 @@ export default function CalendarView({
                   }
                   const clientId = appt.client?.id ?? appt.client?._id ?? appt.clientId;
                   setShowEventActions(false);
-                  if (clientId) router.push(`/dashboard/clients/${clientId}/profile`);
+                  if (clientId) router.push(`/dashboard/contacts/${clientId}`);
                   else window.alert('No contact linked to this event');
                 }}
               >

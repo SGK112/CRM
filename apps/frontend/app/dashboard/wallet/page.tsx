@@ -1,19 +1,10 @@
 'use client';
 
-import {
-    StandardButton,
-    StandardCard,
-    StandardGrid,
-    StandardPageWrapper,
-    StandardSection,
-} from '@/components/ui/StandardPageWrapper';
 import { useWallet } from '@/hooks/useWallet';
-import { getUserPlan } from '@/lib/plans';
 import {
     ArrowDownTrayIcon,
     ArrowUpTrayIcon,
     BanknotesIcon,
-    ChartBarIcon,
     CheckCircleIcon,
     ClockIcon,
     CreditCardIcon,
@@ -26,7 +17,6 @@ import {
 import { useState } from 'react';
 
 export default function WalletPage() {
-  const [userPlan] = useState(getUserPlan());
   const {
     wallet,
     transactions,
@@ -54,7 +44,7 @@ export default function WalletPage() {
       setShowConnectModal(false);
       setWalletAddress('');
     } catch (error) {
-      console.error('Failed to connect wallet:', error);
+      // Error handling for wallet connection
     } finally {
       setSubmitting(false);
     }
@@ -64,7 +54,7 @@ export default function WalletPage() {
     try {
       await disconnectWallet();
     } catch (error) {
-      console.error('Failed to disconnect wallet:', error);
+      // Error handling for wallet disconnection
     }
   };
 
@@ -76,7 +66,7 @@ export default function WalletPage() {
       setPaymentAmount('');
       setPaymentDescription('');
     } catch (error) {
-      console.error('Failed to create payment:', error);
+      // Error handling for payment creation
     } finally {
       setSubmitting(false);
     }
@@ -112,273 +102,315 @@ export default function WalletPage() {
 
   if (loading) {
     return (
-      <StandardPageWrapper title="TON Wallet">
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        </div>
-      </StandardPageWrapper>
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
+      </div>
     );
   }
 
   return (
-    <StandardPageWrapper title="TON Wallet">
-      {/* Error Banner */}
-      {error && (
-        <StandardSection>
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-            <div className="flex items-center">
-              <ExclamationTriangleIcon className="h-5 w-5 text-red-600 mr-3" />
-              <div className="flex-1">
-                <h3 className="text-sm font-medium text-red-800">Error</h3>
-                <p className="text-sm text-red-700 mt-1">{error}</p>
-              </div>
-              <StandardButton variant="ghost" size="sm" onClick={clearError}>
-                ✕
-              </StandardButton>
-            </div>
-          </div>
-        </StandardSection>
-      )}
-      {/* Wallet Status */}
-      <StandardSection>
-        <StandardCard className="p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <WalletIcon className="h-8 w-8 text-blue-600" />
+    <div className="min-h-screen bg-black">
+      {/* Mobile-First Header */}
+      <div className="sticky top-0 z-50 bg-black border-b border-slate-800">
+        <div className="px-4 py-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-amber-500/20 rounded-lg">
+                <WalletIcon className="h-6 w-6 text-amber-400" />
               </div>
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">
-                  {wallet?.isConnected ? 'Wallet Connected' : 'No Wallet Connected'}
-                </h2>
-                {wallet?.isConnected && wallet.tonAddress && (
-                  <p className="text-sm text-gray-600">
-                    {wallet.tonAddress.slice(0, 8)}...{wallet.tonAddress.slice(-8)}
-                  </p>
-                )}
-                <p className="text-xs text-gray-500">Network: {wallet?.network || 'N/A'}</p>
+                <h1 className="text-xl font-bold text-white">TON Wallet</h1>
+                <p className="text-sm text-slate-400">Crypto payments</p>
               </div>
             </div>
-
-            <div className="flex items-center space-x-3">
+            <div className="flex gap-2">
+              <button 
+                onClick={refreshWalletData}
+                disabled={loading}
+                className="p-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-lg transition-colors disabled:opacity-50"
+              >
+                <ArrowDownTrayIcon className={`h-4 w-4 text-slate-400 ${loading ? 'animate-spin' : ''}`} />
+              </button>
               {wallet?.isConnected ? (
-                <>
-                  <StandardButton variant="secondary" onClick={handleDisconnectWallet}>
-                    Disconnect
-                  </StandardButton>
-                  <StandardButton onClick={() => setShowPaymentModal(true)}>
-                    <CreditCardIcon className="h-4 w-4 mr-2" />
-                    Create Payment
-                  </StandardButton>
-                </>
+                <button
+                  onClick={() => setShowPaymentModal(true)}
+                  className="p-2 bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors"
+                >
+                  <CreditCardIcon className="h-5 w-5 text-black" />
+                </button>
               ) : (
-                <StandardButton onClick={() => setShowConnectModal(true)}>
-                  <LinkIcon className="h-4 w-4 mr-2" />
-                  Connect Wallet
-                </StandardButton>
+                <button
+                  onClick={() => setShowConnectModal(true)}
+                  className="p-2 bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors"
+                >
+                  <LinkIcon className="h-5 w-5 text-black" />
+                </button>
               )}
             </div>
           </div>
-        </StandardCard>
-      </StandardSection>
 
-      {/* Balance & Stats */}
-      {wallet?.isConnected && (
-        <StandardSection title="Balance & Statistics">
-          <StandardGrid>
-            <StandardCard className="p-6">
-              <div className="flex items-center">
-                <div className="p-2 bg-green-100 rounded-lg mr-4">
-                  <CurrencyDollarIcon className="h-6 w-6 text-green-600" />
+          {/* Connection Status */}
+          <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
+            wallet?.isConnected
+              ? 'bg-green-500/20 border border-green-500/50'
+              : 'bg-red-500/20 border border-red-500/50'
+          }`}>
+            <div className={`w-2 h-2 rounded-full ${
+              wallet?.isConnected ? 'bg-green-400' : 'bg-red-400'
+            }`} />
+            <span className={`text-sm font-medium ${
+              wallet?.isConnected ? 'text-green-400' : 'text-red-400'
+            }`}>
+              {wallet?.isConnected ? 'Connected' : 'Not Connected'}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="px-4 py-4 space-y-6">
+        {/* Error Banner */}
+        {error && (
+          <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4">
+            <div className="flex items-center">
+              <ExclamationTriangleIcon className="h-5 w-5 text-red-400 mr-3" />
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-red-200">Error</h3>
+                <p className="text-sm text-red-300 mt-1">{error}</p>
+              </div>
+              <button
+                onClick={clearError}
+                className="text-red-400 hover:text-red-300"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Connection Section */}
+        {!wallet?.isConnected && (
+          <div className="bg-slate-900 rounded-lg border border-slate-700 p-6">
+            <div className="text-center">
+              <div className="h-16 w-16 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <WalletIcon className="h-8 w-8 text-amber-400" />
+              </div>
+              <h3 className="text-lg font-medium text-white mb-2">Connect TON Wallet</h3>
+              <p className="text-slate-400 mb-6">
+                Connect your TON wallet to receive cryptocurrency payments from clients.
+              </p>
+              <button
+                onClick={() => setShowConnectModal(true)}
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-amber-500 hover:bg-amber-600 text-black rounded-lg font-medium transition-colors disabled:opacity-50"
+              >
+                {loading ? (
+                  <ArrowDownTrayIcon className="h-4 w-4 animate-spin" />
+                ) : (
+                  <LinkIcon className="h-4 w-4" />
+                )}
+                Connect Wallet
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Wallet Balance & Stats */}
+        {wallet?.isConnected && (
+          <>
+            <div className="bg-slate-900 rounded-lg border border-slate-700 p-6">
+              <div className="text-center mb-6">
+                <div className="text-3xl font-bold text-white mb-1">
+                  {wallet.balance} TON
                 </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-900">{wallet.balance} TON</h3>
-                  <p className="text-sm text-gray-600">Current Balance</p>
+                <div className="text-slate-400 text-sm">
+                  {wallet.tonAddress && (
+                    <span className="font-mono">
+                      {wallet.tonAddress.slice(0, 8)}...{wallet.tonAddress.slice(-8)}
+                    </span>
+                  )}
                 </div>
               </div>
-            </StandardCard>
-
-            {stats && (
-              <>
-                <StandardCard className="p-6">
-                  <div className="flex items-center">
-                    <div className="p-2 bg-blue-100 rounded-lg mr-4">
-                      <ArrowDownTrayIcon className="h-6 w-6 text-blue-600" />
+              
+              {/* Stats Grid */}
+              {stats && (
+                <div className="grid grid-cols-2 gap-4 text-center">
+                  <div className="bg-slate-800 rounded-lg p-3">
+                    <div className="flex items-center justify-center mb-2">
+                      <ArrowDownTrayIcon className="h-5 w-5 text-green-400" />
                     </div>
-                    <div>
-                      <h3 className="text-2xl font-bold text-gray-900">
-                        {stats.totalReceived} TON
-                      </h3>
-                      <p className="text-sm text-gray-600">Total Received</p>
-                    </div>
+                    <div className="text-lg font-bold text-white">{stats.totalReceived}</div>
+                    <div className="text-xs text-slate-400">Received</div>
                   </div>
-                </StandardCard>
-
-                <StandardCard className="p-6">
-                  <div className="flex items-center">
-                    <div className="p-2 bg-orange-100 rounded-lg mr-4">
-                      <ArrowUpTrayIcon className="h-6 w-6 text-orange-600" />
+                  <div className="bg-slate-800 rounded-lg p-3">
+                    <div className="flex items-center justify-center mb-2">
+                      <ArrowUpTrayIcon className="h-5 w-5 text-red-400" />
                     </div>
-                    <div>
-                      <h3 className="text-2xl font-bold text-gray-900">{stats.totalSent} TON</h3>
-                      <p className="text-sm text-gray-600">Total Sent</p>
-                    </div>
+                    <div className="text-lg font-bold text-white">{stats.totalSent}</div>
+                    <div className="text-xs text-slate-400">Sent</div>
                   </div>
-                </StandardCard>
-
-                <StandardCard className="p-6">
-                  <div className="flex items-center">
-                    <div className="p-2 bg-purple-100 rounded-lg mr-4">
-                      <ChartBarIcon className="h-6 w-6 text-purple-600" />
-                    </div>
-                    <div>
-                      <h3 className="text-2xl font-bold text-gray-900">{stats.transactionCount}</h3>
-                      <p className="text-sm text-gray-600">Total Transactions</p>
-                    </div>
-                  </div>
-                </StandardCard>
-              </>
-            )}
-          </StandardGrid>
-        </StandardSection>
-      )}
-
-      {/* Transaction History */}
-      {wallet?.isConnected && (
-        <StandardSection title="Transaction History">
-          <StandardCard>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Type
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Description
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Amount
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Date
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {transactions.map(transaction => (
-                    <tr key={transaction._id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          {getTypeIcon(transaction.type)}
-                          <span className="ml-2 text-sm font-medium text-gray-900 capitalize">
-                            {transaction.type}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm text-gray-900">{transaction.description}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          {transaction.amount} {transaction.currency}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          {getStatusIcon(transaction.status)}
-                          <span
-                            className={`ml-2 text-sm font-medium capitalize ${
-                              transaction.status === 'confirmed'
-                                ? 'text-green-600'
-                                : transaction.status === 'pending'
-                                  ? 'text-yellow-600'
-                                  : 'text-red-600'
-                            }`}
-                          >
-                            {transaction.status}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(transaction.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        {transaction.txHash && (
-                          <a
-                            href={`https://tonviewer.com/transaction/${transaction.txHash}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-900"
-                          >
-                            View on Explorer
-                          </a>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                </div>
+              )}
             </div>
 
-            {transactions.length === 0 && (
-              <div className="text-center py-12">
-                <WalletIcon className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">No transactions</h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  Get started by creating your first payment.
-                </p>
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setShowPaymentModal(true)}
+                className="flex flex-col items-center gap-2 p-4 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-lg transition-colors"
+              >
+                <CreditCardIcon className="h-6 w-6 text-amber-400" />
+                <span className="text-sm font-medium text-white">Create Payment</span>
+              </button>
+              <button
+                onClick={handleDisconnectWallet}
+                className="flex flex-col items-center gap-2 p-4 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-lg transition-colors"
+              >
+                <ExclamationTriangleIcon className="h-6 w-6 text-red-400" />
+                <span className="text-sm font-medium text-white">Disconnect</span>
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* Transaction History */}
+        {wallet?.isConnected && (
+          <div className="bg-slate-900 rounded-lg border border-slate-700">
+            <div className="p-4 border-b border-slate-700">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-medium text-white">Transaction History</h3>
+                <span className="text-sm text-slate-400">{transactions.length} total</span>
+              </div>
+            </div>
+            
+            {transactions.length > 0 ? (
+              <div className="divide-y divide-slate-700">
+                {transactions.map((transaction) => (
+                  <div key={transaction._id} className="p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-lg ${
+                          transaction.type === 'payment'
+                            ? 'bg-green-500/20' 
+                            : 'bg-red-500/20'
+                        }`}>
+                          {getTypeIcon(transaction.type)}
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-white capitalize">
+                            {transaction.type}
+                          </div>
+                          <div className="text-xs text-slate-400">
+                            {new Date(transaction.createdAt).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-medium text-white">
+                          {transaction.amount} {transaction.currency}
+                        </div>
+                        <div className={`text-xs ${
+                          transaction.status === 'confirmed'
+                            ? 'text-green-400'
+                            : transaction.status === 'pending'
+                              ? 'text-yellow-400'
+                              : 'text-red-400'
+                        }`}>
+                          {transaction.status}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="text-xs text-slate-400 mb-2">
+                      {transaction.description}
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        {getStatusIcon(transaction.status)}
+                      </div>
+                      {transaction.txHash && (
+                        <a
+                          href={`https://tonviewer.com/transaction/${transaction.txHash}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-amber-400 hover:text-amber-300"
+                        >
+                          View Explorer
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-8 text-center">
+                <WalletIcon className="h-8 w-8 text-slate-400 mx-auto mb-2" />
+                <p className="text-slate-400 text-sm">No transactions yet</p>
               </div>
             )}
-          </StandardCard>
-        </StandardSection>
-      )}
+          </div>
+        )}
+      </div>
 
       {/* Connect Wallet Modal */}
       {showConnectModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <div className="flex items-center justify-center w-12 h-12 mx-auto bg-blue-100 rounded-full">
-                <WalletIcon className="w-6 h-6 text-blue-600" />
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-900 rounded-lg max-w-sm w-full border border-slate-700">
+            <div className="flex items-center justify-between p-4 border-b border-slate-700">
+              <h3 className="text-lg font-medium text-white">Connect TON Wallet</h3>
+              <button
+                onClick={() => {
+                  setShowConnectModal(false);
+                  setWalletAddress('');
+                }}
+                className="text-slate-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <div className="text-center mb-6">
+                <div className="h-12 w-12 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <WalletIcon className="h-6 w-6 text-amber-400" />
+                </div>
+                <p className="text-slate-400 text-sm">
+                  Enter your TON wallet address to connect
+                </p>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 text-center mt-5">
-                Connect TON Wallet
-              </h3>
-              <div className="mt-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Wallet Address
-                </label>
-                <input
-                  type="text"
-                  value={walletAddress}
-                  onChange={e => setWalletAddress(e.target.value)}
-                  placeholder="Enter your TON wallet address"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div className="flex justify-between mt-6">
-                <StandardButton
-                  variant="secondary"
-                  onClick={() => {
-                    setShowConnectModal(false);
-                    setWalletAddress('');
-                  }}
-                >
-                  Cancel
-                </StandardButton>
-                <StandardButton
-                  onClick={handleConnectWallet}
-                  disabled={!walletAddress.trim() || submitting}
-                >
-                  {submitting ? 'Connecting...' : 'Connect'}
-                </StandardButton>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Wallet Address
+                  </label>
+                  <input
+                    type="text"
+                    value={walletAddress}
+                    onChange={e => setWalletAddress(e.target.value)}
+                    placeholder="Enter your TON wallet address"
+                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  />
+                </div>
+                
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      setShowConnectModal(false);
+                      setWalletAddress('');
+                    }}
+                    className="flex-1 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleConnectWallet}
+                    disabled={!walletAddress.trim() || submitting}
+                    className="flex-1 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-lg font-medium transition-colors disabled:opacity-50"
+                  >
+                    {submitting ? 'Connecting...' : 'Connect'}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -387,16 +419,35 @@ export default function WalletPage() {
 
       {/* Create Payment Modal */}
       {showPaymentModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <div className="flex items-center justify-center w-12 h-12 mx-auto bg-green-100 rounded-full">
-                <CreditCardIcon className="w-6 h-6 text-green-600" />
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-900 rounded-lg max-w-sm w-full border border-slate-700">
+            <div className="flex items-center justify-between p-4 border-b border-slate-700">
+              <h3 className="text-lg font-medium text-white">Create Payment</h3>
+              <button
+                onClick={() => {
+                  setShowPaymentModal(false);
+                  setPaymentAmount('');
+                  setPaymentDescription('');
+                }}
+                className="text-slate-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <div className="text-center mb-6">
+                <div className="h-12 w-12 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <CreditCardIcon className="h-6 w-6 text-green-400" />
+                </div>
+                <p className="text-slate-400 text-sm">
+                  Create a new payment request
+                </p>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 text-center mt-5">Create Payment</h3>
-              <div className="mt-6 space-y-4">
+              
+              <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
                     Amount (TON)
                   </label>
                   <input
@@ -404,11 +455,12 @@ export default function WalletPage() {
                     value={paymentAmount}
                     onChange={e => setPaymentAmount(e.target.value)}
                     placeholder="0.00"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                   />
                 </div>
+                
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
                     Description
                   </label>
                   <input
@@ -416,32 +468,34 @@ export default function WalletPage() {
                     value={paymentDescription}
                     onChange={e => setPaymentDescription(e.target.value)}
                     placeholder="Payment description"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                   />
                 </div>
-              </div>
-              <div className="flex justify-between mt-6">
-                <StandardButton
-                  variant="secondary"
-                  onClick={() => {
-                    setShowPaymentModal(false);
-                    setPaymentAmount('');
-                    setPaymentDescription('');
-                  }}
-                >
-                  Cancel
-                </StandardButton>
-                <StandardButton
-                  onClick={handleCreatePayment}
-                  disabled={!paymentAmount.trim() || !paymentDescription.trim() || submitting}
-                >
-                  {submitting ? 'Creating...' : 'Create Payment'}
-                </StandardButton>
+                
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      setShowPaymentModal(false);
+                      setPaymentAmount('');
+                      setPaymentDescription('');
+                    }}
+                    className="flex-1 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleCreatePayment}
+                    disabled={!paymentAmount.trim() || !paymentDescription.trim() || submitting}
+                    className="flex-1 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-lg font-medium transition-colors disabled:opacity-50"
+                  >
+                    {submitting ? 'Creating...' : 'Create'}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
       )}
-    </StandardPageWrapper>
+    </div>
   );
 }

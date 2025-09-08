@@ -238,126 +238,115 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Enhanced Header Section */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                  <CalendarDaysIcon className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Calendar</h1>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Manage your appointments and schedule
-                  </p>
-                </div>
+    <div className="min-h-screen bg-black">
+      {/* Mobile-First Header */}
+      <div className="sticky top-0 z-50 bg-black border-b border-slate-800">
+        <div className="px-4 py-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-amber-500/20 rounded-lg">
+                <CalendarDaysIcon className="h-6 w-6 text-amber-400" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-white">Calendar</h1>
+                <p className="text-sm text-slate-400">Manage appointments</p>
               </div>
             </div>
-
-            {/* Action Buttons */}
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                  showFilters
-                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
-                }`}
-              >
-                <FunnelIcon className="h-4 w-4" />
-                Filters
-              </button>
-
-              <button
-                onClick={() => router.push('/dashboard/calendar/new')}
-                className="inline-flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105"
-              >
-                <PlusIcon className="h-4 w-4" />
-                New Appointment
-              </button>
-            </div>
+            <button
+              onClick={() => router.push('/dashboard/calendar/new')}
+              className="p-2 bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors"
+            >
+              <PlusIcon className="h-5 w-5 text-black" />
+            </button>
           </div>
 
-          {/* Enhanced Stats Cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-600 rounded-lg shadow-sm">
-                  <CalendarDaysIcon className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Today</p>
-                  <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">
-                    {stats.today}
-                  </p>
-                </div>
-              </div>
+          {/* Stats Cards */}
+          <div className="grid grid-cols-4 gap-2">
+            <div className="bg-slate-900 rounded-lg p-3 text-center">
+              <div className="text-lg font-bold text-white">{stats.today}</div>
+              <div className="text-xs text-slate-400">Today</div>
             </div>
-
-            <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20 rounded-xl p-4 border border-emerald-200 dark:border-emerald-800">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-emerald-600 rounded-lg shadow-sm">
-                  <ClockIcon className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
-                    This Week
-                  </p>
-                  <p className="text-2xl font-bold text-emerald-900 dark:text-emerald-100">
-                    {stats.thisWeek}
-                  </p>
-                </div>
-              </div>
+            <div className="bg-slate-900 rounded-lg p-3 text-center">
+              <div className="text-lg font-bold text-white">{stats.thisWeek}</div>
+              <div className="text-xs text-slate-400">Week</div>
             </div>
-
-            <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-xl p-4 border border-green-200 dark:border-green-800">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-green-600 rounded-lg shadow-sm">
-                  <CheckCircleIcon className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-green-700 dark:text-green-300">
-                    Confirmed
-                  </p>
-                  <p className="text-2xl font-bold text-green-900 dark:text-green-100">
-                    {stats.confirmed}
-                  </p>
-                </div>
-              </div>
+            <div className="bg-slate-900 rounded-lg p-3 text-center">
+              <div className="text-lg font-bold text-amber-400">{stats.confirmed}</div>
+              <div className="text-xs text-slate-400">Confirmed</div>
             </div>
-
-            <div className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 rounded-xl p-4 border border-amber-200 dark:border-amber-800">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-amber-600 rounded-lg shadow-sm">
-                  <ClockSolidIcon className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-amber-700 dark:text-amber-300">Pending</p>
-                  <p className="text-2xl font-bold text-amber-900 dark:text-amber-100">
-                    {stats.pending}
-                  </p>
-                </div>
-              </div>
+            <div className="bg-slate-900 rounded-lg p-3 text-center">
+              <div className="text-lg font-bold text-slate-400">{stats.pending}</div>
+              <div className="text-xs text-slate-400">Pending</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-6">
-        {/* Enhanced Filters */}
+      <div className="px-4 py-4">
+        {/* Mobile Controls */}
+        <div className="flex flex-col gap-3 mb-4">
+          {/* Search */}
+          <div className="relative">
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search appointments..."
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+            />
+          </div>
+
+          {/* View Toggle and Filters */}
+          <div className="flex gap-2">
+            <div className="flex-1 flex bg-slate-900 rounded-lg p-1">
+              {[
+                { key: 'dayGridMonth', label: 'Month', icon: Squares2X2Icon },
+                { key: 'timeGridWeek', label: 'Week', icon: ViewColumnsIcon },
+                { key: 'listWeek', label: 'List', icon: ListBulletIcon },
+              ].map(viewOption => {
+                const IconComponent = viewOption.icon;
+                return (
+                  <button
+                    key={viewOption.key}
+                    onClick={() =>
+                      setView(
+                        viewOption.key as 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek'
+                      )
+                    }
+                    className={`flex-1 flex items-center justify-center gap-1 px-2 py-2 text-xs font-medium rounded transition-all ${
+                      view === viewOption.key
+                        ? 'bg-amber-500 text-black'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <IconComponent className="h-3 w-3" />
+                    {viewOption.label}
+                  </button>
+                );
+              })}
+            </div>
+            
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`px-3 py-2 rounded-lg font-medium transition-all ${
+                showFilters
+                  ? 'bg-amber-500 text-black'
+                  : 'bg-slate-900 text-slate-400 border border-slate-700 hover:text-white'
+              }`}
+            >
+              <FunnelIcon className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Filters */}
         {showFilters && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Filter Appointments
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-slate-900 rounded-lg border border-slate-700 p-4 mb-4">
+            <h3 className="text-sm font-semibold text-white mb-3">Filter Appointments</h3>
+            <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Status
-                </label>
+                <label className="block text-xs font-medium text-slate-400 mb-2">Status</label>
                 <div className="flex flex-wrap gap-2">
                   {['scheduled', 'confirmed', 'completed', 'cancelled'].map(status => (
                     <button
@@ -367,10 +356,10 @@ export default function CalendarPage() {
                           prev.includes(status) ? prev.filter(s => s !== status) : [...prev, status]
                         );
                       }}
-                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${
                         statusFilter.includes(status)
-                          ? 'bg-blue-100 text-blue-700 border-2 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-600'
-                          : 'bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                          ? 'bg-amber-500 text-black'
+                          : 'bg-slate-800 text-slate-400 hover:text-white'
                       }`}
                     >
                       {status.charAt(0).toUpperCase() + status.slice(1)}
@@ -380,9 +369,7 @@ export default function CalendarPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Type
-                </label>
+                <label className="block text-xs font-medium text-slate-400 mb-2">Type</label>
                 <div className="flex flex-wrap gap-2">
                   {[
                     'consultation',
@@ -399,10 +386,10 @@ export default function CalendarPage() {
                           prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
                         );
                       }}
-                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${
                         typeFilter.includes(type)
-                          ? 'bg-emerald-100 text-emerald-700 border-2 border-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-600'
-                          : 'bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                          ? 'bg-amber-500 text-black'
+                          : 'bg-slate-800 text-slate-400 hover:text-white'
                       }`}
                     >
                       {type === 'google_calendar'
@@ -413,230 +400,173 @@ export default function CalendarPage() {
                   ))}
                 </div>
               </div>
-            </div>
 
-            {(statusFilter.length > 0 || typeFilter.length > 0) && (
-              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+              {(statusFilter.length > 0 || typeFilter.length > 0) && (
                 <button
                   onClick={() => {
                     setStatusFilter([]);
                     setTypeFilter([]);
                   }}
-                  className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium"
+                  className="text-xs text-amber-400 hover:text-amber-300 font-medium"
                 >
                   Clear all filters
                 </button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
 
-        {/* Enhanced Controls */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
-          {/* Search */}
-          <div className="relative max-w-md flex-1">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search appointments, clients, or descriptions..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-            />
-          </div>
-
-          {/* View Toggle */}
-          <div className="flex bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 p-1 shadow-sm">
-            {[
-              { key: 'dayGridMonth', label: 'Month', icon: Squares2X2Icon },
-              { key: 'timeGridWeek', label: 'Week', icon: ViewColumnsIcon },
-              { key: 'timeGridDay', label: 'Day', icon: ViewColumnsIcon },
-              { key: 'listWeek', label: 'List', icon: ListBulletIcon },
-            ].map(viewOption => {
-              const IconComponent = viewOption.icon;
-              return (
-                <button
-                  key={viewOption.key}
-                  onClick={() =>
-                    setView(
-                      viewOption.key as 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek'
-                    )
-                  }
-                  className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
-                    view === viewOption.key
-                      ? 'bg-blue-600 text-white shadow-sm'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                  }`}
-                >
-                  <IconComponent className="h-4 w-4" />
-                  {viewOption.label}
-                </button>
-              );
-            })}
-          </div>
+        {/* Calendar */}
+        <div className="bg-slate-900 rounded-lg border border-slate-700 overflow-hidden mb-4">
+          <CalendarView
+            events={calendarEvents}
+            initialView={view}
+            currentView={view}
+            onEventClick={(info: EventClickArg) => {
+              const appointment = info.event.extendedProps.appointment;
+              router.push(`/dashboard/calendar/${appointment._id}`);
+            }}
+            onDateClick={(info: DateClickArg) => {
+              router.push(`/dashboard/calendar/new?date=${info.dateStr}`);
+            }}
+          />
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-          {/* Enhanced Calendar */}
-          <div className="xl:col-span-3">
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
-              <CalendarView
-                events={calendarEvents}
-                initialView={view}
-                currentView={view}
-                onEventClick={(info: EventClickArg) => {
-                  const appointment = info.event.extendedProps.appointment;
-                  router.push(`/dashboard/calendar/${appointment._id}`);
-                }}
-                onDateClick={(info: DateClickArg) => {
-                  router.push(`/dashboard/calendar/new?date=${info.dateStr}`);
-                }}
-              />
-            </div>
+        {/* Upcoming Appointments */}
+        <div className="bg-slate-900 rounded-lg border border-slate-700 overflow-hidden">
+          <div className="p-4 border-b border-slate-700">
+            <h2 className="text-lg font-semibold text-white">Upcoming Appointments</h2>
+            <p className="text-sm text-slate-400">Next 5 scheduled</p>
           </div>
 
-          {/* Enhanced Sidebar - Upcoming Appointments */}
-          <div className="xl:col-span-1">
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Upcoming Appointments
-                </h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  Next 5 scheduled appointments
-                </p>
-              </div>
+          <div className="p-4">
+            {upcomingAppointments.length > 0 ? (
+              <div className="space-y-3">
+                {upcomingAppointments.map(appointment => {
+                  const StatusIcon = getStatusIcon(appointment.status);
+                  const TypeIcon = getAppointmentTypeIcon(appointment.appointmentType);
+                  const appointmentDate = new Date(appointment.startDateTime);
 
-              <div className="p-6">
-                {upcomingAppointments.length > 0 ? (
-                  <div className="space-y-4">
-                    {upcomingAppointments.map(appointment => {
-                      const StatusIcon = getStatusIcon(appointment.status);
-                      const TypeIcon = getAppointmentTypeIcon(appointment.appointmentType);
-                      const appointmentDate = new Date(appointment.startDateTime);
-
-                      return (
-                        <div
-                          key={appointment._id}
-                          onClick={() => router.push(`/dashboard/calendar/${appointment._id}`)}
-                          className="group p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 cursor-pointer border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md"
-                        >
-                          <div className="flex items-start gap-3">
-                            <div className="flex-shrink-0">
-                              <div
-                                className={`p-2 rounded-lg ${
-                                  appointment.status === 'confirmed'
-                                    ? 'bg-green-100 dark:bg-green-900/30'
-                                    : appointment.status === 'scheduled'
-                                      ? 'bg-blue-100 dark:bg-blue-900/30'
-                                      : appointment.status === 'completed'
-                                        ? 'bg-gray-100 dark:bg-gray-900/30'
-                                        : 'bg-red-100 dark:bg-red-900/30'
-                                }`}
-                              >
-                                <StatusIcon
-                                  className={`h-4 w-4 ${
-                                    appointment.status === 'confirmed'
-                                      ? 'text-green-600 dark:text-green-400'
-                                      : appointment.status === 'scheduled'
-                                        ? 'text-blue-600 dark:text-blue-400'
-                                        : appointment.status === 'completed'
-                                          ? 'text-gray-600 dark:text-gray-400'
-                                          : 'text-red-600 dark:text-red-400'
-                                  }`}
-                                />
-                              </div>
-                            </div>
-
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-gray-900 dark:text-white text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">
-                                {appointment.title}
-                              </h3>
-
-                              <div className="flex items-center gap-2 mt-1">
-                                <TypeIcon className="h-3 w-3 text-gray-500 dark:text-gray-400" />
-                                <span className="text-xs text-gray-600 dark:text-gray-400 capitalize">
-                                  {appointment.appointmentType.replace('_', ' ')}
-                                </span>
-                              </div>
-
-                              <div className="flex items-center gap-1 mt-2 text-xs text-gray-600 dark:text-gray-400">
-                                <ClockIcon className="h-3 w-3" />
-                                <span>
-                                  {appointmentDate.toLocaleDateString('en-US', {
-                                    month: 'short',
-                                    day: 'numeric',
-                                  })}{' '}
-                                  at{' '}
-                                  {appointmentDate.toLocaleTimeString([], {
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                  })}
-                                </span>
-                              </div>
-
-                              {appointment.client && (
-                                <div className="flex items-center gap-1 mt-1 text-xs text-gray-600 dark:text-gray-400">
-                                  <UserIcon className="h-3 w-3" />
-                                  <span className="truncate">{appointment.client.name}</span>
-                                </div>
-                              )}
-
-                              {appointment.location && (
-                                <div className="flex items-center gap-1 mt-1 text-xs text-gray-600 dark:text-gray-400">
-                                  <MapPinIcon className="h-3 w-3" />
-                                  <span className="truncate">
-                                    {appointment.location.city}, {appointment.location.state}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          <div className="mt-3 flex justify-between items-center">
-                            <span
-                              className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  return (
+                    <div
+                      key={appointment._id}
+                      onClick={() => router.push(`/dashboard/calendar/${appointment._id}`)}
+                      className="p-3 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors cursor-pointer border border-slate-700"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0">
+                          <div
+                            className={`p-2 rounded-lg ${
+                              appointment.status === 'confirmed'
+                                ? 'bg-green-500/20'
+                                : appointment.status === 'scheduled'
+                                  ? 'bg-blue-500/20'
+                                  : appointment.status === 'completed'
+                                    ? 'bg-slate-500/20'
+                                    : 'bg-red-500/20'
+                            }`}
+                          >
+                            <StatusIcon
+                              className={`h-4 w-4 ${
                                 appointment.status === 'confirmed'
-                                  ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'
+                                  ? 'text-green-400'
                                   : appointment.status === 'scheduled'
-                                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'
+                                    ? 'text-blue-400'
                                     : appointment.status === 'completed'
-                                      ? 'bg-gray-100 text-gray-700 dark:bg-gray-900/40 dark:text-gray-300'
-                                      : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
+                                      ? 'text-slate-400'
+                                      : 'text-red-400'
                               }`}
-                            >
-                              {appointment.status.charAt(0).toUpperCase() +
-                                appointment.status.slice(1)}
-                            </span>
-
-                            <ChevronRightIcon className="h-4 w-4 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200" />
+                            />
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-full w-16 h-16 mx-auto mb-4">
-                      <CalendarDaysIcon className="h-10 w-10 text-gray-400 mx-auto" />
+
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-white text-sm">
+                            {appointment.title}
+                          </h3>
+
+                          <div className="flex items-center gap-2 mt-1">
+                            <TypeIcon className="h-3 w-3 text-slate-400" />
+                            <span className="text-xs text-slate-400 capitalize">
+                              {appointment.appointmentType.replace('_', ' ')}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-1 mt-2 text-xs text-slate-400">
+                            <ClockIcon className="h-3 w-3" />
+                            <span>
+                              {appointmentDate.toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                              })}{' '}
+                              at{' '}
+                              {appointmentDate.toLocaleTimeString([], {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                            </span>
+                          </div>
+
+                          {appointment.client && (
+                            <div className="flex items-center gap-1 mt-1 text-xs text-slate-400">
+                              <UserIcon className="h-3 w-3" />
+                              <span className="truncate">{appointment.client.name}</span>
+                            </div>
+                          )}
+
+                          {appointment.location && (
+                            <div className="flex items-center gap-1 mt-1 text-xs text-slate-400">
+                              <MapPinIcon className="h-3 w-3" />
+                              <span className="truncate">
+                                {appointment.location.city}, {appointment.location.state}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="mt-3 flex justify-between items-center">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            appointment.status === 'confirmed'
+                              ? 'bg-green-500/20 text-green-400'
+                              : appointment.status === 'scheduled'
+                                ? 'bg-blue-500/20 text-blue-400'
+                                : appointment.status === 'completed'
+                                  ? 'bg-slate-500/20 text-slate-400'
+                                  : 'bg-red-500/20 text-red-400'
+                          }`}
+                        >
+                          {appointment.status.charAt(0).toUpperCase() +
+                            appointment.status.slice(1)}
+                        </span>
+
+                        <ChevronRightIcon className="h-4 w-4 text-slate-400" />
+                      </div>
                     </div>
-                    <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
-                      No upcoming appointments
-                    </h3>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-4">
-                      Schedule your next appointment to get started
-                    </p>
-                    <button
-                      onClick={() => router.push('/dashboard/calendar/new')}
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md"
-                    >
-                      <PlusIcon className="h-4 w-4" />
-                      Schedule Now
-                    </button>
-                  </div>
-                )}
+                  );
+                })}
               </div>
-            </div>
+            ) : (
+              <div className="text-center py-8">
+                <div className="p-3 bg-slate-800 rounded-full w-16 h-16 mx-auto mb-4">
+                  <CalendarDaysIcon className="h-10 w-10 text-slate-400 mx-auto" />
+                </div>
+                <h3 className="text-sm font-medium text-white mb-2">
+                  No upcoming appointments
+                </h3>
+                <p className="text-xs text-slate-400 mb-4">
+                  Schedule your next appointment to get started
+                </p>
+                <button
+                  onClick={() => router.push('/dashboard/calendar/new')}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-lg text-sm font-medium transition-colors"
+                >
+                  <PlusIcon className="h-4 w-4" />
+                  Schedule Now
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

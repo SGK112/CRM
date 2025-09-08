@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
       if (!token) {
         return NextResponse.json(localProjects);
       }
-      
+
       // If we have a token, try backend but fallback to local if it fails
       try {
         const response = await fetch(`${BACKEND_URL}/projects`, {
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
         const newProject = projectStorage.create(body);
         return NextResponse.json(newProject, { status: 201 });
       }
-      
+
       // If we have a token, try backend but fallback to local if it fails
       try {
         const response = await fetch(`${BACKEND_URL}/projects`, {

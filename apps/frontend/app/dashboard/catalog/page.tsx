@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
-import { simple } from '@/lib/simple-ui';
 import {
   CloudArrowUpIcon,
   DocumentTextIcon,
@@ -285,131 +284,147 @@ export default function CatalogPage() {
   };
 
   return (
-    <div className={simple.page()}>
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className={simple.text.title()}>Price Sheets</h1>
-            <p className={simple.text.body('mt-2')}>
-              Upload and manage vendor price sheets to access products and services quickly.
-            </p>
+    <div className="min-h-screen bg-black">
+      {/* Mobile-First Header */}
+      <div className="sticky top-0 z-50 bg-black border-b border-slate-800">
+        <div className="px-4 py-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-amber-500/20 rounded-lg">
+                <FolderIcon className="h-6 w-6 text-amber-400" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-white">Price Sheets</h1>
+                <p className="text-sm text-slate-400">Upload & manage catalogs</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setViewMode(viewMode === 'sheets' ? 'products' : 'sheets')}
+                className="p-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-lg transition-colors"
+              >
+                <DocumentTextIcon className="h-4 w-4 text-slate-400" />
+              </button>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="p-2 bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors"
+              >
+                <PlusIcon className="h-5 w-5 text-black" />
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setViewMode(viewMode === 'sheets' ? 'products' : 'sheets')}
-              className={simple.button('secondary')}
-            >
-              {viewMode === 'sheets' ? 'View Products' : 'View Sheets'}
-            </button>
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className={simple.button('primary')}
-            >
-              <PlusIcon className="h-4 w-4 mr-2" />
-              Upload Sheet
-            </button>
-          </div>
-        </div>
-      </div>
 
-      {/* Upload Status Message */}
-      {uploadStatus.type && (
-        <div
-          className={`mb-6 p-4 rounded-lg ${
-            uploadStatus.type === 'success'
-              ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
-              : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
-          }`}
-        >
-          <div className="flex items-center">
-            <div
-              className={`flex-shrink-0 w-5 h-5 ${
-                uploadStatus.type === 'success' ? 'text-green-400' : 'text-red-400'
+          {/* View Mode Toggle */}
+          <div className="flex bg-slate-900 rounded-lg p-1">
+            <button
+              onClick={() => setViewMode('sheets')}
+              className={`flex-1 py-2 px-3 text-sm font-medium rounded transition-colors ${
+                viewMode === 'sheets'
+                  ? 'bg-amber-500 text-black'
+                  : 'text-slate-400 hover:text-white'
               }`}
             >
-              {uploadStatus.type === 'success' ? '✓' : '✕'}
-            </div>
-            <div className="ml-3">
-              <p
-                className={`text-sm font-medium ${
-                  uploadStatus.type === 'success'
-                    ? 'text-green-800 dark:text-green-200'
-                    : 'text-red-800 dark:text-red-200'
-                }`}
-              >
-                {uploadStatus.message}
-              </p>
-            </div>
+              Price Sheets
+            </button>
+            <button
+              onClick={() => setViewMode('products')}
+              className={`flex-1 py-2 px-3 text-sm font-medium rounded transition-colors ${
+                viewMode === 'products'
+                  ? 'bg-amber-500 text-black'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Products
+            </button>
           </div>
         </div>
-      )}
-
-      {/* Upload Area */}
-      <div
-        className={`${simple.card('mb-6')} ${isDragOver ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20 border-blue-300' : 'hover:border-gray-300 dark:hover:border-gray-600'} transition-all duration-200 cursor-pointer`}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        onClick={() => fileInputRef.current?.click()}
-      >
-        <div className="text-center py-12 px-6">
-          <CloudArrowUpIcon
-            className={`mx-auto h-12 w-12 ${isDragOver ? 'text-blue-500 animate-bounce' : 'text-gray-400'} mb-4 transition-all duration-200`}
-          />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            {isDragOver ? 'Drop your price sheet here' : 'Upload Price Sheets'}
-          </h3>
-          <p className="text-gray-500 dark:text-gray-400 mb-4">
-            Drag and drop Excel (.xlsx), CSV, or PDF files, or click to browse
-          </p>
-          <div className="flex items-center justify-center gap-4 text-sm text-gray-400 dark:text-gray-500">
-            <span>📊 Excel files</span>
-            <span>•</span>
-            <span>📄 CSV files</span>
-            <span>•</span>
-            <span>📕 PDF files</span>
-            <span>•</span>
-            <span>📁 Multiple files supported</span>
-          </div>
-          <div className="mt-3 text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 rounded">
-            <strong>Note:</strong> PDF files will be stored for reference but may require manual
-            data entry for full product catalog integration.
-          </div>
-        </div>
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          accept=".xlsx,.xls,.csv,.pdf"
-          onChange={handleFileSelect}
-          className="hidden"
-        />
       </div>
 
-      {/* Filters and Search */}
-      <div className={`${simple.card('mb-6')} p-4`}>
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1">
-            <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder={
-                  viewMode === 'sheets' ? 'Search price sheets...' : 'Search products...'
-                }
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                className={`${simple.input()} pl-10`}
-              />
+      <div className="px-4 py-4">
+        {/* Upload Status Message */}
+        {uploadStatus.type && (
+          <div
+            className={`mb-4 p-4 rounded-lg ${
+              uploadStatus.type === 'success'
+                ? 'bg-green-500/20 border border-green-500/50 text-green-400'
+                : 'bg-red-500/20 border border-red-500/50 text-red-400'
+            }`}
+          >
+            <div className="flex items-center">
+              <div className={`flex-shrink-0 w-5 h-5 ${uploadStatus.type === 'success' ? 'text-green-400' : 'text-red-400'}`}>
+                {uploadStatus.type === 'success' ? '✓' : '✕'}
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium">{uploadStatus.message}</p>
+              </div>
             </div>
           </div>
+        )}
+
+        {/* Upload Area */}
+        <div
+          className={`mb-4 border-2 border-dashed rounded-lg transition-all cursor-pointer ${
+            isDragOver 
+              ? 'border-amber-500 bg-amber-500/10' 
+              : 'border-slate-700 hover:border-slate-600'
+          }`}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <div className="text-center py-8 px-6">
+            <CloudArrowUpIcon
+              className={`mx-auto h-10 w-10 mb-4 transition-all ${
+                isDragOver ? 'text-amber-400 animate-bounce' : 'text-slate-400'
+              }`}
+            />
+            <h3 className="text-lg font-medium text-white mb-2">
+              {isDragOver ? 'Drop files here' : 'Upload Price Sheets'}
+            </h3>
+            <p className="text-slate-400 mb-4 text-sm">
+              Drag and drop Excel, CSV, or PDF files
+            </p>
+            <div className="flex items-center justify-center gap-2 text-xs text-slate-500">
+              <span>📊 Excel</span>
+              <span>•</span>
+              <span>📄 CSV</span>
+              <span>•</span>
+              <span>📕 PDF</span>
+            </div>
+            <div className="mt-3 text-xs text-amber-400 bg-amber-500/10 px-3 py-2 rounded">
+              <strong>Note:</strong> PDF files stored for reference
+            </div>
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept=".xlsx,.xls,.csv,.pdf"
+            onChange={handleFileSelect}
+            className="hidden"
+          />
+        </div>
+
+        {/* Search and Filters */}
+        <div className="mb-4">
+          <div className="relative mb-3">
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder={viewMode === 'sheets' ? 'Search price sheets...' : 'Search products...'}
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+            />
+          </div>
+          
           {viewMode === 'products' && (
-            <>
+            <div className="flex gap-2">
               <select
                 value={selectedCategory}
                 onChange={e => setSelectedCategory(e.target.value)}
-                className={simple.input('w-48')}
+                className="flex-1 px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white text-sm focus:ring-2 focus:ring-amber-500 focus:border-transparent"
               >
                 <option value="all">All Categories</option>
                 {categories.map(category => (
@@ -421,7 +436,7 @@ export default function CatalogPage() {
               <select
                 value={selectedVendor}
                 onChange={e => setSelectedVendor(e.target.value)}
-                className={simple.input('w-48')}
+                className="flex-1 px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white text-sm focus:ring-2 focus:ring-amber-500 focus:border-transparent"
               >
                 <option value="all">All Vendors</option>
                 {vendors.map(vendor => (
@@ -430,36 +445,30 @@ export default function CatalogPage() {
                   </option>
                 ))}
               </select>
-            </>
+            </div>
           )}
         </div>
-      </div>
 
-      {/* Content */}
-      {viewMode === 'sheets' ? (
-        <div className={simple.grid.cols3}>
-          {priceSheets.map(sheet => (
-            <div key={sheet.id} className={simple.card()}>
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center">
+        {/* Content */}
+        {viewMode === 'sheets' ? (
+          <div className="space-y-3">
+            {priceSheets.map(sheet => (
+              <div key={sheet.id} className="bg-slate-900 rounded-lg border border-slate-700 p-4">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-3">
                     {sheet.fileType === 'pdf' ? (
-                      <div className="h-8 w-8 bg-red-100 dark:bg-red-900/30 rounded flex items-center justify-center mr-3">
-                        <span className="text-red-600 dark:text-red-400 font-bold text-sm">
-                          PDF
-                        </span>
+                      <div className="h-8 w-8 bg-red-500/20 rounded flex items-center justify-center">
+                        <span className="text-red-400 font-bold text-xs">PDF</span>
                       </div>
                     ) : (
-                      <DocumentTextIcon className="h-8 w-8 text-blue-500 mr-3" />
+                      <DocumentTextIcon className="h-8 w-8 text-blue-400" />
                     )}
                     <div>
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                        {sheet.name}
-                      </h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <h3 className="text-lg font-medium text-white">{sheet.name}</h3>
+                      <p className="text-sm text-slate-400">
                         {sheet.vendor}
                         {sheet.fileType === 'pdf' && (
-                          <span className="ml-2 px-2 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded text-xs font-medium">
+                          <span className="ml-2 px-2 py-0.5 bg-red-500/20 text-red-400 rounded text-xs font-medium">
                             PDF Reference
                           </span>
                         )}
@@ -469,28 +478,28 @@ export default function CatalogPage() {
                   <div
                     className={`px-2 py-1 rounded-full text-xs font-medium ${
                       sheet.status === 'ready'
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                        ? 'bg-green-500/20 text-green-400'
                         : sheet.status === 'processing'
-                          ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
-                          : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+                          ? 'bg-yellow-500/20 text-yellow-400'
+                          : 'bg-red-500/20 text-red-400'
                     }`}
                   >
                     {sheet.status}
                   </div>
                 </div>
 
-                <div className="space-y-2 mb-4">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500 dark:text-gray-400">Items:</span>
-                    <span className="font-medium">{sheet.itemCount.toLocaleString()}</span>
+                <div className="grid grid-cols-3 gap-4 text-sm mb-4">
+                  <div className="text-center">
+                    <span className="text-slate-400">Items</span>
+                    <div className="font-medium text-white">{sheet.itemCount.toLocaleString()}</div>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500 dark:text-gray-400">Size:</span>
-                    <span className="font-medium">{formatFileSize(sheet.fileSize)}</span>
+                  <div className="text-center">
+                    <span className="text-slate-400">Size</span>
+                    <div className="font-medium text-white">{formatFileSize(sheet.fileSize)}</div>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500 dark:text-gray-400">Uploaded:</span>
-                    <span className="font-medium">{sheet.uploadDate.toLocaleDateString()}</span>
+                  <div className="text-center">
+                    <span className="text-slate-400">Uploaded</span>
+                    <div className="font-medium text-white">{sheet.uploadDate.toLocaleDateString()}</div>
                   </div>
                 </div>
 
@@ -500,13 +509,13 @@ export default function CatalogPage() {
                       {sheet.categories.slice(0, 3).map(category => (
                         <span
                           key={category}
-                          className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs"
+                          className="px-2 py-1 bg-slate-800 text-slate-300 rounded text-xs"
                         >
                           {category}
                         </span>
                       ))}
                       {sheet.categories.length > 3 && (
-                        <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs">
+                        <span className="px-2 py-1 bg-slate-800 text-slate-300 rounded text-xs">
                           +{sheet.categories.length - 3} more
                         </span>
                       )}
@@ -516,194 +525,164 @@ export default function CatalogPage() {
 
                 <div className="flex gap-2">
                   <button
-                    className={`${simple.button('secondary')} flex-1`}
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded transition-colors text-sm"
                     onClick={() => handleViewFile(sheet)}
                   >
-                    <EyeIcon className="h-4 w-4 mr-2" />
+                    <EyeIcon className="h-4 w-4" />
                     View
                   </button>
-                  <button className={`${simple.button('ghost')} p-2`}>
+                  <button className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded transition-colors">
                     <ArrowDownTrayIcon className="h-4 w-4" />
                   </button>
-                  <button className={`${simple.button('ghost')} p-2`}>
+                  <button className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded transition-colors">
                     <TrashIcon className="h-4 w-4" />
                   </button>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className={simple.grid.cols4}>
-          {filteredProducts.map(product => (
-            <div key={product.id} className={simple.card()}>
-              <div className="p-4">
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {filteredProducts.map(product => (
+              <div key={product.id} className="bg-slate-900 rounded-lg border border-slate-700 p-4">
                 <div className="flex items-start justify-between mb-2">
-                  <h3 className="text-sm font-medium text-gray-900 dark:text-white line-clamp-2">
+                  <h3 className="text-sm font-medium text-white line-clamp-2 flex-1">
                     {product.name}
                   </h3>
-                  <span className="text-lg font-bold text-blue-600 dark:text-blue-400 ml-2">
+                  <span className="text-lg font-bold text-amber-400 ml-2">
                     ${product.price}
                   </span>
                 </div>
 
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                <p className="text-xs text-slate-400 mb-2">
                   {product.category} • {product.vendor}
                 </p>
 
-                <p className="text-xs text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
+                <p className="text-xs text-slate-400 mb-3 line-clamp-2">
                   {product.description || 'No description available'}
                 </p>
 
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                  <span className="text-xs text-slate-400">
                     per {product.unit}
                   </span>
-                  <button className={`${simple.button('primary')} text-xs px-3 py-1`}>
+                  <button className="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-black rounded text-xs font-medium transition-colors">
                     Add to Estimate
                   </button>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
 
-      {/* Empty State */}
-      {viewMode === 'sheets' && priceSheets.length === 0 && (
-        <div className={simple.empty.container}>
-          <FolderIcon className={simple.empty.icon} />
-          <h3 className={simple.empty.title}>No price sheets yet</h3>
-          <p className={simple.empty.description}>
-            Upload your first price sheet to get started with managing your vendor catalogs.
-          </p>
-        </div>
-      )}
+        {/* Empty State */}
+        {viewMode === 'sheets' && priceSheets.length === 0 && (
+          <div className="text-center py-12">
+            <FolderIcon className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-white mb-2">No price sheets yet</h3>
+            <p className="text-slate-400 mb-4">
+              Upload your first price sheet to get started with managing your vendor catalogs.
+            </p>
+          </div>
+        )}
 
-      {viewMode === 'products' && filteredProducts.length === 0 && (
-        <div className={simple.empty.container}>
-          <MagnifyingGlassIcon className={simple.empty.icon} />
-          <h3 className={simple.empty.title}>No products found</h3>
-          <p className={simple.empty.description}>Try adjusting your search or filter criteria.</p>
-        </div>
-      )}
+        {viewMode === 'products' && filteredProducts.length === 0 && (
+          <div className="text-center py-12">
+            <MagnifyingGlassIcon className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-white mb-2">No products found</h3>
+            <p className="text-slate-400">Try adjusting your search or filter criteria.</p>
+          </div>
+        )}
 
-      {/* File Viewer Modal */}
-      {showFileViewer && viewingFile && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-              <div className="flex items-center">
+        {/* File Viewer Modal */}
+        {showFileViewer && viewingFile && (
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+            <div className="bg-slate-900 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden border border-slate-700">
+              <div className="flex items-center justify-between p-4 border-b border-slate-700">
+                <div className="flex items-center gap-3">
+                  {viewingFile.fileType === 'pdf' ? (
+                    <div className="h-8 w-8 bg-red-500/20 rounded flex items-center justify-center">
+                      <span className="text-red-400 font-bold text-sm">PDF</span>
+                    </div>
+                  ) : (
+                    <DocumentTextIcon className="h-8 w-8 text-blue-400" />
+                  )}
+                  <div>
+                    <h3 className="text-lg font-medium text-white">{viewingFile.name}</h3>
+                    <p className="text-sm text-slate-400">
+                      {viewingFile.vendor} • {viewingFile.fileType?.toUpperCase()} File
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowFileViewer(false)}
+                  className="text-slate-400 hover:text-white"
+                >
+                  <XMarkIcon className="h-6 w-6" />
+                </button>
+              </div>
+
+              <div className="p-6">
                 {viewingFile.fileType === 'pdf' ? (
-                  <div className="h-8 w-8 bg-red-100 dark:bg-red-900/30 rounded flex items-center justify-center mr-3">
-                    <span className="text-red-600 dark:text-red-400 font-bold text-sm">PDF</span>
+                  <div className="text-center py-12">
+                    <div className="h-16 w-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <span className="text-red-400 font-bold text-xl">PDF</span>
+                    </div>
+                    <h4 className="text-lg font-medium text-white mb-2">PDF Document Viewer</h4>
+                    <p className="text-slate-400 mb-6">
+                      This PDF file has been uploaded successfully. In a production environment, this
+                      would display the actual PDF content using a PDF viewer component.
+                    </p>
+                    <div className="bg-slate-800 rounded-lg p-4 text-left">
+                      <h5 className="font-medium text-white mb-2">File Details:</h5>
+                      <div className="space-y-1 text-sm text-slate-300">
+                        <p><strong>Name:</strong> {viewingFile.name}</p>
+                        <p><strong>Vendor:</strong> {viewingFile.vendor}</p>
+                        <p><strong>Size:</strong> {formatFileSize(viewingFile.fileSize)}</p>
+                        <p><strong>Uploaded:</strong> {viewingFile.uploadDate.toLocaleDateString()}</p>
+                        <p><strong>Status:</strong> {viewingFile.status}</p>
+                      </div>
+                    </div>
                   </div>
                 ) : (
-                  <DocumentTextIcon className="h-8 w-8 text-blue-500 mr-3" />
+                  <div className="text-center py-12">
+                    <DocumentTextIcon className="h-16 w-16 text-blue-400 mx-auto mb-4" />
+                    <h4 className="text-lg font-medium text-white mb-2">Data File Viewer</h4>
+                    <p className="text-slate-400 mb-6">
+                      This {viewingFile.fileType?.toUpperCase()} file contains product data. In a
+                      production environment, this would display the parsed product catalog.
+                    </p>
+                    <div className="bg-slate-800 rounded-lg p-4 text-left">
+                      <h5 className="font-medium text-white mb-2">Processing Status:</h5>
+                      <div className="space-y-1 text-sm text-slate-300">
+                        <p><strong>Name:</strong> {viewingFile.name}</p>
+                        <p><strong>Vendor:</strong> {viewingFile.vendor}</p>
+                        <p><strong>Items Processed:</strong> {viewingFile.itemCount.toLocaleString()}</p>
+                        <p><strong>Size:</strong> {formatFileSize(viewingFile.fileSize)}</p>
+                        <p><strong>Status:</strong> {viewingFile.status}</p>
+                      </div>
+                    </div>
+                  </div>
                 )}
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                    {viewingFile.name}
-                  </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {viewingFile.vendor} • {viewingFile.fileType?.toUpperCase()} File
-                  </p>
-                </div>
               </div>
-              <button
-                onClick={() => setShowFileViewer(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-              >
-                <XMarkIcon className="h-6 w-6" />
-              </button>
-            </div>
 
-            <div className="p-6">
-              {viewingFile.fileType === 'pdf' ? (
-                <div className="text-center py-12">
-                  <div className="h-16 w-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-red-600 dark:text-red-400 font-bold text-xl">PDF</span>
-                  </div>
-                  <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                    PDF Document Viewer
-                  </h4>
-                  <p className="text-gray-500 dark:text-gray-400 mb-6">
-                    This PDF file has been uploaded successfully. In a production environment, this
-                    would display the actual PDF content using a PDF viewer component.
-                  </p>
-                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-left">
-                    <h5 className="font-medium text-gray-900 dark:text-white mb-2">
-                      File Details:
-                    </h5>
-                    <div className="space-y-1 text-sm text-gray-600 dark:text-gray-300">
-                      <p>
-                        <strong>Name:</strong> {viewingFile.name}
-                      </p>
-                      <p>
-                        <strong>Vendor:</strong> {viewingFile.vendor}
-                      </p>
-                      <p>
-                        <strong>Size:</strong> {formatFileSize(viewingFile.fileSize)}
-                      </p>
-                      <p>
-                        <strong>Uploaded:</strong> {viewingFile.uploadDate.toLocaleDateString()}
-                      </p>
-                      <p>
-                        <strong>Status:</strong> {viewingFile.status}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <DocumentTextIcon className="h-16 w-16 text-blue-500 mx-auto mb-4" />
-                  <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                    Data File Viewer
-                  </h4>
-                  <p className="text-gray-500 dark:text-gray-400 mb-6">
-                    This {viewingFile.fileType?.toUpperCase()} file contains product data. In a
-                    production environment, this would display the parsed product catalog.
-                  </p>
-                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-left">
-                    <h5 className="font-medium text-gray-900 dark:text-white mb-2">
-                      Processing Status:
-                    </h5>
-                    <div className="space-y-1 text-sm text-gray-600 dark:text-gray-300">
-                      <p>
-                        <strong>Name:</strong> {viewingFile.name}
-                      </p>
-                      <p>
-                        <strong>Vendor:</strong> {viewingFile.vendor}
-                      </p>
-                      <p>
-                        <strong>Items Processed:</strong> {viewingFile.itemCount.toLocaleString()}
-                      </p>
-                      <p>
-                        <strong>Size:</strong> {formatFileSize(viewingFile.fileSize)}
-                      </p>
-                      <p>
-                        <strong>Status:</strong> {viewingFile.status}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="flex justify-end gap-3 p-4 border-t border-gray-200 dark:border-gray-700">
-              <button
-                onClick={() => setShowFileViewer(false)}
-                className={simple.button('secondary')}
-              >
-                Close
-              </button>
-              {viewingFile.fileType === 'pdf' && (
-                <button className={simple.button('primary')}>Download PDF</button>
-              )}
+              <div className="flex justify-end gap-3 p-4 border-t border-slate-700">
+                <button
+                  onClick={() => setShowFileViewer(false)}
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded transition-colors"
+                >
+                  Close
+                </button>
+                {viewingFile.fileType === 'pdf' && (
+                  <button className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded transition-colors">
+                    Download PDF
+                  </button>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

@@ -71,7 +71,7 @@ export default function DebugPage() {
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
     localStorage.removeItem('authToken');
-    
+
     // Update state
     setTokens({
       accessToken: null,
@@ -80,7 +80,7 @@ export default function DebugPage() {
       user: null,
       authToken: null,
     });
-    
+
     // Reload page to clear any cached headers
     setTimeout(() => window.location.reload(), 1000);
   };
@@ -90,7 +90,7 @@ export default function DebugPage() {
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-lg shadow-lg p-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-6">🔧 CRM Debug Dashboard</h1>
-          
+
           {/* Token Status */}
           <div className="mb-8">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">🔑 LocalStorage Tokens</h2>
@@ -106,7 +106,7 @@ export default function DebugPage() {
                 </div>
               ))}
             </div>
-            
+
             {Object.values(tokens).some(v => v) && (
               <button
                 onClick={clearTokens}
@@ -191,29 +191,29 @@ export default function DebugPage() {
           <div>
             <h2 className="text-xl font-semibold text-gray-800 mb-4">⚡ Quick Actions</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <a 
-                href="/dashboard/clients" 
+              <a
+                href="/dashboard/clients"
                 className="bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors text-center"
               >
                 📋 View Clients
               </a>
-              <a 
-                href="/dashboard/clients/1757142919929/edit" 
+              <a
+                href="/dashboard/clients/1757142919929/edit"
                 className="bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition-colors text-center"
               >
                 ✏️ Edit Test Contact
               </a>
-              <button 
-                onClick={() => window.location.reload()} 
+              <button
+                onClick={() => window.location.reload()}
                 className="bg-orange-600 text-white px-4 py-3 rounded-lg hover:bg-orange-700 transition-colors"
               >
                 🔄 Reload Page
               </button>
-              <button 
+              <button
                 onClick={() => {
                   localStorage.clear();
                   window.location.reload();
-                }} 
+                }}
                 className="bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 transition-colors"
               >
                 🗑️ Clear All Storage
