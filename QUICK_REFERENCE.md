@@ -3,6 +3,7 @@
 ## 🔥 Most Used Commands
 
 ### Development
+
 ```bash
 npm run dev                    # Start full development server
 ./start-dev-robust.sh         # Robust startup with error handling
@@ -11,6 +12,7 @@ npm run backend:dev           # Backend only (port 3001)
 ```
 
 ### Troubleshooting
+
 ```bash
 lsof -i:3000,3001            # Check what's using ports
 pkill -f 'npm run dev'       # Kill all dev processes
@@ -19,6 +21,7 @@ npm install                   # Reinstall dependencies
 ```
 
 ### Git Workflow
+
 ```bash
 git add .                     # Stage changes
 git commit -m "description"   # Save changes
@@ -27,6 +30,7 @@ git status                    # Check current state
 ```
 
 ### Building & Quality
+
 ```bash
 npm run build                 # Build for production
 npm run lint                  # Check code quality
@@ -38,17 +42,20 @@ npm run format                # Format code
 ## 🎯 Essential File Locations
 
 ### Frontend (Next.js)
+
 - `apps/frontend/app/` - Pages and API routes
 - `apps/frontend/src/components/` - Reusable UI components
 - `apps/frontend/src/lib/` - Utility functions
 - `apps/frontend/public/` - Static assets (images, favicon)
 
 ### Backend (NestJS)
+
 - `apps/backend/src/` - API server code
 - `apps/backend/src/controllers/` - API endpoints
 - `apps/backend/src/services/` - Business logic
 
 ### Configuration
+
 - `package.json` - Dependencies and scripts
 - `render.yaml` - Deployment configuration
 - `tsconfig.json` - TypeScript settings
@@ -58,11 +65,13 @@ npm run format                # Format code
 ## 🔧 Key Environment Variables
 
 ### Development
+
 - `NODE_ENV=development` - Development mode
 - `PORT=3000` - Frontend port
 - `PORT=3001` - Backend port
 
 ### Production (Render)
+
 - `NEXT_PUBLIC_API_URL` - Backend API URL
 - `NEXT_PUBLIC_BACKEND_URL` - Backend service URL
 - `MONGODB_URI` - Database connection
@@ -73,24 +82,31 @@ npm run format                # Format code
 ## 🚨 Common Error Patterns
 
 ### Port Already in Use
+
 ```
 Error: listen EADDRINUSE :::3000
 ```
+
 **Fix:** `lsof -ti:3000 | xargs kill -9`
 
 ### Module Not Found
+
 ```
 Cannot find module './component'
 ```
+
 **Fix:** Check import paths and file extensions
 
 ### TypeScript Errors
+
 ```
 Property 'xyz' does not exist on type
 ```
+
 **Fix:** Add proper type definitions or interfaces
 
 ### API 500 Errors in Production
+
 **Fix:** Check environment variables and fallback logic
 
 ---
@@ -107,6 +123,7 @@ Property 'xyz' does not exist on type
 ## 🎨 CSS Framework (Tailwind)
 
 ### Common Classes
+
 - `bg-blue-500` - Blue background
 - `text-white` - White text
 - `p-4` - Padding 16px
@@ -117,6 +134,7 @@ Property 'xyz' does not exist on type
 - `shadow` - Drop shadow
 
 ### Responsive
+
 - `sm:` - Small screens (640px+)
 - `md:` - Medium screens (768px+)
 - `lg:` - Large screens (1024px+)
@@ -136,6 +154,7 @@ Property 'xyz' does not exist on type
 ## 📊 API Endpoint Patterns
 
 ### RESTful Routes
+
 - `GET /api/clients` - List all clients
 - `POST /api/clients` - Create new client
 - `GET /api/clients/:id` - Get specific client
@@ -143,6 +162,7 @@ Property 'xyz' does not exist on type
 - `DELETE /api/clients/:id` - Delete client
 
 ### Status Codes
+
 - `200` - Success
 - `201` - Created
 - `400` - Bad Request
@@ -184,17 +204,20 @@ Property 'xyz' does not exist on type
 ## 💡 Pro Tips
 
 ### Development
+
 - Use VS Code tasks instead of manual commands
 - Clear cache when things act weird
 - Check browser console for frontend errors
 - Monitor terminal output for backend errors
 
 ### Git
+
 - Write descriptive commit messages
 - Commit frequently with small changes
 - Pull before pushing to avoid conflicts
 
 ### Debugging
+
 - Use browser DevTools Network tab for API issues
 - Check VS Code Problems panel for TypeScript errors
 - Use `console.log()` for quick debugging
@@ -202,4 +225,4 @@ Property 'xyz' does not exist on type
 
 ---
 
-*Keep this card handy during development! 📌*
+_Keep this card handy during development! 📌_

@@ -1,9 +1,7 @@
 'use client';
 
-import { mobile, mobileOptimized } from '@/lib/mobile';
 import { getUserPlan } from '@/lib/plans';
 import {
-    ArrowsPointingOutIcon,
     Bars3Icon,
     BellIcon,
     CalculatorIcon,
@@ -12,7 +10,6 @@ import {
     ChevronDownIcon,
     ChevronLeftIcon,
     ChevronRightIcon,
-    ChevronUpIcon,
     ClipboardDocumentListIcon,
     CogIcon,
     CreditCardIcon,
@@ -24,7 +21,6 @@ import {
     PhoneIcon,
     QuestionMarkCircleIcon,
     ShieldCheckIcon,
-    SparklesIcon,
     UserGroupIcon,
     WalletIcon,
     WrenchScrewdriverIcon,
@@ -42,7 +38,6 @@ import Logo from './Logo';
 import RouteMemoryTracker from './RouteMemoryTracker';
 import SearchBar from './SearchBar';
 import { ThemeProvider } from './ThemeProvider';
-import ThemeToggle from './ThemeToggle';
 
 interface User {
   id: string;
@@ -153,7 +148,7 @@ export default function Layout({ children }: LayoutProps) {
   }, [toggleSidebar]);
 
   // Dynamic counts for sidebar badges (fetched after auth)
-  const [counts, setCounts] = useState<{ projects?: number; clients?: number } | null>(null);
+  const [counts, setCounts] = useState<{ projects?: number; clients?: number; documents?: number; notifications?: number } | null>(null);
 
   useEffect(() => {
     async function fetchCounts() {
@@ -163,21 +158,33 @@ export default function Layout({ children }: LayoutProps) {
             ? localStorage.getItem('accessToken') || localStorage.getItem('token')
             : null;
         if (!token) return;
-        // Fetch projects and clients counts; clients has a count endpoint; projects doesn't, so use list length
-        const [projectsRes, clientsRes] = await Promise.all([
-          fetch('/api/projects', { headers: { Authorization: `Bearer ${token}` } }).catch(
+        
+        // Fetch all counts using dedicated count endpoints
+        const [projectsRes, clientsRes, documentsRes, notificationsRes] = await Promise.all([
+          fetch('/api/projects/count', { headers: { Authorization: `Bearer ${token}` } }).catch(
             () => null
           ),
           fetch('/api/clients/count', { headers: { Authorization: `Bearer ${token}` } }).catch(
             () => null
           ),
+          fetch('/api/documents/count', { headers: { Authorization: `Bearer ${token}` } }).catch(
+            () => null
+          ),
+          fetch('/api/notifications/count', { headers: { Authorization: `Bearer ${token}` } }).catch(
+            () => null
+          ),
         ]);
-        const projectsJson = projectsRes && projectsRes.ok ? await projectsRes.json() : [];
+        
+        const projectsCount = projectsRes && projectsRes.ok ? await projectsRes.json() : undefined;
         const clientsCount = clientsRes && clientsRes.ok ? await clientsRes.json() : undefined;
+        const documentsCount = documentsRes && documentsRes.ok ? await documentsRes.json() : undefined;
+        const notificationsCount = notificationsRes && notificationsRes.ok ? await notificationsRes.json() : undefined;
+        
         setCounts({
-          projects: Array.isArray(projectsJson) ? projectsJson.length : undefined,
-          clients:
-            typeof clientsCount === 'number' ? clientsCount : (clientsCount?.count ?? undefined),
+          projects: typeof projectsCount?.count === 'number' ? projectsCount.count : undefined,
+          clients: typeof clientsCount?.count === 'number' ? clientsCount.count : undefined,
+          documents: typeof documentsCount?.count === 'number' ? documentsCount.count : undefined,
+          notifications: typeof notificationsCount?.count === 'number' ? notificationsCount.count : undefined,
         });
       } catch {
         // ignore badge errors
@@ -199,8 +206,8 @@ export default function Layout({ children }: LayoutProps) {
           badge: counts?.projects,
         },
         {
-          name: 'Contacts',
-          href: '/dashboard/contacts',
+          name: 'Clients',
+          href: '/dashboard/clients',
           icon: UserGroupIcon,
           badge: counts?.clients,
         },
@@ -210,8 +217,8 @@ export default function Layout({ children }: LayoutProps) {
     {
       label: 'Design & Sales',
       items: [
-        { name: 'Sales', href: '/dashboard/financial', icon: CalculatorIcon },
-        { name: 'Price Sheets', href: '/dashboard/catalog', icon: WrenchScrewdriverIcon },
+        { name: 'Financial', href: '/dashboard/financial', icon: CalculatorIcon },
+        { name: 'Catalog', href: '/dashboard/catalog', icon: WrenchScrewdriverIcon },
       ],
     },
     {
@@ -231,7 +238,12 @@ export default function Layout({ children }: LayoutProps) {
       label: 'Business Management',
       items: [
         { name: 'TON Wallet', href: '/dashboard/wallet', icon: WalletIcon },
-        { name: 'Documents & Files', href: '/dashboard/documents', icon: DocumentTextIcon },
+        { 
+          name: 'Documents & Files', 
+          href: '/dashboard/documents', 
+          icon: DocumentTextIcon,
+          badge: counts?.documents,
+        },
         { name: 'Reports & Analytics', href: '/dashboard/analytics', icon: ChartBarIcon },
         { name: 'Admin Dashboard', href: '/dashboard/admin', icon: ShieldCheckIcon },
         { name: 'Settings', href: '/dashboard/settings', icon: CogIcon },
@@ -304,19 +316,19 @@ export default function Layout({ children }: LayoutProps) {
             </div>
           )}
 
-          {/* Mobile sidebar - Modern glassmorphism design */}
+          {/* Mobile sidebar - Mobile-first design template */}
           <div
             className={`fixed inset-y-0 left-0 z-50 w-80 transform transition-all duration-300 ease-out lg:hidden ${
               sidebarOpen ? 'translate-x-0' : '-translate-x-full'
             }`}
           >
-            <div className="flex flex-col h-full">
+            <div className="flex flex-col h-full bg-black">
               {/* Mobile header */}
-              <div className="flex items-center justify-between h-16 px-6 border-b border-slate-200/50 dark:border-slate-700/50 flex-shrink-0 bg-slate-800/90 backdrop-blur-sm">
+              <div className="flex items-center justify-between h-16 px-6 border-b border-slate-700 flex-shrink-0">
                 <Logo />
                 <button
                   onClick={() => setSidebarOpen(false)}
-                  className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-700/50 transition-all duration-200"
+                  className="p-2 rounded-xl text-slate-400 hover:text-amber-400 hover:bg-slate-900 transition-all duration-200"
                   aria-label="Close sidebar"
                 >
                   <XMarkIcon className="h-5 w-5" />
@@ -360,8 +372,8 @@ export default function Layout({ children }: LayoutProps) {
                                   className={classNames(
                                     'group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200',
                                     item.current
-                                      ? 'bg-amber-500/20 text-amber-300 shadow-lg shadow-amber-500/10 border border-amber-400/30'
-                                      : 'text-slate-300 hover:bg-slate-700/50 hover:text-white active:scale-95',
+                                      ? 'bg-slate-900 text-amber-400 border border-slate-700'
+                                      : 'text-slate-300 hover:bg-slate-900 hover:text-amber-400 active:scale-95',
                                     isRestricted ? 'opacity-60' : ''
                                   )}
                                 >
@@ -380,7 +392,7 @@ export default function Layout({ children }: LayoutProps) {
                                     <LockClosedIcon className="w-4 h-4 text-amber-500 ml-2" />
                                   )}
                                   {item.badge && item.badge > 0 && !isRestricted && (
-                                    <span className="ml-auto inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-500 text-white shadow-sm">
+                                    <span className="ml-auto inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-500 text-black shadow-sm">
                                       {item.badge > 99 ? '99+' : item.badge}
                                     </span>
                                   )}
@@ -395,10 +407,10 @@ export default function Layout({ children }: LayoutProps) {
               </nav>
 
               {/* User profile section - Mobile */}
-              <div className="flex-shrink-0 p-4 border-t border-slate-700/50 bg-slate-800/90 backdrop-blur-sm">
+              <div className="relative flex-shrink-0 p-4 border-t border-slate-700">
                 <div className="flex items-center space-x-3">
-                  <div className="h-10 w-10 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/25">
-                    <span className="text-sm font-medium text-white">
+                  <div className="h-10 w-10 rounded-xl bg-amber-500 flex items-center justify-center">
+                    <span className="text-sm font-medium text-black">
                       {user.firstName?.[0]}{user.lastName?.[0]}
                     </span>
                   </div>
@@ -415,25 +427,28 @@ export default function Layout({ children }: LayoutProps) {
                   </div>
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
-                    className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-700/50 transition-all duration-200"
+                    className="p-2 rounded-xl text-slate-400 hover:text-amber-400 hover:bg-slate-900 transition-all duration-200"
                   >
                     <ChevronDownIcon className="h-4 w-4" />
                   </button>
                 </div>
 
                 {showUserMenu && (
-                  <div className="mt-3 bg-slate-800/95 backdrop-blur-sm rounded-xl border border-slate-700/50 shadow-xl">
+                  <div 
+                    className="absolute top-full left-0 right-0 mt-2 bg-slate-900 border border-slate-700 rounded-xl shadow-xl"
+                    style={{ zIndex: 9999 }}
+                  >
                     <div className="p-2 space-y-1">
                       <Link
                         href="/dashboard/settings/profile"
-                        className="block px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors duration-200"
+                        className="block px-3 py-2 text-sm text-slate-300 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition-colors duration-200"
                         onClick={() => setShowUserMenu(false)}
                       >
                         Your Profile
                       </Link>
                       <Link
                         href="/billing"
-                        className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors duration-200"
+                        className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition-colors duration-200"
                         onClick={() => setShowUserMenu(false)}
                       >
                         <CreditCardIcon className="h-4 w-4" />
@@ -441,7 +456,7 @@ export default function Layout({ children }: LayoutProps) {
                       </Link>
                       <Link
                         href="/dashboard/settings"
-                        className="block px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors duration-200"
+                        className="block px-3 py-2 text-sm text-slate-300 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition-colors duration-200"
                         onClick={() => setShowUserMenu(false)}
                       >
                         Settings
@@ -451,7 +466,7 @@ export default function Layout({ children }: LayoutProps) {
                           setShowUserMenu(false);
                           handleLogout();
                         }}
-                        className="block w-full px-3 py-2 text-left text-sm text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors duration-200"
+                        className="block w-full px-3 py-2 text-left text-sm text-slate-300 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition-colors duration-200"
                       >
                         Sign out
                       </button>
@@ -462,26 +477,26 @@ export default function Layout({ children }: LayoutProps) {
             </div>
           </div>
 
-          {/* Desktop sidebar - Modern glassmorphism design */}
+          {/* Desktop sidebar - Mobile-first design template */}
           <div
             className={`hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col transition-all duration-300 ease-out ${
               sidebarCollapsed ? 'lg:w-20' : 'lg:w-72'
             }`}
           >
-            <div className="flex min-h-0 flex-1 flex-col bg-slate-800/90 backdrop-blur-xl border-r border-slate-700/50 shadow-2xl shadow-slate-900/20">
+            <div className="flex min-h-0 flex-1 flex-col bg-black border-r border-slate-700">
               {/* Desktop header */}
-              <div className="flex h-16 flex-shrink-0 items-center justify-between px-4 border-b border-slate-700/50">
+              <div className="flex h-16 flex-shrink-0 items-center justify-between px-4 border-b border-slate-700">
                 {!sidebarCollapsed && (
                   <div className="flex items-center space-x-3">
-                    <div className="h-8 w-8 rounded-lg bg-gradient-to-r from-amber-500 to-orange-600 flex items-center justify-center">
-                      <WrenchScrewdriverIcon className="h-4 w-4 text-white" />
+                    <div className="h-8 w-8 rounded-lg bg-amber-500 flex items-center justify-center">
+                      <WrenchScrewdriverIcon className="h-4 w-4 text-black" />
                     </div>
                     <h2 className="text-sm font-semibold text-white">Navigation</h2>
                   </div>
                 )}
                 {sidebarCollapsed && (
-                  <div className="mx-auto h-8 w-8 rounded-lg bg-gradient-to-r from-amber-500 to-orange-600 flex items-center justify-center">
-                    <WrenchScrewdriverIcon className="h-4 w-4 text-white" />
+                  <div className="mx-auto h-8 w-8 rounded-lg bg-amber-500 flex items-center justify-center">
+                    <WrenchScrewdriverIcon className="h-4 w-4 text-black" />
                   </div>
                 )}
               </div>
@@ -526,8 +541,8 @@ export default function Layout({ children }: LayoutProps) {
                                       'group flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 relative',
                                       sidebarCollapsed ? 'justify-center' : '',
                                       item.current
-                                        ? 'bg-amber-500/20 text-amber-300 shadow-lg shadow-amber-500/10 border border-amber-400/30'
-                                        : 'text-slate-300 hover:bg-slate-700/50 hover:text-white active:scale-95',
+                                        ? 'bg-slate-900 text-amber-400 border border-slate-700'
+                                        : 'text-slate-300 hover:bg-slate-900 hover:text-amber-400 active:scale-95',
                                       isRestricted ? 'opacity-60' : ''
                                     )}
                                     title={sidebarCollapsed ? item.name : undefined}
@@ -553,7 +568,7 @@ export default function Layout({ children }: LayoutProps) {
                                       item.badge &&
                                       item.badge > 0 &&
                                       !isRestricted && (
-                                        <span className="ml-auto inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-500 text-white shadow-sm">
+                                        <span className="ml-auto inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-500 text-black shadow-sm">
                                           {item.badge > 99 ? '99+' : item.badge}
                                         </span>
                                       )}
@@ -568,12 +583,12 @@ export default function Layout({ children }: LayoutProps) {
                 </nav>
 
                 {/* User profile section - Desktop */}
-                <div className="flex-shrink-0 p-4 border-t border-slate-700/50">
+                <div className="flex-shrink-0 p-4 border-t border-slate-700">
                   <div className="relative">
                     <button
                       onClick={() => setShowUserMenu(!showUserMenu)}
                       className={classNames(
-                        'group block w-full rounded-xl p-3 text-left text-sm font-medium hover:bg-slate-700/50 focus:outline-none focus:ring-2 focus:ring-amber-500/50 transition-all duration-300',
+                        'group block w-full rounded-xl p-3 text-left text-sm font-medium hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/50 transition-all duration-300',
                         sidebarCollapsed ? 'px-2' : ''
                       )}
                       title={sidebarCollapsed ? `${user.firstName} ${user.lastName}` : undefined}
@@ -582,8 +597,8 @@ export default function Layout({ children }: LayoutProps) {
                         className={`flex items-center ${sidebarCollapsed ? 'justify-center' : ''}`}
                       >
                         <div className="flex-shrink-0">
-                          <div className="h-10 w-10 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/25">
-                            <span className="text-sm font-medium text-white">
+                          <div className="h-10 w-10 rounded-xl bg-amber-500 flex items-center justify-center">
+                            <span className="text-sm font-medium text-black">
                               {user.firstName?.[0]}{user.lastName?.[0]}
                             </span>
                           </div>
@@ -609,31 +624,23 @@ export default function Layout({ children }: LayoutProps) {
 
                     {showUserMenu && (
                       <div
-                        className={`absolute bottom-full mb-2 bg-slate-800/95 backdrop-blur-xl rounded-xl shadow-xl ring-1 ring-slate-700/50 border border-slate-600/50 py-2 transition-all duration-300 ${
-                          sidebarCollapsed ? 'left-0 right-0' : 'left-0 right-0'
-                        }`}
+                        className={`${sidebarCollapsed ? 'fixed' : 'absolute'} ${sidebarCollapsed ? 'bottom-20 left-6 w-64' : 'bottom-full left-0 right-0 mb-2'} bg-slate-900 border border-slate-700 rounded-xl shadow-xl py-2 transition-all duration-300`}
+                        style={{
+                          zIndex: 9999,
+                          backgroundColor: 'rgb(15 23 42)',
+                        }}
                       >
-                        {!sidebarCollapsed && (
-                          <div className="px-4 py-3 border-b border-slate-700/50">
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs uppercase tracking-wide text-slate-400">
-                                Appearance
-                              </span>
-                              <ThemeToggle variant="compact" />
-                            </div>
-                          </div>
-                        )}
                         <div className="p-2 space-y-1">
                           <Link
                             href="/dashboard/settings/profile"
-                            className="block px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors duration-200"
+                            className="block px-3 py-2 text-sm text-slate-300 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition-colors duration-200"
                             onClick={() => setShowUserMenu(false)}
                           >
                             Your Profile
                           </Link>
                           <Link
                             href="/billing"
-                            className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors duration-200"
+                            className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition-colors duration-200"
                             onClick={() => setShowUserMenu(false)}
                           >
                             <CreditCardIcon className="h-4 w-4" />
@@ -641,7 +648,7 @@ export default function Layout({ children }: LayoutProps) {
                           </Link>
                           <Link
                             href="/dashboard/settings"
-                            className="block px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors duration-200"
+                            className="block px-3 py-2 text-sm text-slate-300 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition-colors duration-200"
                             onClick={() => setShowUserMenu(false)}
                           >
                             Settings
@@ -651,7 +658,7 @@ export default function Layout({ children }: LayoutProps) {
                               setShowUserMenu(false);
                               handleLogout();
                             }}
-                            className="block w-full px-3 py-2 text-left text-sm text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors duration-200"
+                            className="block w-full px-3 py-2 text-left text-sm text-slate-300 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition-colors duration-200"
                           >
                             Sign out
                           </button>
@@ -671,14 +678,14 @@ export default function Layout({ children }: LayoutProps) {
             }`}
           >
             {/* Unified Header with Logo and Toolbar */}
-            <header className="sticky top-0 z-40 bg-slate-800/90 backdrop-blur-xl border-b border-slate-700/50 shadow-lg shadow-slate-900/10">
-              <div className="flex h-16 items-center justify-between px-4 lg:px-6">
+            <header className="sticky top-0 z-40 bg-black border-b border-slate-700 overflow-visible">
+              <div className="flex h-16 items-center justify-between px-4 lg:px-6 overflow-visible">
                 {/* Left Section: Logo + Navigation */}
                 <div className="flex items-center gap-4">
                   {/* Desktop sidebar toggle */}
                   <button
                     type="button"
-                    className="hidden lg:flex p-2 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-xl transition-all duration-200 group"
+                    className="hidden lg:flex p-2 text-slate-400 hover:text-amber-400 hover:bg-slate-900 rounded-xl transition-all duration-200 group"
                     onClick={toggleSidebar}
                     title={
                       sidebarCollapsed ? 'Expand sidebar (Ctrl+B)' : 'Collapse sidebar (Ctrl+B)'
@@ -694,7 +701,7 @@ export default function Layout({ children }: LayoutProps) {
                   {/* Mobile menu button */}
                   <button
                     type="button"
-                    className="p-2 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-xl lg:hidden"
+                    className="p-2 text-slate-400 hover:text-amber-400 hover:bg-slate-900 rounded-xl lg:hidden"
                     onClick={() => setSidebarOpen(true)}
                   >
                     <Bars3Icon className="h-5 w-5" />
@@ -731,13 +738,10 @@ export default function Layout({ children }: LayoutProps) {
                     <AIEnable />
                   </div>
 
-                  {/* Theme Toggle */}
-                  <ThemeToggle variant="button" />
-
                   {/* Notifications */}
                   <button
                     onClick={() => router.push('/dashboard/inbox')}
-                    className="relative p-2 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-xl transition-all duration-200 hover:scale-105"
+                    className="relative p-2 text-slate-400 hover:text-amber-400 hover:bg-slate-900 rounded-xl transition-all duration-200 hover:scale-105"
                     title="Notifications"
                   >
                     <BellIcon className="h-5 w-5" />
@@ -753,7 +757,7 @@ export default function Layout({ children }: LayoutProps) {
 
                   {/* Help */}
                   <button
-                    className="hidden sm:flex items-center px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-xl transition-all duration-200 hover:scale-105"
+                    className="hidden sm:flex items-center px-3 py-2 text-sm text-slate-400 hover:text-amber-400 hover:bg-slate-900 rounded-xl transition-all duration-200 hover:scale-105"
                     onClick={() => {
                       const evt = new CustomEvent('copilot:open');
                       window.dispatchEvent(evt);
@@ -779,8 +783,8 @@ export default function Layout({ children }: LayoutProps) {
               </div>
             </main>
 
-            {/* Footer with Copilot Tab */}
-            <FooterCopilot />
+            {/* Floating Rest Tab */}
+            <FloatingRestTab />
           </div>
         </div>
       </AIProvider>
@@ -788,247 +792,58 @@ export default function Layout({ children }: LayoutProps) {
   );
 }
 
-// Footer-based Copilot component
-function FooterCopilot() {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [showFullCopilot, setShowFullCopilot] = useState(false);
-  const [inputValue, setInputValue] = useState('');
-  const pathname = usePathname();
-  const { stats: inboxStats } = useInboxStats();
+// Medium half pill sticky tab on side - connected to Copilot
+function FloatingRestTab() {
+  const [showCopilot, setShowCopilot] = useState(false);
 
   // Listen for global Help button event to open Copilot
   useEffect(() => {
     const handler = () => {
-      setIsExpanded(true);
-      setShowFullCopilot(true);
+      setShowCopilot(true);
     };
     window.addEventListener('copilot:open', handler as EventListener);
     return () => window.removeEventListener('copilot:open', handler as EventListener);
   }, []);
 
-  const handleQuickAction = (action: string) => {
-    setInputValue(action);
-    // Pass the action to the AI assistant and clear the input
-    setShowFullCopilot(true);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      e.stopPropagation();
-      handleSendMessage(e);
-    }
-  };
-
-  const handleSendMessage = (e?: React.KeyboardEvent | React.MouseEvent) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    if (inputValue.trim()) {
-      // Open the AI assistant with the input value
-      setShowFullCopilot(true);
-    }
+  const handleOpenCopilot = () => {
+    setShowCopilot(true);
   };
 
   const handleCloseCopilot = () => {
-    setShowFullCopilot(false);
-    // Clear the input after closing if it was sent
-    if (inputValue.trim()) {
-      setInputValue('');
-    }
+    setShowCopilot(false);
   };
 
   return (
     <>
-      {/* Inline Footer Copilot */}
-      <div
-        className={mobileOptimized(
-          'sticky bottom-0 z-30 overflow-hidden footer-copilot-safe',
-          mobile.safeBottom()
-        )}
-        style={{ bottom: 'var(--safe-area-inset-bottom, 0px)' }}
-      >
-        {/* Enhanced professional background */}
-        <div className="absolute inset-0 bg-gradient-to-t from-white via-slate-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700 backdrop-blur-xl shadow-2xl"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-50/30 via-white/20 to-indigo-50/30 dark:from-blue-900/20 dark:via-slate-800/30 dark:to-indigo-900/20"></div>
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-300/50 dark:via-slate-500 to-transparent shadow-sm"></div>
-
-        {/* Content */}
-        <div className="relative z-10 border-t border-blue-200/50 dark:border-slate-600 shadow-2xl">
-          {/* Main Footer Bar */}
-          <div className="flex flex-col">
-            {/* Mobile Navigation Toolbar */}
-            <div className="md:hidden px-2 pt-2">
-              <nav className="grid grid-cols-5 gap-1">
-                {[{
-                  name: 'Home',
-                  href: '/dashboard',
-                  icon: HomeIcon,
-                }, {
-                  name: 'Inbox',
-                  href: '/dashboard/inbox',
-                  icon: InboxIcon,
-                  badge: (inboxStats && inboxStats.unread) || 0,
-                }, {
-                  name: 'Projects',
-                  href: '/dashboard/projects',
-                  icon: ClipboardDocumentListIcon,
-                }, {
-                  name: 'Contacts',
-                  href: '/dashboard/contacts',
-                  icon: UserGroupIcon,
-                }, {
-                  name: 'Calendar',
-                  href: '/dashboard/calendar',
-                  icon: CalendarDaysIcon,
-                }].map(item => {
-                  const isActive = item.href === '/dashboard'
-                    ? pathname === '/dashboard'
-                    : pathname === item.href || pathname.startsWith(item.href + '/');
-                  return (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className={
-                        'relative flex flex-col items-center justify-center rounded-xl py-2 text-[11px] font-medium transition-colors ' +
-                        (isActive
-                          ? 'text-blue-700 dark:text-blue-300 bg-white/70 dark:bg-slate-700/60 border border-blue-200 dark:border-slate-600'
-                          : 'text-slate-600 dark:text-slate-300 hover:text-blue-700 dark:hover:text-white')
-                      }
-                      aria-label={item.name}
-                    >
-                      <item.icon className={
-                        'h-5 w-5 mb-1 ' +
-                        (isActive ? 'text-blue-600 dark:text-blue-300' : 'text-slate-500 dark:text-slate-300')
-                      } />
-                      <span className="leading-none">{item.name}</span>
-                      {item.badge && item.badge > 0 && (
-                        <span className="absolute -top-1 right-3 h-4 min-w-[16px] px-1 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center shadow">
-                          {item.badge > 9 ? '9+' : item.badge}
-                        </span>
-                      )}
-                    </Link>
-                  );
-                })}
-              </nav>
-            </div>
-
-            {/* Quick Actions Row - Always visible on larger screens, toggle on mobile */}
-            <div
-              className={`px-3 py-2 transition-all duration-200 border-b border-blue-200/50 dark:border-slate-600 ${
-                isExpanded
-                  ? 'max-h-20 opacity-100'
-                  : 'max-h-0 opacity-0 md:max-h-20 md:opacity-100 overflow-hidden'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2 overflow-x-auto">
-                  <span className="text-xs font-semibold whitespace-nowrap mr-2 text-slate-700 dark:text-slate-300">
-                    Quick:
-                  </span>
-                  {[
-                    { label: 'Projects', action: 'Show my remodeling projects' },
-                    { label: 'Contacts', action: 'Show my contacts' },
-                    { label: 'New Kitchen', action: 'Create a new kitchen remodel project' },
-                    { label: 'New Bathroom', action: 'Create a new bathroom remodel project' },
-                    {
-                      label: 'Design Ideas',
-                      action: 'Show me design inspiration for my current project',
-                    },
-                    { label: 'Permits', action: 'Help me with permit requirements' },
-                  ].map(item => (
-                    <button
-                      key={item.label}
-                      onClick={() => handleQuickAction(item.action)}
-                      className="flex-shrink-0 px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 hover:scale-105 bg-white dark:bg-slate-700 border border-blue-200 dark:border-slate-500 text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-600 hover:text-blue-700 dark:hover:text-white shadow-sm hover:shadow-md hover:border-blue-300 dark:hover:border-slate-400"
-                    >
-                      {item.label}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  onClick={() => setShowFullCopilot(true)}
-                  className="ml-2 p-2 rounded-lg bg-white dark:bg-slate-700 hover:bg-blue-50 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 hover:text-blue-700 dark:hover:text-white transition-all duration-200 border border-blue-200 dark:border-slate-500 shadow-sm hover:shadow-md hover:border-blue-300 dark:hover:border-slate-400"
-                  title="Open full assistant"
-                >
-                  <ArrowsPointingOutIcon className="h-4 w-4" />
-                </button>
+      <div className="fixed top-1/2 right-0 transform -translate-y-1/2 z-50">
+        <div className="group relative">
+          {/* Half Pill Tab */}
+          <div
+            onClick={handleOpenCopilot}
+            className="bg-black/80 backdrop-blur-md border-l border-t border-b border-slate-700 rounded-l-full pr-6 pl-4 py-4 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer"
+          >
+            {/* Rest/Sleep Icon */}
+            <div className="relative">
+              <div className="w-8 h-8 flex items-center justify-center">
+                <div className="w-6 h-1 bg-amber-400 rounded-full"></div>
               </div>
+              {/* Subtle glow effect */}
+              <div className="absolute inset-0 bg-amber-400/20 rounded-full blur-sm group-hover:bg-amber-400/30 transition-all duration-300"></div>
             </div>
+          </div>
 
-            {/* Main Input Row */}
-            <div
-              className={mobileOptimized(
-                'flex items-center space-x-3 px-3 py-3',
-                mobile.safeBottom()
-              )}
-              style={{ paddingBottom: 'max(0.75rem, var(--safe-area-inset-bottom))' }}
-            >
-              {/* Copyright */}
-              <div className="hidden sm:flex items-center space-x-2 text-xs font-medium text-slate-600 dark:text-slate-400">
-                <span>© 2025 Remodely CRM</span>
-              </div>
-
-              {/* AI Input */}
-              <div className="flex-1 flex items-center space-x-2">
-                <div className="flex items-center space-x-2 bg-white dark:bg-slate-700 rounded-xl border-2 border-blue-200 dark:border-slate-500 px-4 py-2 flex-1 shadow-lg hover:shadow-xl transition-all duration-200 focus-within:border-blue-400 dark:focus-within:border-blue-400 focus-within:shadow-xl">
-                  <div className="h-4 w-4 rounded-sm bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-sm">
-                    <SparklesIcon className="h-2.5 w-2.5 text-white" />
-                  </div>
-                  <input
-                    type="text"
-                    value={inputValue}
-                    onChange={e => setInputValue(e.target.value)}
-                    placeholder="Ask AI anything..."
-                    className="flex-1 bg-transparent text-sm placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:outline-none min-w-0 text-slate-900 dark:text-slate-100 font-medium"
-                    onKeyDown={handleKeyDown}
-                    onFocus={() => setIsExpanded(true)}
-                  />
-                  <button
-                    onClick={e => handleSendMessage(e)}
-                    disabled={!inputValue.trim()}
-                    className="p-1.5 rounded-lg bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg disabled:hover:shadow-md transform hover:scale-105 disabled:hover:scale-100"
-                  >
-                    <svg
-                      className="h-3 w-3 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                      />
-                    </svg>
-                  </button>
-                </div>
-
-                {/* Toggle Quick Actions (Mobile) */}
-                <button
-                  onClick={() => setIsExpanded(!isExpanded)}
-                  className="md:hidden p-2 rounded-lg bg-white dark:bg-slate-700 hover:bg-blue-50 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 hover:text-blue-700 dark:hover:text-white transition-all duration-200 border border-blue-200 dark:border-slate-500 shadow-sm hover:shadow-md hover:border-blue-300 dark:hover:border-slate-400"
-                  title="Toggle quick actions"
-                >
-                  <div
-                    className={`transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
-                  >
-                    <ChevronUpIcon className="h-3 w-3" />
-                  </div>
-                </button>
-              </div>
-            </div>
+          {/* Hover tooltip */}
+          <div className="absolute top-1/2 right-full transform -translate-y-1/2 mr-2 px-3 py-2 bg-black/90 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+            Open AI Assistant
           </div>
         </div>
       </div>
 
-      {/* Full AI Assistant Modal */}
+      {/* AI Assistant Modal */}
       <AIAssistant
-        isOpen={showFullCopilot}
+        isOpen={showCopilot}
         onClose={handleCloseCopilot}
-        initialMessage={inputValue}
+        initialMessage=""
       />
     </>
   );
@@ -1037,29 +852,51 @@ function FooterCopilot() {
 // Lightweight quick create dropdown (inline to avoid extra file for now)
 function QuickCreate() {
   const [open, setOpen] = useState(false);
+  const [buttonPosition, setButtonPosition] = useState({ top: 0, right: 0 });
+  const buttonRef = useCallback((node: HTMLButtonElement | null) => {
+    if (node) {
+      const rect = node.getBoundingClientRect();
+      setButtonPosition({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right,
+      });
+    }
+  }, []);
+
   return (
-    <div className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen(o => !o)}
-        className="inline-flex items-center px-3 py-2 rounded-md bg-blue-600 text-white text-xs font-medium shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 hover:scale-105 active:scale-95"
-      >
-        <span className="mr-1">+</span> Create
-      </button>
+    <>
+      <div className="relative">
+        <button
+          ref={buttonRef}
+          type="button"
+          onClick={() => setOpen(o => !o)}
+          className="inline-flex items-center px-3 py-2 rounded-md bg-amber-500 text-black text-xs font-medium shadow-sm hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-200 hover:scale-105 active:scale-95"
+        >
+          <span className="mr-1">+</span> Create
+        </button>
+      </div>
+      
+      {/* Render dropdown at root level to escape header constraints */}
       {open && (
         <>
-          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 mt-2 w-44 rounded-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg py-1 z-20 text-sm overflow-hidden transform transition-all duration-200 scale-100 opacity-100">
+          <div className="fixed inset-0 z-[9998]" onClick={() => setOpen(false)} />
+          <div 
+            className="fixed w-44 rounded-md bg-slate-700 border border-slate-600 shadow-xl py-1 z-[9999] text-sm"
+            style={{
+              top: `${buttonPosition.top}px`,
+              right: `${buttonPosition.right}px`,
+            }}
+          >
             {[
               { label: 'Project', href: '/dashboard/projects?new=1' },
-              { label: 'Contact', href: '/dashboard/contacts?new=1' },
+              { label: 'Contact', href: '/dashboard/clients?new=1' },
               { label: 'Design', href: '/dashboard/designer?view=new' },
               { label: 'Message', href: '/dashboard/inbox?compose=1' },
             ].map(item => (
               <Link
                 key={item.label}
                 href={item.href}
-                className="block px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors duration-150"
+                className="block px-3 py-2 hover:bg-slate-600 hover:text-white text-slate-200 transition-colors duration-150"
                 onClick={() => setOpen(false)}
               >
                 {item.label}
@@ -1067,13 +904,13 @@ function QuickCreate() {
             ))}
             <button
               onClick={() => setOpen(false)}
-              className="w-full text-left px-3 py-2 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150"
+              className="w-full text-left px-3 py-2 text-xs text-slate-300 hover:text-white hover:bg-slate-600 transition-colors duration-150"
             >
               Close
             </button>
           </div>
         </>
       )}
-    </div>
+    </>
   );
 }

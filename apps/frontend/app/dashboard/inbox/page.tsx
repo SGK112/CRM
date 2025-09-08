@@ -21,6 +21,7 @@ import {
 } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 interface Sender {
   name: string;
@@ -51,6 +52,7 @@ interface InboxStats {
 }
 
 export default function InboxPage() {
+  const searchParams = useSearchParams();
   const [user, setUser] = useState<{ id: number; name: string; firstName?: string; email: string } | null>(null);
   const [messages, setMessages] = useState<InboxMessage[]>([]);
   const [stats, setStats] = useState<InboxStats>({
@@ -62,6 +64,20 @@ export default function InboxPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFolder, setSelectedFolder] = useState('inbox');
   const [loading, setLoading] = useState(true);
+  const [showCompose, setShowCompose] = useState(false);
+  const [composeForm, setComposeForm] = useState({
+    to: '',
+    subject: '',
+    message: '',
+  });
+
+  useEffect(() => {
+    // Check if compose modal should be open
+    const compose = searchParams.get('compose');
+    if (compose === '1') {
+      setShowCompose(true);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     // Load user data
@@ -258,6 +274,21 @@ export default function InboxPage() {
     }
   };
 
+  const handleComposeSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Here you would normally send the message to your API
+    setShowCompose(false);
+    setComposeForm({ to: '', subject: '', message: '' });
+  };
+
+  const handleCloseCompose = () => {
+    setShowCompose(false);
+    // Update URL to remove compose parameter
+    const url = new URL(window.location.href);
+    url.searchParams.delete('compose');
+    window.history.replaceState({}, '', url.toString());
+  };
+
   const filteredMessages = messages.filter(message => {
     const matchesSearch = message.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          message.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -425,7 +456,10 @@ export default function InboxPage() {
         <div className="bg-black rounded-2xl p-6 border border-slate-700 mb-8">
           <h2 className="text-lg font-semibold text-white mb-6">Quick Actions</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <button className="flex flex-col items-center gap-2 p-4 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors group">
+            <button 
+              onClick={() => setShowCompose(true)}
+              className="flex flex-col items-center gap-2 p-4 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors group"
+            >
               <div className="p-3 bg-amber-600 rounded-xl group-hover:bg-amber-500 transition-colors">
                 <PlusIcon className="h-6 w-6 text-white" />
               </div>
@@ -578,6 +612,81 @@ export default function InboxPage() {
           </div>
         </div>
       </div>
+
+      {/* Compose Modal */}
+      {showCompose && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-black border border-slate-700 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-slate-700">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-white">Compose Message</h2>
+                <button
+                  onClick={handleCloseCompose}
+                  className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            
+            <form onSubmit={handleComposeSubmit} className="p-6 space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">To</label>
+                <input
+                  type="email"
+                  value={composeForm.to}
+                  onChange={(e) => setComposeForm(prev => ({ ...prev, to: e.target.value }))}
+                  placeholder="Enter recipient email"
+                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">Subject</label>
+                <input
+                  type="text"
+                  value={composeForm.subject}
+                  onChange={(e) => setComposeForm(prev => ({ ...prev, subject: e.target.value }))}
+                  placeholder="Enter subject"
+                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">Message</label>
+                <textarea
+                  value={composeForm.message}
+                  onChange={(e) => setComposeForm(prev => ({ ...prev, message: e.target.value }))}
+                  placeholder="Type your message here..."
+                  rows={8}
+                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"
+                  required
+                />
+              </div>
+              
+              <div className="flex gap-4 pt-4">
+                <button
+                  type="submit"
+                  className="flex-1 bg-amber-600 hover:bg-amber-500 text-white font-medium py-3 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-black"
+                >
+                  Send Message
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCloseCompose}
+                  className="px-6 bg-slate-800 hover:bg-slate-700 text-white font-medium py-3 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 focus:ring-offset-black"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

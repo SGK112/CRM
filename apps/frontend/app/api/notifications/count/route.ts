@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
 
-const DEV_MOCK_COUNT = 2; // Mock count for development
+const DEV_MOCK_COUNT = 3; // Mock count for development
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const response = await fetch(`${BACKEND_URL}/api/clients/count`, {
+    const response = await fetch(`${BACKEND_URL}/api/notifications/count`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -26,8 +26,8 @@ export async function GET(request: NextRequest) {
     });
 
     if (!response.ok) {
-      // Fallback to getting all clients and counting them
-      const clientsResponse = await fetch(`${BACKEND_URL}/api/clients`, {
+      // Fallback to getting all notifications and counting them
+      const notificationsResponse = await fetch(`${BACKEND_URL}/api/notifications`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -35,15 +35,15 @@ export async function GET(request: NextRequest) {
         },
       });
 
-      if (clientsResponse.ok) {
-        const clientsData = await clientsResponse.json();
-        const clients = clientsData.clients || clientsData;
-        const count = Array.isArray(clients) ? clients.length : 0;
+      if (notificationsResponse.ok) {
+        const notificationsData = await notificationsResponse.json();
+        const notifications = notificationsData.notifications || notificationsData;
+        const count = Array.isArray(notifications) ? notifications.length : 0;
         return NextResponse.json({ count });
       }
 
       return NextResponse.json(
-        { error: 'Failed to fetch client count' },
+        { error: 'Failed to fetch notification count' },
         { status: response.status }
       );
     }
