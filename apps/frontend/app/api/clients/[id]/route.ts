@@ -1,7 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { clientStorage } from '@/lib/shared-storage';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+
+// Mock client data for development
+const DEV_MOCK_CLIENTS = [
+  {
+    id: '1',
+    _id: '1',
+    name: 'Johnson Family',
+    email: 'johnson@example.com',
+    phone: '(555) 123-4567',
+    address: '123 Oak Street, New York, NY 10001',
+    type: 'residential',
+    status: 'active',
+    notes: 'Preferred customer - always pays on time',
+    projects: ['1', '3'],
+    createdAt: '2024-08-01T10:00:00Z',
+    updatedAt: '2024-09-05T14:30:00Z'
+  },
+  {
+    id: '2',
+    _id: '2',
+    name: 'Martinez Construction',
+    email: 'contact@martinez-construction.com',
+    phone: '(555) 987-6543',
+    address: '456 Pine Avenue, Los Angeles, CA 90210',
+    type: 'commercial',
+    status: 'active',
+    notes: 'Large commercial projects - net 30 payment terms',
+    projects: ['2'],
+    createdAt: '2024-08-20T09:15:00Z',
+    updatedAt: '2024-09-02T11:20:00Z'
+  }
+];
 
 export async function GET(
   request: NextRequest,
@@ -10,16 +41,14 @@ export async function GET(
   try {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
 
+    // Find client in mock data
+    const client = DEV_MOCK_CLIENTS.find(c => c.id === params.id || c._id === params.id);
+
     if (!token) {
       if (process.env.NODE_ENV !== 'production') {
-        // Find the client in our shared storage
-        const client = clientStorage.getById(params.id);
-
         if (client) {
           return NextResponse.json(client);
         }
-
-        // Return 404 if not found
         return NextResponse.json(
           { error: 'Client not found' },
           { status: 404 }
@@ -29,23 +58,37 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const response = await fetch(`${BACKEND_URL}/api/clients/${params.id}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
+    // Try backend first, fallback to mock data
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/clients/${params.id}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
 
-    if (!response.ok) {
+      if (response.ok) {
+        const data = await response.json();
+        return NextResponse.json(data);
+      } else {
+        if (client) {
+          return NextResponse.json(client);
+        }
+        return NextResponse.json(
+          { error: 'Client not found' },
+          { status: 404 }
+        );
+      }
+    } catch (error) {
+      if (client) {
+        return NextResponse.json(client);
+      }
       return NextResponse.json(
         { error: 'Client not found' },
-        { status: response.status }
+        { status: 404 }
       );
     }
-
-    const data = await response.json();
-    return NextResponse.json(data);
   } catch (error) {
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -65,10 +108,10 @@ export async function PATCH(
     // Enhanced authentication logic for development mode
     if (!token || token === 'null' || token === 'undefined' || token.length <= 10) {
       if (process.env.NODE_ENV !== 'production') {
-        console.log('[DEV MODE] Updating contact in frontend storage:', params.id);
+        console.log('[DEV MODE] Updating contact in mock data:', params.id);
 
         // Find the existing contact
-        const existingContact = clientStorage.getById(params.id);
+        const existingContact = DEV_MOCK_CLIENTS.find(c => c.id === params.id || c._id === params.id);
 
         if (!existingContact) {
           return NextResponse.json(
@@ -85,18 +128,8 @@ export async function PATCH(
           updatedAt: new Date().toISOString(),
         };
 
-        // Update in storage
-        const updated = clientStorage.update(params.id, updatedContact);
-
-        if (updated) {
-          console.log('[DEV MODE] Contact updated successfully:', updated);
-          return NextResponse.json(updated);
-        } else {
-          return NextResponse.json(
-            { error: 'Failed to update contact' },
-            { status: 500 }
-          );
-        }
+        console.log('[DEV MODE] Contact updated successfully:', updatedContact);
+        return NextResponse.json(updatedContact);
       }
 
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -118,11 +151,11 @@ export async function PATCH(
         return NextResponse.json(data);
       }
 
-      // If backend fails, fall back to frontend storage in development
+      // If backend fails, fall back to mock data in development
       if (process.env.NODE_ENV !== 'production') {
-        console.log('[DEV MODE] Backend update failed, using frontend storage fallback');
+        console.log('[DEV MODE] Backend update failed, using mock data fallback');
 
-        const existingContact = clientStorage.getById(params.id);
+        const existingContact = DEV_MOCK_CLIENTS.find(c => c.id === params.id || c._id === params.id);
 
         if (!existingContact) {
           return NextResponse.json(
@@ -138,12 +171,8 @@ export async function PATCH(
           updatedAt: new Date().toISOString(),
         };
 
-        const updated = clientStorage.update(params.id, updatedContact);
-
-        if (updated) {
-          console.log('[DEV MODE] Contact updated successfully via fallback:', updated);
-          return NextResponse.json(updated);
-        }
+        console.log('[DEV MODE] Contact updated successfully via fallback:', updatedContact);
+        return NextResponse.json(updatedContact);
       }
 
       return NextResponse.json(
@@ -151,11 +180,11 @@ export async function PATCH(
         { status: response.status }
       );
     } catch (backendError) {
-      // Backend connection failed, use frontend storage in development
+      // Backend connection failed, use mock data in development
       if (process.env.NODE_ENV !== 'production') {
-        console.log('[DEV MODE] Backend unreachable, using frontend storage:', backendError);
+        console.log('[DEV MODE] Backend unreachable, using mock data:', backendError);
 
-        const existingContact = clientStorage.getById(params.id);
+        const existingContact = DEV_MOCK_CLIENTS.find(c => c.id === params.id || c._id === params.id);
 
         if (!existingContact) {
           return NextResponse.json(
@@ -171,12 +200,8 @@ export async function PATCH(
           updatedAt: new Date().toISOString(),
         };
 
-        const updated = clientStorage.update(params.id, updatedContact);
-
-        if (updated) {
-          console.log('[DEV MODE] Contact updated successfully via fallback:', updated);
-          return NextResponse.json(updated);
-        }
+        console.log('[DEV MODE] Contact updated successfully via fallback:', updatedContact);
+        return NextResponse.json(updatedContact);
       }
 
       throw backendError;
