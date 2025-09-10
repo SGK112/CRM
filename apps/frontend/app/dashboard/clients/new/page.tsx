@@ -8,9 +8,16 @@ export default function NewClientPage() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    // Redirect to enhanced contact creation page with all parameters preserved
-    const params = new URLSearchParams(searchParams.toString());
-    router.replace(`/dashboard/clients/new/enhanced?${params.toString()}`);
+    // Check if user wants enhanced form
+    const enhanced = searchParams.get('enhanced');
+    if (enhanced === 'true') {
+      // Redirect to enhanced contact creation page with all parameters preserved
+      const params = new URLSearchParams(searchParams.toString());
+      router.replace(`/dashboard/clients/new/enhanced?${params.toString()}`);
+    } else {
+      // Redirect to simplified onboarding form by default
+      router.replace('/onboarding/simplified');
+    }
   }, [router, searchParams]);
 
   return (
