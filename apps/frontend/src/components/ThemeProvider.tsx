@@ -7,6 +7,7 @@ import React, {
   ReactNode,
   useCallback,
 } from 'react';
+import { ColorProvider } from './ColorProvider';
 
 type Theme = 'light' | 'dark';
 
@@ -64,7 +65,9 @@ export function ThemeProvider({ children }: Props) {
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, toggleTheme, system }}>
-      {children}
+      <ColorProvider>
+        {children}
+      </ColorProvider>
     </ThemeContext.Provider>
   );
 }

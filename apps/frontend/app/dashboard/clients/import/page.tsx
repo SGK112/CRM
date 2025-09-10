@@ -15,6 +15,24 @@ export default function ClientsImportPage() {
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Function to download CSV template
+  const downloadTemplate = () => {
+    const csvContent = `firstName,lastName,email,phone,company,contactType,address,city,state,zipCode,country,website,tags,notes
+John,Doe,john.doe@example.com,(555) 123-4567,Acme Corp,client,"123 Main St","New York",NY,10001,USA,https://johndoe.com,"tag1,tag2",Sample client notes
+Jane,Smith,jane.smith@example.com,(555) 987-6543,Smith Construction,subcontractor,"456 Oak Ave","Los Angeles",CA,90210,USA,https://smithconstruction.com,"contractor,trusted",Reliable subcontractor
+Bob,Wilson,bob@wilsontools.com,(555) 456-7890,Wilson Tools,vendor,"789 Pine St","Chicago",IL,60601,USA,https://wilsontools.com,"vendor,supplies",Tool supplier`;
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'contacts_template.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
+
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -126,14 +144,35 @@ export default function ClientsImportPage() {
   for (let i = 0; i < parsed.length; i++) {
       const row = parsed[i];
       const payload: Record<string, unknown> = {
-        firstName: row.firstName || row.firstname || row.FirstName || '',
-        lastName: row.lastName || row.lastname || row.LastName || '',
-        email: row.email || row.Email || '',
-        phone: row.phone || row.Phone || '',
-        company: row.company || row.Company || '',
-        status: row.status || 'active',
-        notes: row.notes || '',
-        tags: row.tags ? row.tags.split(',').map(t => t.trim()) : undefined,
+        // Name fields with multiple variations
+        firstName: row.firstName || row.firstname || row.FirstName || row.first_name || row['First Name'] || '',
+        lastName: row.lastName || row.lastname || row.LastName || row.last_name || row['Last Name'] || '',
+        
+        // Contact information
+        email: row.email || row.Email || row.emailAddress || row.EmailAddress || row['Email Address'] || '',
+        phone: row.phone || row.Phone || row.phoneNumber || row.PhoneNumber || row['Phone Number'] || row.mobile || row.Mobile || '',
+        
+        // Business information
+        company: row.company || row.Company || row.organization || row.Organization || row.business || row.Business || '',
+        
+        // Additional fields
+        status: row.status || row.Status || 'active',
+        notes: row.notes || row.Notes || row.description || row.Description || '',
+        tags: row.tags || row.Tags ? (row.tags || row.Tags).split(',').map((t: string) => t.trim()) : undefined,
+        
+        // Contact type mapping
+        contactType: row.contactType || row.type || row.Type || row.category || row.Category || 'client',
+        
+        // Address fields if present
+        address: row.address || row.Address || row['Street Address'] || '',
+        city: row.city || row.City || '',
+        state: row.state || row.State || row.province || row.Province || '',
+        zipCode: row.zipCode || row.zip || row.Zip || row.postal || row.Postal || row['Postal Code'] || '',
+        country: row.country || row.Country || '',
+        
+        // Additional contact fields
+        website: row.website || row.Website || row.url || row.URL || '',
+        linkedIn: row.linkedIn || row.LinkedIn || row.linkedin || ''
       };
 
       try {
@@ -194,7 +233,7 @@ export default function ClientsImportPage() {
       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
         <div className="flex items-start gap-3">
           <InformationCircleIcon className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
-          <div>
+          <div className="flex-1">
             <h3 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
               How it works
             </h3>
@@ -204,6 +243,12 @@ export default function ClientsImportPage() {
               <p>3. Preview and import your clients</p>
             </div>
           </div>
+          <button
+            onClick={downloadTemplate}
+            className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:text-blue-200 dark:hover:bg-blue-700 rounded-md transition-colors"
+          >
+            Download Template
+          </button>
         </div>
       </div>
 
@@ -263,8 +308,10 @@ export default function ClientsImportPage() {
             <div>
               <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">CSV Format</h4>
               <p className="text-xs text-gray-700">
-                Columns recognized automatically: firstName, lastName, email, phone, company, tags,
-                status, source
+                Columns recognized automatically: firstName, lastName, email, phone, company, address, city, state, zipCode, country, contactType, website, tags, status, notes
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                Multiple column name variations supported (e.g., firstName, firstname, FirstName, first_name, "First Name")
               </p>
             </div>
           </div>
@@ -336,34 +383,76 @@ export default function ClientsImportPage() {
             <ul className="text-sm text-gray-800 dark:text-gray-300 space-y-1">
               <li>
                 • <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">firstName</code> -
-                Client's first name
+                Client's first name (also: firstname, FirstName, first_name, "First Name")
               </li>
               <li>
                 • <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">lastName</code> -
-                Client's last name
+                Client's last name (also: lastname, LastName, last_name, "Last Name")
               </li>
               <li>
                 • <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">email</code> - Valid
-                email address
+                email address (also: Email, emailAddress, "Email Address")
               </li>
             </ul>
           </div>
           <div>
             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Optional Columns
+              Contact Information
             </h4>
             <ul className="text-sm text-gray-800 dark:text-gray-300 space-y-1">
               <li>
                 • <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">phone</code> - Phone
-                number
+                number (also: Phone, phoneNumber, mobile)
               </li>
               <li>
                 • <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">company</code> -
-                Company name
+                Company name (also: Company, organization, business)
+              </li>
+              <li>
+                • <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">contactType</code> -
+                Type of contact (client, subcontractor, vendor)
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div className="grid md:grid-cols-2 gap-6 mt-4">
+          <div>
+            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Address Fields
+            </h4>
+            <ul className="text-sm text-gray-800 dark:text-gray-300 space-y-1">
+              <li>
+                • <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">address</code> -
+                Street address
+              </li>
+              <li>
+                • <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">city</code> - City
+              </li>
+              <li>
+                • <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">state</code> - State/Province
+              </li>
+              <li>
+                • <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">zipCode</code> - ZIP/Postal code
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Additional Fields
+            </h4>
+            <ul className="text-sm text-gray-800 dark:text-gray-300 space-y-1">
+              <li>
+                • <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">website</code> - Website URL
+              </li>
+              <li>
+                • <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">linkedIn</code> - LinkedIn profile
               </li>
               <li>
                 • <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">tags</code> -
                 Comma-separated tags
+              </li>
+              <li>
+                • <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">notes</code> - Additional notes
               </li>
             </ul>
           </div>

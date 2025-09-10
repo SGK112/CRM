@@ -226,9 +226,9 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="bg-[var(--bg)] min-h-full">
       {/* Mobile-First Header */}
-      <div className="sticky top-0 bg-black backdrop-blur-md border-b border-slate-700 z-40">
+      <div className="sticky top-0 bg-[var(--bg)] backdrop-blur-md border-b border-[var(--border)] z-30">
         <div className="px-4 py-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
@@ -236,15 +236,15 @@ export default function DashboardPage() {
                 {user?.firstName?.charAt(0) || 'U'}
               </div>
               <div className="min-w-0">
-                <h1 className="text-xl font-bold text-white truncate">
+                <h1 className="text-xl font-bold text-[var(--text)] truncate">
                   {getGreeting()}
                 </h1>
                 <p className="text-sm text-slate-400">
-                  {new Date().toLocaleDateString('en-US', { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
+                  {new Date().toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
                   })}
                 </p>
               </div>
@@ -421,7 +421,7 @@ export default function DashboardPage() {
               <div className="p-6 border-b border-slate-700">
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-semibold text-white">Active Projects</h2>
-                  <Link 
+                  <Link
                     href="/dashboard/projects"
                     className="text-amber-600 hover:text-amber-500 text-sm font-medium flex items-center gap-1"
                   >
@@ -430,7 +430,7 @@ export default function DashboardPage() {
                   </Link>
                 </div>
               </div>
-              
+
               <div className="p-6 space-y-4">
                 {recentProjects.map((project) => (
                   <Link
@@ -453,14 +453,14 @@ export default function DashboardPage() {
                         </span>
                       </div>
                     </div>
-                    
+
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="text-slate-400">Progress</span>
                         <span className="text-white font-medium">{project.progress}%</span>
                       </div>
                       <div className="w-full bg-slate-700 rounded-full h-2">
-                        <div 
+                        <div
                           className="bg-amber-600 h-2 rounded-full transition-all"
                           style={{ width: `${project.progress}%` }}
                         ></div>

@@ -71,7 +71,7 @@ function ClientSelector({
 }: ClientSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredClients, setFilteredClients] = useState<Client[]>(clients);
+  const [filteredClients, setFilteredClients] = useState<Client[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -91,7 +91,9 @@ function ClientSelector({
   });
 
   useEffect(() => {
-    const filtered = clients.filter(client => {
+    // Ensure clients is an array before filtering
+    const clientsArray = Array.isArray(clients) ? clients : [];
+    const filtered = clientsArray.filter(client => {
       const search = searchTerm.toLowerCase();
       if (!search) return true;
       const fullName = `${client.firstName || ''} ${client.lastName || ''}`.toLowerCase();
@@ -132,7 +134,7 @@ function ClientSelector({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const selectedClient = clients.find(client => client._id === selectedClientId);
+  const selectedClient = clients?.find?.(client => client._id === selectedClientId) || null;
 
   const handleClientSelect = (client: Client | null) => {
     onClientSelect(client?._id);
@@ -417,10 +419,15 @@ export default function NewDashboardProjectPage() {
 
       if (response.ok) {
         const data = await response.json();
-        setClients(data);
+        // Ensure data is an array
+        setClients(Array.isArray(data) ? data : []);
+      } else {
+        // Set empty array on error
+        setClients([]);
       }
     } catch (error) {
-      // Silently handle error
+      // Set empty array on error
+      setClients([]);
     }
   }, [router]);
 
@@ -625,7 +632,10 @@ export default function NewDashboardProjectPage() {
               selectedClientId={formData.clientId}
               onClientSelect={clientId => setFormData(prev => ({ ...prev, clientId }))}
               onClientCreated={client => {
-                setClients(prev => [client, ...prev]);
+                setClients(prev => {
+                  const prevArray = Array.isArray(prev) ? prev : [];
+                  return [client, ...prevArray];
+                });
                 setFormData(prev => ({ ...prev, clientId: client._id }));
               }}
             />

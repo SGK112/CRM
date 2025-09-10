@@ -108,7 +108,7 @@ export async function PATCH(
     // Enhanced authentication logic for development mode
     if (!token || token === 'null' || token === 'undefined' || token.length <= 10) {
       if (process.env.NODE_ENV !== 'production') {
-        console.log('[DEV MODE] Updating contact in mock data:', params.id);
+        // Development mode: updating contact in mock data
 
         // Find the existing contact
         const existingContact = DEV_MOCK_CLIENTS.find(c => c.id === params.id || c._id === params.id);
@@ -128,7 +128,7 @@ export async function PATCH(
           updatedAt: new Date().toISOString(),
         };
 
-        console.log('[DEV MODE] Contact updated successfully:', updatedContact);
+        // Development mode: contact updated successfully
         return NextResponse.json(updatedContact);
       }
 
@@ -153,7 +153,7 @@ export async function PATCH(
 
       // If backend fails, fall back to mock data in development
       if (process.env.NODE_ENV !== 'production') {
-        console.log('[DEV MODE] Backend update failed, using mock data fallback');
+        // Development mode: backend update failed, using mock data fallback
 
         const existingContact = DEV_MOCK_CLIENTS.find(c => c.id === params.id || c._id === params.id);
 
@@ -171,7 +171,7 @@ export async function PATCH(
           updatedAt: new Date().toISOString(),
         };
 
-        console.log('[DEV MODE] Contact updated successfully via fallback:', updatedContact);
+        // Development mode: contact updated successfully via fallback
         return NextResponse.json(updatedContact);
       }
 
@@ -182,7 +182,7 @@ export async function PATCH(
     } catch (backendError) {
       // Backend connection failed, use mock data in development
       if (process.env.NODE_ENV !== 'production') {
-        console.log('[DEV MODE] Backend unreachable, using mock data:', backendError);
+        // Development mode: backend unreachable, using mock data
 
         const existingContact = DEV_MOCK_CLIENTS.find(c => c.id === params.id || c._id === params.id);
 
@@ -200,14 +200,14 @@ export async function PATCH(
           updatedAt: new Date().toISOString(),
         };
 
-        console.log('[DEV MODE] Contact updated successfully via fallback:', updatedContact);
+        // Development mode: contact updated successfully via fallback
         return NextResponse.json(updatedContact);
       }
 
       throw backendError;
     }
   } catch (error) {
-    console.error('[API] Error updating contact:', error);
+    // Error updating contact - could be logged to monitoring service in production
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

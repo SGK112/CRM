@@ -64,7 +64,7 @@ function TypewriterText({ text, speed = 50, delay = 0, className = "" }: Typewri
     <span className={className}>
       {displayedText}
       {currentIndex < text.length && (
-        <span className="animate-pulse text-amber-500">|</span>
+        <span className="text-amber-500">|</span>
       )}
     </span>
   )

@@ -2,7 +2,6 @@
 import React from 'react';
 import Link from 'next/link';
 import { useSubscription } from './subscription-context';
-import ThemeToggle from './ThemeToggle';
 
 function Badge() {
   const { plan, status, trialEndsAt, loading } = useSubscription();
@@ -66,7 +65,6 @@ export function TopBar() {
 
         {/* Mobile menu button */}
         <div className="ml-auto flex items-center gap-3 md:hidden">
-          <ThemeToggle variant="button" />
           <button
             aria-label="Open menu"
             aria-expanded={open}
@@ -85,7 +83,6 @@ export function TopBar() {
 
         {/* Desktop utilities */}
         <div className="hidden md:flex ml-auto items-center gap-4">
-          <ThemeToggle variant="button" />
           <Link
             href="/auth/login"
             className="text-xs font-medium text-secondary hover:text-primary transition"

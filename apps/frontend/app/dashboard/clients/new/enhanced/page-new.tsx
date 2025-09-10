@@ -39,7 +39,7 @@ export default function EnhancedContactCreationPage() {
   const returnTo = searchParams.get('returnTo') || '/dashboard/clients';
   const contactType = (searchParams.get('type') as string) || 'client';
 
-  const [contactId, setContactId] = useState<string | null>(null);
+  const [_contactId, setContactId] = useState<string | null>(null);
   const [, setQuickBooksEnabled] = useState(false);
 
   const {

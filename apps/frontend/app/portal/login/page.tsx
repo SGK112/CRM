@@ -47,7 +47,7 @@ export default function ClientPortalLogin() {
         setFormData(prev => ({ ...prev, email: data.email, token }));
       }
     } catch (error) {
-      console.error('Token validation failed:', error);
+      // Token validation failed - could be logged to monitoring service
     }
   };
 

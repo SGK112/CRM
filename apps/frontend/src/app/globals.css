@@ -1830,21 +1830,6 @@ html {
   transform: translateY(-1px);
 }
 
-.highlight-pulse {
-  animation: highlight-pulse 2.5s ease-in-out infinite;
-}
-
-@keyframes highlight-pulse {
-  0%, 100% {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(251, 191, 36, 0.05));
-    box-shadow: 0 0 20px rgba(245, 158, 11, 0.1);
-  }
-  50% {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(251, 191, 36, 0.1));
-    box-shadow: 0 0 40px rgba(245, 158, 11, 0.25);
-  }
-}
-
 .highlight-border {
   position: relative;
   overflow: hidden;

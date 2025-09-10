@@ -19,7 +19,6 @@ import { useEffect, useState } from 'react';
 import Logo from './Logo';
 import SearchBar from './SearchBar';
 import { ThemeProvider } from './ThemeProvider';
-import ThemeToggle from './ThemeToggle';
 
 interface NavigationItem {
   name: string;
@@ -314,8 +313,6 @@ export default function SimpleCRMLayout({ children }: SimpleCRMLayoutProps) {
 
               {/* Right actions */}
               <div className="flex items-center gap-2 ml-4">
-                <ThemeToggle variant="button" />
-
                 {/* User menu */}
                 <div className="relative">
                   <button

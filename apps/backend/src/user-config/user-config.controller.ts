@@ -38,4 +38,18 @@ export class UserConfigController {
   updatePdfTemplates(@Body() updatePdfTemplatesDto: UpdatePdfTemplatesDto, @Request() req) {
     return this.userConfigService.updatePdfTemplates(req.user._id, updatePdfTemplatesDto);
   }
+
+  @Get('theme')
+  @ApiOperation({ summary: 'Get user theme configuration' })
+  @ApiResponse({ status: 200, description: 'User theme retrieved successfully' })
+  getTheme(@Request() req) {
+    return this.userConfigService.getUserTheme(req.user._id);
+  }
+
+  @Post('theme')
+  @ApiOperation({ summary: 'Update user theme configuration' })
+  @ApiResponse({ status: 200, description: 'Theme updated successfully' })
+  updateTheme(@Body() themeData: { theme: string; name: string }, @Request() req) {
+    return this.userConfigService.updateUserTheme(req.user._id, themeData);
+  }
 }

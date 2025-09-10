@@ -4,7 +4,6 @@ export const dynamic = 'force-dynamic';
 
 import { simple } from '@/lib/simple-ui';
 import {
-    CreditCardIcon,
     CurrencyDollarIcon,
     DocumentTextIcon,
     EyeIcon,

@@ -13,7 +13,8 @@ import {
     Squares2X2Icon,
     ListBulletIcon,
     PhoneIcon,
-    BuildingOfficeIcon
+    BuildingOfficeIcon,
+    DocumentArrowUpIcon
 } from '@heroicons/react/24/outline';
 import {
     CheckCircleIcon as CheckCircleIconSolid
@@ -366,9 +367,18 @@ export default function ContactsPage() {
                 )}
               </button>
 
+              {/* Bulk Import */}
+              <Link
+                href="/dashboard/clients/import"
+                className="inline-flex items-center px-3 py-2 bg-slate-900 text-slate-300 text-sm font-medium rounded-lg hover:bg-slate-700 hover:text-white transition-colors border border-slate-700"
+              >
+                <DocumentArrowUpIcon className="h-4 w-4 mr-2" />
+                Import
+              </Link>
+
               {/* Add Contact */}
               <Link
-                href="/dashboard/clients/new/enhanced"
+                href="/dashboard/onboarding?enhanced=true"
                 className="inline-flex items-center px-4 py-2 bg-amber-500 text-black text-sm font-medium rounded-lg hover:bg-amber-400 transition-colors"
               >
                 <PlusIcon className="h-4 w-4 mr-2" />
@@ -613,7 +623,7 @@ export default function ContactsPage() {
             </p>
             {!searchQuery && (
               <Link
-                href="/dashboard/clients/new/enhanced"
+                href="/dashboard/onboarding?enhanced=true"
                 className="inline-flex items-center px-4 py-2 bg-amber-500 text-black text-sm font-medium rounded-lg hover:bg-amber-400 transition-colors"
               >
                 <PlusIcon className="h-4 w-4 mr-2" />

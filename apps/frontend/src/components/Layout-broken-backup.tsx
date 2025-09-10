@@ -28,8 +28,8 @@ import {
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState, useCallback, useRef } from 'react';
-import { createPortal } from 'react-dom';
+import { useEffect, useState, useCallback } from 'react';
+import { cn } from '@/lib/utils';
 import { AIProvider } from '../hooks/useAI';
 import { useInboxStats } from '../hooks/useInboxStats';
 import AIAssistant from './AIAssistant';
@@ -47,65 +47,6 @@ interface User {
   lastName: string;
   role: string;
   workspaceId: string;
-}
-
-// Universal Dropdown Component
-interface UniversalDropdownProps {
-  isOpen: boolean;
-  onClose: () => void;
-  buttonRef: React.RefObject<HTMLElement>;
-  children: React.ReactNode;
-  className?: string;
-}
-
-function UniversalDropdown({ isOpen, onClose, buttonRef, children, className = '' }: UniversalDropdownProps) {
-  const [mounted, setMounted] = useState(false);
-  const [buttonPosition, setButtonPosition] = useState({ top: 0, left: 0, right: 0 });
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (isOpen && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      
-      // Always position above the button - use viewport coordinates for fixed positioning
-      setButtonPosition({
-        top: rect.top - 8, // Use viewport coordinates directly for fixed positioning
-        left: rect.left,
-        right: window.innerWidth - rect.right,
-      });
-    }
-  }, [isOpen, buttonRef]);
-
-  const dropdownContent = isOpen && mounted ? (
-    <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 z-[99998] bg-black bg-opacity-10"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-
-      {/* Dropdown panel - rendered at body level */}
-      <div
-        className={`fixed rounded-lg bg-slate-800 border border-slate-600 shadow-2xl py-2 z-[99999] text-sm transform transition-all duration-200 ${className}`}
-        style={{
-          top: `${buttonPosition.top}px`,
-          left: `${buttonPosition.left}px`,
-          minWidth: '200px',
-          transformOrigin: 'top left',
-        }}
-        role="menu"
-        aria-orientation="vertical"
-      >
-        {children}
-      </div>
-    </>
-  ) : null;
-
-  return mounted ? createPortal(dropdownContent, document.body) : null;
 }
 
 interface LayoutProps {
@@ -133,15 +74,10 @@ export default function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [showDesktopUserMenu, setShowDesktopUserMenu] = useState(false);
   const [userPlan, setUserPlan] = useState<'basic' | 'ai-pro' | 'enterprise'>('basic');
   const router = useRouter();
   const pathname = usePathname();
   const { stats: inboxStats } = useInboxStats();
-
-  // Refs for dropdowns
-  const profileButtonRef = useRef<HTMLButtonElement>(null);
-  const profileButtonDesktopRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     // Only check authentication on client side after component mounts
@@ -223,7 +159,7 @@ export default function Layout({ children }: LayoutProps) {
             ? localStorage.getItem('accessToken') || localStorage.getItem('token')
             : null;
         if (!token) return;
-
+        
         // Fetch all counts using dedicated count endpoints
         const [projectsRes, clientsRes, documentsRes, notificationsRes] = await Promise.all([
           fetch('/api/projects/count', { headers: { Authorization: `Bearer ${token}` } }).catch(
@@ -239,12 +175,12 @@ export default function Layout({ children }: LayoutProps) {
             () => null
           ),
         ]);
-
+        
         const projectsCount = projectsRes && projectsRes.ok ? await projectsRes.json() : undefined;
         const clientsCount = clientsRes && clientsRes.ok ? await clientsRes.json() : undefined;
         const documentsCount = documentsRes && documentsRes.ok ? await documentsRes.json() : undefined;
         const notificationsCount = notificationsRes && notificationsRes.ok ? await notificationsRes.json() : undefined;
-
+        
         setCounts({
           projects: typeof projectsCount?.count === 'number' ? projectsCount.count : undefined,
           clients: typeof clientsCount?.count === 'number' ? clientsCount.count : undefined,
@@ -303,9 +239,9 @@ export default function Layout({ children }: LayoutProps) {
       label: 'Business Management',
       items: [
         { name: 'TON Wallet', href: '/dashboard/wallet', icon: WalletIcon },
-        {
-          name: 'Documents & Files',
-          href: '/dashboard/documents',
+        { 
+          name: 'Documents & Files', 
+          href: '/dashboard/documents', 
           icon: DocumentTextIcon,
           badge: counts?.documents,
         },
@@ -361,41 +297,70 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <ThemeProvider>
       <AIProvider>
-        <div className="min-h-screen relative bg-gradient-to-br from-slate-50 via-amber-50 to-orange-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-          <RouteMemoryTracker />
+        {/* Use the new layout coordination classes */}
+        <div className="app-layout-wrapper">
+          {/* Sidebar overlay for mobile */}
+          <div 
+            className={cn(
+              "sidebar-overlay",
+              sidebarOpen && "visible"
+            )}
+            onClick={() => setSidebarOpen(false)}
+          />
 
-          {/* Mobile sidebar backdrop */}
-          {sidebarOpen && (
-            <div className="fixed inset-0 z-40 lg:hidden">
-              <div
-                className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm"
-                onClick={() => setSidebarOpen(false)}
-              />
-            </div>
-          )}
-
-          {/* Mobile sidebar - Mobile-first design template */}
+          {/* Desktop sidebar - coordinated with new layout system */}
           <div
-            className={`fixed inset-y-0 left-0 z-50 w-80 transform transition-all duration-300 ease-out lg:hidden ${
-              sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-            }`}
+            className={cn(
+              "layout-sidebar sidebar-content",
+              // Desktop positioning and width
+              sidebarCollapsed ? "collapsed" : "",
+              // Mobile overlay behavior
+              sidebarOpen ? "open" : ""
+            )}
           >
-            <div className="flex flex-col h-full bg-black">
-              {/* Mobile header */}
-              <div className="flex items-center justify-between h-16 px-6 border-b border-slate-700 flex-shrink-0">
-                <Logo />
+            {/* Sidebar Header */}
+            <div className="sidebar-header">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {!sidebarCollapsed && (
+                    <>
+                      <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center">
+                        <span className="text-white font-bold text-sm">A</span>
+                      </div>
+                      <div>
+                        <h1 className="font-semibold text-lg">AUTOMOTIVATED</h1>
+                        <p className="text-xs text-muted-foreground">CRM Dashboard</p>
+                      </div>
+                    </>
+                  )}
+                </div>
+                
+                {/* Desktop toggle button */}
+                <button
+                  onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                  className="hide-mobile p-2 rounded-lg hover:bg-accent/10 transition-colors"
+                >
+                  <ChevronLeftIcon 
+                    className={cn(
+                      "h-4 w-4 transition-transform",
+                      sidebarCollapsed && "rotate-180"
+                    )}
+                  />
+                </button>
+                
+                {/* Mobile close button */}
                 <button
                   onClick={() => setSidebarOpen(false)}
-                  className="p-2 rounded-xl text-slate-400 hover:text-amber-400 hover:bg-slate-900 transition-all duration-200"
-                  aria-label="Close sidebar"
+                  className="show-mobile p-2 rounded-lg hover:bg-accent/10 transition-colors"
                 >
-                  <XMarkIcon className="h-5 w-5" />
+                  <XMarkIcon className="h-4 w-4" />
                 </button>
               </div>
+            </div>
 
-              {/* Mobile navigation */}
-              <nav className="flex-1 overflow-y-auto px-4 py-6">
-                <div className="space-y-8">
+            {/* Sidebar Navigation */}
+            <nav className="sidebar-nav mobile-sidebar-scroll">
+              <div className="space-y-8 px-4 py-6">{/* Navigation content will go here */}
                   {navigationGroups
                     .filter(group => !group.hidden)
                     .map(group => {
@@ -484,7 +449,6 @@ export default function Layout({ children }: LayoutProps) {
                     </div>
                   </div>
                   <button
-                    ref={profileButtonRef}
                     onClick={() => setShowUserMenu(!showUserMenu)}
                     className="p-2 rounded-xl text-slate-400 hover:text-amber-400 hover:bg-slate-900 transition-all duration-200"
                   >
@@ -492,46 +456,46 @@ export default function Layout({ children }: LayoutProps) {
                   </button>
                 </div>
 
-                <UniversalDropdown
-                  isOpen={showUserMenu}
-                  onClose={() => setShowUserMenu(false)}
-                  buttonRef={profileButtonRef}
-                >
-                  <Link
-                    href="/dashboard/settings/profile"
-                    className="block px-4 py-2 text-left hover:bg-slate-700 hover:text-amber-400 text-slate-200 transition-colors duration-150"
-                    onClick={() => setShowUserMenu(false)}
+                {showUserMenu && (
+                  <div 
+                    className="absolute top-full left-0 right-0 mt-2 bg-slate-900 border border-slate-700 rounded-xl shadow-xl"
+                    style={{ zIndex: 9999 }}
                   >
-                    Your Profile
-                  </Link>
-                  <Link
-                    href="/billing"
-                    className="flex items-center gap-2 px-4 py-2 text-left hover:bg-slate-700 hover:text-amber-400 text-slate-200 transition-colors duration-150"
-                    onClick={() => setShowUserMenu(false)}
-                  >
-                    <CreditCardIcon className="h-4 w-4" />
-                    Billing & Payments
-                  </Link>
-                  <Link
-                    href="/dashboard/settings"
-                    className="block px-4 py-2 text-left hover:bg-slate-700 hover:text-amber-400 text-slate-200 transition-colors duration-150"
-                    onClick={() => setShowUserMenu(false)}
-                  >
-                    Settings
-                  </Link>
-
-                  <div className="border-t border-slate-600 my-1" />
-
-                  <button
-                    onClick={() => {
-                      setShowUserMenu(false);
-                      handleLogout();
-                    }}
-                    className="block w-full px-4 py-2 text-left text-slate-200 hover:text-amber-400 hover:bg-slate-700 transition-colors duration-150"
-                  >
-                    Sign out
-                  </button>
-                </UniversalDropdown>
+                    <div className="p-2 space-y-1">
+                      <Link
+                        href="/dashboard/settings/profile"
+                        className="block px-3 py-2 text-sm text-slate-300 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition-colors duration-200"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        Your Profile
+                      </Link>
+                      <Link
+                        href="/billing"
+                        className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition-colors duration-200"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        <CreditCardIcon className="h-4 w-4" />
+                        Billing & Payments
+                      </Link>
+                      <Link
+                        href="/dashboard/settings"
+                        className="block px-3 py-2 text-sm text-slate-300 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition-colors duration-200"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        Settings
+                      </Link>
+                      <button
+                        onClick={() => {
+                          setShowUserMenu(false);
+                          handleLogout();
+                        }}
+                        className="block w-full px-3 py-2 text-left text-sm text-slate-300 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition-colors duration-200"
+                      >
+                        Sign out
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -645,8 +609,7 @@ export default function Layout({ children }: LayoutProps) {
                 <div className="flex-shrink-0 p-4 border-t border-slate-700">
                   <div className="relative">
                     <button
-                      ref={profileButtonDesktopRef}
-                      onClick={() => setShowDesktopUserMenu(!showDesktopUserMenu)}
+                      onClick={() => setShowUserMenu(!showUserMenu)}
                       className={classNames(
                         'group block w-full rounded-xl p-3 text-left text-sm font-medium hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/50 transition-all duration-300',
                         sidebarCollapsed ? 'px-2' : ''
@@ -682,47 +645,49 @@ export default function Layout({ children }: LayoutProps) {
                       </div>
                     </button>
 
-                    <UniversalDropdown
-                      isOpen={showDesktopUserMenu}
-                      onClose={() => setShowDesktopUserMenu(false)}
-                      buttonRef={profileButtonDesktopRef}
-                      className={sidebarCollapsed ? 'w-64' : ''}
-                    >
-                      <Link
-                        href="/dashboard/settings/profile"
-                        className="block px-4 py-2 text-left hover:bg-slate-700 hover:text-amber-400 text-slate-200 transition-colors duration-150"
-                        onClick={() => setShowDesktopUserMenu(false)}
-                      >
-                        Your Profile
-                      </Link>
-                      <Link
-                        href="/billing"
-                        className="flex items-center gap-2 px-4 py-2 text-left hover:bg-slate-700 hover:text-amber-400 text-slate-200 transition-colors duration-150"
-                        onClick={() => setShowDesktopUserMenu(false)}
-                      >
-                        <CreditCardIcon className="h-4 w-4" />
-                        Billing & Payments
-                      </Link>
-                      <Link
-                        href="/dashboard/settings"
-                        className="block px-4 py-2 text-left hover:bg-slate-700 hover:text-amber-400 text-slate-200 transition-colors duration-150"
-                        onClick={() => setShowDesktopUserMenu(false)}
-                      >
-                        Settings
-                      </Link>
-
-                      <div className="border-t border-slate-600 my-1" />
-
-                      <button
-                        onClick={() => {
-                          setShowDesktopUserMenu(false);
-                          handleLogout();
+                    {showUserMenu && (
+                      <div
+                        className={`${sidebarCollapsed ? 'fixed' : 'absolute'} ${sidebarCollapsed ? 'bottom-20 left-6 w-64' : 'bottom-full left-0 right-0 mb-2'} bg-slate-900 border border-slate-700 rounded-xl shadow-xl py-2 transition-all duration-300`}
+                        style={{
+                          zIndex: 9999,
+                          backgroundColor: 'rgb(15 23 42)',
                         }}
-                        className="block w-full px-4 py-2 text-left text-slate-200 hover:text-amber-400 hover:bg-slate-700 transition-colors duration-150"
                       >
-                        Sign out
-                      </button>
-                    </UniversalDropdown>
+                        <div className="p-2 space-y-1">
+                          <Link
+                            href="/dashboard/settings/profile"
+                            className="block px-3 py-2 text-sm text-slate-300 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition-colors duration-200"
+                            onClick={() => setShowUserMenu(false)}
+                          >
+                            Your Profile
+                          </Link>
+                          <Link
+                            href="/billing"
+                            className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition-colors duration-200"
+                            onClick={() => setShowUserMenu(false)}
+                          >
+                            <CreditCardIcon className="h-4 w-4" />
+                            Billing & Payments
+                          </Link>
+                          <Link
+                            href="/dashboard/settings"
+                            className="block px-3 py-2 text-sm text-slate-300 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition-colors duration-200"
+                            onClick={() => setShowUserMenu(false)}
+                          >
+                            Settings
+                          </Link>
+                          <button
+                            onClick={() => {
+                              setShowUserMenu(false);
+                              handleLogout();
+                            }}
+                            className="block w-full px-3 py-2 text-left text-sm text-slate-300 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition-colors duration-200"
+                          >
+                            Sign out
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -731,7 +696,7 @@ export default function Layout({ children }: LayoutProps) {
 
           {/* Main content */}
           <div
-            className={`lg:flex lg:flex-col min-h-screen w-full transition-all duration-300 ease-out ${
+            className={`lg:flex lg:flex-col min-h-screen transition-all duration-300 ease-out ${
               sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-72'
             }`}
           >
@@ -830,17 +795,11 @@ export default function Layout({ children }: LayoutProps) {
             </header>
 
             {/* Page content with mobile optimization */}
-            <main className="flex-1">
+            <main className="flex-1 py-6 overflow-y-auto">
               <div
                 className={classNames(
-                  pathname === '/dashboard' ||
-                  pathname.startsWith('/dashboard/clients') || 
-                  pathname.startsWith('/dashboard/projects') || 
-                  pathname.startsWith('/dashboard/inbox') ||
-                  pathname.startsWith('/dashboard/calendar') ||
-                  pathname.startsWith('/dashboard/financial') 
-                    ? 'w-full' 
-                    : 'px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto'
+                  'px-4 sm:px-6 lg:px-8',
+                  pathname.startsWith('/dashboard/clients') ? 'max-w-none' : 'max-w-7xl mx-auto'
                 )}
               >
                 {children}
@@ -850,7 +809,9 @@ export default function Layout({ children }: LayoutProps) {
             {/* Floating Rest Tab */}
             <FloatingRestTab />
           </div>
+          {/* End main content area */}
         </div>
+        {/* End app-layout-wrapper */}
       </AIProvider>
     </ThemeProvider>
   );
@@ -917,121 +878,64 @@ function FloatingRestTab() {
 function QuickCreate() {
   const [open, setOpen] = useState(false);
   const [buttonPosition, setButtonPosition] = useState({ top: 0, right: 0 });
-  const [mounted, setMounted] = useState(false);
-  const router = useRouter();
-
-  useEffect(() => {
-    setMounted(true);
+  const buttonRef = useCallback((node: HTMLButtonElement | null) => {
+    if (node) {
+      const rect = node.getBoundingClientRect();
+      setButtonPosition({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right,
+      });
+    }
   }, []);
-
-  const handleItemClick = (href: string) => {
-    setOpen(false);
-    try {
-      router.push(href);
-    } catch (error) {
-      // Router navigation failed, falling back to window.location
-      window.location.href = href;
-    }
-  };
-
-  useEffect(() => {
-    if (open) {
-      const button = document.querySelector('[data-create-button]') as HTMLButtonElement;
-      if (button) {
-        const rect = button.getBoundingClientRect();
-        setButtonPosition({
-          top: rect.bottom + 8,
-          right: window.innerWidth - rect.right,
-        });
-      }
-    }
-  }, [open]);
-
-  const dropdownContent = open && mounted ? (
-    <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 z-[99998] bg-black bg-opacity-10"
-        onClick={() => setOpen(false)}
-        aria-hidden="true"
-      />
-
-      {/* Dropdown panel - rendered at body level */}
-      <div
-        className="fixed w-48 rounded-lg bg-slate-800 border border-slate-600 shadow-2xl py-2 z-[99999] text-sm"
-        style={{
-          top: `${buttonPosition.top}px`,
-          right: `${buttonPosition.right}px`,
-        }}
-        role="menu"
-        aria-orientation="vertical"
-      >
-        <button
-          onClick={() => handleItemClick('/dashboard/projects/new')}
-          className="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 hover:text-amber-400 text-slate-200 transition-colors duration-150"
-          role="menuitem"
-        >
-          <ClipboardDocumentListIcon className="h-4 w-4 mr-3 text-slate-400" />
-          New Project
-        </button>
-
-        <button
-          onClick={() => handleItemClick('/dashboard/onboarding')}
-          className="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 hover:text-amber-400 text-slate-200 transition-colors duration-150"
-          role="menuitem"
-        >
-          <UserGroupIcon className="h-4 w-4 mr-3 text-slate-400" />
-          New Contact
-        </button>
-
-        <button
-          onClick={() => handleItemClick('/dashboard/estimates/new')}
-          className="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 hover:text-amber-400 text-slate-200 transition-colors duration-150"
-          role="menuitem"
-        >
-          <CalculatorIcon className="h-4 w-4 mr-3 text-slate-400" />
-          New Estimate
-        </button>
-
-        <button
-          onClick={() => handleItemClick('/dashboard/inbox?compose=1')}
-          className="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 hover:text-amber-400 text-slate-200 transition-colors duration-150"
-          role="menuitem"
-        >
-          <InboxIcon className="h-4 w-4 mr-3 text-slate-400" />
-          New Message
-        </button>
-
-        <div className="border-t border-slate-600 my-1" />
-
-        <button
-          onClick={() => setOpen(false)}
-          className="flex items-center w-full px-4 py-2 text-left text-xs text-slate-400 hover:text-slate-300 hover:bg-slate-700 transition-colors duration-150"
-          role="menuitem"
-        >
-          Close
-        </button>
-      </div>
-    </>
-  ) : null;
 
   return (
     <>
       <div className="relative">
         <button
-          data-create-button
+          ref={buttonRef}
           type="button"
           onClick={() => setOpen(o => !o)}
           className="inline-flex items-center px-3 py-2 rounded-md bg-amber-500 text-black text-xs font-medium shadow-sm hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-200 hover:scale-105 active:scale-95"
-          aria-expanded={open}
-          aria-haspopup="true"
         >
           <span className="mr-1">+</span> Create
         </button>
       </div>
-
-      {/* Render dropdown using portal to escape ALL container constraints */}
-      {dropdownContent && createPortal(dropdownContent, document.body)}
+      
+      {/* Render dropdown at root level to escape header constraints */}
+      {open && (
+        <>
+          <div className="fixed inset-0 z-[9998]" onClick={() => setOpen(false)} />
+          <div 
+            className="fixed w-44 rounded-md bg-slate-700 border border-slate-600 shadow-xl py-1 z-[9999] text-sm"
+            style={{
+              top: `${buttonPosition.top}px`,
+              right: `${buttonPosition.right}px`,
+            }}
+          >
+            {[
+              { label: 'Project', href: '/dashboard/projects?new=1' },
+              { label: 'Contact', href: '/dashboard/clients?new=1' },
+              { label: 'Design', href: '/dashboard/designer?view=new' },
+              { label: 'Message', href: '/dashboard/inbox?compose=1' },
+            ].map(item => (
+              <Link
+                key={item.label}
+                href={item.href}
+                className="block px-3 py-2 hover:bg-slate-600 hover:text-white text-slate-200 transition-colors duration-150"
+                onClick={() => setOpen(false)}
+              >
+                {item.label}
+              </Link>
+            ))}
+            <button
+              onClick={() => setOpen(false)}
+              className="w-full text-left px-3 py-2 text-xs text-slate-300 hover:text-white hover:bg-slate-600 transition-colors duration-150"
+            >
+              Close
+            </button>
+          </div>
+        </>
+      )}
     </>
   );
 }

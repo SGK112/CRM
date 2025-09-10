@@ -142,6 +142,10 @@ export class User {
     estimateTemplate?: 'professional' | 'modern' | 'classic';
     invoiceTemplate?: 'professional' | 'modern' | 'classic';
   };
+
+  // Custom Theme Configuration
+  @Prop()
+  customTheme?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

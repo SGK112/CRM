@@ -15,8 +15,8 @@ export default function NewClientPage() {
       const params = new URLSearchParams(searchParams.toString());
       router.replace(`/dashboard/clients/new/enhanced?${params.toString()}`);
     } else {
-      // Redirect to simplified onboarding form by default
-      router.replace('/onboarding/simplified');
+      // Redirect to dashboard onboarding form by default
+      router.replace('/dashboard/onboarding');
     }
   }, [router, searchParams]);
 

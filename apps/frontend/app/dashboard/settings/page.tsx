@@ -1,7 +1,6 @@
 'use client';
 
 import CommunicationSettings from '@/components/CommunicationSettings';
-import { useTheme } from '@/components/ThemeProvider';
 import {
     BellIcon,
     BuildingStorefrontIcon,
@@ -13,12 +12,10 @@ import {
     GlobeAltIcon,
     KeyIcon,
     ShieldCheckIcon,
-    SwatchIcon,
     UserIcon,
     UsersIcon,
     WrenchScrewdriverIcon
 } from '@heroicons/react/24/outline';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 // Integration components
@@ -819,7 +816,6 @@ function UserPermissions() {
 
 export default function UnifiedSettingsPage() {
   const [activeTab, setActiveTab] = useState('general');
-  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -979,7 +975,6 @@ export default function UnifiedSettingsPage() {
     { id: 'integrations', name: 'Integrations', icon: KeyIcon },
     { id: 'communications', name: 'Communications', icon: EnvelopeIcon },
     { id: 'users', name: 'Users', icon: UsersIcon },
-    { id: 'colors', name: 'Colors', icon: SwatchIcon },
     { id: 'notifications', name: 'Notifications', icon: BellIcon },
     { id: 'security', name: 'Security', icon: ShieldCheckIcon },
     { id: 'billing', name: 'Billing', icon: CreditCardIcon },
@@ -1112,7 +1107,26 @@ export default function UnifiedSettingsPage() {
         <h3 className="text-lg font-medium text-gray-900 dark:text-[var(--text)] mb-4">
           Appearance
         </h3>
-        <ThemeSettingsSection />
+        <div className="border border-gray-200 dark:border-token rounded-lg p-4 bg-white dark:bg-[var(--surface-2)]">
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="font-medium text-gray-900 dark:text-[var(--text)] mb-2">Dark Theme</h4>
+              <p className="text-sm text-gray-600 dark:text-[var(--text-dim)]">
+                Using the optimized dark theme for better productivity and reduced eye strain.
+              </p>
+            </div>
+            <div className="flex items-center px-3 py-1.5 bg-slate-900 text-amber-400 text-sm font-medium rounded-lg border border-slate-700">
+              <span className="w-2 h-2 bg-amber-400 rounded-full mr-2"></span>
+              Active
+            </div>
+          </div>
+          <div className="mt-4 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+            <p className="text-xs text-gray-600 dark:text-[var(--text-dim)]">
+              Light theme is temporarily unavailable while we design a better experience. 
+              The current dark theme is optimized for all CRM workflows.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -1217,9 +1231,6 @@ export default function UnifiedSettingsPage() {
         return <CommunicationSettings />;
       case 'users':
         return <UserPermissions />;
-      case 'colors':
-        router.push('/dashboard/settings/colors');
-        return null;
       case 'notifications':
         return renderNotificationsTab();
       case 'security':
@@ -1546,50 +1557,6 @@ export default function UnifiedSettingsPage() {
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
-
-// Theme settings subsection
-function ThemeSettingsSection() {
-  const { theme, setTheme, toggleTheme, system } = useTheme();
-  return (
-    <div className="border border-gray-200 dark:border-token rounded-lg p-4 bg-white dark:bg-[var(--surface-2)]">
-      <p className="text-sm text-gray-800 mb-4">
-        Choose between light and dark mode. Your preference is saved to this device.
-      </p>
-      <div className="flex gap-4">
-        {(['light', 'dark'] as const).map(t => (
-          <button
-            key={t}
-            onClick={() => setTheme(t)}
-            className={`flex-1 rounded-lg p-4 border text-left transition-colors ${
-              theme === t
-                ? 'border-blue-600 ring-2 ring-blue-200 bg-blue-50 dark:bg-blue-600/20 dark:ring-blue-500/40'
-                : 'border-gray-200 dark:border-token hover:border-gray-300 dark:hover:border-blue-500'
-            }`}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className="font-medium capitalize">{t}</span>
-              {theme === t && <span className="text-xs text-blue-600 font-medium">Active</span>}
-            </div>
-            <div className="h-6 rounded bg-gradient-to-r from-gray-100 to-gray-200 dark:from-[var(--surface-2)] dark:to-[var(--surface-3)] flex items-center justify-center text-[10px] text-gray-700 dark:text-[var(--text-dim)]">
-              {t === 'dark' ? 'Dark palette preview' : 'Light palette preview'}
-            </div>
-          </button>
-        ))}
-      </div>
-      <div className="mt-4 flex items-center justify-between">
-        <p className="text-xs text-gray-700 dark:text-[var(--text-dim)]">
-          System preference: {system}
-        </p>
-        <button
-          onClick={toggleTheme}
-          className="text-xs px-3 py-1.5 rounded-md border border-gray-300 dark:border-token hover:bg-gray-50 dark:hover:bg-[var(--surface-2)] font-medium"
-        >
-          Toggle
-        </button>
       </div>
     </div>
   );

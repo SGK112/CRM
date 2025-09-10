@@ -36,7 +36,6 @@ import {
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import dynamic from 'next/dynamic';
 
 // Dynamically import GoogleMap to avoid SSR issues
 import GoogleMap from '../../../../components/GoogleMap';

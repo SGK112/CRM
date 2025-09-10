@@ -11,16 +11,12 @@ import {
   CheckCircleIcon,
   XCircleIcon,
   ExclamationTriangleIcon,
-  FunnelIcon,
   ArrowRightIcon,
   EllipsisVerticalIcon,
 } from '@heroicons/react/24/outline';
-import {
-  StarIcon as StarIconSolid,
-} from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 interface Project {
   _id: string;
@@ -49,6 +45,7 @@ interface ProjectStats {
 export default function ProjectsPage() {
   const [user, setUser] = useState<{ id: number; name: string; firstName?: string; email: string } | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
   const [stats, setStats] = useState<ProjectStats>({
     total: 0,
     active: 0,
@@ -62,6 +59,19 @@ export default function ProjectsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     // Load user data
@@ -181,17 +191,17 @@ export default function ProjectsPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'planning':
-        return 'text-amber-500 bg-amber-50 border-amber-200';
+        return 'text-white bg-amber-500 border-amber-600 shadow-amber-500/25';
       case 'active':
-        return 'text-green-500 bg-green-50 border-green-200';
+        return 'text-white bg-green-500 border-green-600 shadow-green-500/25';
       case 'completed':
-        return 'text-blue-500 bg-blue-50 border-blue-200';
+        return 'text-white bg-blue-500 border-blue-600 shadow-blue-500/25';
       case 'on_hold':
-        return 'text-gray-500 bg-gray-50 border-gray-200';
+        return 'text-white bg-gray-500 border-gray-600 shadow-gray-500/25';
       case 'cancelled':
-        return 'text-red-500 bg-red-50 border-red-200';
+        return 'text-white bg-red-500 border-red-600 shadow-red-500/25';
       default:
-        return 'text-gray-500 bg-gray-50 border-gray-200';
+        return 'text-white bg-slate-500 border-slate-600 shadow-slate-500/25';
     }
   };
 
@@ -212,21 +222,67 @@ export default function ProjectsPage() {
   const deleteProject = async (projectId: string) => {
     const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
     if (!token) {
+      alert('You are not logged in. Please log in and try again.');
       return;
     }
-    const ok = window.confirm('Delete this project? This cannot be undone.');
+    
+    const ok = window.confirm('Are you sure you want to delete this project? This action cannot be undone.');
     if (!ok) return;
+    
     try {
       const res = await fetch(`/api/projects/${projectId}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
       });
+      
       if (res.ok) {
+        // Remove project from local state immediately
         setProjects(prev => prev.filter(p => p._id !== projectId));
-        refreshProjects(); // Refresh stats
+        // Refresh stats after deletion
+        await refreshProjects();
+        alert('Project deleted successfully!');
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        alert(`Failed to delete project: ${errorData.message || 'Unknown error'}`);
       }
-    } catch (e) {
-      // ignore for now; show toast in future
+    } catch (error) {
+      alert('Failed to delete project. Please check your connection and try again.');
+    }
+  };
+
+  const updateProjectStatus = async (projectId: string, newStatus: string) => {
+    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+    if (!token) {
+      alert('You are not logged in. Please log in and try again.');
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/projects/${projectId}`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (res.ok) {
+        // Update local state
+        setProjects(prev =>
+          prev.map(p => (p._id === projectId ? { ...p, status: newStatus as Project['status'] } : p))
+        );
+        // Refresh stats
+        await refreshProjects();
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        alert(`Failed to update project: ${errorData.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      alert('Failed to update project. Please check your connection and try again.');
     }
   };
 
@@ -260,14 +316,14 @@ export default function ProjectsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-full bg-[var(--bg)] text-[var(--text)] pb-safe">
       {/* Mobile Header */}
-      <div className="sticky top-0 z-40 bg-black border-b border-slate-800">
+      <div className="sticky top-0 z-30 bg-[var(--bg)]/95 backdrop-blur-sm border-b border-[var(--border)]">
         <div className="px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-bold text-white">Projects</h1>
-              <p className="text-sm text-slate-400">
+              <h1 className="text-xl font-bold text-[var(--text)]">Projects</h1>
+              <p className="text-sm text-[var(--text-muted)]">
                 Hey {user?.firstName || 'there'}, you have {stats.active} active projects
               </p>
             </div>
@@ -350,18 +406,18 @@ export default function ProjectsPage() {
           </div>
 
           {/* Filter Tabs */}
-          <div className="flex overflow-x-auto space-x-2 pb-2">
+          <div className="flex overflow-x-auto space-x-3 py-3 -mx-1">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`flex-shrink-0 px-4 py-2.5 mx-1 rounded-full text-sm font-semibold transition-all duration-200 shadow-lg hover:shadow-xl ${
                   activeTab === tab.id
-                    ? 'bg-amber-500 text-black'
-                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                    ? 'bg-amber-500 text-white border border-amber-600 shadow-amber-500/25 scale-105'
+                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 hover:scale-105 hover:shadow-slate-500/20'
                 }`}
               >
-                {tab.label} ({tab.count})
+                {tab.label} <span className="ml-1 px-1.5 py-0.5 bg-black/20 rounded-full text-xs">{tab.count}</span>
               </button>
             ))}
           </div>
@@ -378,15 +434,84 @@ export default function ProjectsPage() {
                       <h3 className="text-lg font-semibold text-white mb-1">{project.title}</h3>
                       <p className="text-sm text-slate-400 line-clamp-2">{project.description}</p>
                     </div>
-                    <button className="ml-2 p-2 text-slate-400 hover:text-white">
-                      <EllipsisVerticalIcon className="h-5 w-5" />
-                    </button>
+                    <div className="relative ml-2" ref={dropdownRef}>
+                      <button 
+                        onClick={() => setDropdownOpen(dropdownOpen === project._id ? null : project._id)}
+                        className="p-2 text-slate-400 hover:text-white"
+                      >
+                        <EllipsisVerticalIcon className="h-5 w-5" />
+                      </button>
+                      
+                      {/* Dropdown Menu */}
+                      {dropdownOpen === project._id && (
+                        <div className="absolute right-0 top-10 w-48 rounded-lg bg-slate-800 border border-slate-600 shadow-xl py-2 z-50">
+                          <Link
+                            href={`/dashboard/projects/${project._id}`}
+                            onClick={() => setDropdownOpen(null)}
+                            className="block px-4 py-2 text-sm text-slate-200 hover:bg-slate-700 hover:text-amber-400"
+                          >
+                            View Details
+                          </Link>
+                          <Link
+                            href={`/dashboard/projects/${project._id}/edit`}
+                            onClick={() => setDropdownOpen(null)}
+                            className="block px-4 py-2 text-sm text-slate-200 hover:bg-slate-700 hover:text-amber-400"
+                          >
+                            Edit Project
+                          </Link>
+                          
+                          {/* Status Update Submenu */}
+                          <div className="border-t border-slate-600 my-1" />
+                          <div className="px-4 py-2 text-xs text-slate-400 font-medium">Quick Status Update:</div>
+                          
+                          {['planning', 'active', 'on_hold', 'completed', 'cancelled'].map((status) => (
+                            <button
+                              key={status}
+                              onClick={() => {
+                                setDropdownOpen(null);
+                                updateProjectStatus(project._id, status);
+                              }}
+                              className={`flex items-center w-full text-left px-4 py-2.5 text-sm transition-all duration-200 ${
+                                project.status === status 
+                                  ? 'text-amber-400 bg-slate-700 border-l-2 border-amber-400' 
+                                  : 'text-slate-200 hover:bg-slate-700 hover:text-white hover:border-l-2 hover:border-amber-400'
+                              }`}
+                              disabled={project.status === status}
+                            >
+                              <div className="flex items-center">
+                                {getStatusIcon(status)}
+                                <span className="ml-2">
+                                  {project.status === status ? '✓ ' : ''}
+                                  {status.replace('_', ' ').toUpperCase()}
+                                </span>
+                                {project.status === status && (
+                                  <span className="ml-auto text-xs bg-amber-400/20 text-amber-400 px-2 py-0.5 rounded-full">
+                                    Current
+                                  </span>
+                                )}
+                              </div>
+                            </button>
+                          ))}
+                          
+                          <div className="border-t border-slate-600 my-1" />
+                          <button
+                            onClick={() => {
+                              setDropdownOpen(null);
+                              deleteProject(project._id);
+                            }}
+                            className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-slate-700 hover:text-red-300"
+                          >
+                            Delete Project
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div className="flex items-center space-x-4 mb-4">
-                    <div className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border ${getStatusColor(project.status)}`}>
+                    <div className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border shadow-lg ${getStatusColor(project.status)}`}>
                       {getStatusIcon(project.status)}
-                      <span className="ml-1">{project.status.replace('_', ' ').toUpperCase()}</span>
+                      <span className="ml-2">{project.status.replace('_', ' ').toUpperCase()}</span>
                     </div>
                   </div>
 
@@ -412,20 +537,21 @@ export default function ProjectsPage() {
                   </div>
 
                   <div className="flex items-center justify-between pt-3 border-t border-slate-800">
-                    <Link
-                      href={`/dashboard/projects/${project._id}`}
-                      className="inline-flex items-center text-sm text-amber-500 hover:text-amber-400"
-                    >
-                      View Details
-                      <ArrowRightIcon className="h-4 w-4 ml-1" />
-                    </Link>
+                    <div className="flex items-center space-x-4">
+                      <span className="text-xs text-slate-500">
+                        Created: {formatDate(project.startDate)}
+                      </span>
+                    </div>
                     
-                    <button
-                      onClick={() => deleteProject(project._id)}
-                      className="text-sm text-red-400 hover:text-red-300"
-                    >
-                      Delete
-                    </button>
+                    <div className="flex items-center space-x-2">
+                      <Link
+                        href={`/dashboard/projects/${project._id}`}
+                        className="inline-flex items-center text-sm text-amber-500 hover:text-amber-400"
+                      >
+                        View Details
+                        <ArrowRightIcon className="h-4 w-4 ml-1" />
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </div>

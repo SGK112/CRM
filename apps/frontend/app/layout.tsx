@@ -82,7 +82,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <ConditionalTopBar />
 
                 {/* Mobile-first container: stacked content, full-width on small devices */}
-                <main className="flex-1 w-full px-4 sm:px-6 md:px-8 py-4">{children}</main>
+                <main className="flex-1 w-full">{children}</main>
 
                 {/* Mobile bottom navigation (stacked) */}
                 <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[var(--bg)] border-t border-[var(--border)] md:hidden">

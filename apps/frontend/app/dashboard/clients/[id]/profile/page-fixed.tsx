@@ -4,7 +4,6 @@ import {
   ArrowLeftIcon,
   UserIcon,
   BuildingOfficeIcon,
-  MapPinIcon,
   CreditCardIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
@@ -14,7 +13,6 @@ import {
   UserGroupIcon,
   HeartIcon,
   ShieldCheckIcon,
-  CalendarIcon,
   ChatBubbleLeftRightIcon,
   PhoneIcon,
   EnvelopeIcon,
@@ -270,7 +268,7 @@ export default function ContactProfilePage() {
       }
     ];
 
-    let sections = [...baseSections];
+    const sections = [...baseSections];
 
     if (contactType === 'client') {
       sections.push(...businessSections.filter(s => s.contactTypes.includes('client')));

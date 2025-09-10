@@ -77,6 +77,7 @@ const businessTypeOptions = {
 
 export default function SimplifiedOnboardingForm() {
   const router = useRouter();
+  
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'success' | 'error'>('idle');
@@ -94,7 +95,7 @@ export default function SimplifiedOnboardingForm() {
     syncCalendar: false
   });
 
-  const [errors, setErrors] = useState<Partial<OnboardingFormData>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Check for existing integrations
   useEffect(() => {
@@ -122,7 +123,7 @@ export default function SimplifiedOnboardingForm() {
       }
     } catch (error) {
       // Integrations check failed - expected in development
-      console.log('Integration check skipped in development');
+      // Silent fail in development mode
     }
   };
 
@@ -130,12 +131,14 @@ export default function SimplifiedOnboardingForm() {
     setFormData(prev => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
+      const newErrors = { ...errors };
+      delete newErrors[field];
+      setErrors(newErrors);
     }
   };
 
   const validateStep = (step: number): boolean => {
-    const newErrors: Partial<OnboardingFormData> = {};
+    const newErrors: Record<string, string> = {};
 
     if (step === 1) {
       if (!formData.firstName?.trim()) newErrors.firstName = 'First name is required';
@@ -251,7 +254,7 @@ export default function SimplifiedOnboardingForm() {
 
     } catch (error) {
       setSyncStatus('error');
-      console.error('Onboarding failed:', error);
+      // Error handling - could be logged to monitoring service in production
     } finally {
       setLoading(false);
     }
@@ -259,7 +262,7 @@ export default function SimplifiedOnboardingForm() {
 
   if (syncStatus === 'syncing') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-indigo-900/10 flex items-center justify-center p-4">
+      <div className="min-h-full bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-indigo-900/10 flex items-center justify-center p-4">
         <div className="max-w-md mx-auto text-center">
           <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
             <CloudArrowUpIcon className="h-8 w-8 text-white animate-pulse" />
@@ -282,7 +285,7 @@ export default function SimplifiedOnboardingForm() {
 
   if (syncStatus === 'success') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-900/10 flex items-center justify-center p-4">
+      <div className="min-h-full bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-900/10 flex items-center justify-center p-4">
         <div className="max-w-md mx-auto text-center">
           <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
             <CheckIcon className="h-8 w-8 text-white" />
@@ -302,7 +305,7 @@ export default function SimplifiedOnboardingForm() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 dark:from-slate-900 dark:via-slate-800 dark:to-amber-900/10 p-4">
+    <div className="min-h-full bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 dark:from-slate-900 dark:via-slate-800 dark:to-amber-900/10 p-4">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8 pt-6">

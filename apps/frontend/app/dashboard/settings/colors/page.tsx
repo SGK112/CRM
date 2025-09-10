@@ -1,26 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useColors, ColorTheme } from '../../../../src/components/ColorProvider';
 import { SwatchIcon, EyeIcon, ArrowPathIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { PageHeader } from '@/components/ui/PageHeader';
 import './preview.css';
-
-interface ColorTheme {
-  name: string;
-  colors: {
-    primary: string;
-    secondary: string;
-    accent: string;
-    background: string;
-    surface: string;
-    text: string;
-    textSecondary: string;
-    border: string;
-    success: string;
-    warning: string;
-    error: string;
-  };
-}
 
 const defaultThemes: ColorTheme[] = [
   {
@@ -106,10 +90,17 @@ const defaultThemes: ColorTheme[] = [
 ];
 
 export default function ColorsPage() {
-  const [selectedTheme, setSelectedTheme] = useState<ColorTheme>(defaultThemes[0]);
-  const [customColors, setCustomColors] = useState(selectedTheme.colors);
+  const { currentTheme, setTheme, saveTheme, isLoading } = useColors();
+  const [selectedTheme, setSelectedTheme] = useState<ColorTheme>(currentTheme);
+  const [customColors, setCustomColors] = useState(currentTheme.colors);
   const [previewMode, setPreviewMode] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setSelectedTheme(currentTheme);
+    setCustomColors(currentTheme.colors);
+  }, [currentTheme]);
 
   useEffect(() => {
     setCustomColors(selectedTheme.colors);
@@ -133,12 +124,22 @@ export default function ColorsPage() {
     setPreviewMode(false);
   };
 
-  const saveColors = () => {
-    // Here you would save to your backend/localStorage
-    localStorage.setItem('customColors', JSON.stringify(customColors));
-    localStorage.setItem('selectedTheme', selectedTheme.name);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  const saveColors = async () => {
+    setSaving(true);
+    try {
+      const newTheme: ColorTheme = {
+        name: selectedTheme.name === 'Custom' ? 'Custom' : `${selectedTheme.name} (Customized)`,
+        colors: customColors,
+      };
+      
+      await saveTheme(newTheme);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (error) {
+      // Handle error - maybe show a toast
+    } finally {
+      setSaving(false);
+    }
   };
 
   const resetToDefault = () => {
@@ -270,14 +271,20 @@ export default function ColorsPage() {
               </button>
               <button
                 onClick={saveColors}
+                disabled={saving}
                 className={`w-full flex items-center justify-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-                  saved ? 'bg-green-600 text-white' : 'bg-brand-600 hover:bg-brand-700 text-white'
+                  saved ? 'bg-green-600 text-white' : 'bg-brand-600 hover:bg-brand-700 text-white disabled:opacity-50'
                 }`}
               >
                 {saved ? (
                   <>
                     <CheckIcon className="h-4 w-4" />
                     <span>Saved!</span>
+                  </>
+                ) : saving ? (
+                  <>
+                    <ArrowPathIcon className="h-4 w-4 animate-spin" />
+                    <span>Saving...</span>
                   </>
                 ) : (
                   <>

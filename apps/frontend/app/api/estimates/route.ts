@@ -26,6 +26,7 @@ interface Estimate {
 
 // Global storage for development mode
 declare global {
+  // eslint-disable-next-line no-var
   var __DEV_ESTIMATE_STORAGE__: Estimate[] | undefined;
 }
 

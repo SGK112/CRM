@@ -109,4 +109,41 @@ export class UserConfigService {
       pdfTemplates: updatedUser?.pdfTemplates,
     };
   }
+
+  async getUserTheme(userId: string) {
+    const user = await this.userModel.findById(userId).select('customTheme').exec();
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return {
+      theme: user.customTheme || null,
+    };
+  }
+
+  async updateUserTheme(userId: string, themeData: { theme: string; name: string }) {
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const updatedUser = await this.userModel
+      .findByIdAndUpdate(
+        userId,
+        {
+          $set: {
+            customTheme: themeData.theme,
+          },
+        },
+        { new: true }
+      )
+      .select('customTheme')
+      .exec();
+
+    return {
+      success: true,
+      message: 'Theme updated successfully',
+      theme: updatedUser?.customTheme,
+    };
+  }
 }
