@@ -1,38 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { findInDevClientsStore, updateInDevClientsStore, removeFromDevClientsStore } from '@/lib/dev-client-store';
+import { findContactInFile, updateContactInFile, removeContactFromFile } from '@/lib/file-contact-store';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
-
-// Mock client data for development
-const DEV_MOCK_CLIENTS = [
-  {
-    id: '1',
-    _id: '1',
-    name: 'Johnson Family',
-    email: 'johnson@example.com',
-    phone: '(555) 123-4567',
-    address: '123 Oak Street, New York, NY 10001',
-    type: 'residential',
-    status: 'active',
-    notes: 'Preferred customer - always pays on time',
-    projects: ['1', '3'],
-    createdAt: '2024-08-01T10:00:00Z',
-    updatedAt: '2024-09-05T14:30:00Z'
-  },
-  {
-    id: '2',
-    _id: '2',
-    name: 'Martinez Construction',
-    email: 'contact@martinez-construction.com',
-    phone: '(555) 987-6543',
-    address: '456 Pine Avenue, Los Angeles, CA 90210',
-    type: 'commercial',
-    status: 'active',
-    notes: 'Large commercial projects - net 30 payment terms',
-    projects: ['2'],
-    createdAt: '2024-08-20T09:15:00Z',
-    updatedAt: '2024-09-02T11:20:00Z'
-  }
-];
 
 export async function GET(
   request: NextRequest,
@@ -41,8 +11,20 @@ export async function GET(
   try {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
 
-    // Find client in mock data
-    const client = DEV_MOCK_CLIENTS.find(c => c.id === params.id || c._id === params.id);
+    // Find client in memory store first, then file store
+    let client = findInDevClientsStore(params.id);
+    if (!client) {
+      const fileClient = findContactInFile(params.id);
+      if (fileClient) {
+        // Convert file contact to dev client format for response
+        client = {
+          ...fileClient,
+          projects: [],
+          firstName: typeof fileClient.firstName === 'string' ? fileClient.firstName : undefined,
+          lastName: typeof fileClient.lastName === 'string' ? fileClient.lastName : undefined
+        };
+      }
+    }
 
     if (!token) {
       if (process.env.NODE_ENV !== 'production') {
@@ -108,10 +90,10 @@ export async function PATCH(
     // Enhanced authentication logic for development mode
     if (!token || token === 'null' || token === 'undefined' || token.length <= 10) {
       if (process.env.NODE_ENV !== 'production') {
-        // Development mode: updating contact in mock data
+        // Development mode: updating contact in shared store
 
         // Find the existing contact
-        const existingContact = DEV_MOCK_CLIENTS.find(c => c.id === params.id || c._id === params.id);
+        const existingContact = findInDevClientsStore(params.id);
 
         if (!existingContact) {
           return NextResponse.json(
@@ -121,12 +103,14 @@ export async function PATCH(
         }
 
         // Update the contact with new data
-        const updatedContact = {
-          ...existingContact,
-          ...body,
-          id: params.id, // Preserve the ID
-          updatedAt: new Date().toISOString(),
-        };
+        const updatedContact = updateInDevClientsStore(params.id, body);
+
+        if (!updatedContact) {
+          return NextResponse.json(
+            { error: 'Failed to update contact' },
+            { status: 500 }
+          );
+        }
 
         // Development mode: contact updated successfully
         return NextResponse.json(updatedContact);
@@ -151,25 +135,18 @@ export async function PATCH(
         return NextResponse.json(data);
       }
 
-      // If backend fails, fall back to mock data in development
+      // If backend fails, fall back to shared store in development
       if (process.env.NODE_ENV !== 'production') {
-        // Development mode: backend update failed, using mock data fallback
+        // Development mode: backend update failed, using shared store fallback
 
-        const existingContact = DEV_MOCK_CLIENTS.find(c => c.id === params.id || c._id === params.id);
+        const updatedContact = updateInDevClientsStore(params.id, body);
 
-        if (!existingContact) {
+        if (!updatedContact) {
           return NextResponse.json(
             { error: 'Contact not found' },
             { status: 404 }
           );
         }
-
-        const updatedContact = {
-          ...existingContact,
-          ...body,
-          id: params.id,
-          updatedAt: new Date().toISOString(),
-        };
 
         // Development mode: contact updated successfully via fallback
         return NextResponse.json(updatedContact);
@@ -180,25 +157,18 @@ export async function PATCH(
         { status: response.status }
       );
     } catch (backendError) {
-      // Backend connection failed, use mock data in development
+      // Backend connection failed, use shared store in development
       if (process.env.NODE_ENV !== 'production') {
-        // Development mode: backend unreachable, using mock data
+        // Development mode: backend unreachable, using shared store
 
-        const existingContact = DEV_MOCK_CLIENTS.find(c => c.id === params.id || c._id === params.id);
+        const updatedContact = updateInDevClientsStore(params.id, body);
 
-        if (!existingContact) {
+        if (!updatedContact) {
           return NextResponse.json(
             { error: 'Contact not found' },
             { status: 404 }
           );
         }
-
-        const updatedContact = {
-          ...existingContact,
-          ...body,
-          id: params.id,
-          updatedAt: new Date().toISOString(),
-        };
 
         // Development mode: contact updated successfully via fallback
         return NextResponse.json(updatedContact);
@@ -221,6 +191,20 @@ export async function DELETE(
 ) {
   try {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
+
+    // In development mode, allow deletion from shared store
+    if (process.env.NODE_ENV !== 'production') {
+      const deleted = removeFromDevClientsStore(params.id);
+      const fileDeleted = removeContactFromFile(params.id);
+      
+      if (!deleted && !fileDeleted) {
+        return NextResponse.json(
+          { error: 'Client not found' },
+          { status: 404 }
+        );
+      }
+      return NextResponse.json({ message: 'Client deleted successfully' });
+    }
 
     if (!token) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -252,7 +236,7 @@ export async function DELETE(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params: _params }: { params: { id: string } }
 ) {
   try {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
@@ -261,30 +245,10 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const action = searchParams.get('action');
-
-    if (action === 'sync-quickbooks') {
-      const response = await fetch(`${BACKEND_URL}/api/clients/${params.id}/sync-quickbooks`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        return NextResponse.json(
-          { error: 'Failed to sync client to QuickBooks' },
-          { status: response.status }
-        );
-      }
-
-      const data = await response.json();
-      return NextResponse.json(data);
-    }
-
-    return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+    // No sync actions supported - redirect to settings
+    return NextResponse.json({ 
+      error: 'Sync preferences should be configured in settings' 
+    }, { status: 400 });
   } catch (error) {
     return NextResponse.json(
       { error: 'Internal server error' },

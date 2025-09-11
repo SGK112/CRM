@@ -13,6 +13,7 @@ import {
   CalendarIcon,
   ArrowRightIcon,
   StarIcon,
+  UserPlusIcon,
 } from '@heroicons/react/24/outline';
 import {
   StarIcon as StarIconSolid
@@ -57,6 +58,31 @@ interface RecentActivity {
   status?: 'success' | 'warning' | 'info';
 }
 
+interface RecentContact {
+  id: string;
+  name?: string;
+  firstName?: string;
+  lastName?: string;
+  email: string;
+  type: string;
+  company?: string;
+  createdAt: string;
+}
+
+interface ApiContact {
+  id?: string;
+  _id?: string;
+  name?: string;
+  firstName?: string;
+  lastName?: string;
+  email: string;
+  type?: string;
+  contactType?: string;
+  company?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [stats, setStats] = useState<DashboardStats>({
@@ -69,6 +95,7 @@ export default function DashboardPage() {
   });
   const [recentProjects, setRecentProjects] = useState<RecentProject[]>([]);
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
+  const [recentContacts, setRecentContacts] = useState<RecentContact[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -77,6 +104,51 @@ export default function DashboardPage() {
     if (userData) {
       setUser(JSON.parse(userData));
     }
+
+    // Load recent contacts from API
+    const loadRecentContacts = async () => {
+      try {
+        const authToken = localStorage.getItem('accessToken');
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+        };
+        
+        if (authToken && authToken !== 'null' && authToken !== 'undefined' && authToken.length > 10) {
+          headers.Authorization = `Bearer ${authToken}`;
+        }
+
+        const response = await fetch('/api/clients', {
+          method: 'GET',
+          headers,
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const contacts = data.clients || data || [];
+          
+          // Sort by creation date and take the 5 most recent
+          const sortedContacts = contacts
+            .sort((a: ApiContact, b: ApiContact) => new Date(b.createdAt || b.updatedAt || '').getTime() - new Date(a.createdAt || a.updatedAt || '').getTime())
+            .slice(0, 5)
+            .map((contact: ApiContact) => ({
+              id: contact.id || contact._id || '',
+              name: contact.name || `${contact.firstName || ''} ${contact.lastName || ''}`.trim(),
+              firstName: contact.firstName,
+              lastName: contact.lastName,
+              email: contact.email,
+              type: contact.type || contact.contactType || 'client',
+              company: contact.company,
+              createdAt: contact.createdAt || contact.updatedAt || ''
+            }));
+          
+          setRecentContacts(sortedContacts);
+        }
+      } catch (error) {
+        // Fail silently, dashboard will work without contacts
+      }
+    };
+
+    loadRecentContacts();
 
     // Load mock data
     setTimeout(() => {
@@ -346,6 +418,82 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* Quick Actions */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-white">Quick Actions</h2>
+            <Link
+              href="/dashboard/quick-actions"
+              className="text-amber-600 hover:text-amber-500 text-sm font-medium flex items-center gap-1"
+            >
+              View All
+              <ArrowRightIcon className="h-4 w-4" />
+            </Link>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            <Link
+              href="/dashboard/onboarding"
+              className="group p-4 bg-black rounded-2xl border border-slate-700 hover:border-amber-600 transition-all duration-200 hover:scale-[1.02]"
+            >
+              <div className="flex flex-col items-center text-center">
+                <div className="p-3 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl mb-3 group-hover:from-amber-600 group-hover:to-orange-700 transition-all">
+                  <UserPlusIcon className="h-5 w-5 text-white" />
+                </div>
+                <span className="text-sm font-medium text-white group-hover:text-amber-400 transition-colors">Add Contact</span>
+              </div>
+            </Link>
+
+            <Link
+              href="/dashboard/estimates/new"
+              className="group p-4 bg-black rounded-2xl border border-slate-700 hover:border-blue-600 transition-all duration-200 hover:scale-[1.02]"
+            >
+              <div className="flex flex-col items-center text-center">
+                <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl mb-3 group-hover:from-blue-600 group-hover:to-indigo-700 transition-all">
+                  <ClipboardDocumentListIcon className="h-5 w-5 text-white" />
+                </div>
+                <span className="text-sm font-medium text-white group-hover:text-blue-400 transition-colors">New Estimate</span>
+              </div>
+            </Link>
+
+            <Link
+              href="/dashboard/projects/new"
+              className="group p-4 bg-black rounded-2xl border border-slate-700 hover:border-green-600 transition-all duration-200 hover:scale-[1.02]"
+            >
+              <div className="flex flex-col items-center text-center">
+                <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl mb-3 group-hover:from-green-600 group-hover:to-emerald-700 transition-all">
+                  <ClipboardDocumentListIcon className="h-5 w-5 text-white" />
+                </div>
+                <span className="text-sm font-medium text-white group-hover:text-green-400 transition-colors">New Project</span>
+              </div>
+            </Link>
+
+            <Link
+              href="/dashboard/invoices/new"
+              className="group p-4 bg-black rounded-2xl border border-slate-700 hover:border-emerald-600 transition-all duration-200 hover:scale-[1.02]"
+            >
+              <div className="flex flex-col items-center text-center">
+                <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl mb-3 group-hover:from-emerald-600 group-hover:to-teal-700 transition-all">
+                  <CurrencyDollarIcon className="h-5 w-5 text-white" />
+                </div>
+                <span className="text-sm font-medium text-white group-hover:text-emerald-400 transition-colors">Invoice</span>
+              </div>
+            </Link>
+
+            <Link
+              href="/dashboard/reports"
+              className="group p-4 bg-black rounded-2xl border border-slate-700 hover:border-indigo-600 transition-all duration-200 hover:scale-[1.02]"
+            >
+              <div className="flex flex-col items-center text-center">
+                <div className="p-3 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-xl mb-3 group-hover:from-indigo-600 group-hover:to-blue-700 transition-all">
+                  <ChartBarIcon className="h-5 w-5 text-white" />
+                </div>
+                <span className="text-sm font-medium text-white group-hover:text-indigo-400 transition-colors">Reports</span>
+              </div>
+            </Link>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Recent Projects */}
           <div className="lg:col-span-2">
@@ -409,8 +557,76 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Recent Activity */}
+          {/* Recent Contacts */}
           <div className="space-y-6">
+            <div className="bg-black rounded-2xl p-6 border border-slate-700">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-white">Recent Contacts</h3>
+                <Link
+                  href="/dashboard/clients"
+                  className="text-amber-600 hover:text-amber-500 text-sm font-medium flex items-center gap-1"
+                >
+                  View All
+                  <ArrowRightIcon className="h-4 w-4" />
+                </Link>
+              </div>
+              
+              <div className="space-y-3">
+                {recentContacts.length === 0 ? (
+                  <div className="text-center py-8">
+                    <UserGroupIcon className="h-12 w-12 text-slate-500 mx-auto mb-3" />
+                    <p className="text-slate-400 text-sm">No contacts yet</p>
+                    <Link
+                      href="/dashboard/onboarding"
+                      className="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-amber-600 text-black rounded-lg hover:bg-amber-500 transition-colors text-sm font-medium"
+                    >
+                      <UserPlusIcon className="h-4 w-4" />
+                      Add First Contact
+                    </Link>
+                  </div>
+                ) : (
+                  recentContacts.map((contact) => (
+                    <Link
+                      key={contact.id}
+                      href={`/dashboard/clients/${contact.id}`}
+                      className="flex items-center gap-3 p-3 bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors"
+                    >
+                      <div className="flex-shrink-0">
+                        <div className="h-10 w-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg flex items-center justify-center">
+                          <span className="text-white font-semibold text-sm">
+                            {(contact.name || contact.company || 'U').charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-white truncate">
+                          {contact.name}
+                        </p>
+                        <p className="text-xs text-slate-400 truncate">
+                          {contact.email}
+                        </p>
+                        {contact.company && (
+                          <p className="text-xs text-slate-500 truncate">
+                            {contact.company}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex-shrink-0">
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          contact.type === 'business' ? 'bg-blue-900 text-blue-300 border border-blue-700' :
+                          contact.type === 'individual' ? 'bg-green-900 text-green-300 border border-green-700' :
+                          'bg-slate-700 text-slate-300 border border-slate-600'
+                        }`}>
+                          {contact.type}
+                        </span>
+                      </div>
+                    </Link>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Recent Activity */}
             <div className="bg-black rounded-2xl p-6 border border-slate-700">
               <h3 className="text-lg font-semibold text-white mb-4">Recent Activity</h3>
               <div className="space-y-3">

@@ -67,7 +67,7 @@ function UniversalDropdown({ isOpen, onClose, buttonRef, children, className = '
   useEffect(() => {
     if (isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
-      
+
       // Always position above the button - use viewport coordinates for fixed positioning
       setButtonPosition({
         top: rect.top - 8, // Use viewport coordinates directly for fixed positioning
@@ -262,6 +262,7 @@ export default function Layout({ children }: LayoutProps) {
       items: [
         { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
         { name: 'Inbox', href: '/dashboard/inbox', icon: InboxIcon, badge: inboxStats?.unread },
+        { name: 'Notifications', href: '/dashboard/notifications', icon: BellIcon, badge: counts?.notifications },
         {
           name: 'Projects',
           href: '/dashboard/projects',
@@ -269,7 +270,7 @@ export default function Layout({ children }: LayoutProps) {
           badge: counts?.projects,
         },
         {
-          name: 'Clients',
+          name: 'Contacts',
           href: '/dashboard/clients',
           icon: UserGroupIcon,
           badge: counts?.clients,
@@ -791,14 +792,14 @@ export default function Layout({ children }: LayoutProps) {
                 <div className="flex items-center gap-2">
                   {/* Notifications - keep only this essential button */}
                   <button
-                    onClick={() => router.push('/dashboard/inbox')}
+                    onClick={() => router.push('/dashboard/notifications')}
                     className="relative p-2 text-slate-400 hover:text-amber-400 hover:bg-slate-900 rounded-xl transition-all duration-200"
-                    title="Messages"
+                    title="Notifications"
                   >
                     <BellIcon className="h-5 w-5" />
-                    {inboxStats && inboxStats.unread && inboxStats.unread > 0 && (
+                    {counts && counts.notifications && counts.notifications > 0 && (
                       <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium shadow-lg">
-                        {inboxStats.unread > 9 ? '9+' : inboxStats.unread}
+                        {counts.notifications > 9 ? '9+' : counts.notifications}
                       </span>
                     )}
                   </button>
@@ -816,12 +817,12 @@ export default function Layout({ children }: LayoutProps) {
               <div
                 className={classNames(
                   pathname === '/dashboard' ||
-                  pathname.startsWith('/dashboard/clients') || 
-                  pathname.startsWith('/dashboard/projects') || 
+                  pathname.startsWith('/dashboard/clients') ||
+                  pathname.startsWith('/dashboard/projects') ||
                   pathname.startsWith('/dashboard/inbox') ||
                   pathname.startsWith('/dashboard/calendar') ||
-                  pathname.startsWith('/dashboard/financial') 
-                    ? 'w-full' 
+                  pathname.startsWith('/dashboard/financial')
+                    ? 'w-full'
                     : 'px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto'
                 )}
               >

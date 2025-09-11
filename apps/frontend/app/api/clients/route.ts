@@ -1,51 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getDevClientsStore, addToDevClientsStore, findInDevClientsStore, DevClient } from '@/lib/dev-client-store';
+import { addContactToFile, readContactsFromFile } from '@/lib/file-contact-store';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
-
-// Mock client data for development
-const DEV_MOCK_CLIENTS = [
-  {
-    id: '1',
-    _id: '1',
-    name: 'Johnson Family',
-    email: 'johnson@example.com',
-    phone: '(555) 123-4567',
-    address: '123 Oak Street, New York, NY 10001',
-    type: 'residential',
-    status: 'active',
-    notes: 'Preferred customer - always pays on time',
-    projects: ['1', '3'],
-    createdAt: '2024-08-01T10:00:00Z',
-    updatedAt: '2024-09-05T14:30:00Z'
-  },
-  {
-    id: '2',
-    _id: '2',
-    name: 'Martinez Construction',
-    email: 'contact@martinez-construction.com',
-    phone: '(555) 987-6543',
-    address: '456 Pine Avenue, Los Angeles, CA 90210',
-    type: 'commercial',
-    status: 'active',
-    notes: 'Large commercial projects - net 30 payment terms',
-    projects: ['2'],
-    createdAt: '2024-08-20T09:15:00Z',
-    updatedAt: '2024-09-02T11:20:00Z'
-  }
-];
 
 export async function GET(request: NextRequest) {
   try {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
 
-    // In development mode, ALWAYS use mock data for better local testing
+    // In development mode, use file store for persistence across server restarts
     if (process.env.NODE_ENV !== 'production') {
-      return NextResponse.json({ clients: DEV_MOCK_CLIENTS });
+      const fileContacts = readContactsFromFile();
+      const memoryContacts = getDevClientsStore();
+      
+      // Convert memory contacts to file contact format and merge
+      const allContacts = [...fileContacts];
+      memoryContacts.forEach(memContact => {
+        const exists = allContacts.find(fc => fc.id === memContact.id || fc._id === memContact._id);
+        if (!exists) {
+          allContacts.unshift({
+            ...memContact,
+            id: memContact.id,
+            _id: memContact._id,
+            name: memContact.name,
+            email: memContact.email,
+            createdAt: memContact.createdAt,
+            updatedAt: memContact.updatedAt
+          });
+        }
+      });
+      
+      return NextResponse.json({ clients: allContacts });
     }
 
     // Always use mock data as primary in production deployment
     if (!token) {
-      return NextResponse.json({ clients: DEV_MOCK_CLIENTS });
+      return NextResponse.json({ clients: getDevClientsStore() });
     }
 
     // If we have a token, try backend but fallback to mock data if it fails
@@ -66,14 +56,14 @@ export async function GET(request: NextRequest) {
         const data = await response.json();
         return NextResponse.json(data);
       } else {
-        return NextResponse.json({ clients: DEV_MOCK_CLIENTS });
+        return NextResponse.json({ clients: getDevClientsStore() });
       }
     } catch (error) {
-      return NextResponse.json({ clients: DEV_MOCK_CLIENTS });
+      return NextResponse.json({ clients: getDevClientsStore() });
     }
   } catch (error) {
     // Fallback to mock data
-    return NextResponse.json({ clients: DEV_MOCK_CLIENTS });
+    return NextResponse.json({ clients: getDevClientsStore() });
   }
 }
 
@@ -82,11 +72,12 @@ export async function POST(request: NextRequest) {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
     const body = await request.json();
 
-    // In development mode, create mock client
+    // In development mode, create mock client and add to both stores
     if (process.env.NODE_ENV !== 'production') {
-      const newClient = {
-        id: String(Date.now()),
-        _id: String(Date.now()),
+      const clientId = String(Date.now());
+      const newClient: DevClient = {
+        id: clientId,
+        _id: clientId,
         name: body.name || 'New Client',
         email: body.email || '',
         phone: body.phone || '',
@@ -99,6 +90,42 @@ export async function POST(request: NextRequest) {
         updatedAt: new Date().toISOString(),
         ...body
       };
+      
+      // Add to in-memory store
+      addToDevClientsStore(newClient);
+      
+      // Also add to file store for persistence
+      const fileContact = {
+        id: newClient.id,
+        _id: newClient._id,
+        name: newClient.name,
+        email: newClient.email,
+        phone: newClient.phone,
+        address: newClient.address,
+        city: newClient.city,
+        state: newClient.state,
+        zipCode: newClient.zipCode,
+        type: newClient.type,
+        entityType: newClient.entityType,
+        businessType: newClient.businessType,
+        status: newClient.status,
+        notes: newClient.notes,
+        createdAt: newClient.createdAt,
+        updatedAt: newClient.updatedAt,
+        ...body
+      };
+      
+      const fileSaved = addContactToFile(fileContact);
+      
+      // Verify the contact was added successfully
+      const verification = findInDevClientsStore(newClient.id);
+      if (!verification && !fileSaved) {
+        return NextResponse.json(
+          { error: 'Failed to save contact to store' },
+          { status: 500 }
+        );
+      }
+      
       return NextResponse.json(newClient, { status: 201 });
     }
 

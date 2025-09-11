@@ -263,9 +263,6 @@ export default function ClientDetailClient({ initialEntity, entityId }: { initia
         case 'voice_call':
           await fetch(`/api/voice-agent/outbound`, { method: 'POST', headers, body: JSON.stringify({ clientId: entityId, callType: 'general_follow_up' }) });
           break;
-        case 'sync_quickbooks':
-          await fetch(`/api/clients/${entityId}?action=sync-quickbooks`, { method: 'POST', headers });
-          break;
         case 'view_map':
           if (entity?.address) {
             const address = `${entity.address.street}, ${entity.address.city}, ${entity.address.state} ${entity.address.zipCode}`;
@@ -372,10 +369,6 @@ export default function ClientDetailClient({ initialEntity, entityId }: { initia
                       <button onClick={() => handleQuickAction('voice_call')} disabled={!entity.phone || quickActionLoading.voice_call} className="w-full flex items-center gap-3 p-3 hover:bg-[var(--surface-2)] rounded-lg transition-colors disabled:opacity-50">
                         <PhoneIcon className="h-5 w-5 text-purple-500" />
                         <div className="text-left"><div className="font-medium">Voice Call</div><div className="text-xs text-[var(--text-dim)]">AI Assistant</div></div>
-                      </button>
-                      <button onClick={() => handleQuickAction('sync_quickbooks')} disabled={quickActionLoading.sync_quickbooks} className="w-full flex items-center gap-3 p-3 hover:bg-[var(--surface-2)] rounded-lg transition-colors disabled:opacity-50">
-                        <LinkIcon className="h-5 w-5 text-orange-500" />
-                        <div className="text-left"><div className="font-medium">Sync QuickBooks</div><div className="text-xs text-[var(--text-dim)]">Update accounting</div></div>
                       </button>
                       <button onClick={() => handleQuickAction('view_map')} disabled={!entity.address} className="w-full flex items-center gap-3 p-3 hover:bg-[var(--surface-2)] rounded-lg transition-colors disabled:opacity-50">
                         <MapIcon className="h-5 w-5 text-red-500" />

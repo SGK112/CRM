@@ -1,9 +1,0 @@
-This folder contains archived duplicates moved from app/dashboard/financial to avoid route collisions with src/app.
-
-Files archived:
-- page.tsx (moved)
-- page-complex.tsx (moved)
-- page-simplified.tsx (moved)
-- new/page.tsx (moved)
-
-Restore by moving files back to app/dashboard/financial/

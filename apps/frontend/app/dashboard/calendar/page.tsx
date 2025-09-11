@@ -10,7 +10,6 @@ import {
     ClockIcon,
     ClockIcon as ClockSolidIcon,
     ExclamationTriangleIcon,
-    FunnelIcon,
     ListBulletIcon,
     MagnifyingGlassIcon,
     MapPinIcon,
@@ -53,13 +52,10 @@ interface Appointment {
 export default function CalendarPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek'>(
+  const [view, setView] = useState<'dayGridMonth' | 'timeGridWeek' | 'listWeek'>(
     'dayGridMonth'
   );
   const [searchTerm, setSearchTerm] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<string[]>([]);
-  const [typeFilter, setTypeFilter] = useState<string[]>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -186,10 +182,7 @@ export default function CalendarPage() {
       apt.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       apt.client?.name?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus = statusFilter.length === 0 || statusFilter.includes(apt.status);
-    const matchesType = typeFilter.length === 0 || typeFilter.includes(apt.appointmentType);
-
-    return matchesSearch && matchesStatus && matchesType;
+    return matchesSearch;
   });
 
   const calendarEvents = filteredAppointments.map(appointment => ({
@@ -254,9 +247,10 @@ export default function CalendarPage() {
             </div>
             <button
               onClick={() => router.push('/dashboard/calendar/new')}
-              className="p-2 bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors text-black font-medium text-sm"
             >
-              <PlusIcon className="h-5 w-5 text-black" />
+              <PlusIcon className="h-4 w-4" />
+              New Appointment
             </button>
           </div>
 
@@ -297,124 +291,35 @@ export default function CalendarPage() {
             />
           </div>
 
-          {/* View Toggle and Filters */}
-          <div className="flex gap-2">
-            <div className="flex-1 flex bg-slate-900 rounded-lg p-1">
-              {[
-                { key: 'dayGridMonth', label: 'Month', icon: Squares2X2Icon },
-                { key: 'timeGridWeek', label: 'Week', icon: ViewColumnsIcon },
-                { key: 'listWeek', label: 'List', icon: ListBulletIcon },
-              ].map(viewOption => {
-                const IconComponent = viewOption.icon;
-                return (
-                  <button
-                    key={viewOption.key}
-                    onClick={() =>
-                      setView(
-                        viewOption.key as 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek'
-                      )
-                    }
-                    className={`flex-1 flex items-center justify-center gap-1 px-2 py-2 text-xs font-medium rounded transition-all ${
-                      view === viewOption.key
-                        ? 'bg-amber-500 text-black'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    <IconComponent className="h-3 w-3" />
-                    {viewOption.label}
-                  </button>
-                );
-              })}
-            </div>
-            
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`px-3 py-2 rounded-lg font-medium transition-all ${
-                showFilters
-                  ? 'bg-amber-500 text-black'
-                  : 'bg-slate-900 text-slate-400 border border-slate-700 hover:text-white'
-              }`}
-            >
-              <FunnelIcon className="h-4 w-4" />
-            </button>
+          {/* View Toggle */}
+          <div className="flex bg-slate-900 rounded-lg p-1">
+            {[
+              { key: 'dayGridMonth', label: 'Month', icon: Squares2X2Icon },
+              { key: 'timeGridWeek', label: 'Week', icon: ViewColumnsIcon },
+              { key: 'listWeek', label: 'List', icon: ListBulletIcon },
+            ].map(viewOption => {
+              const IconComponent = viewOption.icon;
+              return (
+                <button
+                  key={viewOption.key}
+                  onClick={() =>
+                    setView(
+                      viewOption.key as 'dayGridMonth' | 'timeGridWeek' | 'listWeek'
+                    )
+                  }
+                  className={`flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium rounded transition-all ${
+                    view === viewOption.key
+                      ? 'bg-amber-500 text-black'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <IconComponent className="h-4 w-4" />
+                  {viewOption.label}
+                </button>
+              );
+            })}
           </div>
         </div>
-
-        {/* Filters */}
-        {showFilters && (
-          <div className="bg-slate-900 rounded-lg border border-slate-700 p-4 mb-4">
-            <h3 className="text-sm font-semibold text-white mb-3">Filter Appointments</h3>
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-medium text-slate-400 mb-2">Status</label>
-                <div className="flex flex-wrap gap-2">
-                  {['scheduled', 'confirmed', 'completed', 'cancelled'].map(status => (
-                    <button
-                      key={status}
-                      onClick={() => {
-                        setStatusFilter(prev =>
-                          prev.includes(status) ? prev.filter(s => s !== status) : [...prev, status]
-                        );
-                      }}
-                      className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${
-                        statusFilter.includes(status)
-                          ? 'bg-amber-500 text-black'
-                          : 'bg-slate-800 text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      {status.charAt(0).toUpperCase() + status.slice(1)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-slate-400 mb-2">Type</label>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    'consultation',
-                    'site_visit',
-                    'meeting',
-                    'inspection',
-                    'other',
-                    'google_calendar',
-                  ].map(type => (
-                    <button
-                      key={type}
-                      onClick={() => {
-                        setTypeFilter(prev =>
-                          prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
-                        );
-                      }}
-                      className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${
-                        typeFilter.includes(type)
-                          ? 'bg-amber-500 text-black'
-                          : 'bg-slate-800 text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      {type === 'google_calendar'
-                        ? 'Google Calendar'
-                        : type.replace('_', ' ').charAt(0).toUpperCase() +
-                          type.replace('_', ' ').slice(1)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {(statusFilter.length > 0 || typeFilter.length > 0) && (
-                <button
-                  onClick={() => {
-                    setStatusFilter([]);
-                    setTypeFilter([]);
-                  }}
-                  className="text-xs text-amber-400 hover:text-amber-300 font-medium"
-                >
-                  Clear all filters
-                </button>
-              )}
-            </div>
-          </div>
-        )}
 
         {/* Calendar */}
         <div className="bg-slate-900 rounded-lg border border-slate-700 overflow-hidden mb-4">
@@ -563,7 +468,7 @@ export default function CalendarPage() {
                   className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-lg text-sm font-medium transition-colors"
                 >
                   <PlusIcon className="h-4 w-4" />
-                  Schedule Now
+                  Schedule Appointment
                 </button>
               </div>
             )}

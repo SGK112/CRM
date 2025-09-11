@@ -13,10 +13,10 @@ type Contact = { id: string; name: string };
 
 interface CalendarViewProps {
   events: EventInput[];
-  initialView?: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
+  initialView?: 'dayGridMonth' | 'timeGridWeek' | 'listWeek';
   onEventClick?: (info: EventClickArg) => void;
   onDateClick?: (info: DateClickArg) => void;
-  currentView?: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
+  currentView?: 'dayGridMonth' | 'timeGridWeek' | 'listWeek';
   // New: list of contacts to attach to events and a creation callback
   contacts?: Contact[];
   onCreateEvent?: (payload: {
@@ -39,6 +39,13 @@ export default function CalendarView({
   const [view, setView] = useState(currentView || initialView);
   const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
+
+  // Sync view with parent component
+  useEffect(() => {
+    if (currentView) {
+      setView(currentView);
+    }
+  }, [currentView]);
 
   // Create modal state
   const [showCreate, setShowCreate] = useState(false);
@@ -100,36 +107,6 @@ export default function CalendarView({
 
   return (
     <div className="cal-root">
-      <div className="cal-header">
-        <h2 className="cal-title">Calendar</h2>
-        <div className="cal-controls">
-          <button
-            className={`btn ${view === 'dayGridMonth' ? 'active' : ''}`}
-            onClick={() => setView('dayGridMonth')}
-          >
-            Month
-          </button>
-          <button
-            className={`btn ${view === 'timeGridWeek' ? 'active' : ''}`}
-            onClick={() => setView('timeGridWeek')}
-          >
-            Week
-          </button>
-          <button
-            className={`btn ${view === 'timeGridDay' ? 'active' : ''}`}
-            onClick={() => setView('timeGridDay')}
-          >
-            Day
-          </button>
-          <button
-            className={`btn ${view === 'listWeek' ? 'active' : ''}`}
-            onClick={() => setView('listWeek')}
-          >
-            List
-          </button>
-        </div>
-      </div>
-
       <div className="cal-body">
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
@@ -152,10 +129,6 @@ export default function CalendarView({
           nowIndicator={true}
         />
       </div>
-
-      <button className="floating-new" onClick={() => openCreate()} aria-label="Create event">
-        New
-      </button>
 
       {showCreate && (
         <div className="modal-backdrop" role="dialog" aria-modal="true">

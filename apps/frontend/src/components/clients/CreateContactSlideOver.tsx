@@ -23,13 +23,6 @@ export default function CreateContactSlideOver({ open, onClose, defaultType = 'c
   status: 'lead',
   notes: '',
   type: defaultType,
-  // QuickBooks / accounting fields
-  quickbooksSync: false,
-  quickbooksDisplayName: '',
-  quickbooksAccountRef: '',
-  // Expenses/invoices tracking (useful for subs/vendors)
-  trackExpenses: false,
-  defaultExpenseAccount: '',
   });
 
   const handleSubmit = async (e?: React.FormEvent) => {
@@ -58,13 +51,6 @@ export default function CreateContactSlideOver({ open, onClose, defaultType = 'c
         status: form.status,
         notes: form.notes,
         type: form.type,
-        quickbooks: form.quickbooksSync ? {
-          displayName: form.quickbooksDisplayName || `${form.firstName} ${form.lastName}`,
-          accountRef: form.quickbooksAccountRef || undefined,
-        } : undefined,
-        accounting: form.trackExpenses ? {
-          defaultExpenseAccount: form.defaultExpenseAccount || undefined,
-        } : undefined,
       };
 
       const resp = await fetch('/api/clients', {
@@ -109,8 +95,8 @@ export default function CreateContactSlideOver({ open, onClose, defaultType = 'c
                   <CheckIcon className="h-6 w-6" />
                 </div>
                 <div className="flex-1 text-center sm:text-left">
-                  <h4 className="text-md font-semibold text-gray-900 dark:text-white">Contact & Accounting</h4>
-                  <p className="mt-1 text-sm text-gray-700 dark:text-gray-300">Collect contact details plus QuickBooks and expense settings so this contact can be synced and used for invoices, bills and expense tracking.</p>
+                  <h4 className="text-md font-semibold text-gray-900 dark:text-white">Contact Details</h4>
+                  <p className="mt-1 text-sm text-gray-700 dark:text-gray-300">Collect complete contact information for this person or business. Sync preferences can be configured in settings.</p>
                 </div>
                 <div className="absolute top-3 right-3 bg-white dark:bg-slate-900 px-2 py-0.5 rounded text-xs text-gray-600 dark:text-gray-300 border border-gray-100 dark:border-gray-800">New</div>
               </div>
@@ -166,47 +152,6 @@ export default function CreateContactSlideOver({ open, onClose, defaultType = 'c
           <div>
             <label className="block text-sm font-medium">Notes</label>
             <textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} className="mt-1 block w-full border rounded-md px-3 py-2 h-28" />
-          </div>
-
-          {/* QuickBooks / Accounting Options */}
-          <div className="pt-2 border-t border-gray-100">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-semibold">QuickBooks & Accounting</h4>
-              <div className="text-xs text-gray-500">Optional</div>
-            </div>
-
-            <div className="mt-3 grid grid-cols-1 gap-3">
-              <label className="flex items-center gap-2">
-                <input type="checkbox" checked={form.quickbooksSync} onChange={(e) => setForm({ ...form, quickbooksSync: e.target.checked })} />
-                <span className="text-sm text-gray-900 dark:text-white">Sync to QuickBooks (when enabled, we'll attempt to create or match a QuickBooks contact)</span>
-              </label>
-
-              {form.quickbooksSync && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium">QuickBooks Display Name</label>
-                    <input value={form.quickbooksDisplayName} onChange={(e) => setForm({ ...form, quickbooksDisplayName: e.target.value })} className="mt-1 block w-full border rounded-md px-3 py-2 text-gray-900 dark:text-white bg-white dark:bg-slate-800 border-gray-200 dark:border-gray-700" placeholder={`${form.firstName} ${form.lastName}`} />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium">QuickBooks Account Ref (optional)</label>
-                    <input value={form.quickbooksAccountRef} onChange={(e) => setForm({ ...form, quickbooksAccountRef: e.target.value })} className="mt-1 block w-full border rounded-md px-3 py-2 text-gray-900 dark:text-white bg-white dark:bg-slate-800 border-gray-200 dark:border-gray-700" placeholder="e.g. Vendor:Subcontractors" />
-                  </div>
-                </div>
-              )}
-
-              <label className="flex items-center gap-2">
-                <input type="checkbox" checked={form.trackExpenses} onChange={(e) => setForm({ ...form, trackExpenses: e.target.checked })} />
-                <span className="text-sm">Track expenses & invoices for this contact (recommended for subcontractors/vendors)</span>
-              </label>
-
-              {form.trackExpenses && (
-                <div>
-                  <label className="block text-sm font-medium">Default Expense Account</label>
-                  <input value={form.defaultExpenseAccount} onChange={(e) => setForm({ ...form, defaultExpenseAccount: e.target.value })} className="mt-1 block w-full border rounded-md px-3 py-2" placeholder="e.g. Job Materials" />
-                  <p className="text-xs text-gray-500 mt-1">This account will be used when creating expense entries for invoices or bills for this contact.</p>
-                </div>
-              )}
-            </div>
           </div>
 
           {error && <div className="text-red-600 text-sm">{error}</div>}

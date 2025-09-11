@@ -196,16 +196,6 @@ export default function ContactProfilePage() {
         completed: !!(contact?.firstName && contact?.lastName && contact?.email),
         fields: ['firstName', 'lastName', 'email', 'phone'],
         contactTypes: ['client', 'subcontractor', 'vendor', 'contributor', 'team']
-      },
-      {
-        id: 'communication',
-        title: 'Communication Preferences',
-        description: 'How and when to contact',
-        icon: ChatBubbleLeftRightIcon,
-        required: false,
-        completed: !!(contact?.preferredContact && contact?.bestTimeToContact),
-        fields: ['preferredContact', 'bestTimeToContact', 'communicationNotes'],
-        contactTypes: ['client', 'subcontractor', 'vendor', 'contributor', 'team']
       }
     ];
 

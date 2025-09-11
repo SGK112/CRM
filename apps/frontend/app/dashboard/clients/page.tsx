@@ -87,6 +87,7 @@ export default function ContactsPage() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [successMessageType, setSuccessMessageType] = useState<'created' | 'deleted'>('created');
   const [activeTab, setActiveTab] = useState<'all' | 'client' | 'subcontractor' | 'vendor' | 'lead'>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
@@ -100,7 +101,7 @@ export default function ContactsPage() {
         // Failed to parse user data
       }
     }
-    
+
     const loadData = async () => {
       if (!refreshing) setLoading(true);
 
@@ -213,15 +214,26 @@ export default function ContactsPage() {
       setLoading(false);
       setRefreshing(false);
     };
-    
+
     loadData();
   }, [refreshing]);
 
   // Show success message and handle newly created contacts
   useEffect(() => {
     const created = searchParams?.get?.('created');
+    const deleted = searchParams?.get?.('deleted');
 
     if (created === 'true') {
+      setSuccessMessageType('created');
+      setShowSuccessMessage(true);
+      // Auto-hide success message after 5 seconds
+      const timer = setTimeout(() => {
+        setShowSuccessMessage(false);
+        router.replace('/dashboard/clients'); // Clean URL
+      }, 5000);
+      return () => clearTimeout(timer);
+    } else if (deleted === 'true') {
+      setSuccessMessageType('deleted');
       setShowSuccessMessage(true);
       // Auto-hide success message after 5 seconds
       const timer = setTimeout(() => {
@@ -305,15 +317,15 @@ export default function ContactsPage() {
   };
 
   const filteredClients = clients.filter(client => {
-    const matchesSearch = 
+    const matchesSearch =
       client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       client.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (client.company && client.company.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    const matchesFilter = activeTab === 'all' || 
+
+    const matchesFilter = activeTab === 'all' ||
       (activeTab === 'lead' && client.status === 'lead') ||
       (activeTab !== 'lead' && client.contactType === activeTab);
-    
+
     return matchesSearch && matchesFilter;
   });
 
@@ -396,8 +408,14 @@ export default function ContactsPage() {
             <div className="flex items-center space-x-3">
               <CheckCircleIconSolid className="w-5 h-5 text-amber-500 flex-shrink-0" />
               <div className="flex-1">
-                <h3 className="font-medium text-white">Contact Created!</h3>
-                <p className="text-sm text-slate-400">Successfully added to your contacts.</p>
+                <h3 className="font-medium text-white">
+                  {successMessageType === 'created' ? 'Contact Created!' : 'Contact Deleted!'}
+                </h3>
+                <p className="text-sm text-slate-400">
+                  {successMessageType === 'created'
+                    ? 'Successfully added to your contacts.'
+                    : 'Contact has been permanently removed.'}
+                </p>
               </div>
               <button
                 onClick={() => setShowSuccessMessage(false)}
@@ -488,7 +506,7 @@ export default function ContactsPage() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-slate-900 rounded-xl p-4 border border-slate-800">
             <div className="flex items-center">
               <div className="p-2 bg-green-500/10 rounded-lg">
@@ -500,7 +518,7 @@ export default function ContactsPage() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-slate-900 rounded-xl p-4 border border-slate-800">
             <div className="flex items-center">
               <div className="p-2 bg-blue-500/10 rounded-lg">
@@ -512,7 +530,7 @@ export default function ContactsPage() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-slate-900 rounded-xl p-4 border border-slate-800">
             <div className="flex items-center">
               <div className="p-2 bg-amber-500/10 rounded-lg">
@@ -545,7 +563,7 @@ export default function ContactsPage() {
           <div className="flex overflow-x-auto space-x-2 pb-2">
             {[
               { id: 'all', label: 'All', count: stats.total },
-              { id: 'client', label: 'Clients', count: stats.clients },
+              { id: 'client', label: 'Contacts', count: stats.clients },
               { id: 'subcontractor', label: 'Subcontractors', count: stats.subcontractors },
               { id: 'vendor', label: 'Vendors', count: stats.vendors },
               { id: 'lead', label: 'Leads', count: stats.leads },
@@ -597,8 +615,8 @@ export default function ContactsPage() {
         {/* Contact Cards */}
         {filteredClients.length > 0 ? (
           <div className={
-            viewMode === 'grid' 
-              ? "grid grid-cols-1 sm:grid-cols-2 gap-4" 
+            viewMode === 'grid'
+              ? "grid grid-cols-1 sm:grid-cols-2 gap-4"
               : "space-y-3"
           }>
             {filteredClients.map((client) => (
@@ -641,13 +659,13 @@ export default function ContactsPage() {
 }
 
 // Inline Contact Card Component
-function ContactCard({ 
-  client, 
-  viewMode, 
-  onViewDetails 
-}: { 
-  client: Client; 
-  viewMode: 'grid' | 'list'; 
+function ContactCard({
+  client,
+  viewMode,
+  onViewDetails
+}: {
+  client: Client;
+  viewMode: 'grid' | 'list';
   onViewDetails: () => void;
 }) {
   const getInitials = (name: string) => {
@@ -817,7 +835,7 @@ function ContactCard({
               </button>
             )}
           </div>
-          
+
           <button
             onClick={(e) => {
               e.stopPropagation();
