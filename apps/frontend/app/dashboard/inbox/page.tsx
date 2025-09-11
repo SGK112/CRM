@@ -4,17 +4,13 @@ import {
   ArchiveBoxIcon,
   BellIcon,
   ChatBubbleLeftRightIcon,
-  CheckIcon,
   EnvelopeIcon,
   ExclamationTriangleIcon,
   FlagIcon,
   InboxIcon,
   MagnifyingGlassIcon,
-  PlusIcon,
   StarIcon,
   UserIcon,
-  ArrowRightIcon,
-  EllipsisVerticalIcon,
 } from '@heroicons/react/24/outline';
 import {
   StarIcon as StarIconSolid,
@@ -449,63 +445,6 @@ export default function InboxPage() {
                 Starred
               </button>
             </div>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="bg-black rounded-2xl p-6 border border-slate-700 mb-8">
-          <h2 className="text-lg font-semibold text-white mb-6">Quick Actions</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <button 
-              onClick={() => setShowCompose(true)}
-              className="flex flex-col items-center gap-2 p-4 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors group"
-            >
-              <div className="p-3 bg-amber-600 rounded-xl group-hover:bg-amber-500 transition-colors">
-                <PlusIcon className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-sm font-medium text-white text-center">Compose</span>
-            </button>
-
-            <button className="flex flex-col items-center gap-2 p-4 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors group">
-              <div className="p-3 bg-blue-600 rounded-xl group-hover:bg-blue-500 transition-colors">
-                <CheckIcon className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-sm font-medium text-white text-center">Mark All Read</span>
-            </button>
-
-            <button className="flex flex-col items-center gap-2 p-4 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors group">
-              <div className="p-3 bg-purple-600 rounded-xl group-hover:bg-purple-500 transition-colors">
-                <ArchiveBoxIcon className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-sm font-medium text-white text-center">Archive All</span>
-            </button>
-
-            <Link
-              href="/dashboard"
-              className="flex flex-col items-center gap-2 p-4 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors group"
-            >
-              <div className="p-3 bg-green-600 rounded-xl group-hover:bg-green-500 transition-colors">
-                <ArrowRightIcon className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-sm font-medium text-white text-center">Dashboard</span>
-            </Link>
-
-            <Link
-              href="/dashboard/clients"
-              className="flex flex-col items-center gap-2 p-4 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors group"
-            >
-              <div className="p-3 bg-cyan-600 rounded-xl group-hover:bg-cyan-500 transition-colors">
-                <UserIcon className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-sm font-medium text-white text-center">Clients</span>
-            </Link>
-
-            <button className="flex flex-col items-center gap-2 p-4 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors group">
-              <div className="p-3 bg-indigo-600 rounded-xl group-hover:bg-indigo-500 transition-colors">
-                <EllipsisVerticalIcon className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-sm font-medium text-white text-center">More</span>
-            </button>
           </div>
         </div>
 

@@ -7,12 +7,10 @@ import {
   ClockIcon,
   CurrencyDollarIcon,
   ExclamationTriangleIcon,
-  PlusIcon,
   UserGroupIcon,
   BellIcon,
   UserIcon,
   CalendarIcon,
-  DocumentTextIcon,
   ArrowRightIcon,
   StarIcon,
 } from '@heroicons/react/24/outline';
@@ -345,72 +343,6 @@ export default function DashboardPage() {
                 <p className="text-lg font-bold text-white">{stats.upcomingAppointments}</p>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="bg-black rounded-2xl p-6 border border-slate-700 mb-8">
-          <h2 className="text-lg font-semibold text-white mb-6">Quick Actions</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <Link
-              href="/dashboard/projects/new"
-              className="flex flex-col items-center gap-2 p-4 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors group"
-            >
-              <div className="p-3 bg-amber-600 rounded-xl group-hover:bg-amber-500 transition-colors">
-                <PlusIcon className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-sm font-medium text-white text-center">New Project</span>
-            </Link>
-
-            <Link
-              href="/dashboard/clients"
-              className="flex flex-col items-center gap-2 p-4 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors group"
-            >
-              <div className="p-3 bg-blue-600 rounded-xl group-hover:bg-blue-500 transition-colors">
-                <UserGroupIcon className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-sm font-medium text-white text-center">Manage Clients</span>
-            </Link>
-
-            <Link
-              href="/portal/invite"
-              className="flex flex-col items-center gap-2 p-4 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors group"
-            >
-              <div className="p-3 bg-cyan-600 rounded-xl group-hover:bg-cyan-500 transition-colors">
-                <UserIcon className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-sm font-medium text-white text-center">Client Portal</span>
-            </Link>
-
-            <Link
-              href="/dashboard/analytics"
-              className="flex flex-col items-center gap-2 p-4 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors group"
-            >
-              <div className="p-3 bg-purple-600 rounded-xl group-hover:bg-purple-500 transition-colors">
-                <ChartBarIcon className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-sm font-medium text-white text-center">Analytics</span>
-            </Link>
-
-            <Link
-              href="/dashboard/calendar"
-              className="flex flex-col items-center gap-2 p-4 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors group"
-            >
-              <div className="p-3 bg-green-600 rounded-xl group-hover:bg-green-500 transition-colors">
-                <CalendarIcon className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-sm font-medium text-white text-center">Calendar</span>
-            </Link>
-
-            <Link
-              href="/dashboard/documents"
-              className="flex flex-col items-center gap-2 p-4 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors group"
-            >
-              <div className="p-3 bg-indigo-600 rounded-xl group-hover:bg-indigo-500 transition-colors">
-                <DocumentTextIcon className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-sm font-medium text-white text-center">Documents</span>
-            </Link>
           </div>
         </div>
 

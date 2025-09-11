@@ -25,9 +25,7 @@ import {
   GlobeAltIcon,
   ShoppingCartIcon,
   ClipboardDocumentListIcon,
-  CogIcon,
   AcademicCapIcon,
-  BriefcaseIcon
 } from '@heroicons/react/24/outline';
 import {
   CheckCircleIcon as CheckCircleIconSolid,
@@ -144,43 +142,30 @@ export default function ContactDetailPage() {
           { label: 'Schedule Meeting', icon: CalendarIcon, action: () => {}, color: 'purple' },
           { label: 'Create Estimate', icon: DocumentTextIcon, action: () => {}, color: 'orange' },
           { label: 'Send Email', icon: EnvelopeIcon, action: () => {}, color: 'blue' },
-          { label: 'Create Invoice', icon: CurrencyDollarIcon, action: () => {}, color: 'green' },
-          { label: 'View Projects', icon: BriefcaseIcon, action: () => {}, color: 'indigo' },
-          { label: 'Client Portal', icon: GlobeAltIcon, action: () => {}, color: 'cyan' },
         ];
       case 'subcontractor':
         return [
-          { label: 'View Website', icon: GlobeAltIcon, action: () => contact?.website ? window.open(contact.website, '_blank') : {}, color: 'blue', disabled: !contact?.website },
           { label: 'Assign Project', icon: WrenchScrewdriverIcon, action: () => {}, color: 'green' },
           { label: 'Send Email', icon: EnvelopeIcon, action: () => {}, color: 'blue' },
           { label: 'View Contracts', icon: DocumentTextIcon, action: () => {}, color: 'purple' },
-          { label: 'Check Certifications', icon: AcademicCapIcon, action: () => {}, color: 'yellow' },
-          { label: 'Performance Review', icon: ChartBarIcon, action: () => {}, color: 'indigo' },
         ];
       case 'vendor':
         return [
           { label: 'Visit Website', icon: GlobeAltIcon, action: () => contact?.website ? window.open(contact.website, '_blank') : {}, color: 'blue', disabled: !contact?.website },
           { label: 'Order Portal', icon: ShoppingCartIcon, action: () => contact?.orderPortalUrl ? window.open(contact.orderPortalUrl, '_blank') : {}, color: 'green', disabled: !contact?.orderPortalUrl },
-          { label: 'View Catalog', icon: ClipboardDocumentListIcon, action: () => contact?.catalogUrl ? window.open(contact.catalogUrl, '_blank') : {}, color: 'orange', disabled: !contact?.catalogUrl },
           { label: 'Send Email', icon: EnvelopeIcon, action: () => {}, color: 'blue' },
-          { label: 'Track Orders', icon: TruckIcon, action: () => {}, color: 'purple' },
-          { label: 'Payment History', icon: CurrencyDollarIcon, action: () => {}, color: 'green' },
         ];
       case 'contributor':
         return [
           { label: 'Send Email', icon: EnvelopeIcon, action: () => {}, color: 'blue' },
           { label: 'Assign Task', icon: PlusIcon, action: () => {}, color: 'orange' },
-          { label: 'View Portfolio', icon: StarIcon, action: () => {}, color: 'yellow' },
           { label: 'Schedule Review', icon: CalendarIcon, action: () => {}, color: 'purple' },
         ];
       case 'team':
         return [
           { label: 'Send Email', icon: EnvelopeIcon, action: () => {}, color: 'blue' },
-          { label: 'HR Dashboard', icon: UserGroupIcon, action: () => {}, color: 'indigo' },
-          { label: 'Performance', icon: ChartBarIcon, action: () => {}, color: 'purple' },
           { label: 'Schedule 1:1', icon: CalendarIcon, action: () => {}, color: 'green' },
-          { label: 'Timesheet', icon: ClockIcon, action: () => {}, color: 'orange' },
-          { label: 'Settings', icon: CogIcon, action: () => {}, color: 'slate' },
+          { label: 'Performance', icon: ChartBarIcon, action: () => {}, color: 'purple' },
         ];
       default:
         return baseActions;
@@ -387,7 +372,7 @@ export default function ContactDetailPage() {
         {/* Quick Actions */}
         <div className="bg-black rounded-2xl p-6 border border-slate-700 mb-6">
           <h3 className="text-lg font-semibold text-white mb-4">Quick Actions</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {actions.map((action, index) => (
               <button
                 key={index}

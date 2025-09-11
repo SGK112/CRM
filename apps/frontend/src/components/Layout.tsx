@@ -19,7 +19,6 @@ import {
     LockClosedIcon,
     MicrophoneIcon,
     PhoneIcon,
-    QuestionMarkCircleIcon,
     ShieldCheckIcon,
     UserGroupIcon,
     WalletIcon,
@@ -33,7 +32,6 @@ import { createPortal } from 'react-dom';
 import { AIProvider } from '../hooks/useAI';
 import { useInboxStats } from '../hooks/useInboxStats';
 import AIAssistant from './AIAssistant';
-import AIEnable from './AIEnable';
 import { PlanBadge } from './CapabilityGate';
 import Logo from './Logo';
 import RouteMemoryTracker from './RouteMemoryTracker';
@@ -789,18 +787,13 @@ export default function Layout({ children }: LayoutProps) {
                   <SearchBar />
                 </div>
 
-                {/* Right Section: Actions Toolbar */}
+                {/* Right Section: Minimal Actions */}
                 <div className="flex items-center gap-2">
-                  {/* AI Enable Toggle */}
-                  <div className="hidden sm:flex">
-                    <AIEnable />
-                  </div>
-
-                  {/* Notifications */}
+                  {/* Notifications - keep only this essential button */}
                   <button
                     onClick={() => router.push('/dashboard/inbox')}
-                    className="relative p-2 text-slate-400 hover:text-amber-400 hover:bg-slate-900 rounded-xl transition-all duration-200 hover:scale-105"
-                    title="Notifications"
+                    className="relative p-2 text-slate-400 hover:text-amber-400 hover:bg-slate-900 rounded-xl transition-all duration-200"
+                    title="Messages"
                   >
                     <BellIcon className="h-5 w-5" />
                     {inboxStats && inboxStats.unread && inboxStats.unread > 0 && (
@@ -810,21 +803,10 @@ export default function Layout({ children }: LayoutProps) {
                     )}
                   </button>
 
-                  {/* Quick Create */}
-                  <QuickCreate />
-
-                  {/* Help */}
-                  <button
-                    className="hidden sm:flex items-center px-3 py-2 text-sm text-slate-400 hover:text-amber-400 hover:bg-slate-900 rounded-xl transition-all duration-200 hover:scale-105"
-                    onClick={() => {
-                      const evt = new CustomEvent('copilot:open');
-                      window.dispatchEvent(evt);
-                    }}
-                    title="Help & Support"
-                  >
-                    <QuestionMarkCircleIcon className="h-4 w-4 mr-1" />
-                    Help
-                  </button>
+                  {/* Simplified Create - only on mobile where space is critical */}
+                  <div className="lg:hidden">
+                    <QuickCreate />
+                  </div>
                 </div>
               </div>
             </header>
@@ -966,6 +948,7 @@ function QuickCreate() {
         role="menu"
         aria-orientation="vertical"
       >
+        {/* Essential actions only */}
         <button
           onClick={() => handleItemClick('/dashboard/projects/new')}
           className="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 hover:text-amber-400 text-slate-200 transition-colors duration-150"
@@ -985,31 +968,12 @@ function QuickCreate() {
         </button>
 
         <button
-          onClick={() => handleItemClick('/dashboard/estimates/new')}
-          className="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 hover:text-amber-400 text-slate-200 transition-colors duration-150"
-          role="menuitem"
-        >
-          <CalculatorIcon className="h-4 w-4 mr-3 text-slate-400" />
-          New Estimate
-        </button>
-
-        <button
           onClick={() => handleItemClick('/dashboard/inbox?compose=1')}
           className="flex items-center w-full px-4 py-2 text-left hover:bg-slate-700 hover:text-amber-400 text-slate-200 transition-colors duration-150"
           role="menuitem"
         >
           <InboxIcon className="h-4 w-4 mr-3 text-slate-400" />
           New Message
-        </button>
-
-        <div className="border-t border-slate-600 my-1" />
-
-        <button
-          onClick={() => setOpen(false)}
-          className="flex items-center w-full px-4 py-2 text-left text-xs text-slate-400 hover:text-slate-300 hover:bg-slate-700 transition-colors duration-150"
-          role="menuitem"
-        >
-          Close
         </button>
       </div>
     </>
