@@ -48,8 +48,8 @@ export default function ClientPortalPage({ params }: { params: { id: string } })
             = await comm.json();
           const simplified = data.slice(0, 15).map((c, i: number) => ({
             id: c._id || String(i),
-            from: c.direction === 'inbound' ? 'client' : 'team',
-            content: c.subject ? `${c.subject}: ${c.content}` : c.content,
+            from: (c.direction === 'inbound' ? 'client' : 'team') as 'client' | 'team' | 'system',
+            content: c.subject ? `${c.subject}: ${c.content || ''}` : (c.content || 'No content'),
             createdAt: c.timestamp || new Date().toISOString(),
           }));
           setMessages(simplified);
