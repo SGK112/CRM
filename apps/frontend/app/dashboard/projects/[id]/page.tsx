@@ -9,6 +9,7 @@ import {
   CurrencyDollarIcon,
   ArrowLeftIcon,
   PlusIcon,
+  CalculatorIcon,
 } from '@heroicons/react/24/outline';
 
 interface Project {
@@ -137,6 +138,23 @@ export default function ProjectDetailPage() {
             <ArrowLeftIcon className="h-4 w-4" />
             Back to Projects
           </Link>
+          
+          <div className="flex items-center gap-2 ml-auto">
+            <Link
+              href={`/dashboard/invoices/new?projectId=${id}&projectName=${encodeURIComponent(project?.title || '')}`}
+              className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 rounded-lg shadow-sm transition-colors duration-200"
+            >
+              <DocumentTextIcon className="h-4 w-4" />
+              Create Invoice
+            </Link>
+            <Link
+              href={`/dashboard/estimates/new?projectId=${id}&projectName=${encodeURIComponent(project?.title || '')}`}
+              className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors duration-200"
+            >
+              <CalculatorIcon className="h-4 w-4" />
+              Create Estimate
+            </Link>
+          </div>
         </div>
 
         {loading && (

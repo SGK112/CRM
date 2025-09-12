@@ -27,43 +27,7 @@ export interface FileContact {
 // Initialize store file if it doesn't exist
 function initializeStore() {
   if (!fs.existsSync(STORE_FILE)) {
-    const initialContacts: FileContact[] = [
-      {
-        id: '1',
-        _id: '1',
-        name: 'Johnson Family',
-        email: 'johnson@example.com',
-        phone: '(555) 123-4567',
-        address: '123 Oak Street',
-        city: 'New York',
-        state: 'NY',
-        zipCode: '10001',
-        type: 'residential',
-        entityType: 'client',
-        status: 'active',
-        notes: 'Preferred customer - always pays on time',
-        createdAt: '2024-08-01T10:00:00Z',
-        updatedAt: '2024-09-05T14:30:00Z'
-      },
-      {
-        id: '2',
-        _id: '2',
-        name: 'Martinez Construction',
-        email: 'contact@martinez-construction.com',
-        phone: '(555) 987-6543',
-        address: '456 Pine Avenue',
-        city: 'Los Angeles',
-        state: 'CA',
-        zipCode: '90210',
-        type: 'commercial',
-        entityType: 'subcontractor',
-        businessType: 'construction',
-        status: 'active',
-        notes: 'Large commercial projects - net 30 payment terms',
-        createdAt: '2024-08-20T09:15:00Z',
-        updatedAt: '2024-09-02T11:20:00Z'
-      }
-    ];
+    const initialContacts: FileContact[] = [];
     
     try {
       fs.writeFileSync(STORE_FILE, JSON.stringify(initialContacts, null, 2));

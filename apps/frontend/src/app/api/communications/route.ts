@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 type CommunicationType = 'email' | 'notification' | 'message' | 'task';
 type PriorityType = 'low' | 'normal' | 'high' | 'urgent';

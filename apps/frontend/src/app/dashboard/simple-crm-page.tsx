@@ -40,38 +40,13 @@ export default function SimpleCRMDashboard() {
   useEffect(() => {
     // Mock data for demo - replace with actual API calls
     setStats({
-      totalClients: 47,
-      activeProjects: 12,
-      monthlyRevenue: 125000,
-      upcomingAppointments: 8
+      totalClients: 0,
+      activeProjects: 0,
+      monthlyRevenue: 0,
+      upcomingAppointments: 0
     });
 
-    setRecentProjects([
-      {
-        id: '1',
-        name: 'Kitchen Renovation',
-        client: 'Johnson Family',
-        status: 'in_progress',
-        progress: 65,
-        budget: 45000
-      },
-      {
-        id: '2',
-        name: 'Bathroom Remodel',
-        client: 'Smith Residence',
-        status: 'planning',
-        progress: 15,
-        budget: 28000
-      },
-      {
-        id: '3',
-        name: 'Deck Installation',
-        client: 'Miller Home',
-        status: 'in_progress',
-        progress: 80,
-        budget: 18000
-      }
-    ]);
+    setRecentProjects([]);
   }, []);
 
   const formatCurrency = (amount: number) => {

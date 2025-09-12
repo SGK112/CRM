@@ -46,7 +46,7 @@ export function useWallet(): UseWalletReturn {
           ? localStorage.getItem('accessToken') || localStorage.getItem('token')
           : null;
 
-      if (!token) {
+      if (!walletService) {
         setLoading(false);
         return;
       }
@@ -77,6 +77,10 @@ export function useWallet(): UseWalletReturn {
 
   const connectWallet = useCallback(
     async (address: string) => {
+      if (!walletService) {
+        throw new Error('Wallet service not initialized');
+      }
+      
       try {
         setError(null);
         const connectedWallet = await walletService.connectWallet(address);
@@ -93,6 +97,10 @@ export function useWallet(): UseWalletReturn {
   );
 
   const disconnectWallet = useCallback(async () => {
+    if (!walletService) {
+      throw new Error('Wallet service not initialized');
+    }
+    
     try {
       setError(null);
       await walletService.disconnectWallet();
@@ -105,6 +113,10 @@ export function useWallet(): UseWalletReturn {
 
   const createPayment = useCallback(
     async (amount: string, description: string, clientId?: string, projectId?: string) => {
+      if (!walletService) {
+        throw new Error('Wallet service not initialized');
+      }
+      
       try {
         setError(null);
         await walletService.createPayment({

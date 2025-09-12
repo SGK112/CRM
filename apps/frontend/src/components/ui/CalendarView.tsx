@@ -13,10 +13,10 @@ type Contact = { id: string; name: string };
 
 interface CalendarViewProps {
   events: EventInput[];
-  initialView?: 'dayGridMonth' | 'timeGridWeek' | 'listWeek';
+  initialView?: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
   onEventClick?: (info: EventClickArg) => void;
   onDateClick?: (info: DateClickArg) => void;
-  currentView?: 'dayGridMonth' | 'timeGridWeek' | 'listWeek';
+  currentView?: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
   // New: list of contacts to attach to events and a creation callback
   contacts?: Contact[];
   onCreateEvent?: (payload: {

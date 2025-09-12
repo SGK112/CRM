@@ -138,36 +138,8 @@ export default function ClientDetailClient({ initialEntity, entityId }: { initia
           const data = await response.json();
           if (!cancelled) setEntity(data);
         } else if (response.status === 401) {
-          const isLocalDev = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) || process.env.NODE_ENV === 'development';
-          if (isLocalDev) {
-            const mockEntity: Entity = {
-              _id: String(entityId),
-              type: 'client',
-              firstName: 'Demo',
-              lastName: 'Client',
-              email: 'demo@example.com',
-              phone: '555-555-5555',
-              company: 'Demo Co',
-              address: { street: '123 Dev St', city: 'Localtown', state: 'CA', zipCode: '94107', country: 'USA', coordinates: { lat: 37.7749, lng: -122.4194 } },
-              notes: 'This is mock data shown in development when the API is not authenticated.',
-              tags: ['demo', 'dev'],
-              status: 'active',
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-              totalProjects: 3,
-              totalValue: 12500,
-              averageProjectValue: 4166.67,
-              rating: 4.2,
-              twilioSmsEnabled: true,
-              emailVerified: true,
-              preferredContactMethod: 'email',
-              communicationPreferences: { email: true, sms: true, voiceCall: true, push: false, marketing: false }
-            };
-
-            if (!cancelled) setEntity(mockEntity);
-          } else {
-            if (!cancelled) setError('Entity not found');
-          }
+          // No demo data - require proper authentication
+          if (!cancelled) setError('Authentication required - please login to view client details');
         } else {
           if (!cancelled) setError('Entity not found');
         }

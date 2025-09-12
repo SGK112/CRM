@@ -153,78 +153,17 @@ export default function DashboardPage() {
     // Load mock data
     setTimeout(() => {
       setStats({
-        totalRevenue: 485000,
-        activeProjects: 12,
-        totalClients: 28,
-        avgProjectValue: 87500,
-        pendingTasks: 7,
-        upcomingAppointments: 3,
+        totalRevenue: 0,
+        activeProjects: 0,
+        totalClients: 0,
+        avgProjectValue: 0,
+        pendingTasks: 0,
+        upcomingAppointments: 0,
       });
 
-      setRecentProjects([
-        {
-          id: '1',
-          title: 'Modern Kitchen Renovation',
-          client: 'Johnson Family',
-          status: 'construction',
-          budget: 95000,
-          progress: 75,
-          nextMilestone: 'Cabinet installation'
-        },
-        {
-          id: '2',
-          title: 'Master Bathroom Remodel',
-          client: 'Davis Residence',
-          status: 'finishing',
-          budget: 42000,
-          progress: 90,
-          nextMilestone: 'Final inspection'
-        },
-        {
-          id: '3',
-          title: 'Victorian Home Restoration',
-          client: 'Miller Estate',
-          status: 'permits',
-          budget: 350000,
-          progress: 15,
-          nextMilestone: 'Permit approval'
-        },
-      ]);
+      setRecentProjects([]);
 
-      setRecentActivity([
-        {
-          id: '1',
-          type: 'payment',
-          title: 'Payment Received',
-          description: 'Johnson Family - $25,000 progress payment',
-          time: '2 hours ago',
-          status: 'success'
-        },
-        {
-          id: '2',
-          type: 'appointment',
-          title: 'Site Visit Scheduled',
-          description: 'Miller Estate - Tomorrow at 2:00 PM',
-          time: '4 hours ago',
-          status: 'info'
-        },
-        {
-          id: '3',
-          type: 'project',
-          title: 'Milestone Completed',
-          description: 'Davis Residence - Tile installation finished',
-          time: '6 hours ago',
-          status: 'success'
-        },
-        {
-          id: '4',
-          type: 'client',
-          title: 'New Lead',
-          description: 'Sarah Wilson - Kitchen remodel inquiry',
-          time: '1 day ago',
-          status: 'info'
-        }
-      ]);
+      setRecentActivity([]);
 
       setLoading(false);
     }, 800);
@@ -661,15 +600,15 @@ export default function DashboardPage() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-slate-400">Projects Completed</span>
-                  <span className="text-white font-semibold">4</span>
+                  <span className="text-white font-semibold">0</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-slate-400">Revenue Generated</span>
-                  <span className="text-green-400 font-semibold">$125,000</span>
+                  <span className="text-green-400 font-semibold">$0</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-slate-400">New Clients</span>
-                  <span className="text-blue-400 font-semibold">3</span>
+                  <span className="text-blue-400 font-semibold">0</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-slate-400">Client Satisfaction</span>
@@ -677,10 +616,10 @@ export default function DashboardPage() {
                     {Array.from({ length: 5 }).map((_, i) => (
                       <StarIconSolid
                         key={i}
-                        className={`h-4 w-4 ${i < 4 ? 'text-amber-500' : 'text-slate-600'}`}
+                        className={`h-4 w-4 text-slate-600`}
                       />
                     ))}
-                    <span className="text-white font-semibold ml-1">4.8</span>
+                    <span className="text-white font-semibold ml-1">N/A</span>
                   </div>
                 </div>
               </div>

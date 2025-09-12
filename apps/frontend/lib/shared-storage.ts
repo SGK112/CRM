@@ -87,90 +87,8 @@ export interface NotificationData {
   updatedAt: string;
 }
 
-// In-memory storage (simulates database persistence)
-const devMockClients: ClientData[] = [
-  {
-    id: '1',
-    _id: '1',
-    name: 'Johnson Family',
-    firstName: 'John',
-    lastName: 'Johnson',
-    email: 'contact@johnsonfamily.com',
-    phone: '(555) 123-4567',
-    address: '123 Oak Street',
-    city: 'New York',
-    state: 'NY',
-    zipCode: '10001',
-    status: 'active',
-    contactType: 'client',
-    projectsCount: 2,
-    totalProjects: 2,
-    totalValue: 45000,
-    lastContact: '2024-09-03T10:30:00Z',
-    updatedAt: '2024-09-03T10:30:00Z',
-    unreadNotifications: 3,
-    quickbooksSynced: true,
-    estimatesSent: 2,
-    estimatesViewed: 1,
-    notes: 'Kitchen remodel project - premium finishes requested. Second project for bathroom renovation scheduled for Q4.'
-  },
-  {
-    id: '2',
-    _id: '2',
-    name: 'Martinez Construction',
-    firstName: 'Carlos',
-    lastName: 'Martinez',
-    company: 'Martinez Construction',
-    email: 'info@martinezconstruction.com',
-    phone: '(555) 234-5678',
-    website: 'www.martinezconstruction.com',
-    address: '456 Pine Avenue',
-    city: 'Los Angeles',
-    state: 'CA',
-    zipCode: '90210',
-    status: 'active',
-    contactType: 'subcontractor',
-    projectsCount: 1,
-    totalProjects: 1,
-    totalValue: 28000,
-    lastContact: '2024-09-01T09:15:00Z',
-    updatedAt: '2024-09-01T09:15:00Z',
-    unreadNotifications: 1,
-    quickbooksSynced: false,
-    estimatesSent: 1,
-    estimatesViewed: 1,
-    specialties: ['Electrical', 'HVAC', 'Plumbing'],
-    certifications: ['Licensed Electrician', 'OSHA Certified'],
-    notes: 'Reliable electrical contractor specializing in residential projects. Great communication and punctual delivery.'
-  },
-  {
-    id: '3',
-    _id: '3',
-    name: 'Home Depot Pro',
-    company: 'Home Depot',
-    email: 'pro@homedepot.com',
-    phone: '(555) 345-6789',
-    website: 'www.homedepot.com',
-    orderPortalUrl: 'https://pro.homedepot.com/orders',
-    catalogUrl: 'https://pro.homedepot.com/catalog',
-    address: '789 Builder Blvd',
-    city: 'Atlanta',
-    state: 'GA',
-    zipCode: '30309',
-    status: 'active',
-    contactType: 'vendor',
-    projectsCount: 0,
-    totalProjects: 0,
-    totalValue: 15000,
-    lastContact: '2024-08-28T14:20:00Z',
-    updatedAt: '2024-08-28T14:20:00Z',
-    unreadNotifications: 0,
-    quickbooksSynced: true,
-    estimatesSent: 0,
-    estimatesViewed: 0,
-    notes: 'Primary supplier for lumber, hardware, and construction materials. Pro account with bulk pricing.'
-  }
-];
+// In-memory storage (simulates database persistence) - cleared for production use
+const devMockClients: ClientData[] = [];
 
 export const clientStorage = {
   getAll: (): ClientData[] => {
@@ -245,75 +163,8 @@ export const clientStorage = {
   }
 };
 
-// Mock project data
-const devMockProjects: ProjectData[] = [
-  {
-    id: '1',
-    _id: '1',
-    name: 'Johnson Kitchen Remodel',
-    description: 'Complete kitchen renovation including new cabinets, countertops, and appliances',
-    status: 'active',
-    priority: 'high',
-    clientId: '1',
-    clientName: 'Johnson Family',
-    address: '123 Oak Street, New York, NY 10001',
-    estimatedBudget: 35000,
-    actualCost: 28500,
-    startDate: '2024-08-15T00:00:00Z',
-    endDate: '2024-10-15T00:00:00Z',
-    estimatedDuration: 60,
-    progress: 65,
-    assignedTeam: ['John Smith', 'Sarah Connor'],
-    tags: ['kitchen', 'remodel', 'residential'],
-    notes: 'Client wants premium finishes. Ordered custom cabinets with 3-week lead time.',
-    createdAt: '2024-08-01T10:00:00Z',
-    updatedAt: '2024-09-05T14:30:00Z'
-  },
-  {
-    id: '2',
-    _id: '2',
-    name: 'Martinez Office Build-out',
-    description: 'Commercial office space renovation for tech startup',
-    status: 'planning',
-    priority: 'medium',
-    clientId: '2',
-    clientName: 'Martinez Construction',
-    address: '456 Pine Avenue, Los Angeles, CA 90210',
-    estimatedBudget: 75000,
-    actualCost: 0,
-    startDate: '2024-10-01T00:00:00Z',
-    endDate: '2024-12-01T00:00:00Z',
-    estimatedDuration: 90,
-    progress: 15,
-    assignedTeam: ['Mike Johnson', 'Lisa Park'],
-    tags: ['commercial', 'office', 'build-out'],
-    notes: 'Need to coordinate with IT team for network infrastructure requirements.',
-    createdAt: '2024-08-20T09:15:00Z',
-    updatedAt: '2024-09-02T11:20:00Z'
-  },
-  {
-    id: '3',
-    _id: '3',
-    name: 'Residential Addition',
-    description: 'Two-story addition with master suite and family room',
-    status: 'completed',
-    priority: 'low',
-    clientId: '1',
-    clientName: 'Johnson Family',
-    address: '123 Oak Street, New York, NY 10001',
-    estimatedBudget: 125000,
-    actualCost: 132000,
-    startDate: '2024-03-01T00:00:00Z',
-    endDate: '2024-07-30T00:00:00Z',
-    estimatedDuration: 150,
-    progress: 100,
-    assignedTeam: ['David Wilson', 'Emma Davis'],
-    tags: ['addition', 'residential', 'two-story'],
-    notes: 'Project completed successfully. Small cost overrun due to structural modifications.',
-    createdAt: '2024-02-15T08:30:00Z',
-    updatedAt: '2024-07-30T16:45:00Z'
-  }
-];
+// Mock project data - cleared for production use
+const devMockProjects: ProjectData[] = [];
 
 export const projectStorage = {
   getAll: (): ProjectData[] => {
@@ -375,48 +226,8 @@ export const projectStorage = {
   }
 };
 
-// Mock document data
-const devMockDocuments: DocumentData[] = [
-  {
-    id: '1',
-    _id: '1',
-    name: 'Kitchen_Remodel_Contract.pdf',
-    type: 'contract',
-    size: 256000,
-    uploadedBy: 'John Smith',
-    projectId: '1',
-    clientId: '1',
-    url: '/uploads/documents/Kitchen_Remodel_Contract.pdf',
-    createdAt: '2024-08-15T10:00:00Z',
-    updatedAt: '2024-08-15T10:00:00Z'
-  },
-  {
-    id: '2',
-    _id: '2',
-    name: 'Building_Permits.pdf',
-    type: 'permit',
-    size: 128000,
-    uploadedBy: 'Sarah Connor',
-    projectId: '2',
-    clientId: '2',
-    url: '/uploads/documents/Building_Permits.pdf',
-    createdAt: '2024-08-20T14:30:00Z',
-    updatedAt: '2024-08-20T14:30:00Z'
-  },
-  {
-    id: '3',
-    _id: '3',
-    name: 'Progress_Photos_Week_4.zip',
-    type: 'photo',
-    size: 15600000,
-    uploadedBy: 'Mike Johnson',
-    projectId: '1',
-    clientId: '1',
-    url: '/uploads/documents/Progress_Photos_Week_4.zip',
-    createdAt: '2024-09-05T09:15:00Z',
-    updatedAt: '2024-09-05T09:15:00Z'
-  }
-];
+// Mock document data - cleared for production use
+const devMockDocuments: DocumentData[] = [];
 
 export const documentStorage = {
   getAll: (): DocumentData[] => {
@@ -469,57 +280,8 @@ export const documentStorage = {
   }
 };
 
-// Mock notification data
-const devMockNotifications: NotificationData[] = [
-  {
-    id: '1',
-    _id: '1',
-    title: 'Project Update',
-    message: 'Kitchen remodel project is 65% complete',
-    type: 'info',
-    read: false,
-    userId: 'user1',
-    actionUrl: '/dashboard/projects/1',
-    createdAt: '2024-09-05T14:30:00Z',
-    updatedAt: '2024-09-05T14:30:00Z'
-  },
-  {
-    id: '2',
-    _id: '2',
-    title: 'New Document Uploaded',
-    message: 'Progress photos for Week 4 have been uploaded',
-    type: 'success',
-    read: false,
-    userId: 'user1',
-    actionUrl: '/dashboard/documents',
-    createdAt: '2024-09-05T09:15:00Z',
-    updatedAt: '2024-09-05T09:15:00Z'
-  },
-  {
-    id: '3',
-    _id: '3',
-    title: 'Payment Reminder',
-    message: 'Invoice #INV-2024-0023 is due in 3 days',
-    type: 'warning',
-    read: true,
-    userId: 'user1',
-    actionUrl: '/dashboard/financial',
-    createdAt: '2024-09-02T10:00:00Z',
-    updatedAt: '2024-09-02T10:00:00Z'
-  },
-  {
-    id: '4',
-    _id: '4',
-    title: 'Permit Approved',
-    message: 'Building permit for Martinez Office project has been approved',
-    type: 'success',
-    read: false,
-    userId: 'user1',
-    actionUrl: '/dashboard/projects/2',
-    createdAt: '2024-09-01T15:45:00Z',
-    updatedAt: '2024-09-01T15:45:00Z'
-  }
-];
+// Mock notification data - cleared for production use
+const devMockNotifications: NotificationData[] = [];
 
 export const notificationStorage = {
   getAll: (): NotificationData[] => {

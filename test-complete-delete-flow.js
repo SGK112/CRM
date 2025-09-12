@@ -1,4 +1,5 @@
-const fetch = require('node-fetch');
+/* eslint-disable no-console */
+import fetch from 'node-fetch';
 
 async function testCompleteDeleteFlow() {
   console.log('🧪 Testing complete delete flow including UI feedback...\n');

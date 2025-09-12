@@ -68,9 +68,10 @@ function UniversalDropdown({ isOpen, onClose, buttonRef, children, className = '
     if (isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
 
-      // Always position above the button - use viewport coordinates for fixed positioning
+      // Position above the button - estimate dropdown height and position accordingly
+      const estimatedDropdownHeight = 180; // Approximate height of the dropdown
       setButtonPosition({
-        top: rect.top - 8, // Use viewport coordinates directly for fixed positioning
+        top: rect.top - estimatedDropdownHeight - 8, // Position above with gap
         left: rect.left,
         right: window.innerWidth - rect.right,
       });
@@ -93,7 +94,8 @@ function UniversalDropdown({ isOpen, onClose, buttonRef, children, className = '
           top: `${buttonPosition.top}px`,
           left: `${buttonPosition.left}px`,
           minWidth: '200px',
-          transformOrigin: 'top left',
+          transformOrigin: 'bottom left',
+          animation: 'slideUpFromBelow 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards',
         }}
         role="menu"
         aria-orientation="vertical"
@@ -212,6 +214,17 @@ export default function Layout({ children }: LayoutProps) {
 
   // Dynamic counts for sidebar badges (fetched after auth)
   const [counts, setCounts] = useState<{ projects?: number; clients?: number; documents?: number; notifications?: number } | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Expose refresh function globally
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (window as any).refreshSidebarCounts = () => {
+        setRefreshTrigger(prev => prev + 1);
+      };
+    }
+  }, []);
 
   useEffect(() => {
     async function fetchCounts() {
@@ -254,7 +267,7 @@ export default function Layout({ children }: LayoutProps) {
       }
     }
     fetchCounts();
-  }, []);
+  }, [refreshTrigger]);
 
   const navigationGroups: NavigationGroup[] = [
     {

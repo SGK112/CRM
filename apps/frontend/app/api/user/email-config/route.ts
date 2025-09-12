@@ -1,22 +1,70 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Force dynamic rendering for this route
 export const dynamic = 'force-dynamic';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+export async function GET(request: NextRequest) {
+  try {
+    const token =
+      request.headers.get('authorization')?.replace('Bearer ', '') ||
+      request.cookies.get('accessToken')?.value;
+
+    if (!token) {
+      return NextResponse.json({ success: false, message: 'No token provided' }, { status: 401 });
+    }
+
+    const response = await fetch(`${BACKEND_URL}/api/user/email-config`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    let data;
+    try {
+      const text = await response.text();
+      data = text ? JSON.parse(text) : {};
+    } catch (parseError) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid response from server' },
+        { status: 500 }
+      );
+    }
+
+    if (!response.ok) {
+      return NextResponse.json(
+        { success: false, message: data.message || 'Failed to fetch email configuration' },
+        { status: response.status }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      config: data,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to fetch email configuration',
+      },
+      { status: 500 }
+    );
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    // Get the access token from cookies
-    const token = request.cookies.get('accessToken')?.value;
+    const token =
+      request.headers.get('authorization')?.replace('Bearer ', '') ||
+      request.cookies.get('accessToken')?.value;
 
     if (!token) {
-      return NextResponse.json(
-        { success: false, message: 'Authentication required' },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, message: 'No token provided' }, { status: 401 });
     }
 
     const response = await fetch(`${BACKEND_URL}/api/user/email-config`, {
@@ -28,13 +76,28 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(body),
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to update email configuration');
+    let data;
+    try {
+      const text = await response.text();
+      data = text ? JSON.parse(text) : {};
+    } catch (parseError) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid response from server' },
+        { status: 500 }
+      );
     }
 
-    const data = await response.json();
-    return NextResponse.json(data);
+    if (!response.ok) {
+      return NextResponse.json(
+        { success: false, message: data.message || 'Failed to update email configuration' },
+        { status: response.status }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      config: data,
+    });
   } catch (error) {
     return NextResponse.json(
       {

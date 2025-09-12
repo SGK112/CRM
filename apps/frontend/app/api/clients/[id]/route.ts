@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { findInDevClientsStore, updateInDevClientsStore, removeFromDevClientsStore } from '@/lib/dev-client-store';
 import { findContactInFile, updateContactInFile, removeContactFromFile } from '@/lib/file-contact-store';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 export async function GET(
   request: NextRequest,

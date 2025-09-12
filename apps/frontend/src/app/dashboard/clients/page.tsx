@@ -80,76 +80,9 @@ export default function ClientsPage() {
       setClients(clientsData.clients || []);
       setNotifications(notificationsData.notifications || []);
     } catch (error) {
-      // Fallback to mock data
-      setClients([
-        {
-          id: '1',
-          name: 'Johnson Family',
-          email: 'contact@johnsonfamily.com',
-          phone: '(555) 123-4567',
-          status: 'active',
-          projectsCount: 2,
-          totalValue: 45000,
-          lastContact: '2024-09-03T10:30:00Z',
-          unreadNotifications: 3,
-          quickbooksSynced: true,
-          estimatesSent: 2,
-          estimatesViewed: 1,
-          lastEstimateViewed: '2024-09-02T14:20:00Z'
-        },
-        {
-          id: '2',
-          name: 'Martinez Construction',
-          email: 'info@martinezconstruction.com',
-          phone: '(555) 234-5678',
-          status: 'active',
-          projectsCount: 1,
-          totalValue: 28000,
-          lastContact: '2024-09-01T09:15:00Z',
-          unreadNotifications: 1,
-          quickbooksSynced: false,
-          estimatesSent: 1,
-          estimatesViewed: 1,
-          lastEstimateViewed: '2024-08-30T16:45:00Z'
-        },
-        {
-          id: '3',
-          name: 'Wilson Enterprises',
-          email: 'hello@wilsonenterprises.com',
-          phone: '(555) 345-6789',
-          status: 'lead',
-          projectsCount: 0,
-          totalValue: 0,
-          lastContact: '2024-08-28T11:00:00Z',
-          unreadNotifications: 0,
-          quickbooksSynced: false,
-          estimatesSent: 0,
-          estimatesViewed: 0
-        }
-      ]);
-
-      setNotifications([
-        {
-          id: '1',
-          type: 'estimate_viewed',
-          title: 'Estimate Viewed',
-          message: 'Johnson Family viewed your kitchen renovation estimate',
-          timestamp: '2024-09-03T10:30:00Z',
-          read: false,
-          clientId: '1',
-          clientName: 'Johnson Family'
-        },
-        {
-          id: '2',
-          type: 'email',
-          title: 'Email Sent',
-          message: 'Follow-up email sent to Martinez Construction',
-          timestamp: '2024-09-01T09:15:00Z',
-          read: true,
-          clientId: '2',
-          clientName: 'Martinez Construction'
-        }
-      ]);
+      // Demo data cleared - using empty arrays for clean start
+      setClients([]);
+      setNotifications([]);
     }
 
     setLoading(false);

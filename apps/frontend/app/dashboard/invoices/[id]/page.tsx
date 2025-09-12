@@ -1,5 +1,5 @@
 'use client';
-import { API_BASE } from '@/lib/api';
+import { API_PREFIX } from '@/lib/api';
 import {
     ArrowDownTrayIcon,
     ArrowLeftIcon,
@@ -40,14 +40,36 @@ export default function InvoiceDetail() {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : '';
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !token) {
+      router.push(`/auth/login?redirect=/dashboard/invoices/${id}`);
+    }
+  }, [token, router, id]);
   useEffect(() => {
     if (!id) return;
     (async () => {
-      const res = await fetch(`${API_BASE}/invoices/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) setInv(await res.json());
-      setLoading(false);
+      try {
+        if (!token) {
+          setLoading(false);
+          return;
+        }
+        
+        const headers: Record<string, string> = {
+          Authorization: `Bearer ${token}`
+        };
+        
+        const res = await fetch(`${API_PREFIX}/invoices/${id}`, { headers });
+        
+        if (res.ok) {
+          setInv(await res.json());
+        }
+      } catch (error) {
+        // Error fetching invoice
+      } finally {
+        setLoading(false);
+      }
     })();
   }, [id, token]);
 
@@ -57,7 +79,7 @@ export default function InvoiceDetail() {
     if (!ok) return;
     setDeleting(true);
     try {
-      const res = await fetch(`${API_BASE}/invoices/${id}`, {
+      const res = await fetch(`${API_PREFIX}/invoices/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -71,13 +93,13 @@ export default function InvoiceDetail() {
   const sendInvoice = async () => {
     if (!id) return;
     try {
-      const res = await fetch(`${API_BASE}/invoices/${id}/send`, {
+      const res = await fetch(`${API_PREFIX}/invoices/${id}/send`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
         // refresh
-        const refreshed = await fetch(`${API_BASE}/invoices/${id}`, {
+        const refreshed = await fetch(`${API_PREFIX}/invoices/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (refreshed.ok) setInv(await refreshed.json());
@@ -89,7 +111,7 @@ export default function InvoiceDetail() {
   const downloadPdf = async () => {
     if (!id) return;
     try {
-      const res = await fetch(`${API_BASE}/invoices/${id}/pdf`, {
+      const res = await fetch(`${API_PREFIX}/invoices/${id}/pdf`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) return;
@@ -109,6 +131,24 @@ export default function InvoiceDetail() {
       {loading && <div className="text-sm text-gray-700">Loading...</div>}
       {!loading && inv && (
         <>
+          {!token && (
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-center">
+                <div className="text-blue-600 text-sm">
+                  🧾 <strong>Demo Mode:</strong> You're viewing demo data. For full functionality, please{' '}
+                  <Link href="/auth/login" className="text-blue-700 underline hover:text-blue-800">
+                    sign in
+                  </Link>{' '}
+                  or{' '}
+                  <Link href="/auth/register" className="text-blue-700 underline hover:text-blue-800">
+                    create an account
+                  </Link>
+                  .
+                </div>
+              </div>
+            </div>
+          )}
+          
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-3">
               <Link href="/dashboard/invoices" className="text-gray-600 hover:text-gray-900">

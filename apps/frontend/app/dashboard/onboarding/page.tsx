@@ -312,6 +312,10 @@ export default function OnboardingPage() {
           const verifyResponse = await fetch(`/api/clients/${newContactId}`, { headers });
 
           if (verifyResponse.ok) {
+            // Contact verified - refresh sidebar counts
+            if (typeof window !== 'undefined' && (window as any).refreshSidebarCounts) {
+              (window as any).refreshSidebarCounts();
+            }
             // Contact verified - safe to redirect
             router.push(`/dashboard/clients/${newContactId}?created=true&type=${formData.entityType}`);
           } else {
@@ -320,9 +324,17 @@ export default function OnboardingPage() {
             const retryResponse = await fetch(`/api/clients/${newContactId}`, { headers });
 
             if (retryResponse.ok) {
+              // Contact verified after retry - refresh sidebar counts
+              if (typeof window !== 'undefined' && (window as any).refreshSidebarCounts) {
+                (window as any).refreshSidebarCounts();
+              }
               router.push(`/dashboard/clients/${newContactId}?created=true&type=${formData.entityType}`);
             } else {
               // Fallback: redirect to contacts list with success message
+              // Still refresh counts as contact was likely created
+              if (typeof window !== 'undefined' && (window as any).refreshSidebarCounts) {
+                (window as any).refreshSidebarCounts();
+              }
               router.push(`/dashboard/clients?created=${newContactId}&name=${encodeURIComponent(created.name || 'Contact')}`);
             }
           }

@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 // Force dynamic rendering for this route
 export const dynamic = 'force-dynamic';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,35 +11,45 @@ export async function GET(request: NextRequest) {
     const token = request.cookies.get('accessToken')?.value;
 
     if (!token) {
-      return NextResponse.json(
-        { success: false, message: 'Authentication required' },
-        { status: 401 }
-      );
+      // Return default theme when no token
+      return NextResponse.json({
+        success: true,
+        theme: 'dark', // Default theme
+        data: { theme: 'dark' }
+      });
     }
 
-    const response = await fetch(`${BACKEND_URL}/api/user/theme`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/user/theme`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        signal: AbortSignal.timeout(5000)
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return NextResponse.json(data);
+      }
+    } catch (backendError) {
+      // Backend is unavailable, return default
+    }
+
+    // Return default theme when backend is unavailable
+    return NextResponse.json({
+      success: true,
+      theme: 'dark',
+      data: { theme: 'dark' }
     });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to fetch theme');
-    }
-
-    const data = await response.json();
-    return NextResponse.json(data);
   } catch (error) {
-    return NextResponse.json(
-      {
-        success: false,
-        message: error instanceof Error ? error.message : 'Failed to fetch theme',
-      },
-      { status: 500 }
-    );
+    // Always return a valid theme response
+    return NextResponse.json({
+      success: true,
+      theme: 'dark',
+      data: { theme: 'dark' }
+    });
   }
 }
 

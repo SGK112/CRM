@@ -40,38 +40,13 @@ export default function AnalyticsPage() {
       // Mock data - replace with actual API calls
       setTimeout(() => {
         setStats({
-          totalRevenue: 487500,
-          totalProjects: 23,
-          totalClients: 45,
-          completionRate: 87
+          totalRevenue: 0,
+          totalProjects: 0,
+          totalClients: 0,
+          completionRate: 0
         });
 
-        setRecentActivity([
-          {
-            id: '1',
-            type: 'project',
-            title: 'Kitchen Remodel completed',
-            timestamp: '2 hours ago'
-          },
-          {
-            id: '2',
-            type: 'payment',
-            title: 'Payment received from Johnson Family',
-            timestamp: '4 hours ago'
-          },
-          {
-            id: '3',
-            type: 'estimate',
-            title: 'New estimate created for bathroom renovation',
-            timestamp: '1 day ago'
-          },
-          {
-            id: '4',
-            type: 'client',
-            title: 'New client added: Miller Construction',
-            timestamp: '2 days ago'
-          }
-        ]);
+        setRecentActivity([]);
 
         setLoading(false);
       }, 1000);

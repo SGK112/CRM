@@ -1,29 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-const DEV_MOCK_NOTIFICATIONS = [
-  {
-    id: '1',
-    type: 'estimate_viewed',
-    title: 'Estimate Viewed',
-    message: 'Johnson Family viewed your kitchen renovation estimate',
-    timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-    read: false,
-    clientId: '1',
-    clientName: 'Johnson Family'
-  },
-  {
-    id: '2',
-    type: 'email',
-    title: 'Email Sent',
-    message: 'Follow-up email sent to Martinez Construction',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-    read: true,
-    clientId: '2',
-    clientName: 'Martinez Construction'
-  }
-];
+interface Notification {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  timestamp: string;
+  read: boolean;
+  clientId: string;
+  clientName: string;
+}
+
+const DEV_MOCK_NOTIFICATIONS: Notification[] = [];
 
 export async function GET(request: NextRequest) {
   try {

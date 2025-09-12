@@ -18,9 +18,7 @@ export default function ClientsImportPage() {
   // Function to download CSV template
   const downloadTemplate = () => {
     const csvContent = `firstName,lastName,email,phone,company,contactType,address,city,state,zipCode,country,website,tags,notes
-John,Doe,john.doe@example.com,(555) 123-4567,Acme Corp,client,"123 Main St","New York",NY,10001,USA,https://johndoe.com,"tag1,tag2",Sample client notes
-Jane,Smith,jane.smith@example.com,(555) 987-6543,Smith Construction,subcontractor,"456 Oak Ave","Los Angeles",CA,90210,USA,https://smithconstruction.com,"contractor,trusted",Reliable subcontractor
-Bob,Wilson,bob@wilsontools.com,(555) 456-7890,Wilson Tools,vendor,"789 Pine St","Chicago",IL,60601,USA,https://wilsontools.com,"vendor,supplies",Tool supplier`;
+,,,(555) 000-0000,,client,,,,,USA,,,"Notes here"`;
     
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);

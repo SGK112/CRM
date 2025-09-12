@@ -1,6 +1,7 @@
 'use client';
 
 import PhoneInput from '@/components/forms/PhoneInput';
+import WorkflowActions from '@/components/WorkflowActions';
 import {
     ArrowLeftIcon,
     CalendarIcon,
@@ -61,6 +62,8 @@ interface ClientSelectorProps {
   selectedClientId: string | undefined;
   onClientSelect: (clientId: string | undefined) => void;
   onClientCreated?: (client: Client) => void;
+  loading?: boolean;
+  error?: string | null;
 }
 
 function ClientSelector({
@@ -68,6 +71,8 @@ function ClientSelector({
   selectedClientId,
   onClientSelect,
   onClientCreated,
+  loading = false,
+  error = null,
 }: ClientSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -219,149 +224,166 @@ function ClientSelector({
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="w-full px-3 py-2 border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 bg-[var(--surface-1)] text-left flex items-center justify-between hover:bg-[var(--surface-2)] transition-colors"
+          disabled={loading}
+          className="w-full px-3 py-2 border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 bg-[var(--surface-1)] text-left flex items-center justify-between hover:bg-[var(--surface-2)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <span className={selectedClient ? 'text-[var(--text)]' : 'text-[var(--text-dim)]'}>
-            {selectedClient
-              ? `${selectedClient.firstName} ${selectedClient.lastName}${selectedClient.company ? ` (${selectedClient.company})` : ''}`
-              : 'Select a client (optional)'}
+            {loading 
+              ? 'Loading clients...'
+              : selectedClient
+                ? `${selectedClient.firstName} ${selectedClient.lastName}${selectedClient.company ? ` (${selectedClient.company})` : ''}`
+                : error 
+                  ? 'No clients available (you can still create a project)'
+                  : 'Select a client (optional)'
+            }
           </span>
           <ChevronDownIcon
             className={`h-4 w-4 text-[var(--text-faint)] transition-transform ${isOpen ? 'rotate-180' : ''}`}
           />
         </button>
 
-        {isOpen && (
+        {isOpen && !loading && (
           <div className="absolute z-10 w-full mt-1 bg-[var(--surface-1)] border border-[var(--border)] rounded-lg shadow-lg max-h-80 overflow-hidden">
-            <div className="p-2 border-b border-[var(--border)]">
-              <div className="relative">
-                <MagnifyingGlassIcon className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--text-faint)]" />
-                <input
-                  type="text"
-                  placeholder="Search by name, email, phone, company, or address..."
-                  value={searchTerm}
-                  onChange={e => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 border border-[var(--border)] rounded-md focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 text-sm bg-[var(--input-bg)] text-[var(--text)] placeholder-[var(--text-faint)]"
-                  autoFocus
-                />
+            {error ? (
+              <div className="p-4 text-center">
+                <p className="text-[var(--text-dim)] text-sm mb-2">{error}</p>
+                <p className="text-xs text-[var(--text-faint)]">
+                  You can still create a project without selecting a client.
+                </p>
               </div>
-            </div>
-
-            <div className="max-h-64 overflow-y-auto">
-              {/* Add new client trigger inside list */}
-              <div className="px-3 py-2 border-b border-[var(--border)]">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowCreateForm(v => !v);
-                    setCreateError(null);
-                  }}
-                  className="w-full inline-flex items-center gap-2 text-sm text-amber-500 hover:text-amber-400"
-                >
-                  <UserPlusIcon className="h-4 w-4" />
-                  {showCreateForm ? 'Close new client form' : 'Add new client'}
-                </button>
-                {showCreateForm && (
-                  <div className="mt-2 rounded-md border border-[var(--border)] bg-[var(--surface-2)] p-3 space-y-2">
-                    <div className="grid grid-cols-2 gap-2">
-                      <input
-                        className="col-span-1 px-2 py-1 rounded border border-[var(--border)] bg-[var(--input-bg)] text-[var(--text)] text-xs"
-                        placeholder="First name*"
-                        value={newClient.firstName}
-                        onChange={e => setNewClient({ ...newClient, firstName: e.target.value })}
-                      />
-                      <input
-                        className="col-span-1 px-2 py-1 rounded border border-[var(--border)] bg-[var(--input-bg)] text-[var(--text)] text-xs"
-                        placeholder="Last name"
-                        value={newClient.lastName}
-                        onChange={e => setNewClient({ ...newClient, lastName: e.target.value })}
-                      />
-                      <input
-                        className="col-span-1 px-2 py-1 rounded border border-[var(--border)] bg-[var(--input-bg)] text-[var(--text)] text-xs"
-                        placeholder="Email"
-                        value={newClient.email}
-                        onChange={e => setNewClient({ ...newClient, email: e.target.value })}
-                      />
-                      <div className="col-span-1">
-                        <PhoneInput
-                          value={newClient.phone || ''}
-                          onChange={value => setNewClient({ ...newClient, phone: value })}
-                          placeholder="Phone"
-                          className="px-2 py-1 rounded border border-[var(--border)] bg-[var(--input-bg)] text-[var(--text)] text-xs"
-                        />
-                      </div>
-                      <input
-                        className="col-span-2 px-2 py-1 rounded border border-[var(--border)] bg-[var(--input-bg)] text-[var(--text)] text-xs"
-                        placeholder="Company (optional)"
-                        value={newClient.company}
-                        onChange={e => setNewClient({ ...newClient, company: e.target.value })}
-                      />
-                    </div>
-                    {createError && <div className="text-xs text-red-400">{createError}</div>}
-                    <div className="flex gap-2 justify-end">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowCreateForm(false);
-                          setCreateError(null);
-                        }}
-                        className="px-2 py-1 text-xs rounded border border-[var(--border)] text-[var(--text-dim)] hover:bg-[var(--surface-3)]"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="button"
-                        disabled={creating}
-                        onClick={handleCreate}
-                        className="px-2 py-1 text-xs rounded bg-amber-600 text-white hover:bg-amber-500 disabled:opacity-60"
-                      >
-                        {creating ? 'Creating…' : 'Create & select'}
-                      </button>
-                    </div>
+            ) : (
+              <>
+                <div className="p-2 border-b border-[var(--border)]">
+                  <div className="relative">
+                    <MagnifyingGlassIcon className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--text-faint)]" />
+                    <input
+                      type="text"
+                      placeholder="Search by name, email, phone, company, or address..."
+                      value={searchTerm}
+                      onChange={e => setSearchTerm(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2 border border-[var(--border)] rounded-md focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 text-sm bg-[var(--input-bg)] text-[var(--text)] placeholder-[var(--text-faint)]"
+                      autoFocus
+                    />
                   </div>
-                )}
-              </div>
-              <div
-                className="px-3 py-2 hover:bg-[var(--surface-2)] cursor-pointer flex items-center justify-between"
-                onClick={() => handleClientSelect(null)}
-              >
-                <span className="text-[var(--text-dim)]">No client selected</span>
-                {!selectedClientId && <CheckIcon className="h-4 w-4 text-amber-600" />}
-              </div>
-
-              {filteredClients.length === 0 && searchTerm ? (
-                <div className="px-3 py-2 text-[var(--text-dim)] text-sm">
-                  <div>No clients found matching "{searchTerm}"</div>
                 </div>
-              ) : (
-                filteredClients.map(client => (
-                  <div
-                    key={client._id}
-                    className="px-3 py-2 hover:bg-[var(--surface-2)] cursor-pointer flex items-center justify-between"
-                    onClick={() => handleClientSelect(client)}
-                  >
-                    <div>
-                      <div className="font-medium text-[var(--text)]">
-                        {client.firstName} {client.lastName}
-                      </div>
-                      {(client.company || client.phone) && (
-                        <div className="text-sm text-[var(--text-dim)]">
-                          {client.company}
-                          {client.company && client.phone ? ' • ' : ''}
-                          {client.phone}
+
+                <div className="max-h-64 overflow-y-auto">
+                  {/* Add new client trigger inside list */}
+                  <div className="px-3 py-2 border-b border-[var(--border)]">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowCreateForm(v => !v);
+                        setCreateError(null);
+                      }}
+                      className="w-full inline-flex items-center gap-2 text-sm text-amber-500 hover:text-amber-400"
+                    >
+                      <UserPlusIcon className="h-4 w-4" />
+                      {showCreateForm ? 'Close new client form' : 'Add new client'}
+                    </button>
+                    {showCreateForm && (
+                      <div className="mt-2 rounded-md border border-[var(--border)] bg-[var(--surface-2)] p-3 space-y-2">
+                        <div className="grid grid-cols-2 gap-2">
+                          <input
+                            className="col-span-1 px-2 py-1 rounded border border-[var(--border)] bg-[var(--input-bg)] text-[var(--text)] text-xs"
+                            placeholder="First name*"
+                            value={newClient.firstName}
+                            onChange={e => setNewClient({ ...newClient, firstName: e.target.value })}
+                          />
+                          <input
+                            className="col-span-1 px-2 py-1 rounded border border-[var(--border)] bg-[var(--input-bg)] text-[var(--text)] text-xs"
+                            placeholder="Last name"
+                            value={newClient.lastName}
+                            onChange={e => setNewClient({ ...newClient, lastName: e.target.value })}
+                          />
+                          <input
+                            className="col-span-1 px-2 py-1 rounded border border-[var(--border)] bg-[var(--input-bg)] text-[var(--text)] text-xs"
+                            placeholder="Email"
+                            value={newClient.email}
+                            onChange={e => setNewClient({ ...newClient, email: e.target.value })}
+                          />
+                          <div className="col-span-1">
+                            <PhoneInput
+                              value={newClient.phone || ''}
+                              onChange={value => setNewClient({ ...newClient, phone: value })}
+                              placeholder="Phone"
+                              className="px-2 py-1 rounded border border-[var(--border)] bg-[var(--input-bg)] text-[var(--text)] text-xs"
+                            />
+                          </div>
+                          <input
+                            className="col-span-2 px-2 py-1 rounded border border-[var(--border)] bg-[var(--input-bg)] text-[var(--text)] text-xs"
+                            placeholder="Company (optional)"
+                            value={newClient.company}
+                            onChange={e => setNewClient({ ...newClient, company: e.target.value })}
+                          />
                         </div>
-                      )}
-                      {client.email && (
-                        <div className="text-xs text-[var(--text-faint)]">{client.email}</div>
-                      )}
-                    </div>
-                    {selectedClientId === client._id && (
-                      <CheckIcon className="h-4 w-4 text-amber-600" />
+                        {createError && <div className="text-xs text-red-400">{createError}</div>}
+                        <div className="flex gap-2 justify-end">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowCreateForm(false);
+                              setCreateError(null);
+                            }}
+                            className="px-2 py-1 text-xs rounded border border-[var(--border)] text-[var(--text-dim)] hover:bg-[var(--surface-3)]"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="button"
+                            disabled={creating}
+                            onClick={handleCreate}
+                            className="px-2 py-1 text-xs rounded bg-amber-600 text-white hover:bg-amber-500 disabled:opacity-60"
+                          >
+                            {creating ? 'Creating…' : 'Create & select'}
+                          </button>
+                        </div>
+                      </div>
                     )}
                   </div>
-                ))
-              )}
-            </div>
+                  <div
+                    className="px-3 py-2 hover:bg-[var(--surface-2)] cursor-pointer flex items-center justify-between"
+                    onClick={() => handleClientSelect(null)}
+                  >
+                    <span className="text-[var(--text-dim)]">No client selected</span>
+                    {!selectedClientId && <CheckIcon className="h-4 w-4 text-amber-600" />}
+                  </div>
+
+                  {filteredClients.length === 0 && searchTerm ? (
+                    <div className="px-3 py-2 text-[var(--text-dim)] text-sm">
+                      <div>No clients found matching "{searchTerm}"</div>
+                    </div>
+                  ) : (
+                    filteredClients.map(client => (
+                      <div
+                        key={client._id}
+                        className="px-3 py-2 hover:bg-[var(--surface-2)] cursor-pointer flex items-center justify-between"
+                        onClick={() => handleClientSelect(client)}
+                      >
+                        <div>
+                          <div className="font-medium text-[var(--text)]">
+                            {client.firstName} {client.lastName}
+                          </div>
+                          {(client.company || client.phone) && (
+                            <div className="text-sm text-[var(--text-dim)]">
+                              {client.company}
+                              {client.company && client.phone ? ' • ' : ''}
+                              {client.phone}
+                            </div>
+                          )}
+                          {client.email && (
+                            <div className="text-xs text-[var(--text-faint)]">{client.email}</div>
+                          )}
+                        </div>
+                        {selectedClientId === client._id && (
+                          <CheckIcon className="h-4 w-4 text-amber-600" />
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </>
+            )}
           </div>
         )}
       </div>
@@ -372,12 +394,29 @@ function ClientSelector({
 export default function NewDashboardProjectPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const returnTo = searchParams?.get('returnTo') || '/dashboard/projects';
   const preselectedClientId = searchParams?.get('clientId') || '';
+  
+  // Smart returnTo logic: if clientId is provided but no returnTo, assume coming from estimate form
+  const getReturnTo = () => {
+    const explicitReturnTo = searchParams?.get('returnTo');
+    if (explicitReturnTo) {
+      return explicitReturnTo;
+    }
+    // If clientId is provided but no returnTo, likely came from estimate form
+    if (preselectedClientId) {
+      return `/dashboard/estimates/new?clientId=${preselectedClientId}`;
+    }
+    return '/dashboard/projects';
+  };
+  
+  const returnTo = getReturnTo();
 
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(false);
+  const [clientsLoading, setClientsLoading] = useState(true);
+  const [clientsError, setClientsError] = useState<string | null>(null);
   const [tagInput, setTagInput] = useState('');
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
 
   const [formData, setFormData] = useState<CreateProjectData>({
     title: '',
@@ -402,11 +441,30 @@ export default function NewDashboardProjectPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Re-check URL params after clients are loaded to ensure selection works
+  useEffect(() => {
+    if (clients.length > 0 && searchParams) {
+      const clientId = searchParams.get('clientId');
+      if (clientId && !formData.clientId) {
+        // Only set if not already set and client exists in the list
+        const clientExists = clients.some(client => client._id === clientId);
+        if (clientExists) {
+          setFormData(prev => ({ ...prev, clientId }));
+        }
+      }
+    }
+  }, [clients, searchParams, formData.clientId]);
+
   const fetchClients = useCallback(async () => {
     try {
+      setClientsLoading(true);
+      setClientsError(null);
+      
       const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
       if (!token) {
-        router.push('/auth/login');
+        // If no token, still allow the form to work with limited functionality
+        setClients([]);
+        setClientsLoading(false);
         return;
       }
 
@@ -419,17 +477,30 @@ export default function NewDashboardProjectPage() {
 
       if (response.ok) {
         const data = await response.json();
-        // Ensure data is an array
-        setClients(Array.isArray(data) ? data : []);
+        const clientsArray = Array.isArray(data) ? data : [];
+        setClients(clientsArray);
+        
+        // Auto-select client if preselected from URL
+        if (preselectedClientId) {
+          const foundClient = clientsArray.find(client => client._id === preselectedClientId);
+          if (foundClient) {
+            setSelectedClient(foundClient);
+            setFormData(prev => ({ ...prev, clientId: foundClient._id }));
+          }
+        }
       } else {
-        // Set empty array on error
+        // Handle API errors gracefully
         setClients([]);
+        setClientsError('Unable to load clients. You can still create a project.');
       }
     } catch (error) {
-      // Set empty array on error
+      // Handle network errors gracefully
       setClients([]);
+      setClientsError('Connection error. Please check your network.');
+    } finally {
+      setClientsLoading(false);
     }
-  }, [router]);
+  }, [preselectedClientId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -471,6 +542,10 @@ export default function NewDashboardProjectPage() {
 
       if (response.ok) {
         const created = await response.json();
+        // Trigger sidebar refresh for counts
+        if (typeof window !== 'undefined' && 'refreshSidebarCounts' in window) {
+          (window as { refreshSidebarCounts: () => void }).refreshSidebarCounts();
+        }
         // Check if we need to redirect back to estimate creation
         if (returnTo.includes('estimates/new')) {
           const url = new URL(returnTo, window.location.origin);
@@ -549,11 +624,58 @@ export default function NewDashboardProjectPage() {
         >
           <ArrowLeftIcon className="h-5 w-5 mr-1" /> Back
         </Link>
-        <div>
+        <div className="flex-1">
           <h1 className="text-3xl font-bold text-primary">Create New Project</h1>
           <p className="text-secondary mt-1">Fill in the details to create a new project</p>
         </div>
       </div>
+
+      {/* Client Info Header */}
+      {(selectedClient || (preselectedClientId && clients.length > 0)) && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-medium text-blue-900 dark:text-blue-100">
+                Project for {selectedClient?.firstName} {selectedClient?.lastName}
+                {selectedClient?.company && ` (${selectedClient.company})`}
+              </h3>
+              <div className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                {selectedClient?.email && (
+                  <span className="mr-4">{selectedClient.email}</span>
+                )}
+                {selectedClient?.phone && (
+                  <span>{selectedClient.phone}</span>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Link
+                href={`/dashboard/clients/${selectedClient?._id || preselectedClientId}`}
+                className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200"
+              >
+                View Client
+              </Link>
+              <span className="text-blue-300 dark:text-blue-600">•</span>
+              <Link
+                href={`/dashboard/estimates/new?clientId=${selectedClient?._id || preselectedClientId}`}
+                className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200"
+              >
+                Create Estimate
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Error Messages */}
+      {clientsError && (
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-6">
+          <div className="text-yellow-800 dark:text-yellow-200">
+            <p className="font-medium">Notice:</p>
+            <p className="text-sm mt-1">{clientsError}</p>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Basic Information */}
@@ -630,16 +752,40 @@ export default function NewDashboardProjectPage() {
             <ClientSelector
               clients={clients}
               selectedClientId={formData.clientId}
-              onClientSelect={clientId => setFormData(prev => ({ ...prev, clientId }))}
+              onClientSelect={clientId => {
+                setFormData(prev => ({ ...prev, clientId }));
+                const client = clients.find(c => c._id === clientId);
+                setSelectedClient(client || null);
+              }}
               onClientCreated={client => {
                 setClients(prev => {
                   const prevArray = Array.isArray(prev) ? prev : [];
                   return [client, ...prevArray];
                 });
                 setFormData(prev => ({ ...prev, clientId: client._id }));
+                setSelectedClient(client);
               }}
+              loading={clientsLoading}
+              error={clientsError}
             />
           </div>
+
+          {/* Workflow Actions */}
+          {formData.clientId && (
+            <div className="mt-6 pt-4 border-t border-[var(--border)]">
+              <WorkflowActions
+                context="project"
+                currentItem={{
+                  _id: '',
+                  clientId: formData.clientId,
+                  projectId: '',
+                }}
+                size="sm"
+                variant="pills"
+                layout="horizontal"
+              />
+            </div>
+          )}
         </div>
 
         {/* Budget & Timeline */}

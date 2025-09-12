@@ -17,6 +17,7 @@ import {
   BellIcon,
   CalendarIcon,
   DocumentTextIcon,
+  CalculatorIcon,
   WrenchScrewdriverIcon,
   TruckIcon,
   UserGroupIcon,
@@ -65,6 +66,8 @@ interface ContactData {
   quickbooksSynced?: boolean;
   estimatesSent?: number;
   estimatesViewed?: number;
+  invoicesCount?: number;
+  invoiceTotal?: number;
   accountType?: string;
   source?: string;
   notes?: string;
@@ -203,9 +206,25 @@ export default function ContactDetailPage() {
             label: 'Create Estimate',
             icon: DocumentTextIcon,
             action: () => {
-              window.open(`/dashboard/estimates/new?contact=${contactId}`, '_blank');
+              router.push(`/dashboard/estimates/new?clientId=${contactId}`);
             },
             color: 'orange'
+          },
+          {
+            label: 'Create Invoice',
+            icon: CurrencyDollarIcon,
+            action: () => {
+              router.push(`/dashboard/invoices/new?clientId=${contactId}`);
+            },
+            color: 'green'
+          },
+          {
+            label: 'Create Project',
+            icon: WrenchScrewdriverIcon,
+            action: () => {
+              router.push(`/dashboard/projects/new?clientId=${contactId}`);
+            },
+            color: 'purple'
           },
           {
             label: 'Send Email',
@@ -224,9 +243,17 @@ export default function ContactDetailPage() {
             label: 'Assign Project',
             icon: WrenchScrewdriverIcon,
             action: () => {
-              window.open(`/dashboard/projects/new?subcontractor=${contactId}`, '_blank');
+              router.push(`/dashboard/projects?assignTo=${contactId}`);
             },
             color: 'green'
+          },
+          {
+            label: 'Create Project',
+            icon: PlusIcon,
+            action: () => {
+              router.push(`/dashboard/projects/new?assignedTo=${contactId}`);
+            },
+            color: 'purple'
           },
           {
             label: 'Send Email',
@@ -278,7 +305,7 @@ export default function ContactDetailPage() {
             label: 'Assign Task',
             icon: PlusIcon,
             action: () => {
-              window.open(`/dashboard/tasks/new?assignee=${contactId}`, '_blank');
+              router.push(`/dashboard/projects?assignTo=${contactId}`);
             },
             color: 'orange'
           },
@@ -286,7 +313,7 @@ export default function ContactDetailPage() {
             label: 'Schedule Review',
             icon: CalendarIcon,
             action: () => {
-              window.open(`/dashboard/calendar/new?contact=${contactId}&type=review`, '_blank');
+              router.push(`/dashboard/calendar?clientId=${contactId}&type=review`);
             },
             color: 'purple'
           },
@@ -378,6 +405,20 @@ export default function ContactDetailPage() {
             </Link>
 
             <div className="flex items-center gap-2">
+              <Link
+                href={`/dashboard/invoices/new?clientId=${contactId}&clientName=${encodeURIComponent(displayName)}`}
+                className="flex items-center justify-center w-10 h-10 rounded-xl bg-amber-600 hover:bg-amber-700 transition-colors"
+                title="Create Invoice"
+              >
+                <DocumentTextIcon className="h-4 w-4 text-white" />
+              </Link>
+              <Link
+                href={`/dashboard/estimates/new?clientId=${contactId}&clientName=${encodeURIComponent(displayName)}`}
+                className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-600 hover:bg-blue-700 transition-colors"
+                title="Create Estimate"
+              >
+                <CalculatorIcon className="h-4 w-4 text-white" />
+              </Link>
               <Link
                 href={`/dashboard/clients/${contactId}/profile`}
                 className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors"
@@ -789,6 +830,96 @@ export default function ContactDetailPage() {
                     </div>
                   </div>
                 )}
+
+                {/* Related Items */}
+                <div>
+                  <h4 className="text-lg font-semibold text-white mb-4">Related Items</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Estimates */}
+                    <div className="p-4 bg-slate-800 rounded-xl">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <DocumentTextIcon className="h-5 w-5 text-orange-400" />
+                          <span className="text-sm font-medium text-white">Estimates</span>
+                        </div>
+                        <Link
+                          href={`/dashboard/estimates/new?clientId=${contactId}`}
+                          className="text-orange-400 hover:text-orange-300 text-sm"
+                        >
+                          + New
+                        </Link>
+                      </div>
+                      <div className="text-2xl font-bold text-white mb-1">
+                        {contact.estimatesSent || 0}
+                      </div>
+                      <div className="text-xs text-slate-400">
+                        {contact.estimatesViewed || 0} viewed
+                      </div>
+                      <Link
+                        href={`/dashboard/estimates?clientId=${contactId}`}
+                        className="text-orange-400 hover:text-orange-300 text-xs mt-2 inline-block"
+                      >
+                        View all →
+                      </Link>
+                    </div>
+
+                    {/* Projects */}
+                    <div className="p-4 bg-slate-800 rounded-xl">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <WrenchScrewdriverIcon className="h-5 w-5 text-purple-400" />
+                          <span className="text-sm font-medium text-white">Projects</span>
+                        </div>
+                        <Link
+                          href={`/dashboard/projects/new?clientId=${contactId}`}
+                          className="text-purple-400 hover:text-purple-300 text-sm"
+                        >
+                          + New
+                        </Link>
+                      </div>
+                      <div className="text-2xl font-bold text-white mb-1">
+                        {contact.projectsCount || 0}
+                      </div>
+                      <div className="text-xs text-slate-400">
+                        ${(contact.totalValue || 0).toLocaleString()} total
+                      </div>
+                      <Link
+                        href={`/dashboard/projects?clientId=${contactId}`}
+                        className="text-purple-400 hover:text-purple-300 text-xs mt-2 inline-block"
+                      >
+                        View all →
+                      </Link>
+                    </div>
+
+                    {/* Invoices */}
+                    <div className="p-4 bg-slate-800 rounded-xl">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <CurrencyDollarIcon className="h-5 w-5 text-green-400" />
+                          <span className="text-sm font-medium text-white">Invoices</span>
+                        </div>
+                        <Link
+                          href={`/dashboard/invoices/new?clientId=${contactId}`}
+                          className="text-green-400 hover:text-green-300 text-sm"
+                        >
+                          + New
+                        </Link>
+                      </div>
+                      <div className="text-2xl font-bold text-white mb-1">
+                        {contact.invoicesCount || 0}
+                      </div>
+                      <div className="text-xs text-slate-400">
+                        ${(contact.invoiceTotal || 0).toLocaleString()} billed
+                      </div>
+                      <Link
+                        href={`/dashboard/invoices?clientId=${contactId}`}
+                        className="text-green-400 hover:text-green-300 text-xs mt-2 inline-block"
+                      >
+                        View all →
+                      </Link>
+                    </div>
+                  </div>
+                </div>
 
                 {/* Notes */}
                 {contact.notes && (

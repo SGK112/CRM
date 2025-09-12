@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 // Mock data for development
 const DEV_MOCK_ANALYTICS = {
@@ -21,11 +21,7 @@ const DEV_MOCK_ANALYTICS = {
     { status: 'in-progress', count: 3 },
     { status: 'pending', count: 2 },
   ],
-  topClients: [
-    { name: 'Johnson Family', revenue: 45000 },
-    { name: 'Martinez Construction', revenue: 35000 },
-    { name: 'Smith Enterprises', revenue: 28000 },
-  ],
+  clientRevenue: []
 };
 
 export async function GET(request: NextRequest) {

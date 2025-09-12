@@ -8,14 +8,14 @@ import { Providers } from './providers';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
-  title: 'Remodely CRM - Mobile-First Construction Management',
+  title: 'Remodely - AI-Driven CRM for Remodeling Professionals',
   description:
-    'Professional CRM app for remodeling contractors. Manage projects, clients, estimates, and teams on any device with our mobile-optimized platform.',
+    'AI-powered CRM designed for remodeling contractors. Smart project insights, automated client follow-ups, and intelligent workflow management for renovation professionals.',
   keywords:
-    'construction CRM, contractor app, mobile CRM, project management, remodeling software, construction business management',
-  authors: [{ name: 'Remodely CRM' }],
-  creator: 'Remodely CRM',
-  publisher: 'Remodely CRM',
+    'remodeling CRM, AI construction software, renovation management, contractor app, smart project management, remodeling business automation',
+  authors: [{ name: 'Remodely' }],
+  creator: 'Remodely',
+  publisher: 'Remodely',
   formatDetection: {
     email: false,
     address: false,
@@ -49,16 +49,16 @@ export const metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    title: 'Remodely CRM - Mobile-First Construction Management',
+    title: 'Remodely - AI-Driven CRM for Remodeling Professionals',
     description:
-      'Professional CRM app for remodeling contractors. Manage projects, clients, estimates, and teams on any device with our mobile-optimized platform.',
-    siteName: 'Remodely CRM',
+      'AI-powered CRM designed for remodeling contractors. Smart project insights, automated client follow-ups, and intelligent workflow management for renovation professionals.',
+    siteName: 'Remodely',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Remodely CRM - Mobile-First Construction Management',
+    title: 'Remodely - AI-Driven CRM for Remodeling Professionals',
     description:
-      'Professional CRM app for remodeling contractors. Manage projects, clients, estimates, and teams on any device with our mobile-optimized platform.',
+      'AI-powered CRM designed for remodeling contractors. Smart project insights, automated client follow-ups, and intelligent workflow management for renovation professionals.',
   },
 };
 
@@ -115,13 +115,35 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                         {/* Brand Section */}
                         <div className="flex flex-col md:flex-row items-center gap-4">
                           <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-amber-600 rounded-lg flex items-center justify-center">
-                              <span className="text-white font-bold text-sm">R</span>
+                            <div className="w-10 h-10 bg-gradient-to-br from-amber-500 via-amber-600 to-amber-700 rounded-xl flex items-center justify-center shadow-lg border border-amber-400/20 relative overflow-hidden">
+                              {/* Professional Remodeling Logo */}
+                              <div className="relative z-10">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-white">
+                                  {/* Hammer handle */}
+                                  <rect x="14" y="12" width="2" height="10" fill="currentColor" opacity="0.9" rx="1"/>
+                                  {/* Hammer head */}
+                                  <rect x="11" y="10" width="8" height="4" fill="currentColor" rx="1"/>
+                                  {/* Wrench */}
+                                  <circle cx="8" cy="8" r="2.5" stroke="currentColor" strokeWidth="1.5" fill="none" opacity="0.8"/>
+                                  <rect x="5" y="7" width="6" height="2" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.8"/>
+                                  {/* Blueprint lines */}
+                                  <line x1="2" y1="4" x2="10" y2="4" stroke="currentColor" strokeWidth="1" opacity="0.6" strokeDasharray="2,1"/>
+                                  <line x1="2" y1="6" x2="8" y2="6" stroke="currentColor" strokeWidth="1" opacity="0.6" strokeDasharray="2,1"/>
+                                  {/* Accent dots */}
+                                  <circle cx="4" cy="20" r="1" fill="currentColor" opacity="0.7"/>
+                                  <circle cx="20" cy="4" r="1" fill="currentColor" opacity="0.7"/>
+                                </svg>
+                              </div>
+                              {/* Subtle shine effect */}
+                              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent"></div>
                             </div>
-                            <span className="text-xl font-bold">Remodely CRM</span>
+                            <div className="flex flex-col">
+                              <span className="text-lg font-bold">Remodely</span>
+                              <span className="text-xs text-[var(--text-dim)] -mt-1 tracking-wider">AI-DRIVEN CRM</span>
+                            </div>
                           </div>
                           <p className="text-[var(--text-dim)] text-sm text-center md:text-left max-w-md">
-                            The mobile-first construction CRM that grows with your business.
+                            The AI-powered construction CRM that grows with your remodeling business.
                           </p>
                         </div>
 

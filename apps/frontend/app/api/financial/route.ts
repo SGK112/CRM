@@ -1,80 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-// Mock data for development
+// Mock data for development - cleared for production use
 const DEV_MOCK_FINANCIAL = {
-  invoices: [
-    {
-      id: 1,
-      client: 'Johnson Family',
-      amount: 25000,
-      status: 'paid',
-      date: '2024-01-15',
-      dueDate: '2024-02-15',
-      project: 'Kitchen Renovation',
-    },
-    {
-      id: 2,
-      client: 'Martinez Construction',
-      amount: 18000,
-      status: 'pending',
-      date: '2024-01-20',
-      dueDate: '2024-02-20',
-      project: 'Office Building',
-    },
-    {
-      id: 3,
-      client: 'Smith Enterprises',
-      amount: 12000,
-      status: 'overdue',
-      date: '2024-01-10',
-      dueDate: '2024-02-10',
-      project: 'Warehouse Expansion',
-    },
-  ],
-  payments: [
-    {
-      id: 1,
-      client: 'Johnson Family',
-      amount: 25000,
-      date: '2024-02-14',
-      method: 'bank_transfer',
-      status: 'completed',
-    },
-    {
-      id: 2,
-      client: 'Davis LLC',
-      amount: 15000,
-      date: '2024-02-10',
-      method: 'check',
-      status: 'completed',
-    },
-  ],
-  expenses: [
-    {
-      id: 1,
-      description: 'Materials - Lumber',
-      amount: 3500,
-      date: '2024-01-25',
-      category: 'materials',
-      project: 'Kitchen Renovation',
-    },
-    {
-      id: 2,
-      description: 'Equipment Rental',
-      amount: 800,
-      date: '2024-01-28',
-      category: 'equipment',
-      project: 'Office Building',
-    },
-  ],
+  invoices: [],
+  payments: [],
+  expenses: [],
   summary: {
-    totalInvoiced: 55000,
-    totalPaid: 40000,
-    totalPending: 15000,
-    totalExpenses: 4300,
-    netProfit: 35700,
+    totalInvoiced: 0,
+    totalPaid: 0,
+    totalPending: 0,
+    totalExpenses: 0,
+    netProfit: 0,
   },
 };
 

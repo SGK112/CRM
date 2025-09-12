@@ -1,27 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-const DEV_MOCK_CLIENTS = [
-  {
-    id: '1',
-    name: 'Johnson Family',
-    email: 'contact@johnsonfamily.com',
-    phone: '(555) 123-4567',
-    status: 'active',
-    projectsCount: 2,
-    totalValue: 45000,
-  },
-  {
-    id: '2',
-    name: 'Martinez Construction',
-    email: 'info@martinezconstruction.com',
-    phone: '(555) 234-5678',
-    status: 'active',
-    projectsCount: 1,
-    totalValue: 28000,
-  }
-];
+interface Client {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  status: string;
+  projectsCount: number;
+  totalValue: number;
+}
+
+const DEV_MOCK_CLIENTS: Client[] = [];
 
 export async function GET(request: NextRequest) {
   try {

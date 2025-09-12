@@ -61,38 +61,13 @@ export default function DashboardPage() {
     // Load mock data
     setTimeout(() => {
       setStats({
-        totalRevenue: 485000,
-        activeProjects: 12,
-        totalClients: 28,
-        avgProjectValue: 87500
+        totalRevenue: 0,
+        activeProjects: 0,
+        totalClients: 0,
+        avgProjectValue: 0
       });
 
-      setRecentProjects([
-        {
-          id: '1',
-          title: 'Modern Kitchen Renovation',
-          client: 'Johnson Family',
-          status: 'construction',
-          budget: 95000,
-          progress: 75
-        },
-        {
-          id: '2',
-          title: 'Master Bathroom Remodel',
-          client: 'Davis Residence',
-          status: 'finishing',
-          budget: 42000,
-          progress: 90
-        },
-        {
-          id: '3',
-          title: 'Victorian Home Restoration',
-          client: 'Miller Estate',
-          status: 'permits',
-          budget: 350000,
-          progress: 15
-        }
-      ]);
+      setRecentProjects([]);
 
       setLoading(false);
     }, 800);

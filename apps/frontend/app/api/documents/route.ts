@@ -1,78 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 // Mock data for development
 const DEV_MOCK_DOCUMENTS = {
-  documents: [
-    {
-      id: 1,
-      name: 'Johnson Kitchen Contract.pdf',
-      type: 'contract',
-      size: '2.4 MB',
-      uploadDate: '2024-01-15',
-      client: 'Johnson Family',
-      project: 'Kitchen Renovation',
-      status: 'signed',
-      url: '/docs/johnson-kitchen-contract.pdf',
-    },
-    {
-      id: 2,
-      name: 'Martinez Estimate.pdf',
-      type: 'estimate',
-      size: '1.8 MB',
-      uploadDate: '2024-01-20',
-      client: 'Martinez Construction',
-      project: 'Office Building',
-      status: 'pending',
-      url: '/docs/martinez-estimate.pdf',
-    },
-    {
-      id: 3,
-      name: 'Smith Invoice #003.pdf',
-      type: 'invoice',
-      size: '890 KB',
-      uploadDate: '2024-01-25',
-      client: 'Smith Enterprises',
-      project: 'Warehouse Expansion',
-      status: 'sent',
-      url: '/docs/smith-invoice-003.pdf',
-    },
-    {
-      id: 4,
-      name: 'Building Permit - Johnson.pdf',
-      type: 'permit',
-      size: '1.2 MB',
-      uploadDate: '2024-01-18',
-      client: 'Johnson Family',
-      project: 'Kitchen Renovation',
-      status: 'approved',
-      url: '/docs/building-permit-johnson.pdf',
-    },
-    {
-      id: 5,
-      name: 'Material Receipt - Lumber.pdf',
-      type: 'receipt',
-      size: '650 KB',
-      uploadDate: '2024-01-26',
-      client: null,
-      project: 'Kitchen Renovation',
-      status: 'filed',
-      url: '/docs/material-receipt-lumber.pdf',
-    },
-  ],
+  documents: [],
   categories: [
-    { name: 'contracts', count: 4 },
-    { name: 'estimates', count: 2 },
-    { name: 'invoices', count: 8 },
-    { name: 'permits', count: 3 },
-    { name: 'receipts', count: 12 },
-    { name: 'photos', count: 45 },
+    { name: 'contracts', count: 0 },
+    { name: 'estimates', count: 0 },
+    { name: 'invoices', count: 0 },
+    { name: 'permits', count: 0 },
+    { name: 'receipts', count: 0 },
+    { name: 'photos', count: 0 },
   ],
   storage: {
-    used: '125.6 MB',
+    used: '0 MB',
     total: '5 GB',
-    percentage: 2.5,
+    percentage: 0,
   },
 };
 

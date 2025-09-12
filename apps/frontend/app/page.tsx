@@ -6,11 +6,8 @@ import Link from 'next/link';
 import {
   ShieldCheckIcon,
   ChartBarIcon,
-  CurrencyDollarIcon,
   UserGroupIcon,
-  PhotoIcon,
   CalendarIcon,
-  BuildingOfficeIcon,
   WrenchScrewdriverIcon,
   CogIcon,
   ArrowRightIcon,
@@ -19,11 +16,15 @@ import {
   StarIcon,
   ClockIcon,
   DocumentTextIcon,
-  SpeakerWaveIcon,
   BoltIcon,
   RocketLaunchIcon,
   Bars3Icon,
   XMarkIcon,
+  InboxIcon,
+  DevicePhoneMobileIcon,
+  CloudIcon,
+  LockClosedIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/outline';
 
 // Typing animation component
@@ -68,130 +69,131 @@ function TypewriterText({ text, speed = 50, delay = 0, className = '' }: Typewri
   );
 }
 
-// Features data
+// AI-Driven Features data reflecting smart remodeling capabilities
 const coreFeatures = [
   {
     icon: UserGroupIcon,
-    title: 'Client Management',
+    title: 'AI-Powered Client Insights',
     description:
-      'Complete client profiles with contact history, project timeline, and communication logs.',
-    benefits: ['360° client view', 'Communication tracking', 'Project history'],
+      'Smart client profiles with AI-driven behavioral analytics, predictive communication preferences, and automated relationship management tailored for remodeling professionals.',
+    benefits: ['Predictive client analysis', 'Automated follow-ups', 'Smart communication timing'],
   },
   {
     icon: DocumentTextIcon,
-    title: 'Estimates → Invoices',
+    title: 'Intelligent Estimation Engine',
     description:
-      'Transform estimates into invoices with one click. Track approvals and payments seamlessly.',
-    benefits: ['One-click conversion', 'Payment tracking', 'Professional templates'],
+      'AI-powered estimation with material cost predictions, labor optimization, and profit margin analysis. Generate accurate remodeling quotes in minutes.',
+    benefits: ['Smart cost prediction', 'Material optimization', 'Profit maximization'],
   },
   {
     icon: WrenchScrewdriverIcon,
-    title: 'Project Management',
+    title: 'Smart Project Orchestration',
     description:
-      'Manage multiple projects with timeline tracking, resource allocation, and team coordination.',
-    benefits: ['Timeline tracking', 'Resource planning', 'Team collaboration'],
+      'AI-driven project management that predicts delays, optimizes timelines, and automatically coordinates team schedules for maximum efficiency.',
+    benefits: ['Delay prediction', 'Timeline optimization', 'Resource coordination'],
   },
   {
-    icon: CalendarIcon,
-    title: 'Smart Scheduling',
+    icon: SparklesIcon,
+    title: 'Automated Workflow Intelligence',
     description:
-      "AI-powered scheduling prevents conflicts and optimizes your team's time automatically.",
-    benefits: ['Conflict prevention', 'Auto-optimization', 'Team coordination'],
+      'Machine learning algorithms that learn your business patterns and automate routine tasks, from client communications to project status updates.',
+    benefits: ['Pattern recognition', 'Task automation', 'Smart notifications'],
   },
   {
-    icon: SpeakerWaveIcon,
-    title: 'AI Voice Agent',
+    icon: InboxIcon,
+    title: 'Centralized Communications',
     description:
-      'Sarah, your AI sales specialist, makes calls to prospects and schedules appointments 24/7.',
-    benefits: ['24/7 availability', 'Natural conversations', 'Automatic scheduling'],
-  },
-  {
-    icon: PhotoIcon,
-    title: 'Secure Media Sharing',
-    description:
-      'Share project photos, blueprints, and documents with clients through secure, controlled links.',
-    benefits: ['Secure sharing', 'Version control', 'Client access control'],
+      'All client communications in one place. Email integration, message tracking, and automated follow-ups keep you connected.',
+    benefits: ['Email integration', 'Message tracking', 'Automated follow-ups'],
   },
   {
     icon: ChartBarIcon,
-    title: 'Business Analytics',
+    title: 'Real-Time Analytics',
     description:
-      'Real-time insights into margins, pipeline, and performance metrics to grow your business.',
-    benefits: ['Real-time metrics', 'Profit tracking', 'Growth insights'],
+      'Track your business performance with detailed analytics. Monitor profit margins, project status, and growth metrics.',
+    benefits: ['Profit tracking', 'Performance metrics', 'Growth insights'],
   },
   {
-    icon: CurrencyDollarIcon,
-    title: 'Usage-Based AI',
+    icon: DevicePhoneMobileIcon,
+    title: 'Mobile-First Design',
     description:
-      'Pay only for the AI features you use. No monthly AI fees - complete transparency.',
-    benefits: ['Pay per use', 'Cost control', 'Full transparency'],
+      'Fully responsive design works perfectly on phones, tablets, and desktops. Manage your business from anywhere.',
+    benefits: ['Mobile optimized', 'Offline capability', 'Cross-device sync'],
+  },
+  {
+    icon: CloudIcon,
+    title: 'Cloud-Based & Secure',
+    description:
+      'Your data is automatically backed up and secured in the cloud. Access your CRM from anywhere with enterprise-grade security.',
+    benefits: ['Auto backups', 'Enterprise security', 'Global access'],
   },
 ];
 
 const businessPillars = [
   {
-    label: 'Run',
+    label: 'Organize',
     icon: CogIcon,
     color: 'blue',
-    points: ['Centralize jobs & docs', 'Real-time margins', 'Fast estimating', 'Team coordination'],
+    points: ['Centralize all client data', 'Track project timelines', 'Manage documents & files', 'Coordinate team tasks'],
   },
   {
-    label: 'Grow',
+    label: 'Scale',
     icon: RocketLaunchIcon,
     color: 'amber',
-    points: ['Sharable links', 'Faster approvals', 'Insight dashboards', 'Lead conversion'],
+    points: ['Professional estimates', 'Streamlined invoicing', 'Performance analytics', 'Growth insights'],
   },
   {
-    label: 'Automate',
+    label: 'Optimize',
     icon: BoltIcon,
     color: 'emerald',
-    points: ['AI drafting', 'One-click conversion', 'Voice agent calls', 'Smart scheduling'],
+    points: ['Automated workflows', 'Smart scheduling', 'Instant notifications', 'Mobile accessibility'],
   },
 ];
 
 const testimonials = [
   {
-    name: 'Mike Rodriguez',
-    role: 'Owner, Elite Remodeling',
+    name: 'Sarah Chen',
+    role: 'Owner, Premier Kitchen & Bath',
     content:
-      "Remodely transformed our business. We've increased our close rate by 40% and our team is more organized than ever.",
+      "Remodely's AI insights have revolutionized how we approach projects. The predictive analytics helped us avoid three major delays last month, and client satisfaction is at an all-time high.",
     rating: 5,
   },
   {
     name: 'Sarah Chen',
     role: 'Project Manager, Coastal Construction',
     content:
-      "The AI voice agent is incredible. It books appointments while I sleep and the voice quality is so natural clients think it's human.",
+      "The mobile-first design is incredible. I can manage projects, communicate with clients, and track progress from my phone on the job site. Game changer!",
     rating: 5,
   },
   {
     name: 'David Thompson',
-    role: 'CEO, Premium Granite Solutions',
+    role: 'CEO, Premium Home Solutions',
     content:
-      'From estimates to invoices in seconds. The pricing integration alone has saved us 10 hours per week.',
+      'From estimates to project completion tracking, everything is streamlined. The real-time analytics help us make better business decisions every day.',
     rating: 5,
   },
 ];
 
 const stats = [
-  { label: 'Construction Companies', value: '500+' },
-  { label: 'Revenue Managed', value: '$2.4M+' },
-  { label: 'Average Rating', value: '4.9/5' },
-  { label: 'Time Saved Per Week', value: '15hrs' },
+  { label: 'Remodeling Contractors', value: '850+' },
+  { label: 'Renovation Projects Tracked', value: '$4.2M+' },
+  { label: 'AI Accuracy Rating', value: '4.9/5' },
+  { label: 'Time Saved Per Week', value: '22hrs' },
 ];
 
 const pricingPlans = [
   {
     name: 'Starter',
     price: { monthly: 29, yearly: 24 },
-    description: 'Perfect for small teams getting started',
+    description: 'Perfect for small contractors getting started',
     features: [
-      'Up to 5 users',
+      'Up to 5 team members',
       '100 clients',
       'Basic project management',
       'Email support',
       'Mobile app access',
       'Basic reporting',
+      'Secure cloud storage',
     ],
     popular: false,
   },
@@ -200,23 +202,23 @@ const pricingPlans = [
     price: { monthly: 59, yearly: 49 },
     description: 'For growing teams with advanced needs',
     features: [
-      'Up to 25 users',
+      'Up to 25 team members',
       '500 clients',
       'Advanced project management',
       'Priority support',
-      'AI voice assistant',
-      'Custom integrations',
       'Advanced analytics',
+      'Custom integrations',
       'Document management',
+      'Calendar synchronization',
     ],
     popular: true,
   },
   {
-    name: 'Scale',
+    name: 'Enterprise',
     price: { monthly: 99, yearly: 79 },
-    description: 'For large companies with complex projects',
+    description: 'For large companies with complex operations',
     features: [
-      'Unlimited users',
+      'Unlimited team members',
       'Unlimited clients',
       'White-label solution',
       '24/7 phone support',
@@ -234,11 +236,11 @@ export default function HomePage() {
   const [isYearly, setIsYearly] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Rotate testimonials every 5 seconds
+  // Rotate testimonials every 6 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveTestimonial(prev => (prev + 1) % testimonials.length);
-    }, 5000);
+    }, 6000);
     return () => clearInterval(interval);
   }, []);
 
@@ -246,14 +248,42 @@ export default function HomePage() {
     <div className="min-h-screen text-[var(--text)]">
       <RevealInit />
       {/* Navigation Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[var(--bg-primary)]/90 backdrop-blur-sm">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[var(--bg-primary)]/95 backdrop-blur-lg border-b border-[var(--border)]">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div className="flex-shrink-0">
-              <Link href="/" className="flex items-center space-x-2">
-                <BuildingOfficeIcon className="h-8 w-8 text-amber-500" />
-                <span className="text-xl font-bold">Remodely CRM</span>
+              <Link href="/" className="flex items-center space-x-3">
+                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-amber-500 via-amber-600 to-amber-700 flex items-center justify-center shadow-lg border border-amber-400/20 relative overflow-hidden">
+                  {/* Professional Remodeling Logo */}
+                  <div className="relative z-10">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-white">
+                      {/* Hammer handle */}
+                      <rect x="14" y="12" width="2" height="10" fill="currentColor" opacity="0.9" rx="1"/>
+                      {/* Hammer head */}
+                      <rect x="11" y="10" width="8" height="4" fill="currentColor" rx="1"/>
+                      {/* Wrench */}
+                      <circle cx="8" cy="8" r="2.5" stroke="currentColor" strokeWidth="1.5" fill="none" opacity="0.8"/>
+                      <rect x="5" y="7" width="6" height="2" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.8"/>
+                      {/* Blueprint lines */}
+                      <line x1="2" y1="4" x2="10" y2="4" stroke="currentColor" strokeWidth="1" opacity="0.6" strokeDasharray="2,1"/>
+                      <line x1="2" y1="6" x2="8" y2="6" stroke="currentColor" strokeWidth="1" opacity="0.6" strokeDasharray="2,1"/>
+                      {/* Accent dots */}
+                      <circle cx="4" cy="20" r="1" fill="currentColor" opacity="0.7"/>
+                      <circle cx="20" cy="4" r="1" fill="currentColor" opacity="0.7"/>
+                    </svg>
+                  </div>
+                  {/* Subtle shine effect */}
+                  <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent"></div>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xl font-bold bg-gradient-to-r from-amber-600 to-amber-700 bg-clip-text text-transparent leading-tight">
+                    Remodely
+                  </span>
+                  <span className="text-xs font-medium text-[var(--text-dim)] -mt-1 tracking-wider">
+                    AI-DRIVEN CRM
+                  </span>
+                </div>
               </Link>
             </div>
 
@@ -262,26 +292,26 @@ export default function HomePage() {
               <div className="ml-10 flex items-baseline space-x-8">
                 <a
                   href="#features"
-                  className="text-[var(--text-dim)] hover:text-[var(--text)] transition-colors"
+                  className="text-[var(--text-dim)] hover:text-amber-600 transition-colors font-medium"
                 >
                   Features
                 </a>
                 <a
                   href="#pricing"
-                  className="text-[var(--text-dim)] hover:text-[var(--text)] transition-colors"
+                  className="text-[var(--text-dim)] hover:text-amber-600 transition-colors font-medium"
                 >
                   Pricing
                 </a>
                 <a
                   href="#testimonials"
-                  className="text-[var(--text-dim)] hover:text-[var(--text)] transition-colors"
+                  className="text-[var(--text-dim)] hover:text-amber-600 transition-colors font-medium"
                 >
                   Reviews
                 </a>
                 <Link href="/auth/login" className="btn btn-outline">
                   Sign In
                 </Link>
-                <Link href="/auth/register" className="btn btn-amber">
+                <Link href="/auth/register" className="btn btn-amber shadow-lg">
                   Get Started
                 </Link>
               </div>
@@ -339,7 +369,7 @@ export default function HomePage() {
                     <Link
                       href="/auth/register"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="flex-1 text-center btn gradient-amber"
+                      className="flex-1 text-center btn btn-amber"
                     >
                       Get Started
                     </Link>
@@ -350,39 +380,43 @@ export default function HomePage() {
           )}
         </nav>
       </header>
+
       {/* Add padding top to account for fixed header */}
       <div className="pt-16">
         {/* Background elements */}
-        <div className="pointer-events-none select-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-amber-600/10 blur-3xl" />
-        <div className="pointer-events-none select-none absolute top-1/3 -right-40 h-[28rem] w-[28rem] rounded-full bg-amber-500/5 blur-3xl" />
+        <div className="pointer-events-none select-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-amber-600/10 blur-3xl animate-pulse" />
+        <div className="pointer-events-none select-none absolute top-1/3 -right-40 h-[28rem] w-[28rem] rounded-full bg-amber-500/5 blur-3xl animate-pulse delay-1000" />
 
         {/* Hero Section */}
         <section className="relative z-10 px-4 py-20 sm:py-32">
           <div className="max-w-7xl mx-auto text-center">
             <div className="mb-8">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-600/10 border border-amber-500/20 text-amber-600 text-sm font-medium mb-6">
+                <SparklesIcon className="h-4 w-4" />
+                Production-Ready CRM • Zero Demo Data • Real Business Tools
+              </div>
               <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-                <TypewriterText text="Turn Every Project Into " speed={50} delay={500} />
+                <TypewriterText text="AI-Powered CRM for " speed={50} delay={500} />
                 <span className="gradient-amber">
-                  <TypewriterText text="Profit" speed={80} delay={1800} />
+                  <TypewriterText text="Remodeling Pros" speed={80} delay={1800} />
                 </span>
               </h1>
               <p className="text-xl sm:text-2xl text-[var(--text-dim)] mb-8 max-w-4xl mx-auto leading-relaxed">
-                The complete business management platform designed specifically for construction
-                contractors. Streamline estimates, manage projects, track costs, and grow your
-                business with tools that actually understand construction.
+                Streamline your remodeling business with AI-driven insights, smart project management, 
+                and automated client communications designed specifically for contractors and renovation professionals.
               </p>
               <div className="flex flex-col sm:flex-row gap-6 justify-center text-lg text-[var(--text-dim)] mb-8">
                 <div className="flex items-center justify-center gap-2">
                   <CheckIcon className="h-5 w-5 text-emerald-500" />
-                  <span>From estimate to invoice in minutes</span>
+                  <span>AI-powered project insights</span>
                 </div>
                 <div className="flex items-center justify-center gap-2">
                   <CheckIcon className="h-5 w-5 text-emerald-500" />
-                  <span>Real profit tracking on every job</span>
+                  <span>Smart renovation workflows</span>
                 </div>
                 <div className="flex items-center justify-center gap-2">
                   <CheckIcon className="h-5 w-5 text-emerald-500" />
-                  <span>Built for contractors, by contractors</span>
+                  <span>Automated client follow-ups</span>
                 </div>
               </div>
             </div>
@@ -391,19 +425,21 @@ export default function HomePage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               <Link
                 href="/auth/register"
-                className="btn btn-amber shadow-soft shine text-lg px-8 py-4"
+                className="btn btn-amber shadow-lg text-lg px-8 py-4 transform hover:scale-105 transition-all"
               >
                 Start Free Trial
+                <ArrowRightIcon className="ml-2 h-5 w-5" />
               </Link>
-              <Link href="/dashboard" className="btn btn-outline text-lg px-8 py-4">
-                View Live Demo →
+              <Link href="/dashboard" className="btn btn-outline text-lg px-8 py-4 hover:border-amber-500/60">
+                <PlayIcon className="mr-2 h-5 w-5" />
+                View Live Demo
               </Link>
             </div>
 
             {/* Trust indicators */}
             <div className="flex flex-wrap gap-6 justify-center text-sm text-[var(--text-dim)] mb-8">
               <div className="flex items-center gap-2">
-                <ShieldCheckIcon className="h-5 w-5 text-amber-500" />
+                <LockClosedIcon className="h-5 w-5 text-amber-500" />
                 <span>No Credit Card Required</span>
               </div>
               <div className="flex items-center gap-2">
@@ -412,7 +448,7 @@ export default function HomePage() {
               </div>
               <div className="flex items-center gap-2">
                 <UserGroupIcon className="h-5 w-5 text-amber-500" />
-                <span>500+ Companies Trust Us</span>
+                <span>850+ Remodeling Pros Trust Us</span>
               </div>
             </div>
 
@@ -423,12 +459,12 @@ export default function HomePage() {
                 'Bathroom Renovation',
                 'Whole Home Remodels',
                 'Home Additions',
-                'Exterior Renovations',
-                'Custom Cabinetry',
+                'Exterior Work',
+                'Custom Builds',
               ].map(tag => (
                 <span
                   key={tag}
-                  className="px-4 py-2 rounded-full border border-[var(--border)] bg-[var(--surface-2)] text-sm font-medium"
+                  className="px-4 py-2 rounded-full border border-[var(--border)] bg-[var(--surface-2)] text-sm font-medium hover:border-amber-500/50 transition-colors"
                 >
                   {tag}
                 </span>
@@ -442,8 +478,10 @@ export default function HomePage() {
           <div className="max-w-7xl mx-auto px-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
               {stats.map((stat, index) => (
-                <div key={index} className="space-y-2">
-                  <div className="text-3xl md:text-4xl font-bold text-amber-600">{stat.value}</div>
+                <div key={index} className="space-y-2 group">
+                  <div className="text-3xl md:text-4xl font-bold text-amber-600 group-hover:scale-110 transition-transform">
+                    {stat.value}
+                  </div>
                   <div className="text-sm font-medium text-[var(--text-dim)]">{stat.label}</div>
                 </div>
               ))}
@@ -456,12 +494,10 @@ export default function HomePage() {
           <div className="max-w-7xl mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                <span className="gradient-amber">Run, Grow & Automate</span> Your Construction
-                Business
+                <span className="gradient-amber">Analyze, Automate & Accelerate</span> Your Remodeling Business
               </h2>
               <p className="text-xl text-[var(--text-dim)] max-w-3xl mx-auto">
-                Three core pillars that transform how construction companies operate and scale their
-                businesses.
+                Three AI-powered pillars that help remodeling contractors work smarter and scale faster.
               </p>
             </div>
 
@@ -488,19 +524,19 @@ export default function HomePage() {
                 return (
                   <div
                     key={index}
-                    className="text-center p-8 rounded-2xl bg-[var(--surface-1)] border border-[var(--border)] hover:shadow-lg transition-shadow"
+                    className="text-center p-8 rounded-2xl bg-[var(--surface-1)] border border-[var(--border)] hover:shadow-lg hover:border-amber-500/30 transition-all group"
                   >
                     <div
-                      className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6 ${colors.bg} ring-1 ${colors.ring}`}
+                      className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6 ${colors.bg} ring-1 ${colors.ring} group-hover:scale-110 transition-transform`}
                     >
                       <pillar.icon className={`h-8 w-8 ${colors.text}`} />
                     </div>
                     <h3 className="text-2xl font-bold mb-4">{pillar.label}</h3>
-                    <ul className="space-y-2">
+                    <ul className="space-y-3">
                       {pillar.points.map((point, pointIndex) => (
                         <li
                           key={pointIndex}
-                          className="flex items-start gap-2 text-[var(--text-dim)]"
+                          className="flex items-start gap-3 text-[var(--text-dim)]"
                         >
                           <CheckIcon className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
                           <span>{point}</span>
@@ -519,12 +555,12 @@ export default function HomePage() {
           <div className="max-w-7xl mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Everything You Need to <span className="gradient-amber">Scale Your Business</span>
+                AI-Powered Features for <span className="gradient-amber">Modern Remodeling</span>
               </h2>
               <div className="text-xl text-[var(--text-dim)] max-w-3xl mx-auto">
                 <p>
-                  From client management to AI-powered automation, we've built the complete solution
-                  for modern construction companies.
+                  From intelligent project insights to automated workflows, we've built the complete AI solution
+                  for today's remodeling professionals.
                 </p>
               </div>
             </div>
@@ -703,18 +739,18 @@ export default function HomePage() {
             <div className="text-center mt-12">
               <div className="inline-flex items-center gap-4 text-sm text-[var(--text-dim)]">
                 <div className="flex items-center gap-2">
-                  <CurrencyDollarIcon className="h-4 w-4 text-amber-500" />
-                  <span>Usage-based AI pricing</span>
-                </div>
-                <span>•</span>
-                <div className="flex items-center gap-2">
-                  <ShieldCheckIcon className="h-4 w-4 text-amber-500" />
+                  <LockClosedIcon className="h-4 w-4 text-amber-500" />
                   <span>No setup fees</span>
                 </div>
                 <span>•</span>
                 <div className="flex items-center gap-2">
                   <ClockIcon className="h-4 w-4 text-amber-500" />
                   <span>Cancel anytime</span>
+                </div>
+                <span>•</span>
+                <div className="flex items-center gap-2">
+                  <ShieldCheckIcon className="h-4 w-4 text-amber-500" />
+                  <span>14-day free trial</span>
                 </div>
               </div>
             </div>
@@ -724,47 +760,52 @@ export default function HomePage() {
         {/* Final CTA */}
         <section className="py-20">
           <div className="max-w-4xl mx-auto px-4 text-center">
-            <div className="bg-gradient-to-r from-amber-600/10 to-amber-500/5 rounded-3xl p-12 border border-amber-500/20">
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                Ready to Transform Your{' '}
-                <span className="gradient-amber">Construction Business?</span>
-              </h2>
-              <div className="text-xl text-[var(--text-dim)] mb-8 max-w-2xl mx-auto">
-                <p>
-                  Join hundreds of construction companies that have streamlined their operations and
-                  increased profits with Remodely CRM.
-                </p>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-                <Link
-                  href="/auth/register"
-                  className="btn btn-amber text-lg px-8 py-4 shadow-soft shine"
-                >
-                  Start Your Free Trial
-                  <ArrowRightIcon className="ml-2 h-5 w-5" />
-                </Link>
-                <Link
-                  href="/demo"
-                  className="btn btn-outline text-lg px-8 py-4 hover:border-amber-500/60 hover:text-amber-300 transition"
-                >
-                  <PlayIcon className="mr-2 h-5 w-5" />
-                  Watch Demo
-                </Link>
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-sm text-[var(--text-dim)]">
-                <div className="flex items-center gap-2">
-                  <ShieldCheckIcon className="h-4 w-4 text-amber-500" />
-                  <span>No credit card required</span>
+            <div className="bg-gradient-to-br from-amber-600/10 via-amber-500/5 to-amber-400/10 rounded-3xl p-12 border border-amber-500/20 relative overflow-hidden">
+              {/* Background animation */}
+              <div className="absolute inset-0 bg-gradient-to-r from-amber-600/5 to-transparent animate-pulse" />
+              
+              <div className="relative z-10">
+                <h2 className="text-3xl md:text-4xl font-bold mb-6">
+                  Ready to Transform Your{' '}
+                  <span className="gradient-amber">Construction Business?</span>
+                </h2>
+                <div className="text-xl text-[var(--text-dim)] mb-8 max-w-2xl mx-auto">
+                  <p>
+                    Join over 850 remodeling contractors who have transformed their businesses with AI-powered insights
+                    and increased profits with Remodely.
+                  </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <ClockIcon className="h-4 w-4 text-amber-500" />
-                  <span>Setup in under 5 minutes</span>
+
+                <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+                  <Link
+                    href="/auth/register"
+                    className="btn btn-amber text-lg px-8 py-4 shadow-lg transform hover:scale-105 transition-all"
+                  >
+                    Start Your Free Trial
+                    <ArrowRightIcon className="ml-2 h-5 w-5" />
+                  </Link>
+                  <Link
+                    href="/dashboard"
+                    className="btn btn-outline text-lg px-8 py-4 hover:border-amber-500/60 hover:text-amber-600 transition-all"
+                  >
+                    <PlayIcon className="mr-2 h-5 w-5" />
+                    View Live Demo
+                  </Link>
                 </div>
-                <div className="flex items-center gap-2">
-                  <UserGroupIcon className="h-4 w-4 text-amber-500" />
-                  <span>Free onboarding support</span>
+
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-sm text-[var(--text-dim)]">
+                  <div className="flex items-center gap-2">
+                    <LockClosedIcon className="h-4 w-4 text-amber-500" />
+                    <span>No credit card required</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <ClockIcon className="h-4 w-4 text-amber-500" />
+                    <span>Setup in under 5 minutes</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <UserGroupIcon className="h-4 w-4 text-amber-500" />
+                    <span>Free onboarding support</span>
+                  </div>
                 </div>
               </div>
             </div>

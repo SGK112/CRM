@@ -1,25 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-const DEV_MOCK_EVENTS = [
-  {
-    id: '1',
-    title: 'Site Visit - Johnson Family',
-    start: new Date().toISOString(),
-    end: new Date(Date.now() + 3600 * 1000).toISOString(),
-    description: 'Initial site visit',
-    extendedProps: { type: 'site_visit', status: 'scheduled', source: 'local' }
-  },
-  {
-    id: '2',
-    title: 'Estimate Meeting - Martinez',
-    start: new Date(Date.now() + 2 * 24 * 3600 * 1000).toISOString(),
-    end: new Date(Date.now() + 2 * 24 * 3600 * 1000 + 3600 * 1000).toISOString(),
-    description: 'Discuss estimate',
-    extendedProps: { type: 'consultation', status: 'scheduled', source: 'local' }
-  }
-];
+interface CalendarEvent {
+  id: string;
+  title: string;
+  start: string;
+  end: string;
+  description?: string;
+  extendedProps?: {
+    type: string;
+    status: string;
+    source: string;
+  };
+}
+
+const DEV_MOCK_EVENTS: CalendarEvent[] = [];
 
 export async function GET(request: NextRequest) {
   try {

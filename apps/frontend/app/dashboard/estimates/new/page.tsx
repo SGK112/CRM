@@ -414,6 +414,67 @@ export default function NewEstimatePage() {
                 </p>
               )}
             </div>
+
+            {/* Quick Navigation Links */}
+            <div className="mt-4 pt-4 border-t border-[var(--border)]">
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => router.push('/dashboard/clients')}
+                  className="text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-md transition-colors"
+                >
+                  View All Clients
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push('/dashboard/projects')}
+                  className="text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-md transition-colors"
+                >
+                  View All Projects
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push('/dashboard/clients/new')}
+                  className="text-xs bg-brand-100 dark:bg-brand-900/20 hover:bg-brand-200 dark:hover:bg-brand-900/30 text-brand-700 dark:text-brand-300 px-3 py-1.5 rounded-md transition-colors"
+                >
+                  + New Client
+                </button>
+                {selectedClientId && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => router.push(`/dashboard/projects/new?clientId=${selectedClientId}`)}
+                      className="text-xs bg-brand-100 dark:bg-brand-900/20 hover:bg-brand-200 dark:hover:bg-brand-900/30 text-brand-700 dark:text-brand-300 px-3 py-1.5 rounded-md transition-colors"
+                    >
+                      + New Project for this Client
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => router.push(`/dashboard/clients/${selectedClientId}`)}
+                      className="text-xs bg-blue-100 dark:bg-blue-900/20 hover:bg-blue-200 dark:hover:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1.5 rounded-md transition-colors"
+                    >
+                      View Client Details →
+                    </button>
+                  </>
+                )}
+                {selectedProjectId && (
+                  <button
+                    type="button"
+                    onClick={() => router.push(`/dashboard/projects/${selectedProjectId}`)}
+                    className="text-xs bg-blue-100 dark:bg-blue-900/20 hover:bg-blue-200 dark:hover:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1.5 rounded-md transition-colors"
+                  >
+                    View Project Details →
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => router.push('/dashboard/invoices/new' + (selectedClientId ? `?clientId=${selectedClientId}` : '') + (selectedProjectId ? `&projectId=${selectedProjectId}` : ''))}
+                  className="text-xs bg-purple-100 dark:bg-purple-900/20 hover:bg-purple-200 dark:hover:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-3 py-1.5 rounded-md transition-colors"
+                >
+                  Create Invoice Instead
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
