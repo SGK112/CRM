@@ -1,6 +1,7 @@
 import { Controller, Post, Body, UseGuards, Req, Delete } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { DataManagementService } from './data-management.service';
+import { BulkActionDto, ExportDataDto } from './data-management.types';
 import { Request } from 'express';
 
 interface AuthenticatedRequest extends Request {
@@ -8,17 +9,6 @@ interface AuthenticatedRequest extends Request {
     id: string;
     workspaceId?: string;
   };
-}
-
-export class BulkActionDto {
-  action: 'delete' | 'archive' | 'organize';
-  categories: string[];
-  includeDemo?: boolean;
-}
-
-export class ExportDataDto {
-  categories: string[];
-  format: 'json' | 'csv';
 }
 
 @Controller('data-management')

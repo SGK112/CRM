@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Document } from 'mongoose';
+import { Model } from 'mongoose';
 import { User } from '../users/schemas/user.schema';
 import { Client } from '../clients/schemas/client.schema';
 import { Project } from '../projects/schemas/project.schema';
@@ -12,14 +12,7 @@ import { Media } from '../media/schemas/media.schema';
 import { Design } from '../designs/schemas/design.schema';
 import { DesignRevision } from '../designs/schemas/design-revision.schema';
 import { Employee } from '../hr/schemas/employee.schema';
-
-interface BulkActionResult {
-  category: string;
-  action?: string;
-  affectedCount: number;
-  success: boolean;
-  error?: string;
-}
+import { BulkActionResult } from './data-management.types';
 
 @Injectable()
 export class DataManagementService {
@@ -37,8 +30,10 @@ export class DataManagementService {
     @InjectModel(Employee.name) private employeeModel: Model<Employee>,
   ) {}
 
-  private getModelForCategory(category: string): Model<Document> | null {
-    const modelMap: Record<string, Model<Document>> = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private getModelForCategory(category: string): Model<any> | null {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const modelMap: Record<string, Model<any>> = {
       'notifications': this.notificationModel,
       'contacts': this.clientModel,
       'invoices': this.invoiceModel,
@@ -141,9 +136,11 @@ export class DataManagementService {
     categories: string[],
     format: 'json' | 'csv',
     workspaceId: string
-  ): Promise<{ success: boolean; data?: Record<string, Document[]>; message: string }> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<{ success: boolean; data?: Record<string, any[]>; message: string }> {
     try {
-      const exportData: Record<string, Document[]> = {};
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const exportData: Record<string, any[]> = {};
 
       for (const category of categories) {
         const model = this.getModelForCategory(category);
