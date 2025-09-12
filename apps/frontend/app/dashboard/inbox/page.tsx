@@ -11,6 +11,9 @@ import {
   MagnifyingGlassIcon,
   StarIcon,
   UserIcon,
+  TrashIcon,
+  FolderIcon,
+  CheckIcon,
 } from '@heroicons/react/24/outline';
 import {
   StarIcon as StarIconSolid,
@@ -18,6 +21,7 @@ import {
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { showNotification } from '@/components/NotificationBanner';
 
 interface Sender {
   name: string;
@@ -51,6 +55,8 @@ export default function InboxPage() {
   const searchParams = useSearchParams();
   const [user, setUser] = useState<{ id: number; name: string; firstName?: string; email: string } | null>(null);
   const [messages, setMessages] = useState<InboxMessage[]>([]);
+  const [selectedMessages, setSelectedMessages] = useState<string[]>([]);
+  const [bulkActionMode, setBulkActionMode] = useState(false);
   const [stats, setStats] = useState<InboxStats>({
     total: 0,
     unread: 0,
@@ -61,6 +67,7 @@ export default function InboxPage() {
   const [selectedFolder, setSelectedFolder] = useState('inbox');
   const [loading, setLoading] = useState(true);
   const [showCompose, setShowCompose] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<string | null>(null);
   const [composeForm, setComposeForm] = useState({
     to: '',
     subject: '',
@@ -285,6 +292,99 @@ export default function InboxPage() {
     window.history.replaceState({}, '', url.toString());
   };
 
+  // Bulk action functions
+  const toggleBulkActionMode = () => {
+    setBulkActionMode(!bulkActionMode);
+    setSelectedMessages([]);
+  };
+
+  const handleSelectMessage = (messageId: string) => {
+    setSelectedMessages(prev => 
+      prev.includes(messageId) 
+        ? prev.filter(id => id !== messageId)
+        : [...prev, messageId]
+    );
+  };
+
+  const handleSelectAll = () => {
+    if (selectedMessages.length === filteredMessages.length) {
+      setSelectedMessages([]);
+    } else {
+      setSelectedMessages(filteredMessages.map(m => m.id));
+    }
+  };
+
+  const executeBulkAction = async (action: 'delete' | 'archive' | 'mark-read' | 'star') => {
+    if (selectedMessages.length === 0) {
+      showNotification.error({ title: 'No Selection', message: 'Please select at least one message' });
+      return;
+    }
+
+    try {
+      let updatedMessages = [...messages];
+      let updateStats = { ...stats };
+
+      switch (action) {
+        case 'delete':
+          updatedMessages = messages.filter(m => !selectedMessages.includes(m.id));
+          updateStats.total -= selectedMessages.length;
+          updateStats.unread -= messages.filter(m => selectedMessages.includes(m.id) && m.status === 'unread').length;
+          updateStats.starred -= messages.filter(m => selectedMessages.includes(m.id) && m.status === 'starred').length;
+          showNotification.success({ title: 'Messages Deleted', message: `Deleted ${selectedMessages.length} messages` });
+          break;
+
+        case 'archive':
+          updatedMessages = messages.map(m => 
+            selectedMessages.includes(m.id) 
+              ? { ...m, folderId: 'archived' }
+              : m
+          );
+          updateStats.archived += selectedMessages.length;
+          showNotification.success({ title: 'Messages Archived', message: `Archived ${selectedMessages.length} messages` });
+          break;
+
+        case 'mark-read':
+          const unreadSelected = messages.filter(m => selectedMessages.includes(m.id) && m.status === 'unread');
+          updatedMessages = messages.map(m => 
+            selectedMessages.includes(m.id) && m.status === 'unread'
+              ? { ...m, status: 'read' as const }
+              : m
+          );
+          updateStats.unread -= unreadSelected.length;
+          showNotification.success({ title: 'Messages Marked as Read', message: `Marked ${unreadSelected.length} messages as read` });
+          break;
+
+        case 'star':
+          const unstarredSelected = messages.filter(m => selectedMessages.includes(m.id) && m.status !== 'starred');
+          updatedMessages = messages.map(m => 
+            selectedMessages.includes(m.id) 
+              ? { ...m, status: 'starred' as const }
+              : m
+          );
+          updateStats.starred += unstarredSelected.length;
+          showNotification.success({ title: 'Messages Starred', message: `Starred ${unstarredSelected.length} messages` });
+          break;
+      }
+
+      setMessages(updatedMessages);
+      setStats(updateStats);
+      setSelectedMessages([]);
+      setBulkActionMode(false);
+      setConfirmAction(null);
+
+    } catch (error) {
+      showNotification.error({ title: 'Action Failed', message: 'Failed to perform bulk action' });
+    }
+  };
+
+  const handleBulkAction = (action: 'delete' | 'archive' | 'mark-read' | 'star') => {
+    if (action === 'delete') {
+      setConfirmAction(action);
+    } else {
+      executeBulkAction(action);
+    }
+  };
+
   const filteredMessages = messages.filter(message => {
     const matchesSearch = message.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          message.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -292,7 +392,8 @@ export default function InboxPage() {
     
     const matchesFolder = selectedFolder === 'inbox' || 
                          (selectedFolder === 'starred' && message.status === 'starred') ||
-                         (selectedFolder === 'unread' && message.status === 'unread');
+                         (selectedFolder === 'unread' && message.status === 'unread') ||
+                         (selectedFolder === 'archived' && message.folderId === 'archived');
     
     return matchesSearch && matchesFolder;
   });
@@ -444,9 +545,93 @@ export default function InboxPage() {
               >
                 Starred
               </button>
+              <button
+                onClick={() => setSelectedFolder('archived')}
+                className={`px-4 py-3 rounded-xl font-medium transition-colors ${
+                  selectedFolder === 'archived'
+                    ? 'bg-amber-600 text-white'
+                    : 'bg-slate-800 text-slate-400 hover:text-white'
+                }`}
+              >
+                Archived
+              </button>
             </div>
           </div>
         </div>
+
+        {/* Bulk Actions Toolbar */}
+        {bulkActionMode ? (
+          <div className="bg-amber-900/20 border border-amber-600/30 rounded-2xl p-4 mb-6">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <span className="text-amber-300 font-medium">
+                  {selectedMessages.length} of {filteredMessages.length} selected
+                </span>
+                <button
+                  onClick={handleSelectAll}
+                  className="text-amber-400 hover:text-amber-300 text-sm underline"
+                >
+                  {selectedMessages.length === filteredMessages.length ? 'Deselect All' : 'Select All'}
+                </button>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleBulkAction('mark-read')}
+                  disabled={selectedMessages.length === 0}
+                  className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
+                >
+                  <CheckIcon className="h-4 w-4" />
+                  Mark Read
+                </button>
+                
+                <button
+                  onClick={() => handleBulkAction('star')}
+                  disabled={selectedMessages.length === 0}
+                  className="px-3 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
+                >
+                  <StarIcon className="h-4 w-4" />
+                  Star
+                </button>
+                
+                <button
+                  onClick={() => handleBulkAction('archive')}
+                  disabled={selectedMessages.length === 0}
+                  className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
+                >
+                  <ArchiveBoxIcon className="h-4 w-4" />
+                  Archive
+                </button>
+                
+                <button
+                  onClick={() => handleBulkAction('delete')}
+                  disabled={selectedMessages.length === 0}
+                  className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
+                >
+                  <TrashIcon className="h-4 w-4" />
+                  Delete
+                </button>
+                
+                <button
+                  onClick={toggleBulkActionMode}
+                  className="px-3 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors text-sm"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex justify-between items-center mb-6">
+            <button
+              onClick={toggleBulkActionMode}
+              className="px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-colors flex items-center gap-2"
+            >
+              <FolderIcon className="h-4 w-4" />
+              Bulk Actions
+            </button>
+          </div>
+        )}
 
         {/* Messages List */}
         <div className="bg-black rounded-2xl border border-slate-700">
@@ -475,10 +660,28 @@ export default function InboxPage() {
               filteredMessages.map((message) => (
                 <div
                   key={message.id}
-                  className="p-4 hover:bg-slate-800 cursor-pointer transition-colors"
-                  onClick={() => handleMessageClick(message)}
+                  className={`p-4 hover:bg-slate-800 cursor-pointer transition-colors ${
+                    bulkActionMode && selectedMessages.includes(message.id) 
+                      ? 'bg-amber-900/20 border-l-4 border-l-amber-500' 
+                      : ''
+                  }`}
+                  onClick={() => bulkActionMode ? handleSelectMessage(message.id) : handleMessageClick(message)}
                 >
                   <div className="flex items-start gap-3">
+                    {bulkActionMode && (
+                      <div className="mt-1">
+                        <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                          selectedMessages.includes(message.id)
+                            ? 'border-amber-500 bg-amber-500'
+                            : 'border-slate-400 hover:border-amber-400'
+                        }`}>
+                          {selectedMessages.includes(message.id) && (
+                            <CheckIcon className="w-3 h-3 text-white" />
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    
                     <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                       {message.sender.avatar}
                     </div>
@@ -529,21 +732,23 @@ export default function InboxPage() {
                       </div>
                     </div>
 
-                    <div className="flex flex-col items-center gap-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleStar(message.id);
-                        }}
-                        className="p-2 rounded-lg hover:bg-slate-700 transition-colors"
-                      >
-                        {message.status === 'starred' ? (
-                          <StarIconSolid className="h-5 w-5 text-yellow-400" />
-                        ) : (
-                          <StarIcon className="h-5 w-5 text-slate-400" />
-                        )}
-                      </button>
-                    </div>
+                    {!bulkActionMode && (
+                      <div className="flex flex-col items-center gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleStar(message.id);
+                          }}
+                          className="p-2 rounded-lg hover:bg-slate-700 transition-colors"
+                        >
+                          {message.status === 'starred' ? (
+                            <StarIconSolid className="h-5 w-5 text-yellow-400" />
+                          ) : (
+                            <StarIcon className="h-5 w-5 text-slate-400" />
+                          )}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))
@@ -623,6 +828,42 @@ export default function InboxPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {confirmAction && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-black border border-slate-700 rounded-2xl w-full max-w-md">
+            <div className="p-6">
+              <div className="flex items-center mb-4">
+                <ExclamationTriangleIcon className="h-8 w-8 text-red-500 mr-3" />
+                <h3 className="text-lg font-medium text-white">
+                  Confirm Deletion
+                </h3>
+              </div>
+              
+              <p className="text-sm text-slate-400 mb-6">
+                Are you sure you want to delete {selectedMessages.length} message{selectedMessages.length !== 1 ? 's' : ''}? 
+                This action cannot be undone.
+              </p>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setConfirmAction(null)}
+                  className="flex-1 px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => executeBulkAction('delete')}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

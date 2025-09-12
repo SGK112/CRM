@@ -1,6 +1,7 @@
 'use client';
 
 import CommunicationSettings from '@/components/CommunicationSettings';
+import DataManagement from '@/components/DataManagement';
 import {
     BellIcon,
     BuildingStorefrontIcon,
@@ -14,7 +15,8 @@ import {
     ShieldCheckIcon,
     UserIcon,
     UsersIcon,
-    WrenchScrewdriverIcon
+    WrenchScrewdriverIcon,
+    ArchiveBoxIcon
 } from '@heroicons/react/24/outline';
 import { useEffect, useState } from 'react';
 
@@ -1206,6 +1208,7 @@ export default function UnifiedSettingsPage() {
       'notifications': 'Alert & notification preferences',
       'security': 'Security & privacy settings',
       'billing': 'Payment & subscription settings',
+      'data': 'Delete, organize & archive data',
       'advanced': 'Advanced system settings'
     };
     return descriptions[tabId as keyof typeof descriptions] || 'Configure settings';
@@ -1415,6 +1418,7 @@ export default function UnifiedSettingsPage() {
     { id: 'notifications', name: 'Notifications', icon: BellIcon },
     { id: 'security', name: 'Security', icon: ShieldCheckIcon },
     { id: 'billing', name: 'Billing', icon: CreditCardIcon },
+    { id: 'data', name: 'Data Management', icon: ArchiveBoxIcon },
     { id: 'advanced', name: 'Advanced', icon: WrenchScrewdriverIcon },
   ];
 
@@ -1689,6 +1693,8 @@ export default function UnifiedSettingsPage() {
         return renderSecurityTab();
       case 'billing':
         return renderBillingTab();
+      case 'data':
+        return <DataManagement />;
       case 'advanced':
         return renderAdvancedTab();
       default:

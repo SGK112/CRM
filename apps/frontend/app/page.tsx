@@ -257,20 +257,9 @@ export default function HomePage() {
                 <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-amber-500 via-amber-600 to-amber-700 flex items-center justify-center shadow-lg border border-amber-400/20 relative overflow-hidden">
                   {/* Professional Remodeling Logo */}
                   <div className="relative z-10">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-white">
-                      {/* Hammer handle */}
-                      <rect x="14" y="12" width="2" height="10" fill="currentColor" opacity="0.9" rx="1"/>
-                      {/* Hammer head */}
-                      <rect x="11" y="10" width="8" height="4" fill="currentColor" rx="1"/>
-                      {/* Wrench */}
-                      <circle cx="8" cy="8" r="2.5" stroke="currentColor" strokeWidth="1.5" fill="none" opacity="0.8"/>
-                      <rect x="5" y="7" width="6" height="2" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.8"/>
-                      {/* Blueprint lines */}
-                      <line x1="2" y1="4" x2="10" y2="4" stroke="currentColor" strokeWidth="1" opacity="0.6" strokeDasharray="2,1"/>
-                      <line x1="2" y1="6" x2="8" y2="6" stroke="currentColor" strokeWidth="1" opacity="0.6" strokeDasharray="2,1"/>
-                      {/* Accent dots */}
-                      <circle cx="4" cy="20" r="1" fill="currentColor" opacity="0.7"/>
-                      <circle cx="20" cy="4" r="1" fill="currentColor" opacity="0.7"/>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="text-white">
+                      <path d="M11.47 3.84a.75.75 0 011.06 0l8.69 8.69a.75.75 0 101.06-1.06l-8.689-8.69a2.25 2.25 0 00-3.182 0l-8.69 8.69a.75.75 0 001.061 1.06l8.69-8.69z" />
+                      <path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 01-.75-.75v-4.5a.75.75 0 00-.75-.75h-3a.75.75 0 00-.75.75V21a.75.75 0 01-.75.75H5.625a1.875 1.875 0 01-1.875-1.875v-6.198a2.29 2.29 0 00.091-.086L12 5.43z" />
                     </svg>
                   </div>
                   {/* Subtle shine effect */}

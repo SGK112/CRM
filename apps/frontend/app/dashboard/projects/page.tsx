@@ -348,10 +348,12 @@ export default function ProjectsPage() {
           </div>
 
           {/* AI Insights Bar */}
-          <div className="bg-gradient-to-r from-amber-50 to-amber-100 dark:from-amber-950/50 dark:to-amber-900/30 rounded-lg p-3 border border-amber-200 dark:border-amber-800">
-            <div className="flex items-center space-x-2">
-              <SparklesIcon className="h-4 w-4 text-amber-600" />
-              <span className="text-sm font-medium text-amber-800 dark:text-amber-200">
+          <div className="bg-gradient-to-r from-orange-600/90 to-orange-700/90 backdrop-blur-sm rounded-xl p-4 border-2 border-orange-500 shadow-lg">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+                <SparklesIcon className="h-5 w-5 text-white" />
+              </div>
+              <span className="text-sm font-semibold text-white">
                 {stats.active > 0
                   ? `${stats.active} active projects averaging $${Math.round(stats.totalBudget / Math.max(stats.total, 1) / 1000)}k each`
                   : 'Ready to track your first remodeling project'

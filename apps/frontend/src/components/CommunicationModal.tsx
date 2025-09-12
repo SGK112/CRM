@@ -24,10 +24,9 @@ import {
 import {
   EnvelopeIcon,
   DevicePhoneMobileIcon,
-  CheckCircleIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
-import { toast } from 'react-hot-toast';
+import { showNotification } from './NotificationBanner';
 
 interface Client {
   _id: string;
@@ -67,7 +66,10 @@ export default function CommunicationModal({ isOpen, onClose, client }: Communic
 
   const handleSendEmail = async () => {
     if (!emailSubject.trim() || !emailMessage.trim()) {
-      toast.error('Please fill in both subject and message');
+      showNotification.warning({
+        title: 'Missing Information',
+        message: 'Please fill in both subject and message'
+      });
       return;
     }
 
@@ -92,16 +94,24 @@ export default function CommunicationModal({ isOpen, onClose, client }: Communic
       const result = await response.json();
 
       if (result.success) {
-        toast.success('Email sent successfully!');
+        showNotification.success({
+          title: 'Email Sent',
+          message: 'Your email has been sent successfully!'
+        });
         setEmailSubject('');
         setEmailMessage('');
         onClose();
       } else {
-        toast.error(result.message || 'Failed to send email');
+        showNotification.error({
+          title: 'Email Failed',
+          message: result.message || 'Failed to send email'
+        });
       }
-    } catch (error) {
-      console.error('Email error:', error);
-      toast.error('Failed to send email. Please try again.');
+    } catch {
+      showNotification.error({
+        title: 'Email Error',
+        message: 'Failed to send email. Please try again.'
+      });
     } finally {
       setIsLoading(false);
     }
@@ -109,12 +119,18 @@ export default function CommunicationModal({ isOpen, onClose, client }: Communic
 
   const handleSendSMS = async () => {
     if (!smsMessage.trim()) {
-      toast.error('Please enter a message');
+      showNotification.warning({
+        title: 'Missing Message',
+        message: 'Please enter a message'
+      });
       return;
     }
 
     if (!client.phone) {
-      toast.error('Client does not have a phone number');
+      showNotification.warning({
+        title: 'No Phone Number',
+        message: 'Client does not have a phone number on file'
+      });
       return;
     }
 
@@ -138,15 +154,23 @@ export default function CommunicationModal({ isOpen, onClose, client }: Communic
       const result = await response.json();
 
       if (result.success) {
-        toast.success('SMS sent successfully!');
+        showNotification.success({
+          title: 'SMS Sent',
+          message: 'Your SMS has been sent successfully!'
+        });
         setSmsMessage('');
         onClose();
       } else {
-        toast.error(result.message || 'Failed to send SMS');
+        showNotification.error({
+          title: 'SMS Failed',
+          message: result.message || 'Failed to send SMS'
+        });
       }
-    } catch (error) {
-      console.error('SMS error:', error);
-      toast.error('Failed to send SMS. Please try again.');
+    } catch {
+      showNotification.error({
+        title: 'SMS Error',
+        message: 'Failed to send SMS. Please try again.'
+      });
     } finally {
       setIsLoading(false);
     }
@@ -178,14 +202,22 @@ export default function CommunicationModal({ isOpen, onClose, client }: Communic
       const result = await response.json();
 
       if (result.success) {
-        toast.success('Email sent successfully!');
+        showNotification.success({
+          title: 'Email Sent',
+          message: 'Your templated email has been sent successfully!'
+        });
         onClose();
       } else {
-        toast.error(result.message || 'Failed to send email');
+        showNotification.error({
+          title: 'Email Failed',
+          message: result.message || 'Failed to send templated email'
+        });
       }
-    } catch (error) {
-      console.error('Templated email error:', error);
-      toast.error('Failed to send email. Please try again.');
+    } catch {
+      showNotification.error({
+        title: 'Email Error',
+        message: 'Failed to send email. Please try again.'
+      });
     } finally {
       setIsLoading(false);
     }

@@ -12,6 +12,7 @@ import { CatalogModule } from './catalog/catalog.module';
 import { ChatModule } from './chat/chat.module';
 import { ClientsModule } from './clients/clients.module';
 import { CommunicationsModule } from './communications/communications.module';
+import { DataManagementModule } from './data-management/data-management.module';
 import { DesignsModule } from './designs/designs.module';
 import { DevModule } from './dev/dev.module';
 import { DocumentsModule } from './documents/documents.module';
@@ -85,6 +86,7 @@ import { WorkspaceModule } from './workspace/workspace.module';
     QuickBooksModule,
     WalletModule,
     TwilioNumbersModule,
+    DataManagementModule,
   ],
   controllers: [RootController],
 })

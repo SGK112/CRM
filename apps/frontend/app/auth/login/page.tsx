@@ -160,10 +160,7 @@ export default function LoginPage() {
               </div>
 
               {/* Password field */}
-              <div className="space-y-2">
-                <label htmlFor="password" className="block text-sm font-medium text-white">
-                  Password
-                </label>
+              <div>
                 <PasswordField
                   id="password"
                   label="Password"
