@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDevClientsStore } from '@/lib/dev-client-store';
 import { readContactsFromFile } from '@/lib/file-contact-store';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     if (process.env.NODE_ENV !== 'production') {
       const fileContacts = readContactsFromFile();
       const memoryContacts = getDevClientsStore();
-      
+
       // Convert memory contacts to file contact format and merge (same logic as main clients endpoint)
       const allContacts = [...fileContacts];
       memoryContacts.forEach(memContact => {
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
           });
         }
       });
-      
+
       return NextResponse.json({ count: allContacts.length });
     }
 
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
         // Fallback to counting mock data
         const fileContacts = readContactsFromFile();
         const memoryContacts = getDevClientsStore();
-        
+
         const allContacts = [...fileContacts];
         memoryContacts.forEach(memContact => {
           const exists = allContacts.find(fc => fc.id === memContact.id || fc._id === memContact._id);
@@ -75,14 +75,14 @@ export async function GET(request: NextRequest) {
             });
           }
         });
-        
+
         return NextResponse.json({ count: allContacts.length });
       }
     } catch (error) {
       // Fallback to counting mock data
       const fileContacts = readContactsFromFile();
       const memoryContacts = getDevClientsStore();
-      
+
       const allContacts = [...fileContacts];
       memoryContacts.forEach(memContact => {
         const exists = allContacts.find(fc => fc.id === memContact.id || fc._id === memContact._id);
@@ -98,14 +98,14 @@ export async function GET(request: NextRequest) {
           });
         }
       });
-      
+
       return NextResponse.json({ count: allContacts.length });
     }
   } catch (error) {
     // Fallback to mock data count
     const fileContacts = readContactsFromFile();
     const memoryContacts = getDevClientsStore();
-    
+
     const allContacts = [...fileContacts];
     memoryContacts.forEach(memContact => {
       const exists = allContacts.find(fc => fc.id === memContact.id || fc._id === memContact._id);
@@ -121,7 +121,7 @@ export async function GET(request: NextRequest) {
         });
       }
     });
-    
+
     return NextResponse.json({ count: allContacts.length });
   }
 }

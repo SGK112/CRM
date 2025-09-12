@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
 
 // Mock data for development
 const DEV_MOCK_DOCUMENTS = {
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
       if (process.env.NODE_ENV !== 'production') {
         return NextResponse.json(DEV_MOCK_DOCUMENTS);
       }
-      
+
       return NextResponse.json(
         { error: 'Failed to fetch documents' },
         { status: response.status }
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
     if (process.env.NODE_ENV !== 'production') {
       return NextResponse.json(DEV_MOCK_DOCUMENTS);
     }
-    
+
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
           });
         }
       }
-      
+
       return NextResponse.json(
         { error: 'Failed to upload document' },
         { status: response.status }

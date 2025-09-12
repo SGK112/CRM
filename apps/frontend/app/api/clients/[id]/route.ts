@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { findInDevClientsStore, updateInDevClientsStore, removeFromDevClientsStore } from '@/lib/dev-client-store';
 import { findContactInFile, updateContactInFile, removeContactFromFile } from '@/lib/file-contact-store';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
 
 export async function GET(
   request: NextRequest,
@@ -196,7 +196,7 @@ export async function DELETE(
     if (process.env.NODE_ENV !== 'production') {
       const deleted = removeFromDevClientsStore(params.id);
       const fileDeleted = removeContactFromFile(params.id);
-      
+
       if (!deleted && !fileDeleted) {
         return NextResponse.json(
           { error: 'Client not found' },
@@ -246,8 +246,8 @@ export async function POST(
     }
 
     // No sync actions supported - redirect to settings
-    return NextResponse.json({ 
-      error: 'Sync preferences should be configured in settings' 
+    return NextResponse.json({
+      error: 'Sync preferences should be configured in settings'
     }, { status: 400 });
   } catch (error) {
     return NextResponse.json(

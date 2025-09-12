@@ -86,7 +86,7 @@ export default function ProjectsPage() {
         // Failed to parse user data
       }
     }
-    
+
     const fetchProjects = async () => {
       try {
         setLoading(true);
@@ -107,7 +107,7 @@ export default function ProjectsPage() {
           const data = await response.json();
           const projectsData = Array.isArray(data) ? data : data.projects || [];
           setProjects(projectsData);
-          
+
           // Calculate stats
           const newStats = {
             total: projectsData.length,
@@ -120,35 +120,15 @@ export default function ProjectsPage() {
           };
           setStats(newStats);
         } else {
-          // Failed to fetch projects - set empty stats
-          setProjects([]);
-          setStats({
-            total: 0,
-            active: 0,
-            completed: 0,
-            planning: 0,
-            onHold: 0,
-            cancelled: 0,
-            totalBudget: 0,
-          });
+          // Failed to fetch projects
         }
       } catch (error) {
-        // Error fetching projects - set empty stats
-        setProjects([]);
-        setStats({
-          total: 0,
-          active: 0,
-          completed: 0,
-          planning: 0,
-          onHold: 0,
-          cancelled: 0,
-          totalBudget: 0,
-        });
+        // Error fetching projects
       } finally {
         setLoading(false);
       }
     };
-    
+
     fetchProjects();
   }, [router]);
 
@@ -172,7 +152,7 @@ export default function ProjectsPage() {
         const data = await response.json();
         const projectsData = Array.isArray(data) ? data : data.projects || [];
         setProjects(projectsData);
-        
+
         // Calculate stats
         const newStats = {
           total: projectsData.length,
@@ -185,30 +165,10 @@ export default function ProjectsPage() {
         };
         setStats(newStats);
       } else {
-        // Failed to fetch projects - set empty stats
-        setProjects([]);
-        setStats({
-          total: 0,
-          active: 0,
-          completed: 0,
-          planning: 0,
-          onHold: 0,
-          cancelled: 0,
-          totalBudget: 0,
-        });
+        // Failed to fetch projects
       }
     } catch (error) {
-      // Error fetching projects - set empty stats
-      setProjects([]);
-      setStats({
-        total: 0,
-        active: 0,
-        completed: 0,
-        planning: 0,
-        onHold: 0,
-        cancelled: 0,
-        totalBudget: 0,
-      });
+      // Error fetching projects
     } finally {
       setLoading(false);
     }
@@ -268,19 +228,19 @@ export default function ProjectsPage() {
       alert('You are not logged in. Please log in and try again.');
       return;
     }
-    
+
     const ok = window.confirm('Are you sure you want to delete this project? This action cannot be undone.');
     if (!ok) return;
-    
+
     try {
       const res = await fetch(`/api/projects/${projectId}`, {
         method: 'DELETE',
-        headers: { 
+        headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (res.ok) {
         // Remove project from local state immediately
         setProjects(prev => prev.filter(p => p._id !== projectId));
@@ -330,13 +290,13 @@ export default function ProjectsPage() {
   };
 
   const filteredProjects = projects.filter(project => {
-    const matchesSearch = searchQuery === '' || 
+    const matchesSearch = searchQuery === '' ||
       project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.clientName?.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     const matchesTab = activeTab === 'all' || project.status === activeTab;
-    
+
     return matchesSearch && matchesTab;
   });
 
@@ -386,25 +346,17 @@ export default function ProjectsPage() {
               New Project
             </Link>
           </div>
-          
+
           {/* AI Insights Bar */}
           <div className="bg-gradient-to-r from-amber-50 to-amber-100 dark:from-amber-950/50 dark:to-amber-900/30 rounded-lg p-3 border border-amber-200 dark:border-amber-800">
             <div className="flex items-center space-x-2">
               <SparklesIcon className="h-4 w-4 text-amber-600" />
-              {stats.total > 0 ? (
-                <span className="text-sm font-medium text-amber-800 dark:text-amber-200">
-                  {stats.active > 0 
-                    ? `${stats.active} active projects averaging $${Math.round(stats.totalBudget / Math.max(stats.total, 1) / 1000)}k each`
-                    : `${stats.total} projects created • ${stats.completed} completed • $${Math.round(stats.totalBudget / 1000)}k total value`
-                  }
-                </span>
-              ) : (
-                <div className="px-3 py-1.5 bg-amber-600/90 text-white rounded-lg backdrop-blur-sm border border-amber-500/30 shadow-md">
-                  <span className="text-sm font-medium">
-                    Ready to track your first remodeling project
-                  </span>
-                </div>
-              )}
+              <span className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                {stats.active > 0
+                  ? `${stats.active} active projects averaging $${Math.round(stats.totalBudget / Math.max(stats.total, 1) / 1000)}k each`
+                  : 'Ready to track your first remodeling project'
+                }
+              </span>
             </div>
           </div>
         </div>
@@ -424,7 +376,7 @@ export default function ProjectsPage() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-[var(--surface-1)] rounded-xl p-4 border border-[var(--border)] hover:border-emerald-500/30 transition-colors">
             <div className="flex items-center">
               <div className="p-2.5 bg-emerald-500/10 rounded-lg">
@@ -436,7 +388,7 @@ export default function ProjectsPage() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-[var(--surface-1)] rounded-xl p-4 border border-[var(--border)] hover:border-blue-500/30 transition-colors">
             <div className="flex items-center">
               <div className="p-2.5 bg-blue-500/10 rounded-lg">
@@ -448,7 +400,7 @@ export default function ProjectsPage() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-[var(--surface-1)] rounded-xl p-4 border border-[var(--border)] hover:border-amber-500/30 transition-colors">
             <div className="flex items-center">
               <div className="p-2.5 bg-amber-500/10 rounded-lg">
@@ -489,10 +441,10 @@ export default function ProjectsPage() {
                     : 'bg-[var(--surface-1)] text-[var(--text-dim)] hover:text-[var(--text)] border border-[var(--border)] hover:border-amber-500/30'
                 }`}
               >
-                {tab.label} 
+                {tab.label}
                 <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${
-                  activeTab === tab.id 
-                    ? 'bg-white/20 text-white' 
+                  activeTab === tab.id
+                    ? 'bg-white/20 text-white'
                     : 'bg-[var(--surface-2)] text-[var(--text-dim)]'
                 }`}>
                   {tab.count}
@@ -520,13 +472,13 @@ export default function ProjectsPage() {
                       <p className="text-sm text-[var(--text-dim)] line-clamp-2 mb-4">{project.description}</p>
                     </div>
                     <div className="relative ml-4" ref={dropdownRef}>
-                      <button 
+                      <button
                         onClick={() => setDropdownOpen(dropdownOpen === project._id ? null : project._id)}
                         className="p-2 text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-[var(--surface-2)] rounded-lg transition-colors"
                       >
                         <EllipsisVerticalIcon className="h-5 w-5" />
                       </button>
-                      
+
                       {/* Enhanced Dropdown Menu */}
                       {dropdownOpen === project._id && (
                         <div className="absolute right-0 top-10 w-52 rounded-xl bg-[var(--surface-1)] border border-[var(--border)] shadow-xl py-2 z-50">
@@ -546,11 +498,11 @@ export default function ProjectsPage() {
                             <WrenchScrewdriverIcon className="h-4 w-4 mr-3" />
                             Edit Project
                           </Link>
-                          
+
                           {/* Status Update Submenu */}
                           <div className="border-t border-[var(--border)] my-2" />
                           <div className="px-4 py-2 text-xs text-[var(--text-dim)] font-medium">Quick Status Update:</div>
-                          
+
                           {['planning', 'active', 'on_hold', 'completed', 'cancelled'].map((status) => (
                             <button
                               key={status}
@@ -559,8 +511,8 @@ export default function ProjectsPage() {
                                 updateProjectStatus(project._id, status);
                               }}
                               className={`flex items-center w-full text-left px-4 py-2.5 text-sm transition-all duration-200 ${
-                                project.status === status 
-                                  ? 'text-amber-600 bg-amber-50 dark:bg-amber-950/50 border-l-2 border-amber-500' 
+                                project.status === status
+                                  ? 'text-amber-600 bg-amber-50 dark:bg-amber-950/50 border-l-2 border-amber-500'
                                   : 'text-[var(--text)] hover:bg-[var(--surface-2)] hover:text-amber-600 hover:border-l-2 hover:border-amber-400'
                               }`}
                               disabled={project.status === status}
@@ -579,7 +531,7 @@ export default function ProjectsPage() {
                               </div>
                             </button>
                           ))}
-                          
+
                           <div className="border-t border-[var(--border)] my-2" />
                           <button
                             onClick={() => {
@@ -604,14 +556,14 @@ export default function ProjectsPage() {
                         {project.clientName}
                       </div>
                     )}
-                    
+
                     {project.budget && (
                       <div className="flex items-center text-sm text-[var(--text-dim)]">
                         <CurrencyDollarIcon className="h-4 w-4 mr-2" />
                         {formatCurrency(project.budget)}
                       </div>
                     )}
-                    
+
                     <div className="flex items-center text-sm text-[var(--text-dim)]">
                       <CalendarIcon className="h-4 w-4 mr-2" />
                       Start: {formatDate(project.startDate)}
@@ -625,7 +577,7 @@ export default function ProjectsPage() {
                         Created: {formatDate(project.startDate)}
                       </span>
                     </div>
-                    
+
                     <div className="flex items-center space-x-3">
                       <Link
                         href={`/dashboard/projects/${project._id}`}

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDevClientsStore, addToDevClientsStore, findInDevClientsStore, DevClient } from '@/lib/dev-client-store';
 import { addContactToFile, readContactsFromFile } from '@/lib/file-contact-store';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     if (process.env.NODE_ENV !== 'production') {
       const fileContacts = readContactsFromFile();
       const memoryContacts = getDevClientsStore();
-      
+
       // Convert memory contacts to file contact format and merge
       const allContacts = [...fileContacts];
       memoryContacts.forEach(memContact => {
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
           });
         }
       });
-      
+
       return NextResponse.json({ clients: allContacts });
     }
 
@@ -90,10 +90,10 @@ export async function POST(request: NextRequest) {
         updatedAt: new Date().toISOString(),
         ...body
       };
-      
+
       // Add to in-memory store
       addToDevClientsStore(newClient);
-      
+
       // Also add to file store for persistence
       const fileContact = {
         id: newClient.id,
@@ -114,9 +114,9 @@ export async function POST(request: NextRequest) {
         updatedAt: newClient.updatedAt,
         ...body
       };
-      
+
       const fileSaved = addContactToFile(fileContact);
-      
+
       // Verify the contact was added successfully
       const verification = findInDevClientsStore(newClient.id);
       if (!verification && !fileSaved) {
@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
           { status: 500 }
         );
       }
-      
+
       return NextResponse.json(newClient, { status: 201 });
     }
 
