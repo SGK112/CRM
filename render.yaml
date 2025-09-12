@@ -12,7 +12,7 @@ services:
       echo "✅ Backend build complete!"
     startCommand: cd apps/backend && npm run start:prod
     healthCheckPath: /api/health
-    autoDeploy: false # Manual deploy required
+    autoDeploy: true # Auto-deploy enabled
     envVars:
       - key: NODE_ENV
         value: production
@@ -68,7 +68,7 @@ services:
       cd -
       echo "✅ Frontend build complete!"
     startCommand: cd apps/frontend && node .next/standalone/apps/frontend/server.js
-    autoDeploy: false # Manual deploy required
+    autoDeploy: true # Auto-deploy enabled
     envVars:
       - key: NODE_ENV
         value: production
