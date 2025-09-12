@@ -351,16 +351,17 @@ export default function ProjectsPage() {
           <div className="bg-gradient-to-r from-amber-50 to-amber-100 dark:from-amber-950/50 dark:to-amber-900/30 rounded-lg p-3 border border-amber-200 dark:border-amber-800">
             <div className="flex items-center space-x-2">
               <SparklesIcon className="h-4 w-4 text-amber-600" />
-              <span className="text-sm font-medium text-amber-800 dark:text-amber-200">
-                {stats.active > 0 
-                  ? `${stats.active} active projects averaging $${Math.round(stats.totalBudget / Math.max(stats.total, 1) / 1000)}k each`
-                  : (
-                    <span className="px-3 py-1.5 bg-amber-600/80 text-white rounded-lg backdrop-blur-sm border border-amber-500/50 shadow-lg">
-                      Ready to track your first remodeling project
-                    </span>
-                  )
-                }
-              </span>
+              {stats.active > 0 ? (
+                <span className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                  {`${stats.active} active projects averaging $${Math.round(stats.totalBudget / Math.max(stats.total, 1) / 1000)}k each`}
+                </span>
+              ) : (
+                <div className="px-3 py-1.5 bg-amber-600/90 text-white rounded-lg backdrop-blur-sm border border-amber-500/30 shadow-md">
+                  <span className="text-sm font-medium">
+                    Ready to track your first remodeling project
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
