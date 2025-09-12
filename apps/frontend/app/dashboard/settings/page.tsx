@@ -21,12 +21,14 @@ import { useEffect, useState } from 'react';
 // Integration components
 function GoogleCalendarIntegration() {
   const [status, setStatus] = useState<{ connected: boolean; email?: string } | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchStatus();
   }, []);
 
   const fetchStatus = async () => {
+    setLoading(true);
     try {
       const token = localStorage.getItem('accessToken');
       const res = await fetch('/api/integrations/google-calendar/status', {
@@ -37,12 +39,29 @@ function GoogleCalendarIntegration() {
         setStatus(data);
       }
     } catch (error) {
-      // Handle error silently
+      // Handle error silently - could add user notification here
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleConnect = () => {
     window.location.href = '/api/auth/google';
+  };
+
+  const handleDisconnect = async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      const res = await fetch('/api/integrations/google-calendar/disconnect', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        await fetchStatus();
+      }
+    } catch (error) {
+      // Handle error silently - could add user notification here
+    }
   };
 
   return (
@@ -59,7 +78,9 @@ function GoogleCalendarIntegration() {
             </p>
           </div>
         </div>
-        {status?.connected ? (
+        {loading ? (
+          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+        ) : status?.connected ? (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
             Connected
           </span>
@@ -75,12 +96,22 @@ function GoogleCalendarIntegration() {
           <p className="text-sm text-gray-700 dark:text-[var(--text-dim)]">
             Connected as: {status.email}
           </p>
-          <button
-            onClick={fetchStatus}
-            className="text-sm px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-          >
-            Refresh Status
-          </button>
+          <div className="flex space-x-2">
+            <button
+              onClick={fetchStatus}
+              disabled={loading}
+              className="text-sm px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50"
+            >
+              Refresh Status
+            </button>
+            <button
+              onClick={handleDisconnect}
+              disabled={loading}
+              className="text-sm px-3 py-1.5 bg-red-600 text-white rounded hover:bg-red-700 transition-colors disabled:opacity-50"
+            >
+              Disconnect
+            </button>
+          </div>
         </div>
       ) : (
         <div className="space-y-3">
@@ -89,7 +120,8 @@ function GoogleCalendarIntegration() {
           </p>
           <button
             onClick={handleConnect}
-            className="text-sm px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            disabled={loading}
+            className="text-sm px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50"
           >
             Connect Google Calendar
           </button>
@@ -110,8 +142,34 @@ function EmailIntegration() {
     fromName: '',
     secure: true,
   });
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  useEffect(() => {
+    loadConfig();
+  }, []);
+
+  const loadConfig = async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch('/api/user/email-config', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.config) {
+          setConfig(prev => ({ ...prev, ...data.config }));
+        }
+      }
+    } catch (error) {
+      // Handle error silently
+    }
+  };
 
   const handleSave = async () => {
+    setLoading(true);
+    setMessage(null);
     try {
       const token = localStorage.getItem('accessToken');
       const response = await fetch('/api/user/email-config', {
@@ -123,13 +181,43 @@ function EmailIntegration() {
         body: JSON.stringify(config),
       });
 
-      if (response.ok) {
-        alert('Email configuration saved successfully!');
+      const data = await response.json();
+      if (data.success) {
+        setMessage({ type: 'success', text: 'Email configuration saved successfully!' });
       } else {
-        alert('Failed to save email configuration');
+        setMessage({ type: 'error', text: data.message || 'Failed to save email configuration' });
       }
     } catch (error) {
-      alert('Failed to save email configuration');
+      setMessage({ type: 'error', text: 'Failed to save email configuration' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const testConnection = async () => {
+    setLoading(true);
+    setMessage(null);
+    try {
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch('/api/user/email-config/test', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(config),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setMessage({ type: 'success', text: 'Email connection test successful!' });
+      } else {
+        setMessage({ type: 'error', text: data.message || 'Connection test failed' });
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Connection test failed' });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -146,6 +234,18 @@ function EmailIntegration() {
           </p>
         </div>
       </div>
+
+      {message && (
+        <div
+          className={`mb-4 p-3 rounded-lg ${
+            message.type === 'success'
+              ? 'bg-green-50 text-green-800 border border-green-200'
+              : 'bg-red-50 text-red-800 border border-red-200'
+          }`}
+        >
+          {message.text}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -200,6 +300,32 @@ function EmailIntegration() {
           />
         </div>
 
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-[var(--text)] mb-2">
+            From Email
+          </label>
+          <input
+            type="email"
+            value={config.fromEmail}
+            onChange={e => setConfig({ ...config, fromEmail: e.target.value })}
+            className="input"
+            placeholder="noreply@yourcompany.com"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-[var(--text)] mb-2">
+            From Name
+          </label>
+          <input
+            type="text"
+            value={config.fromName}
+            onChange={e => setConfig({ ...config, fromName: e.target.value })}
+            className="input"
+            placeholder="Your Company Name"
+          />
+        </div>
+
         <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-700 dark:text-[var(--text)] mb-2">
             Password
@@ -209,17 +335,28 @@ function EmailIntegration() {
             value={config.smtpPassword}
             onChange={e => setConfig({ ...config, smtpPassword: e.target.value })}
             className="input"
+            placeholder="Enter your SMTP password"
           />
         </div>
       </div>
 
-      <div className="mt-4">
+      <div className="mt-4 flex space-x-3">
         <button
           onClick={handleSave}
-          disabled={false}
-          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors disabled:opacity-50"
+          disabled={loading}
+          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center"
         >
+          {loading && (
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+          )}
           Save Email Config
+        </button>
+        <button
+          onClick={testConnection}
+          disabled={loading}
+          className="px-4 py-2 border border-green-600 text-green-600 rounded hover:bg-green-50 transition-colors disabled:opacity-50"
+        >
+          Test Connection
         </button>
       </div>
     </div>
@@ -234,9 +371,33 @@ function SMSIntegration() {
     webhookUrl: '',
   });
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  useEffect(() => {
+    loadConfig();
+  }, []);
+
+  const loadConfig = async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch('/api/user/twilio-config', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.config) {
+          setConfig(prev => ({ ...prev, ...data.config }));
+        }
+      }
+    } catch (error) {
+      // Handle error silently
+    }
+  };
 
   const handleSave = async () => {
     setLoading(true);
+    setMessage(null);
     try {
       const token = localStorage.getItem('accessToken');
       const response = await fetch('/api/user/twilio-config', {
@@ -248,13 +409,41 @@ function SMSIntegration() {
         body: JSON.stringify(config),
       });
 
-      if (response.ok) {
-        alert('SMS configuration saved successfully!');
+      const data = await response.json();
+      if (data.success) {
+        setMessage({ type: 'success', text: 'SMS configuration saved successfully!' });
       } else {
-        alert('Failed to save SMS configuration');
+        setMessage({ type: 'error', text: data.message || 'Failed to save SMS configuration' });
       }
     } catch (error) {
-      alert('Failed to save SMS configuration');
+      setMessage({ type: 'error', text: 'Failed to save SMS configuration' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const testConnection = async () => {
+    setLoading(true);
+    setMessage(null);
+    try {
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch('/api/user/twilio-config/test', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(config),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setMessage({ type: 'success', text: 'SMS connection test successful!' });
+      } else {
+        setMessage({ type: 'error', text: data.message || 'Connection test failed' });
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Connection test failed' });
     } finally {
       setLoading(false);
     }
@@ -273,6 +462,18 @@ function SMSIntegration() {
           </p>
         </div>
       </div>
+
+      {message && (
+        <div
+          className={`mb-4 p-3 rounded-lg ${
+            message.type === 'success'
+              ? 'bg-green-50 text-green-800 border border-green-200'
+              : 'bg-red-50 text-red-800 border border-red-200'
+          }`}
+        >
+          {message.text}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -297,6 +498,7 @@ function SMSIntegration() {
             value={config.authToken}
             onChange={e => setConfig({ ...config, authToken: e.target.value })}
             className="input"
+            placeholder="Enter your Twilio auth token"
           />
         </div>
 
@@ -327,13 +529,23 @@ function SMSIntegration() {
         </div>
       </div>
 
-      <div className="mt-4">
+      <div className="mt-4 flex space-x-3">
         <button
           onClick={handleSave}
           disabled={loading}
-          className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors disabled:opacity-50"
+          className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors disabled:opacity-50 flex items-center"
         >
-          {loading ? 'Saving...' : 'Save SMS Config'}
+          {loading && (
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+          )}
+          Save SMS Config
+        </button>
+        <button
+          onClick={testConnection}
+          disabled={loading}
+          className="px-4 py-2 border border-purple-600 text-purple-600 rounded hover:bg-purple-50 transition-colors disabled:opacity-50"
+        >
+          Test Connection
         </button>
       </div>
     </div>
@@ -411,9 +623,33 @@ function EstimateTemplates() {
     warrantyInfo: '',
   });
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  useEffect(() => {
+    loadTemplates();
+  }, []);
+
+  const loadTemplates = async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch('/api/workspace/estimate-templates', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.templates) {
+          setTemplates(prev => ({ ...prev, ...data.templates }));
+        }
+      }
+    } catch (error) {
+      // Handle error silently
+    }
+  };
 
   const handleSave = async () => {
     setLoading(true);
+    setMessage(null);
     try {
       const token = localStorage.getItem('accessToken');
       const response = await fetch('/api/workspace/estimate-templates', {
@@ -425,13 +661,14 @@ function EstimateTemplates() {
         body: JSON.stringify(templates),
       });
 
-      if (response.ok) {
-        alert('Estimate templates saved successfully!');
+      const data = await response.json();
+      if (data.success) {
+        setMessage({ type: 'success', text: 'Estimate templates saved successfully!' });
       } else {
-        alert('Failed to save estimate templates');
+        setMessage({ type: 'error', text: data.message || 'Failed to save estimate templates' });
       }
     } catch (error) {
-      alert('Failed to save estimate templates');
+      setMessage({ type: 'error', text: 'Failed to save estimate templates' });
     } finally {
       setLoading(false);
     }
@@ -447,6 +684,18 @@ function EstimateTemplates() {
           Set default terms, notes, and conditions that will appear on all new estimates
         </p>
       </div>
+
+      {message && (
+        <div
+          className={`p-3 rounded-lg ${
+            message.type === 'success'
+              ? 'bg-green-50 text-green-800 border border-green-200'
+              : 'bg-red-50 text-red-800 border border-red-200'
+          }`}
+        >
+          {message.text}
+        </div>
+      )}
 
       <div className="space-y-4">
         <div>
@@ -506,8 +755,11 @@ function EstimateTemplates() {
         <button
           onClick={handleSave}
           disabled={loading}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50"
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center"
         >
+          {loading && (
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+          )}
           {loading ? 'Saving...' : 'Save Templates'}
         </button>
       </div>
@@ -528,9 +780,33 @@ function InvoiceSettings() {
     nextInvoiceNumber: 1001,
   });
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch('/api/workspace/invoice-settings', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.settings) {
+          setSettings(prev => ({ ...prev, ...data.settings }));
+        }
+      }
+    } catch (error) {
+      // Handle error silently
+    }
+  };
 
   const handleSave = async () => {
     setLoading(true);
+    setMessage(null);
     try {
       const token = localStorage.getItem('accessToken');
       const response = await fetch('/api/workspace/invoice-settings', {
@@ -542,13 +818,14 @@ function InvoiceSettings() {
         body: JSON.stringify(settings),
       });
 
-      if (response.ok) {
-        alert('Invoice settings saved successfully!');
+      const data = await response.json();
+      if (data.success) {
+        setMessage({ type: 'success', text: 'Invoice settings saved successfully!' });
       } else {
-        alert('Failed to save invoice settings');
+        setMessage({ type: 'error', text: data.message || 'Failed to save invoice settings' });
       }
     } catch (error) {
-      alert('Failed to save invoice settings');
+      setMessage({ type: 'error', text: 'Failed to save invoice settings' });
     } finally {
       setLoading(false);
     }
@@ -564,6 +841,18 @@ function InvoiceSettings() {
           Configure your company information and default invoice settings
         </p>
       </div>
+
+      {message && (
+        <div
+          className={`p-3 rounded-lg ${
+            message.type === 'success'
+              ? 'bg-green-50 text-green-800 border border-green-200'
+              : 'bg-red-50 text-red-800 border border-red-200'
+          }`}
+        >
+          {message.text}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="md:col-span-2">
@@ -626,7 +915,7 @@ function InvoiceSettings() {
             type="number"
             step="0.01"
             value={settings.taxRate}
-            onChange={e => setSettings({ ...settings, taxRate: parseFloat(e.target.value) })}
+            onChange={e => setSettings({ ...settings, taxRate: parseFloat(e.target.value) || 0 })}
             className="input"
             placeholder="8.25"
           />
@@ -639,7 +928,7 @@ function InvoiceSettings() {
           <input
             type="number"
             value={settings.defaultDueDays}
-            onChange={e => setSettings({ ...settings, defaultDueDays: parseInt(e.target.value) })}
+            onChange={e => setSettings({ ...settings, defaultDueDays: parseInt(e.target.value) || 30 })}
             className="input"
             placeholder="30"
           />
@@ -654,7 +943,7 @@ function InvoiceSettings() {
             step="0.01"
             value={settings.lateFeePercentage}
             onChange={e =>
-              setSettings({ ...settings, lateFeePercentage: parseFloat(e.target.value) })
+              setSettings({ ...settings, lateFeePercentage: parseFloat(e.target.value) || 0 })
             }
             className="input"
             placeholder="1.5"
@@ -673,14 +962,30 @@ function InvoiceSettings() {
             placeholder="INV"
           />
         </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-[var(--text)] mb-2">
+            Next Invoice Number
+          </label>
+          <input
+            type="number"
+            value={settings.nextInvoiceNumber}
+            onChange={e => setSettings({ ...settings, nextInvoiceNumber: parseInt(e.target.value) || 1001 })}
+            className="input"
+            placeholder="1001"
+          />
+        </div>
       </div>
 
       <div className="pt-4">
         <button
           onClick={handleSave}
           disabled={loading}
-          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors disabled:opacity-50"
+          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center"
         >
+          {loading && (
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+          )}
           {loading ? 'Saving...' : 'Save Invoice Settings'}
         </button>
       </div>
@@ -691,12 +996,15 @@ function InvoiceSettings() {
 function UserPermissions() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [updating, setUpdating] = useState<string | null>(null);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
     fetchUsers();
   }, []);
 
   const fetchUsers = async () => {
+    setLoading(true);
     try {
       const token = localStorage.getItem('accessToken');
       const response = await fetch('/api/users/workspace-users', {
@@ -706,14 +1014,19 @@ function UserPermissions() {
       if (response.ok) {
         const data = await response.json();
         setUsers(data.users || []);
+      } else {
+        setMessage({ type: 'error', text: 'Failed to load workspace users' });
       }
     } catch (error) {
-      // Handle error silently
+      setMessage({ type: 'error', text: 'Failed to load workspace users' });
+    } finally {
+      setLoading(false);
     }
   };
 
   const updateUserRole = async (userId: string, newRole: string) => {
-    setLoading(true);
+    setUpdating(userId);
+    setMessage(null);
     try {
       const token = localStorage.getItem('accessToken');
       const response = await fetch(`/api/users/${userId}/role`, {
@@ -725,16 +1038,17 @@ function UserPermissions() {
         body: JSON.stringify({ role: newRole }),
       });
 
-      if (response.ok) {
-        fetchUsers(); // Refresh the list
-        alert('User role updated successfully!');
+      const data = await response.json();
+      if (data.success) {
+        await fetchUsers(); // Refresh the list
+        setMessage({ type: 'success', text: 'User role updated successfully!' });
       } else {
-        alert('Failed to update user role');
+        setMessage({ type: 'error', text: data.message || 'Failed to update user role' });
       }
     } catch (error) {
-      alert('Failed to update user role');
+      setMessage({ type: 'error', text: 'Failed to update user role' });
     } finally {
-      setLoading(false);
+      setUpdating(null);
     }
   };
 
@@ -765,40 +1079,72 @@ function UserPermissions() {
         </p>
       </div>
 
-      <div className="space-y-4">
-        {users.map((user: { _id: string; firstName: string; lastName: string; email: string; role: string }) => (
-          <div
-            key={user._id}
-            className="border border-gray-200 dark:border-token rounded-lg p-4 bg-white dark:bg-[var(--surface-2)]"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="font-medium text-gray-900 dark:text-[var(--text)]">
-                  {user.firstName} {user.lastName}
-                </h4>
-                <p className="text-sm text-gray-600 dark:text-[var(--text-dim)]">{user.email}</p>
-              </div>
-              <div className="flex items-center space-x-3">
-                <span className="text-sm text-gray-600 dark:text-[var(--text-dim)]">
-                  Current: {user.role}
-                </span>
-                <select
-                  value={user.role}
-                  onChange={e => updateUserRole(user._id, e.target.value)}
-                  disabled={loading}
-                  className="text-sm border border-gray-300 dark:border-token rounded px-2 py-1 bg-white dark:bg-[var(--surface-2)]"
-                >
-                  {roles.map(role => (
-                    <option key={role.value} value={role.value}>
-                      {role.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+      {message && (
+        <div
+          className={`p-3 rounded-lg ${
+            message.type === 'success'
+              ? 'bg-green-50 text-green-800 border border-green-200'
+              : 'bg-red-50 text-red-800 border border-red-200'
+          }`}
+        >
+          {message.text}
+        </div>
+      )}
+
+      {loading ? (
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <span className="ml-2 text-gray-600 dark:text-[var(--text-dim)]">Loading users...</span>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {users.length === 0 ? (
+            <div className="text-center py-8 text-gray-500 dark:text-[var(--text-dim)]">
+              No users found in this workspace
             </div>
-          </div>
-        ))}
-      </div>
+          ) : (
+            users.map((user: { _id: string; firstName: string; lastName: string; email: string; role: string }) => (
+              <div
+                key={user._id}
+                className="border border-gray-200 dark:border-token rounded-lg p-4 bg-white dark:bg-[var(--surface-2)]"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium text-gray-900 dark:text-[var(--text)]">
+                      {user.firstName} {user.lastName}
+                    </h4>
+                    <p className="text-sm text-gray-600 dark:text-[var(--text-dim)]">{user.email}</p>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <span className="text-sm text-gray-600 dark:text-[var(--text-dim)]">
+                      Current: {roles.find(r => r.value === user.role)?.label || user.role}
+                    </span>
+                    <div className="relative">
+                      {updating === user._id && (
+                        <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                        </div>
+                      )}
+                      <select
+                        value={user.role}
+                        onChange={e => updateUserRole(user._id, e.target.value)}
+                        disabled={updating === user._id}
+                        className="text-sm border border-gray-300 dark:border-token rounded px-2 py-1 bg-white dark:bg-[var(--surface-2)] disabled:opacity-50 pr-8"
+                      >
+                        {roles.map(role => (
+                          <option key={role.value} value={role.value}>
+                            {role.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
 
       <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
         <h4 className="font-medium text-blue-900 dark:text-blue-300 mb-2">Role Descriptions</h4>
@@ -841,9 +1187,47 @@ export default function UnifiedSettingsPage() {
     },
   });
 
-  // Load user profile data on component mount
+  const [workspaceSettings, setWorkspaceSettings] = useState({
+    name: '',
+    brandingColor: '',
+    logoUrl: '',
+    personalizationEnabled: true,
+  });
+
+  const getTabDescription = (tabId: string): string => {
+    const descriptions = {
+      'general': 'Personal information & preferences',
+      'business': 'Company & workspace settings',
+      'estimates': 'Estimate templates & defaults',
+      'invoices': 'Billing & invoice settings',
+      'integrations': 'Third-party connections',
+      'communications': 'Email & SMS configuration',
+      'users': 'User management & permissions',
+      'notifications': 'Alert & notification preferences',
+      'security': 'Security & privacy settings',
+      'billing': 'Payment & subscription settings',
+      'advanced': 'Advanced system settings'
+    };
+    return descriptions[tabId as keyof typeof descriptions] || 'Configure settings';
+  };
+
+  // Load user profile and workspace settings on component mount
   useEffect(() => {
-    loadUserProfile();
+    const loadAllSettings = async () => {
+      setLoading(true);
+      try {
+        await Promise.all([
+          loadUserProfile(),
+          loadWorkspaceSettings(),
+        ]);
+      } catch (error) {
+        setMessage({ type: 'error', text: 'Failed to load settings' });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadAllSettings();
   }, []);
 
   const loadUserProfile = async () => {
@@ -851,7 +1235,6 @@ export default function UnifiedSettingsPage() {
       const token = localStorage.getItem('accessToken');
       if (!token) {
         setMessage({ type: 'error', text: 'No authentication token found' });
-        setLoading(false);
         return;
       }
 
@@ -879,8 +1262,28 @@ export default function UnifiedSettingsPage() {
       }
     } catch (error) {
       setMessage({ type: 'error', text: 'Failed to load profile data' });
-    } finally {
-      setLoading(false);
+    }
+  };
+
+  const loadWorkspaceSettings = async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      if (!token) return;
+
+      const response = await fetch('/api/workspace/settings', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.settings) {
+          setWorkspaceSettings(prev => ({ ...prev, ...data.settings }));
+        }
+      }
+    } catch (error) {
+      // Handle silently - workspace settings are optional
     }
   };
 
@@ -928,6 +1331,40 @@ export default function UnifiedSettingsPage() {
       }
     } catch (error) {
       setMessage({ type: 'error', text: 'Failed to update profile' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveWorkspaceSettings = async () => {
+    setSaving(true);
+    setMessage(null);
+
+    try {
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        setMessage({ type: 'error', text: 'No authentication token found' });
+        return;
+      }
+
+      const response = await fetch('/api/workspace/settings', {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(workspaceSettings),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setMessage({ type: 'success', text: 'Workspace settings updated successfully!' });
+      } else {
+        setMessage({ type: 'error', text: data.message || 'Failed to update workspace settings' });
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Failed to update workspace settings' });
     } finally {
       setSaving(false);
     }
@@ -1102,32 +1539,6 @@ export default function UnifiedSettingsPage() {
           </div>
         </div>
       </div>
-
-      <div>
-        <h3 className="text-lg font-medium text-gray-900 dark:text-[var(--text)] mb-4">
-          Appearance
-        </h3>
-        <div className="border border-gray-200 dark:border-token rounded-lg p-4 bg-white dark:bg-[var(--surface-2)]">
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="font-medium text-gray-900 dark:text-[var(--text)] mb-2">Dark Theme</h4>
-              <p className="text-sm text-gray-600 dark:text-[var(--text-dim)]">
-                Using the optimized dark theme for better productivity and reduced eye strain.
-              </p>
-            </div>
-            <div className="flex items-center px-3 py-1.5 bg-slate-900 text-amber-400 text-sm font-medium rounded-lg border border-slate-700">
-              <span className="w-2 h-2 bg-amber-400 rounded-full mr-2"></span>
-              Active
-            </div>
-          </div>
-          <div className="mt-4 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-            <p className="text-xs text-gray-600 dark:text-[var(--text-dim)]">
-              Light theme is temporarily unavailable while we design a better experience. 
-              The current dark theme is optimized for all CRM workflows.
-            </p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 
@@ -1149,8 +1560,11 @@ export default function UnifiedSettingsPage() {
             </label>
             <input
               type="text"
-              value={formData.company}
-              onChange={e => handleInputChange('company', e.target.value)}
+              value={workspaceSettings.name || formData.company}
+              onChange={e => {
+                setWorkspaceSettings({ ...workspaceSettings, name: e.target.value });
+                setFormData({ ...formData, company: e.target.value });
+              }}
               className="input"
               placeholder="Your Business Name"
             />
@@ -1181,7 +1595,45 @@ export default function UnifiedSettingsPage() {
               placeholder="info@yourbusiness.com"
             />
           </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-[var(--text)] mb-2">
+              Brand Color
+            </label>
+            <input
+              type="color"
+              value={workspaceSettings.brandingColor || '#3B82F6'}
+              onChange={e => setWorkspaceSettings({ ...workspaceSettings, brandingColor: e.target.value })}
+              className="input h-10 w-20"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-[var(--text)] mb-2">
+              Logo URL
+            </label>
+            <input
+              type="url"
+              value={workspaceSettings.logoUrl || ''}
+              onChange={e => setWorkspaceSettings({ ...workspaceSettings, logoUrl: e.target.value })}
+              className="input"
+              placeholder="https://yourwebsite.com/logo.png"
+            />
+          </div>
         </div>
+      </div>
+
+      <div className="pt-4">
+        <button
+          onClick={handleSaveWorkspaceSettings}
+          disabled={saving}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center"
+        >
+          {saving && (
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+          )}
+          Save Business Settings
+        </button>
       </div>
     </div>
   );
@@ -1482,28 +1934,45 @@ export default function UnifiedSettingsPage() {
         </p>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* Sidebar */}
-        <div className="lg:w-80 flex-shrink-0">
-          <nav className="space-y-1">
+      <div className="flex flex-col xl:flex-row gap-8">
+        {/* Sidebar - Multi-box Grid Layout */}
+        <div className="xl:w-80 flex-shrink-0">
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-1 gap-3">
             {tabs.map(tab => {
               const IconComponent = tab.icon;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`w-full flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors border ${
+                  className={`group flex items-center p-4 text-sm font-medium rounded-xl transition-all duration-200 border-2 min-h-[90px] hover:scale-[1.02] hover:shadow-lg ${
                     activeTab === tab.id
-                      ? 'bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-600/20 dark:text-blue-300 dark:border-blue-500'
-                      : 'text-gray-800 hover:bg-gray-100 dark:text-[var(--text-dim)] dark:hover:bg-[var(--surface-2)] dark:border-token'
+                      ? 'bg-gradient-to-br from-orange-600 to-orange-700 text-white border-orange-500 shadow-lg scale-[1.02]'
+                      : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300'
                   }`}
                 >
-                  <IconComponent className="h-5 w-5 mr-3 flex-shrink-0" />
-                  <span className="text-left">{tab.name}</span>
+                  <div className="flex flex-col items-start text-left w-full">
+                    <div className="flex items-center mb-2">
+                      <IconComponent 
+                        className={`h-5 w-5 mr-2 flex-shrink-0 transition-colors ${
+                          activeTab === tab.id
+                            ? 'text-white'
+                            : 'text-gray-500 group-hover:text-gray-700'
+                        }`} 
+                      />
+                      <span className="font-semibold">{tab.name}</span>
+                    </div>
+                    <span className={`text-xs leading-tight ${
+                      activeTab === tab.id
+                        ? 'text-orange-100'
+                        : 'text-gray-500 group-hover:text-gray-600'
+                    }`}>
+                      {getTabDescription(tab.id)}
+                    </span>
+                  </div>
                 </button>
               );
             })}
-          </nav>
+          </div>
         </div>
 
         {/* Content */}
@@ -1542,9 +2011,12 @@ export default function UnifiedSettingsPage() {
                 onClick={() => {
                   if (activeTab === 'general') {
                     handleSaveProfile();
+                  } else if (activeTab === 'business') {
+                    handleSaveWorkspaceSettings();
                   } else if (activeTab === 'notifications') {
                     handleSaveNotifications();
                   }
+                  // Other tabs handle their own saving within their components
                 }}
                 disabled={saving}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
