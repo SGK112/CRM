@@ -354,7 +354,11 @@ export default function ProjectsPage() {
               <span className="text-sm font-medium text-amber-800 dark:text-amber-200">
                 {stats.active > 0 
                   ? `${stats.active} active projects averaging $${Math.round(stats.totalBudget / Math.max(stats.total, 1) / 1000)}k each`
-                  : 'Ready to track your first remodeling project'
+                  : (
+                    <span className="px-3 py-1.5 bg-amber-600/80 text-white rounded-lg backdrop-blur-sm border border-amber-500/50 shadow-lg">
+                      Ready to track your first remodeling project
+                    </span>
+                  )
                 }
               </span>
             </div>
