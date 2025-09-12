@@ -120,10 +120,30 @@ export default function ProjectsPage() {
           };
           setStats(newStats);
         } else {
-          // Failed to fetch projects
+          // Failed to fetch projects - set empty stats
+          setProjects([]);
+          setStats({
+            total: 0,
+            active: 0,
+            completed: 0,
+            planning: 0,
+            onHold: 0,
+            cancelled: 0,
+            totalBudget: 0,
+          });
         }
       } catch (error) {
-        // Error fetching projects
+        // Error fetching projects - set empty stats
+        setProjects([]);
+        setStats({
+          total: 0,
+          active: 0,
+          completed: 0,
+          planning: 0,
+          onHold: 0,
+          cancelled: 0,
+          totalBudget: 0,
+        });
       } finally {
         setLoading(false);
       }
@@ -165,10 +185,30 @@ export default function ProjectsPage() {
         };
         setStats(newStats);
       } else {
-        // Failed to fetch projects
+        // Failed to fetch projects - set empty stats
+        setProjects([]);
+        setStats({
+          total: 0,
+          active: 0,
+          completed: 0,
+          planning: 0,
+          onHold: 0,
+          cancelled: 0,
+          totalBudget: 0,
+        });
       }
     } catch (error) {
-      // Error fetching projects
+      // Error fetching projects - set empty stats
+      setProjects([]);
+      setStats({
+        total: 0,
+        active: 0,
+        completed: 0,
+        planning: 0,
+        onHold: 0,
+        cancelled: 0,
+        totalBudget: 0,
+      });
     } finally {
       setLoading(false);
     }
@@ -351,9 +391,12 @@ export default function ProjectsPage() {
           <div className="bg-gradient-to-r from-amber-50 to-amber-100 dark:from-amber-950/50 dark:to-amber-900/30 rounded-lg p-3 border border-amber-200 dark:border-amber-800">
             <div className="flex items-center space-x-2">
               <SparklesIcon className="h-4 w-4 text-amber-600" />
-              {stats.active > 0 ? (
+              {stats.total > 0 ? (
                 <span className="text-sm font-medium text-amber-800 dark:text-amber-200">
-                  {`${stats.active} active projects averaging $${Math.round(stats.totalBudget / Math.max(stats.total, 1) / 1000)}k each`}
+                  {stats.active > 0 
+                    ? `${stats.active} active projects averaging $${Math.round(stats.totalBudget / Math.max(stats.total, 1) / 1000)}k each`
+                    : `${stats.total} projects created • ${stats.completed} completed • $${Math.round(stats.totalBudget / 1000)}k total value`
+                  }
                 </span>
               ) : (
                 <div className="px-3 py-1.5 bg-amber-600/90 text-white rounded-lg backdrop-blur-sm border border-amber-500/30 shadow-md">
