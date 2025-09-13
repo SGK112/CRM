@@ -1,5 +1,5 @@
-import React from 'react'
 import { redirect } from 'next/navigation'
+import React from 'react'
 
 // Simple redirect to the existing clients/new onboarding page to keep routes working
 export default function ContactsNewRedirect() {

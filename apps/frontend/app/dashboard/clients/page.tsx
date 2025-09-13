@@ -2,26 +2,26 @@
 
 import {
     BellIcon,
+    BuildingOfficeIcon,
     ChatBubbleLeftRightIcon,
     ClockIcon,
+    DocumentArrowUpIcon,
     DocumentTextIcon,
     EnvelopeIcon,
     EyeIcon,
-    MagnifyingGlassIcon,
-    PlusIcon,
-    UserGroupIcon,
-    Squares2X2Icon,
     ListBulletIcon,
+    MagnifyingGlassIcon,
     PhoneIcon,
-    BuildingOfficeIcon,
-    DocumentArrowUpIcon
+    PlusIcon,
+    Squares2X2Icon,
+    UserGroupIcon
 } from '@heroicons/react/24/outline';
 import {
     CheckCircleIcon as CheckCircleIconSolid
 } from '@heroicons/react/24/solid';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface ClientData {
   _id?: string;

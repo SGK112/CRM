@@ -27,7 +27,7 @@ import {
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AIProvider } from '../hooks/useAI';
 import { useInboxStats } from '../hooks/useInboxStats';
@@ -294,6 +294,7 @@ export default function Layout({ children }: LayoutProps) {
     {
       label: 'Design & Sales',
       items: [
+        { name: 'Estimates', href: '/dashboard/estimates', icon: DocumentTextIcon },
         { name: 'Financial', href: '/dashboard/financial', icon: CalculatorIcon },
         { name: 'Catalog', href: '/dashboard/catalog', icon: WrenchScrewdriverIcon },
       ],
@@ -373,7 +374,7 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <ThemeProvider>
       <AIProvider>
-        <div className="min-h-screen relative bg-gradient-to-br from-slate-50 via-amber-50 to-orange-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+        <div className="min-h-screen relative bg-orange-50 dark:bg-slate-900">
           <RouteMemoryTracker />
 
           {/* Mobile sidebar backdrop */}

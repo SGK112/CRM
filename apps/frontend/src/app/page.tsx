@@ -5,7 +5,6 @@ import {
     ArrowRightIcon,
     Bars3Icon,
     BoltIcon,
-    BuildingOfficeIcon,
     CalendarIcon,
     ChartBarIcon,
     CheckIcon,
@@ -25,6 +24,7 @@ import {
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { FaRockrms } from "react-icons/fa6";
 
 // Typing animation component
 interface TypewriterTextProps {
@@ -244,7 +244,7 @@ export default function HomePage() {
             {/* Logo */}
             <div className="flex-shrink-0">
               <Link href="/" className="flex items-center space-x-2">
-                <BuildingOfficeIcon className="h-8 w-8 text-amber-500" />
+                <FaRockrms className="h-8 w-8 text-amber-500" />
                 <span className="text-xl font-bold">Remodely CRM</span>
               </Link>
             </div>
@@ -312,7 +312,7 @@ export default function HomePage() {
                 <RocketLaunchIcon className="h-4 w-4" />
                 <span>Now with AI Voice Agent & Smart Scheduling</span>
               </div>
-              
+
               <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
                 <TypewriterText
                   text="Turn Every Project Into "
@@ -402,7 +402,7 @@ export default function HomePage() {
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Dashboard preview */}
                 <div className="aspect-[16/10] bg-gradient-to-br from-[var(--bg)] to-[var(--surface-1)] p-6">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-full">
@@ -421,7 +421,7 @@ export default function HomePage() {
                         <div className="text-sm text-[var(--text-dim)]">Client Satisfaction</div>
                       </div>
                     </div>
-                    
+
                     {/* Chart placeholder */}
                     <div className="md:col-span-2 bg-[var(--surface-2)] border border-[var(--border)] rounded-lg p-4">
                       <div className="flex items-center justify-between mb-4">
@@ -431,14 +431,14 @@ export default function HomePage() {
                       <div className="h-32 bg-gradient-to-r from-amber-500/20 to-emerald-500/20 rounded"></div>
                     </div>
                   </div>
-                  
+
                   {/* Floating action hint */}
                   <div className="absolute bottom-8 left-8 bg-amber-600 text-white px-3 py-2 rounded-lg text-sm font-medium animate-bounce">
                     Click to explore live demo →
                   </div>
                 </div>
               </div>
-              
+
               {/* Overlay for demo link */}
               <Link href="/dashboard" className="absolute inset-0 z-10">
                 <span className="sr-only">View live demo</span>
@@ -475,7 +475,7 @@ export default function HomePage() {
             {[
               'Elite Remodeling Co.',
               'Coastal Construction',
-              'Premium Granite Solutions', 
+              'Premium Granite Solutions',
               'Master Builders Inc.',
               'Heritage Renovation',
               'Crown Construction'
@@ -548,7 +548,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-3 gap-8 relative">
             {/* Connection lines for desktop */}
             <div className="hidden md:block absolute top-24 left-1/6 right-1/6 h-0.5 bg-gradient-to-r from-amber-500/30 via-amber-500/60 to-amber-500/30"></div>
-            
+
             {[
               {
                 step: '01',
@@ -558,7 +558,7 @@ export default function HomePage() {
                 time: '5 minutes'
               },
               {
-                step: '02', 
+                step: '02',
                 title: 'Customize & Configure',
                 description: 'Set up your services, pricing, and templates. Configure AI assistant with your business voice and style.',
                 icon: CogIcon,
@@ -566,7 +566,7 @@ export default function HomePage() {
               },
               {
                 step: '03',
-                title: 'Launch & Scale', 
+                title: 'Launch & Scale',
                 description: 'Start creating estimates, managing projects, and let AI handle customer calls while you focus on building.',
                 icon: RocketLaunchIcon,
                 time: 'Ready to go!'
@@ -577,7 +577,7 @@ export default function HomePage() {
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-600 text-white font-bold text-xl mb-6 relative z-10">
                   {step.step}
                 </div>
-                
+
                 <div className="space-y-4">
                   <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-600/15 ring-1 ring-amber-500/30 mb-4">
                     <step.icon className="h-6 w-6 text-amber-600" />
@@ -634,7 +634,7 @@ export default function HomePage() {
                     </li>
                   ))}
                 </ul>
-                
+
                 {/* Hover effect overlay */}
                 <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
                   <div className="text-xs text-amber-600 font-medium">Learn more →</div>
@@ -673,7 +673,7 @@ export default function HomePage() {
               {/* Background decoration */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-amber-600/10 rounded-full -translate-y-16 translate-x-16"></div>
               <div className="absolute bottom-0 left-0 w-24 h-24 bg-emerald-600/10 rounded-full translate-y-12 -translate-x-12"></div>
-              
+
               <div className="relative z-10">
                 <div className="flex justify-center mb-6">
                   {[...Array(5)].map((_, i) => (
@@ -715,8 +715,8 @@ export default function HomePage() {
             <div className="grid md:grid-cols-3 gap-6 mt-12">
               {testimonials.map((testimonial, index) => (
                 <div key={index} className={`p-6 rounded-xl border transition-all cursor-pointer ${
-                  index === activeTestimonial 
-                    ? 'bg-amber-600/10 border-amber-500/30' 
+                  index === activeTestimonial
+                    ? 'bg-amber-600/10 border-amber-500/30'
                     : 'bg-[var(--bg)] border-[var(--border)] hover:border-amber-500/30'
                 }`}
                 onClick={() => setActiveTestimonial(index)}>

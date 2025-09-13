@@ -14,7 +14,7 @@ async function setupTestData() {
   try {
     await client.connect();
     console.log('Connected to MongoDB...');
-    
+
     const db = client.db();
 
     // Get or create a test user
@@ -48,7 +48,7 @@ async function setupTestData() {
           user.workspaceId = new ObjectId();
         }
       }
-      
+
       const testWorkspace = {
         _id: user.workspaceId,
         name: 'Remodely CRM',

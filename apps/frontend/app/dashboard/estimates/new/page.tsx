@@ -132,9 +132,11 @@ export default function NewEstimatePage() {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (clientsRes.ok) {
-          const clientsData: ClientApiResponse[] = await clientsRes.json();
+          const clientsData = await clientsRes.json();
+          // Handle both backend response format { clients: [...] } and direct array
+          const clientsList = clientsData.clients || clientsData;
           setClients(
-            clientsData.map((c) => ({
+            clientsList.map((c: ClientApiResponse) => ({
               ...c,
               name: `${c.firstName} ${c.lastName}`.trim(),
             }))
@@ -147,7 +149,9 @@ export default function NewEstimatePage() {
         });
         if (projectsRes.ok) {
           const projectsData = await projectsRes.json();
-          setProjects(projectsData);
+          // Handle both backend response format { projects: [...] } and direct array
+          const projectsList = projectsData.projects || projectsData;
+          setProjects(projectsList);
         }
       } catch (err) {
         // Error fetching data - silently handle
@@ -297,7 +301,12 @@ export default function NewEstimatePage() {
 
       if (res.ok) {
         const created = await res.json();
-        router.push(`/dashboard/estimates/${created._id}`);
+        const newId = created._id || created.id;
+        if (!newId) {
+          setError('Created estimate missing id.');
+        } else {
+          router.push(`/dashboard/estimates/${newId}`);
+        }
       } else {
         const errorText = await res.text();
         setError(`Failed to create estimate: ${res.status} ${errorText}`);

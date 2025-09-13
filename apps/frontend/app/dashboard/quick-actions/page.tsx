@@ -1,16 +1,16 @@
 'use client';
 
 import {
-  UserPlusIcon,
-  DocumentTextIcon,
-  CalendarIcon,
-  EnvelopeIcon,
-  BanknotesIcon,
-  ChartBarIcon,
-  ClipboardDocumentListIcon,
-  CogIcon,
-  ArrowRightIcon,
-  PlusIcon,
+    ArrowRightIcon,
+    BanknotesIcon,
+    CalendarIcon,
+    ChartBarIcon,
+    ClipboardDocumentListIcon,
+    CogIcon,
+    DocumentTextIcon,
+    EnvelopeIcon,
+    PlusIcon,
+    UserPlusIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -111,8 +111,8 @@ export default function QuickActionsPage() {
     { id: 'communication', label: 'Communication', count: quickActions.filter(a => a.category === 'communication').length },
   ];
 
-  const filteredActions = selectedCategory === 'all' 
-    ? quickActions 
+  const filteredActions = selectedCategory === 'all'
+    ? quickActions
     : quickActions.filter(action => action.category === selectedCategory);
 
   const getColorClasses = (color: string) => {
@@ -177,7 +177,7 @@ export default function QuickActionsPage() {
               >
                 {/* Background gradient */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${getColorClasses(action.color)} opacity-10 group-hover:opacity-20 transition-opacity`} />
-                
+
                 <div className="relative p-6">
                   {/* Icon */}
                   <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${getColorClasses(action.color)} mb-4`}>

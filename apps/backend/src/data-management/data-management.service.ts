@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { User } from '../users/schemas/user.schema';
-import { Client } from '../clients/schemas/client.schema';
-import { Project } from '../projects/schemas/project.schema';
 import { Appointment } from '../appointments/schemas/appointment.schema';
-import { Estimate } from '../estimates/schemas/estimate.schema';
-import { Invoice } from '../invoices/schemas/invoice.schema';
-import { Notification } from '../notifications/schemas/notification.schema';
-import { Media } from '../media/schemas/media.schema';
-import { Design } from '../designs/schemas/design.schema';
+import { Client } from '../clients/schemas/client.schema';
 import { DesignRevision } from '../designs/schemas/design-revision.schema';
+import { Design } from '../designs/schemas/design.schema';
+import { Estimate } from '../estimates/schemas/estimate.schema';
 import { Employee } from '../hr/schemas/employee.schema';
+import { Invoice } from '../invoices/schemas/invoice.schema';
+import { Media } from '../media/schemas/media.schema';
+import { Notification } from '../notifications/schemas/notification.schema';
+import { Project } from '../projects/schemas/project.schema';
+import { User } from '../users/schemas/user.schema';
 import { BulkActionResult } from './data-management.types';
 
 @Injectable()
@@ -69,7 +69,7 @@ export class DataManagementService {
         }
 
         const query: Record<string, unknown> = {};
-        
+
         // Build query for workspace-specific data
         if (category === 'notifications') {
           query.workspaceId = workspaceId;

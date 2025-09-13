@@ -59,6 +59,12 @@ export const AddressInput: React.FC<AddressInputProps> = ({
   // Load Google Maps API
   useEffect(() => {
     const loadGoogleMaps = () => {
+      const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+      if (!apiKey) {
+        // No key configured; stay in manual entry mode without spamming errors
+        console.info('Google Maps API key missing; AddressInput running in manual mode.');
+        return;
+      }
       if (window.google && window.google.maps) {
         setIsGoogleMapsLoaded(true);
         initializeServices();
@@ -70,8 +76,8 @@ export const AddressInput: React.FC<AddressInputProps> = ({
         return;
       }
 
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`;
+  const script = document.createElement('script');
+  script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
       script.async = true;
       script.defer = true;
       script.onload = () => {

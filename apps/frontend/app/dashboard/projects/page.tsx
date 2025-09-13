@@ -1,25 +1,24 @@
 'use client';
 
 import {
-  WrenchScrewdriverIcon,
-  CalendarIcon,
-  CurrencyDollarIcon,
-  MagnifyingGlassIcon,
-  PlusIcon,
-  ChartBarIcon,
-  ClockIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  ExclamationTriangleIcon,
-  ArrowRightIcon,
-  EllipsisVerticalIcon,
-  HomeModernIcon,
-  SparklesIcon,
-  BoltIcon,
+    ArrowRightIcon,
+    BoltIcon,
+    CalendarIcon,
+    CheckCircleIcon,
+    ClockIcon,
+    CurrencyDollarIcon,
+    EllipsisVerticalIcon,
+    ExclamationTriangleIcon,
+    HomeModernIcon,
+    MagnifyingGlassIcon,
+    PlusIcon,
+    SparklesIcon,
+    WrenchScrewdriverIcon,
+    XCircleIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface Project {
   _id: string;
@@ -61,6 +60,8 @@ export default function ProjectsPage() {
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const [relatedCounts, setRelatedCounts] = useState<Record<string, { estimates: number; invoices: number }>>({});
+  const [countsLoading, setCountsLoading] = useState(false);
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -174,52 +175,68 @@ export default function ProjectsPage() {
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'planning':
-        return <ClockIcon className="h-4 w-4" />;
-      case 'active':
-        return <WrenchScrewdriverIcon className="h-4 w-4" />;
-      case 'completed':
-        return <CheckCircleIcon className="h-4 w-4" />;
-      case 'on_hold':
-        return <ExclamationTriangleIcon className="h-4 w-4" />;
-      case 'cancelled':
-        return <XCircleIcon className="h-4 w-4" />;
-      default:
-        return <HomeModernIcon className="h-4 w-4" />;
+  const fetchRelatedCounts = async (projectIds: string[]) => {
+    if (!projectIds.length) return;
+    try {
+      setCountsLoading(true);
+      const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+      if (!token) return;
+      // Batch endpoints assumption; fallback gracefully if not implemented
+      const res = await fetch(`/api/projects/related-counts?ids=${encodeURIComponent(projectIds.join(','))}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && typeof data === 'object') setRelatedCounts(data);
+      }
+    } finally {
+      setCountsLoading(false);
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'planning':
-        return 'text-amber-700 bg-amber-50 border-amber-200 shadow-amber-100/50 dark:text-amber-300 dark:bg-amber-950/50 dark:border-amber-800';
-      case 'active':
-        return 'text-emerald-700 bg-emerald-50 border-emerald-200 shadow-emerald-100/50 dark:text-emerald-300 dark:bg-emerald-950/50 dark:border-emerald-800';
-      case 'completed':
-        return 'text-blue-700 bg-blue-50 border-blue-200 shadow-blue-100/50 dark:text-blue-300 dark:bg-blue-950/50 dark:border-blue-800';
-      case 'on_hold':
-        return 'text-gray-700 bg-gray-50 border-gray-200 shadow-gray-100/50 dark:text-gray-300 dark:bg-gray-950/50 dark:border-gray-800';
-      case 'cancelled':
-        return 'text-red-700 bg-red-50 border-red-200 shadow-red-100/50 dark:text-red-300 dark:bg-red-950/50 dark:border-red-800';
-      default:
-        return 'text-slate-700 bg-slate-50 border-slate-200 shadow-slate-100/50 dark:text-slate-300 dark:bg-slate-950/50 dark:border-slate-800';
+  useEffect(() => {
+    if (projects.length) {
+      fetchRelatedCounts(projects.map(p => p._id));
+    }
+  }, [projects]);
+
+  // Helper utilities (re-added after refactor)
+  const formatCurrency = (value: number | undefined) => {
+    if (value == null || isNaN(value)) return '$0';
+    return value.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+  };
+
+  const formatDate = (date?: string) => {
+    if (!date) return '—';
+    try {
+      const d = new Date(date);
+      if (isNaN(d.getTime())) return '—';
+      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch {
+      return '—';
     }
   };
 
-  const formatCurrency = (amount: number | undefined) => {
-    if (!amount) return 'Not set';
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-    }).format(amount);
+  const getStatusColor = (status: Project['status']) => {
+    switch (status) {
+      case 'active': return 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-300/40';
+      case 'planning': return 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-300/40';
+      case 'completed': return 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border-indigo-300/40';
+      case 'on_hold': return 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-300/40';
+      case 'cancelled': return 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border-red-300/40';
+      default: return 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-300/40';
+    }
   };
 
-  const formatDate = (dateString: string | undefined) => {
-    if (!dateString) return 'Not set';
-    return new Date(dateString).toLocaleDateString();
+  const getStatusIcon = (status: Project['status']) => {
+    switch (status) {
+      case 'active': return <BoltIcon className="h-4 w-4" />;
+      case 'planning': return <ClockIcon className="h-4 w-4" />;
+      case 'completed': return <CheckCircleIcon className="h-4 w-4" />;
+      case 'on_hold': return <ExclamationTriangleIcon className="h-4 w-4" />;
+      case 'cancelled': return <XCircleIcon className="h-4 w-4" />;
+      default: return <ClockIcon className="h-4 w-4" />;
+    }
   };
 
   const deleteProject = async (projectId: string) => {
@@ -308,6 +325,13 @@ export default function ProjectsPage() {
     { id: 'on_hold', label: 'On Hold', count: stats.onHold },
   ];
 
+  const buildActionUrl = (base: string, project: Project) => {
+    const params = new URLSearchParams();
+    if (project._id) params.set('projectId', project._id);
+    if (project.clientId) params.set('clientId', project.clientId);
+    return `${base}?${params.toString()}`;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[var(--bg)]">
@@ -323,12 +347,39 @@ export default function ProjectsPage() {
 
   return (
     <div className="min-h-full bg-[var(--bg)] text-[var(--text)]">
+      {/* Global Quick Actions Bar */}
+      <div className="sticky top-0 z-40 bg-[var(--bg)]/95 backdrop-blur border-b border-[var(--border)]">
+        <div className="px-4 pt-4 pb-3 flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs text-[var(--text-dim)]">
+              <span className="px-2 py-1 rounded-md bg-[var(--surface-2)] border border-[var(--border)]">Projects: {stats.total}</span>
+              <span className="px-2 py-1 rounded-md bg-[var(--surface-2)] border border-[var(--border)]">Active: {stats.active}</span>
+              <span className="px-2 py-1 rounded-md bg-[var(--surface-2)] border border-[var(--border)]">Planning: {stats.planning}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Link href="/dashboard/projects/new" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md bg-orange-600 text-white text-xs font-medium hover:bg-orange-500 transition">
+                <PlusIcon className="h-4 w-4" /> Project
+              </Link>
+              <Link href="/dashboard/estimates/new" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-500 transition">
+                <SparklesIcon className="h-4 w-4" /> Estimate
+              </Link>
+              <Link href="/dashboard/invoices/new" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-500 transition">
+                <CurrencyDollarIcon className="h-4 w-4" /> Invoice
+              </Link>
+              <Link href="/dashboard/calendar/new" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md bg-blue-600 text-white text-xs font-medium hover:bg-blue-500 transition">
+                <CalendarIcon className="h-4 w-4" /> Event
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Modern Header with AI Insights */}
       <div className="sticky top-0 z-30 bg-[var(--bg)]/95 backdrop-blur-lg border-b border-[var(--border)]">
         <div className="px-4 py-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center shadow-lg">
+              <div className="h-10 w-10 rounded-xl bg-orange-600 flex items-center justify-center shadow-lg">
                 <WrenchScrewdriverIcon className="h-5 w-5 text-white" />
               </div>
               <div>
@@ -340,7 +391,7 @@ export default function ProjectsPage() {
             </div>
             <Link
               href="/dashboard/projects/new"
-              className="inline-flex items-center px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-sm font-medium rounded-lg hover:from-amber-600 hover:to-amber-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="inline-flex items-center px-4 py-2.5 bg-orange-600 text-white text-sm font-medium rounded-lg hover:bg-orange-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
             >
               <PlusIcon className="h-4 w-4 mr-2" />
               New Project
@@ -348,7 +399,7 @@ export default function ProjectsPage() {
           </div>
 
           {/* AI Insights Bar */}
-          <div className="bg-gradient-to-r from-orange-600/90 to-orange-700/90 backdrop-blur-sm rounded-xl p-4 border-2 border-orange-500 shadow-lg">
+          <div className="bg-orange-600/90 backdrop-blur-sm rounded-xl p-4 border-2 border-orange-500 shadow-lg">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
                 <SparklesIcon className="h-5 w-5 text-white" />
@@ -474,76 +525,53 @@ export default function ProjectsPage() {
                       <p className="text-sm text-[var(--text-dim)] line-clamp-2 mb-4">{project.description}</p>
                     </div>
                     <div className="relative ml-4" ref={dropdownRef}>
-                      <button
-                        onClick={() => setDropdownOpen(dropdownOpen === project._id ? null : project._id)}
-                        className="p-2 text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-[var(--surface-2)] rounded-lg transition-colors"
-                      >
+                      <button onClick={() => setDropdownOpen(dropdownOpen === project._id ? null : project._id)} className="p-2 text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-[var(--surface-2)] rounded-lg transition-colors">
                         <EllipsisVerticalIcon className="h-5 w-5" />
                       </button>
-
-                      {/* Enhanced Dropdown Menu */}
                       {dropdownOpen === project._id && (
-                        <div className="absolute right-0 top-10 w-52 rounded-xl bg-[var(--surface-1)] border border-[var(--border)] shadow-xl py-2 z-50">
-                          <Link
-                            href={`/dashboard/projects/${project._id}`}
-                            onClick={() => setDropdownOpen(null)}
-                            className="flex items-center px-4 py-2.5 text-sm text-[var(--text)] hover:bg-[var(--surface-2)] hover:text-amber-600 transition-colors"
-                          >
-                            <ArrowRightIcon className="h-4 w-4 mr-3" />
-                            View Details
+                        <div className="absolute right-0 top-10 w-60 rounded-xl bg-[var(--surface-1)] border border-[var(--border)] shadow-xl py-2 z-50">
+                          <Link href={`/dashboard/projects/${project._id}`} onClick={() => setDropdownOpen(null)} className="flex items-center px-4 py-2.5 text-sm text-[var(--text)] hover:bg-[var(--surface-2)] hover:text-amber-600 transition-colors">
+                            <ArrowRightIcon className="h-4 w-4 mr-3" /> View Details
                           </Link>
-                          <Link
-                            href={`/dashboard/projects/${project._id}/edit`}
-                            onClick={() => setDropdownOpen(null)}
-                            className="flex items-center px-4 py-2.5 text-sm text-[var(--text)] hover:bg-[var(--surface-2)] hover:text-amber-600 transition-colors"
-                          >
-                            <WrenchScrewdriverIcon className="h-4 w-4 mr-3" />
-                            Edit Project
+                          <Link href={`/dashboard/projects/${project._id}/edit`} onClick={() => setDropdownOpen(null)} className="flex items-center px-4 py-2.5 text-sm text-[var(--text)] hover:bg-[var(--surface-2)] hover:text-amber-600 transition-colors">
+                            <WrenchScrewdriverIcon className="h-4 w-4 mr-3" /> Edit Project
                           </Link>
-
-                          {/* Status Update Submenu */}
                           <div className="border-t border-[var(--border)] my-2" />
-                          <div className="px-4 py-2 text-xs text-[var(--text-dim)] font-medium">Quick Status Update:</div>
-
-                          {['planning', 'active', 'on_hold', 'completed', 'cancelled'].map((status) => (
-                            <button
-                              key={status}
-                              onClick={() => {
-                                setDropdownOpen(null);
-                                updateProjectStatus(project._id, status);
-                              }}
-                              className={`flex items-center w-full text-left px-4 py-2.5 text-sm transition-all duration-200 ${
-                                project.status === status
-                                  ? 'text-amber-600 bg-amber-50 dark:bg-amber-950/50 border-l-2 border-amber-500'
-                                  : 'text-[var(--text)] hover:bg-[var(--surface-2)] hover:text-amber-600 hover:border-l-2 hover:border-amber-400'
-                              }`}
-                              disabled={project.status === status}
-                            >
-                              <div className="flex items-center w-full">
+                          <div className="px-4 py-2 text-xs text-[var(--text-dim)] font-medium">Workflow:</div>
+                          <Link href={buildActionUrl('/dashboard/estimates/new', project)} onClick={() => setDropdownOpen(null)} className="flex items-center px-4 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)] hover:text-indigo-500 transition-colors">
+                            <SparklesIcon className="h-4 w-4 mr-3" /> New Estimate
+                          </Link>
+                          <Link href={buildActionUrl('/dashboard/invoices/new', project)} onClick={() => setDropdownOpen(null)} className="flex items-center px-4 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)] hover:text-emerald-500 transition-colors">
+                            <CurrencyDollarIcon className="h-4 w-4 mr-3" /> New Invoice
+                          </Link>
+                          <Link href={buildActionUrl('/dashboard/calendar/new', project)} onClick={() => setDropdownOpen(null)} className="flex items-center px-4 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)] hover:text-blue-500 transition-colors">
+                            <CalendarIcon className="h-4 w-4 mr-3" /> Schedule Event
+                          </Link>
+                          <Link href={`/dashboard/clients/${project.clientId || ''}`} onClick={() => setDropdownOpen(null)} className="flex items-center px-4 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-2)] hover:text-orange-500 transition-colors disabled:opacity-40" aria-disabled={!project.clientId}>
+                            <HomeModernIcon className="h-4 w-4 mr-3" /> View Client
+                          </Link>
+                          <div className="border-t border-[var(--border)] my-2" />
+                          <div className="px-4 py-2 text-xs text-[var(--text-dim)] font-medium">Quick Status:</div>
+                          {['planning','active','on_hold','completed','cancelled'].map(status => {
+                            const active = project.status === status;
+                            return (
+                              <button
+                                key={status}
+                                onClick={() => { setDropdownOpen(null); updateProjectStatus(project._id, status); }}
+                                className={`flex items-center w-full text-left px-4 py-2 text-sm transition ${active ? 'text-amber-600 bg-amber-50 dark:bg-amber-950/50 border-l-2 border-amber-500' : 'text-[var(--text)] hover:bg-[var(--surface-2)] hover:text-amber-600 hover:border-l-2 hover:border-amber-400'}`}
+                                disabled={active}
+                              >
                                 {getStatusIcon(status)}
-                                <span className="ml-3">
-                                  {project.status === status ? '✓ ' : ''}
-                                  {status.replace('_', ' ').toUpperCase()}
-                                </span>
-                                {project.status === status && (
-                                  <span className="ml-auto text-xs bg-amber-400/20 text-amber-600 px-2 py-0.5 rounded-full">
-                                    Current
-                                  </span>
+                                <span className="ml-3">{active ? '✓ ' : ''}{status.replace('_',' ').toUpperCase()}</span>
+                                {active && (
+                                  <span className="ml-auto text-xs bg-amber-400/20 text-amber-600 px-2 py-0.5 rounded-full">Current</span>
                                 )}
-                              </div>
-                            </button>
-                          ))}
-
+                              </button>
+                            );
+                          })}
                           <div className="border-t border-[var(--border)] my-2" />
-                          <button
-                            onClick={() => {
-                              setDropdownOpen(null);
-                              deleteProject(project._id);
-                            }}
-                            className="flex items-center w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 transition-colors"
-                          >
-                            <XCircleIcon className="h-4 w-4 mr-3" />
-                            Delete Project
+                          <button onClick={() => { setDropdownOpen(null); deleteProject(project._id); }} className="flex items-center w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 transition-colors">
+                            <XCircleIcon className="h-4 w-4 mr-3" /> Delete Project
                           </button>
                         </div>
                       )}
@@ -599,17 +627,53 @@ export default function ProjectsPage() {
                 <HomeModernIcon className="h-20 w-20 mx-auto opacity-50" />
               </div>
               <h3 className="text-xl font-semibold text-[var(--text)] mb-3">
-                {searchQuery ? 'No projects found' : 'Start your first renovation project'}
+                {searchQuery ? 'No projects found' : 'Streamline your first project workflow'}
               </h3>
               <p className="text-[var(--text-dim)] mb-8 max-w-md mx-auto">
                 {searchQuery
                   ? `No projects match "${searchQuery}". Try adjusting your search terms.`
-                  : 'Create your first remodeling project and start tracking progress, budgets, and timelines.'}
+                  : 'Follow the guided steps below to create a client, start a project, and generate an estimate.'}
               </p>
+              {searchQuery ? null : (
+                <div className="max-w-xl mx-auto space-y-4 mb-10 text-left">
+                  <div className="flex items-start gap-3 p-4 rounded-lg border border-[var(--border)] bg-[var(--surface-1)]">
+                    <span className="h-6 w-6 flex items-center justify-center rounded-full bg-orange-600 text-white text-xs font-semibold">1</span>
+                    <div>
+                      <p className="text-sm font-medium text-[var(--text)]">Create / import a client</p>
+                      <p className="text-xs text-[var(--text-dim)]">Add your customer so future projects, estimates & invoices auto-link.</p>
+                      <Link href="/dashboard/clients/new" className="inline-block mt-2 text-xs text-orange-500 hover:underline">New Client</Link>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-4 rounded-lg border border-[var(--border)] bg-[var(--surface-1)]">
+                    <span className="h-6 w-6 flex items-center justify-center rounded-full bg-orange-600 text-white text-xs font-semibold">2</span>
+                    <div>
+                      <p className="text-sm font-medium text-[var(--text)]">Start a project</p>
+                      <p className="text-xs text-[var(--text-dim)]">Track scope, timeline & budget. Client is pre-selectable.</p>
+                      <Link href="/dashboard/projects/new" className="inline-block mt-2 text-xs text-orange-500 hover:underline">Create Project</Link>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-4 rounded-lg border border-[var(--border)] bg-[var(--surface-1)]">
+                    <span className="h-6 w-6 flex items-center justify-center rounded-full bg-orange-600 text-white text-xs font-semibold">3</span>
+                    <div>
+                      <p className="text-sm font-medium text-[var(--text)]">Generate an estimate</p>
+                      <p className="text-xs text-[var(--text-dim)]">Turn scope into a structured, sendable proposal.</p>
+                      <Link href="/dashboard/estimates/new" className="inline-block mt-2 text-xs text-orange-500 hover:underline">New Estimate</Link>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-4 rounded-lg border border-[var(--border)] bg-[var(--surface-1)]">
+                    <span className="h-6 w-6 flex items-center justify-center rounded-full bg-orange-600 text-white text-xs font-semibold">4</span>
+                    <div>
+                      <p className="text-sm font-medium text-[var(--text)]">Convert to invoice</p>
+                      <p className="text-xs text-[var(--text-dim)]">After approval, convert accepted estimate into an invoice in one click.</p>
+                      <Link href="/dashboard/invoices/new" className="inline-block mt-2 text-xs text-orange-500 hover:underline">Issue Invoice</Link>
+                    </div>
+                  </div>
+                </div>
+              )}
               {!searchQuery && (
                 <Link
                   href="/dashboard/projects/new"
-                  className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-sm font-medium rounded-lg hover:from-amber-600 hover:to-amber-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                  className="inline-flex items-center px-6 py-3 bg-orange-600 text-white text-sm font-medium rounded-lg hover:bg-orange-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
                   <PlusIcon className="h-5 w-5 mr-2" />
                   Create Your First Project

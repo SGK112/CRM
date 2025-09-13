@@ -10,6 +10,7 @@ import { User, UserSchema } from '../users/schemas/user.schema';
 import { AIEstimateController } from './ai-estimate.controller';
 import { AIEstimateService } from './ai-estimate.service';
 import { EstimatesController } from './estimates.controller';
+import { PublicEstimateController } from './public-estimate.controller';
 import { EstimatesService } from './estimates.service';
 import { Estimate, EstimateSchema } from './schemas/estimate.schema';
 
@@ -27,7 +28,7 @@ import { Estimate, EstimateSchema } from './schemas/estimate.schema';
     AiModule,
   ],
   providers: [EstimatesService, AIEstimateService, EmailService, PdfTemplatesService],
-  controllers: [EstimatesController, AIEstimateController],
+  controllers: [EstimatesController, AIEstimateController, PublicEstimateController],
   exports: [EstimatesService, AIEstimateService],
 })
 export class EstimatesModule {}

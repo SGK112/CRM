@@ -1,25 +1,25 @@
 'use client';
 
 import {
-  ArrowLeftIcon,
-  UserIcon,
-  BuildingOfficeIcon,
-  CreditCardIcon,
-  CheckCircleIcon,
-  ExclamationTriangleIcon,
-  PencilIcon,
-  TruckIcon,
-  WrenchScrewdriverIcon,
-  UserGroupIcon,
-  HeartIcon,
-  ShieldCheckIcon,
-  ChatBubbleLeftRightIcon,
-  PhoneIcon,
-  EnvelopeIcon,
-  PaperAirplaneIcon
+    ArrowLeftIcon,
+    BuildingOfficeIcon,
+    ChatBubbleLeftRightIcon,
+    CheckCircleIcon,
+    CreditCardIcon,
+    EnvelopeIcon,
+    ExclamationTriangleIcon,
+    HeartIcon,
+    PaperAirplaneIcon,
+    PencilIcon,
+    PhoneIcon,
+    ShieldCheckIcon,
+    TruckIcon,
+    UserGroupIcon,
+    UserIcon,
+    WrenchScrewdriverIcon
 } from '@heroicons/react/24/outline';
 import {
-  CheckCircleIcon as CheckCircleIconSolid,
+    CheckCircleIcon as CheckCircleIconSolid,
 } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
@@ -61,12 +61,12 @@ interface ContactData {
     expirationDate?: string;
     coverageAmount?: number;
   };
-  
+
   // Communication preferences
   preferredContact?: 'email' | 'phone' | 'text' | 'mail';
   bestTimeToContact?: string;
   communicationNotes?: string;
-  
+
   // Payment and billing
   paymentTerms?: string;
   creditLimit?: number;
@@ -78,7 +78,7 @@ interface ContactData {
     zip?: string;
     country?: string;
   };
-  
+
   // Professional/Service specific
   specialties?: string[];
   serviceArea?: string;
@@ -416,7 +416,7 @@ export default function ContactProfilePage() {
       {/* Contact Header */}
       <div className="px-4 mb-6">
         <div className="flex items-start gap-4 mb-4">
-          <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
+          <div className="w-16 h-16 bg-orange-600 rounded-2xl flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
             {displayName.split(' ').map(n => n[0]).join('').slice(0, 2)}
           </div>
           <div className="flex-1 min-w-0">
@@ -458,7 +458,7 @@ export default function ContactProfilePage() {
           </div>
           <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
             <div
-              className="bg-gradient-to-r from-orange-500 to-orange-600 h-2 rounded-full transition-all duration-500"
+              className="bg-orange-600 h-2 rounded-full transition-all duration-500"
               style={{ width: `${completionPercentage}%` }}
             />
           </div>
@@ -694,7 +694,7 @@ function ProfileSectionCard({
             <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">{section.description}</p>
           </div>
         </div>
-        
+
         {!isEditing && (
           <button
             onClick={onEdit}
@@ -802,7 +802,7 @@ function ProfileSectionCard({
               </div>
             </div>
           )}
-          
+
           {section.id === 'communication' && (
             <div className="text-sm space-y-2">
               <div>

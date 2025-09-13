@@ -1,14 +1,14 @@
 'use client';
 
-import { useState } from 'react';
 import {
-  UserPlusIcon,
-  EnvelopeIcon,
-  ClipboardDocumentIcon,
-  CheckIcon,
-  ExclamationTriangleIcon,
-  InformationCircleIcon
+    CheckIcon,
+    ClipboardDocumentIcon,
+    EnvelopeIcon,
+    ExclamationTriangleIcon,
+    InformationCircleIcon,
+    UserPlusIcon
 } from '@heroicons/react/24/outline';
+import { useState } from 'react';
 
 interface InvitationData {
   clientId: string;
@@ -57,7 +57,7 @@ export default function ClientInvite({ clientId, clientName, clientEmail, onInvi
         clientName,
         clientEmail,
         invitedBy: 'current_user', // This would come from auth context
-        permissions: permissionLevel === 'full' 
+        permissions: permissionLevel === 'full'
           ? ['viewProjects', 'viewEstimates', 'viewInvoices', 'viewMessages', 'viewCalendar', 'editProfile', 'payInvoices', 'communicateWithTeam']
           : Object.entries(customPermissions)
               .filter(([, enabled]) => enabled)
@@ -212,7 +212,7 @@ export default function ClientInvite({ clientId, clientName, clientEmail, onInvi
             <option value="full">Full Access - View and manage all client data</option>
             <option value="custom">Custom Permissions - Select specific features</option>
           </select>
-          
+
           {permissionLevel === 'custom' && (
             <div className="bg-slate-800 rounded-xl p-4 mt-4">
               <h5 className="text-sm font-medium text-white mb-3">Select Permissions:</h5>
@@ -271,7 +271,7 @@ export default function ClientInvite({ clientId, clientName, clientEmail, onInvi
           <div className="text-sm text-blue-200">
             <p className="font-medium mb-1">About Client Portal Access</p>
             <p>
-              Clients will be able to view their project information, communicate with your team, 
+              Clients will be able to view their project information, communicate with your team,
               and manage their account. They can only see data related to their own projects.
             </p>
           </div>

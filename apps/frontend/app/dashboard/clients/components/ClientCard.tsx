@@ -1,13 +1,13 @@
 'use client';
 
 import {
-  EnvelopeIcon,
-  PhoneIcon,
-  MapPinIcon,
-  UserIcon,
-  StarIcon,
-  WrenchScrewdriverIcon,
-  BuildingOfficeIcon
+    BuildingOfficeIcon,
+    EnvelopeIcon,
+    MapPinIcon,
+    PhoneIcon,
+    StarIcon,
+    UserIcon,
+    WrenchScrewdriverIcon
 } from '@heroicons/react/24/outline';
 
 interface ClientData {
@@ -72,7 +72,7 @@ export default function ClientCard({ client, viewMode, onViewDetails }: ClientCa
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4 flex-1 min-w-0">
             {/* Avatar */}
-            <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+            <div className="w-12 h-12 bg-orange-600 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
               {(client.name || client.companyName || 'U').charAt(0).toUpperCase()}
             </div>
 
@@ -87,7 +87,7 @@ export default function ClientCard({ client, viewMode, onViewDetails }: ClientCa
                   {client.type}
                 </span>
               </div>
-              
+
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 {client.email && (
                   <div className="flex items-center gap-2">
@@ -138,7 +138,7 @@ export default function ClientCard({ client, viewMode, onViewDetails }: ClientCa
     <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-6 hover:shadow-lg transition-all duration-200 hover:border-amber-300 dark:hover:border-amber-600">
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
-        <div className="w-14 h-14 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
+        <div className="w-14 h-14 bg-orange-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
           {(client.name || client.companyName || 'U').charAt(0).toUpperCase()}
         </div>
         <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${getTypeColor(client.type)}`}>

@@ -1,21 +1,22 @@
 'use client';
 
+import CreateContactSlideOver from '@/components/clients/CreateContactSlideOver';
 import { simple } from '@/lib/simple-ui';
 import {
+    ArrowPathIcon,
     BellIcon,
+    BuildingStorefrontIcon,
     ChatBubbleLeftRightIcon,
+    ClockIcon,
+    CurrencyDollarIcon,
+    DocumentTextIcon,
     EnvelopeIcon,
+    ExclamationTriangleIcon,
+    EyeIcon,
     MagnifyingGlassIcon,
     PhoneIcon,
     PlusIcon,
-    UserGroupIcon,
-    EyeIcon,
-    ClockIcon,
-    ExclamationTriangleIcon,
-    ArrowPathIcon,
-    DocumentTextIcon,
-    CurrencyDollarIcon,
-    BuildingStorefrontIcon
+    UserGroupIcon
 } from '@heroicons/react/24/outline';
 import {
     BellIcon as BellIconSolid,
@@ -23,7 +24,6 @@ import {
 } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import CreateContactSlideOver from '@/components/clients/CreateContactSlideOver';
 
 interface Client {
   id: string;

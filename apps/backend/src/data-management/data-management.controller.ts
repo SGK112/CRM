@@ -1,8 +1,8 @@
-import { Controller, Post, Body, UseGuards, Req, Delete } from '@nestjs/common';
+import { Body, Controller, Delete, Post, Req, UseGuards } from '@nestjs/common';
+import { Request } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { DataManagementService } from './data-management.service';
 import { BulkActionDto, ExportDataDto } from './data-management.types';
-import { Request } from 'express';
 
 interface AuthenticatedRequest extends Request {
   user: {

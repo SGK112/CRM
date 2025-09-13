@@ -30,6 +30,21 @@ export class User {
   @Prop()
   phone?: string;
 
+  @Prop()
+  company?: string;
+
+  @Prop()
+  jobTitle?: string;
+
+  @Prop()
+  bio?: string;
+
+  @Prop({ default: 'America/New_York' })
+  timezone?: string;
+
+  @Prop({ default: 'en' })
+  language?: string;
+
   @Prop({ default: false })
   isEmailVerified: boolean;
 
@@ -41,6 +56,12 @@ export class User {
 
   @Prop()
   twoFactorSecret?: string;
+
+  @Prop([String])
+  twoFactorBackupCodes?: string[];
+
+  @Prop()
+  twoFactorEnabledAt?: Date;
 
   @Prop({ required: true })
   workspaceId: string;
@@ -141,6 +162,36 @@ export class User {
   pdfTemplates?: {
     estimateTemplate?: 'professional' | 'modern' | 'classic';
     invoiceTemplate?: 'professional' | 'modern' | 'classic';
+  };
+
+  // Notification Preferences
+  @Prop({
+    type: {
+      emailNotifications: {
+        newLeads: { type: Boolean, default: true },
+        appointmentUpdates: { type: Boolean, default: true },
+        estimateUpdates: { type: Boolean, default: true },
+        paymentNotifications: { type: Boolean, default: true },
+      },
+      pushNotifications: {
+        newLeads: { type: Boolean, default: true },
+        messages: { type: Boolean, default: true },
+        appointmentReminders: { type: Boolean, default: true },
+      },
+    },
+  })
+  notificationPreferences?: {
+    emailNotifications?: {
+      newLeads?: boolean;
+      appointmentUpdates?: boolean;
+      estimateUpdates?: boolean;
+      paymentNotifications?: boolean;
+    };
+    pushNotifications?: {
+      newLeads?: boolean;
+      messages?: boolean;
+      appointmentReminders?: boolean;
+    };
   };
 
   // Custom Theme Configuration

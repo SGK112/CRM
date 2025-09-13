@@ -1,37 +1,36 @@
 'use client';
 
 import {
-  ArrowRightIcon,
-  ArrowLeftIcon,
-  UserIcon,
-  EnvelopeIcon,
-  PhoneIcon,
-  BuildingOfficeIcon,
-  CheckIcon,
-  MapPinIcon,
-  UserGroupIcon,
-  WrenchScrewdriverIcon,
-  BuildingStorefrontIcon,
-  DocumentCheckIcon,
-  ShieldCheckIcon,
-  CreditCardIcon,
-  DocumentTextIcon,
-  UserPlusIcon,
-  DocumentArrowUpIcon
-} from '@heroicons/react/24/outline'
-import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+    FormattedInput
+} from '@/components/forms/FormattedInputs';
 import {
-  StandardPageWrapper,
-  StandardCard,
-  StandardSection,
-  StandardButton,
-  StandardGrid
+    StandardButton,
+    StandardCard,
+    StandardGrid,
+    StandardPageWrapper,
+    StandardSection
 } from '@/components/ui/StandardPageWrapper';
 import {
-  FormattedInput
-} from '@/components/forms/FormattedInputs';
+    ArrowRightIcon,
+    BuildingOfficeIcon,
+    BuildingStorefrontIcon,
+    CheckIcon,
+    CreditCardIcon,
+    DocumentArrowUpIcon,
+    DocumentCheckIcon,
+    DocumentTextIcon,
+    EnvelopeIcon,
+    MapPinIcon,
+    PhoneIcon,
+    ShieldCheckIcon,
+    UserGroupIcon,
+    UserIcon,
+    UserPlusIcon,
+    WrenchScrewdriverIcon
+} from '@heroicons/react/24/outline';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
 
 interface OnboardingFormData {
   // Essential Info

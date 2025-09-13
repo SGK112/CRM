@@ -1,16 +1,17 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
 import {
-  DocumentDuplicateIcon,
-  PaperAirplaneIcon,
-  CurrencyDollarIcon,
-  PencilIcon,
-  ArrowLeftIcon,
-  ArrowDownTrayIcon,
-  TrashIcon,
+    ArrowDownTrayIcon,
+    ArrowLeftIcon,
+    CurrencyDollarIcon,
+    DocumentDuplicateIcon,
+  LinkIcon,
+    PaperAirplaneIcon,
+    PencilIcon,
+    TrashIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface Client {
   _id: string;
@@ -57,6 +58,7 @@ interface Estimate {
   project?: Project;
   createdAt: string;
   updatedAt: string;
+  shareToken?: string;
 }
 
 function getStatusColor(status: string) {
@@ -84,6 +86,7 @@ export default function EstimateDetailPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string>('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [infoMsg, setInfoMsg] = useState<string | null>(null);
 
   const token =
     typeof window !== 'undefined'
@@ -99,9 +102,9 @@ export default function EstimateDetailPage() {
       if (token) {
         headers.Authorization = `Bearer ${token}`;
       }
-      
+
       const res = await fetch(`/api/estimates/${id}`, { headers });
-      
+
       if (res.ok) {
         const data = await res.json();
         setEst(data);
@@ -235,6 +238,10 @@ export default function EstimateDetailPage() {
 
   const convertToInvoice = async () => {
     if (!id) return;
+    if (est && est.status !== 'accepted' && est.status !== 'converted') {
+      setErrorMsg('Estimate must be accepted before converting.');
+      return;
+    }
     setActionLoading('convert');
     try {
       const res = await fetch(`/api/estimates/${id}/convert`, {
@@ -250,6 +257,56 @@ export default function EstimateDetailPage() {
       setErrorMsg('Failed to convert');
     } finally {
       setActionLoading('');
+    }
+  };
+
+  const approveEstimate = async () => {
+    if (!id) return;
+    setActionLoading('approve');
+    try {
+      const res = await fetch(`/api/estimates/${id}/approve`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        await fetchOne();
+        setInfoMsg('Estimate approved. You can now convert to an invoice.');
+      } else setErrorMsg('Failed to approve');
+    } catch (e) {
+      setErrorMsg('Failed to approve');
+    } finally {
+      setActionLoading('');
+    }
+  };
+
+  const rejectEstimate = async () => {
+    if (!id) return;
+    setActionLoading('reject');
+    try {
+      const res = await fetch(`/api/estimates/${id}/reject`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        await fetchOne();
+        setInfoMsg('Estimate marked as rejected.');
+      } else setErrorMsg('Failed to reject');
+    } catch (e) {
+      setErrorMsg('Failed to reject');
+    } finally {
+      setActionLoading('');
+    }
+  };
+
+  const copyShareLink = async () => {
+    if (!est) return;
+  const token = est.shareToken || est._id;
+    const url = `${window.location.origin}/share/estimate/${token}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setInfoMsg('Share link copied to clipboard!');
+    } catch {
+      setErrorMsg('Failed to copy link');
     }
   };
 
@@ -335,7 +392,7 @@ export default function EstimateDetailPage() {
               </div>
             </div>
           )}
-          
+
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link
@@ -399,11 +456,32 @@ export default function EstimateDetailPage() {
               </button>
               <button
                 onClick={convertToInvoice}
-                disabled={actionLoading === 'convert' || est.status === 'converted'}
+                disabled={actionLoading === 'convert' || est.status === 'converted' || (est.status !== 'accepted' && est.status !== 'converted')}
                 className="pill pill-tint-purple sm disabled:opacity-50"
               >
                 <CurrencyDollarIcon className="h-4 w-4 mr-1" />
                 {actionLoading === 'convert' ? 'Converting...' : 'Convert to Invoice'}
+              </button>
+              <button
+                onClick={approveEstimate}
+                disabled={actionLoading === 'approve' || est.status === 'accepted' || est.status === 'converted'}
+                className="pill pill-tint-green sm disabled:opacity-50"
+              >
+                {actionLoading === 'approve' ? 'Approving...' : 'Approve'}
+              </button>
+              <button
+                onClick={rejectEstimate}
+                disabled={actionLoading === 'reject' || est.status === 'rejected' || est.status === 'converted'}
+                className="pill pill-tint-red sm disabled:opacity-50"
+              >
+                {actionLoading === 'reject' ? 'Rejecting...' : 'Reject'}
+              </button>
+              <button
+                onClick={copyShareLink}
+                className="pill pill-ghost sm"
+              >
+                <LinkIcon className="h-4 w-4 mr-1" />
+                Share Link
               </button>
             </div>
           </div>
@@ -560,6 +638,16 @@ export default function EstimateDetailPage() {
           <div className="flex items-center justify-between gap-3">
             <span>{errorMsg}</span>
             <button className="text-red-600" onClick={() => setErrorMsg(null)}>
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+      {infoMsg && (
+        <div className="fixed bottom-4 right-4 mr-48 bg-green-100 text-green-700 px-3 py-2 rounded shadow">
+          <div className="flex items-center justify-between gap-3">
+            <span>{infoMsg}</span>
+            <button className="text-green-600" onClick={() => setInfoMsg(null)}>
               ✕
             </button>
           </div>

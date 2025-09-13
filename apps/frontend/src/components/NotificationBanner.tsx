@@ -1,14 +1,14 @@
 'use client';
 
-import { toast } from 'react-hot-toast';
-import { 
-  CheckCircleIcon, 
-  ExclamationTriangleIcon, 
-  InformationCircleIcon, 
-  XCircleIcon,
-  BellIcon,
-  XMarkIcon
+import {
+    BellIcon,
+    CheckCircleIcon,
+    ExclamationTriangleIcon,
+    InformationCircleIcon,
+    XCircleIcon,
+    XMarkIcon
 } from '@heroicons/react/24/outline';
+import { toast } from 'react-hot-toast';
 
 export interface NotificationProps {
   title: string;
@@ -37,19 +37,19 @@ const getNotificationIcon = (type: string) => {
   }
 };
 
-const CustomNotification = ({ 
-  title, 
-  message, 
-  type = 'info', 
+const CustomNotification = ({
+  title,
+  message,
+  type = 'info',
   action,
-  onDismiss 
+  onDismiss
 }: NotificationProps & { onDismiss?: () => void }) => {
   return (
     <div className="flex items-start gap-3 p-4 max-w-md">
       <div className="flex-shrink-0 mt-0.5">
         {getNotificationIcon(type)}
       </div>
-      
+
       <div className="flex-1 min-w-0">
         <h4 className="text-sm font-semibold text-white mb-1">
           {title}
@@ -59,7 +59,7 @@ const CustomNotification = ({
             {message}
           </p>
         )}
-        
+
         {action && (
           <button
             onClick={action.onClick}
@@ -69,7 +69,7 @@ const CustomNotification = ({
           </button>
         )}
       </div>
-      
+
       {onDismiss && (
         <button
           onClick={onDismiss}

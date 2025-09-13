@@ -28,7 +28,7 @@ export interface FileContact {
 function initializeStore() {
   if (!fs.existsSync(STORE_FILE)) {
     const initialContacts: FileContact[] = [];
-    
+
     try {
       fs.writeFileSync(STORE_FILE, JSON.stringify(initialContacts, null, 2));
     } catch (error) {
@@ -87,9 +87,9 @@ export function updateContactInFile(id: string, updates: Partial<FileContact>): 
   try {
     const contacts = readContactsFromFile();
     const index = contacts.findIndex(c => c.id === id || c._id === id);
-    
+
     if (index === -1) return null;
-    
+
     contacts[index] = { ...contacts[index], ...updates, updatedAt: new Date().toISOString() };
     writeContactsToFile(contacts);
     return contacts[index];
@@ -104,9 +104,9 @@ export function removeContactFromFile(id: string): boolean {
   try {
     const contacts = readContactsFromFile();
     const index = contacts.findIndex(c => c.id === id || c._id === id);
-    
+
     if (index === -1) return false;
-    
+
     contacts.splice(index, 1);
     writeContactsToFile(contacts);
     return true;

@@ -1,15 +1,15 @@
 'use client';
-import React, { useState, useEffect } from 'react';
-import { Crown, Lock, ArrowUpRight, Check, Sparkles, Zap } from 'lucide-react';
 import {
-  hasCapability,
-  getUserPlan,
-  getUpgradeUrl,
-  getPlanColor,
-  PLANS,
-  type PlanTier,
-  type PlanCapabilities,
+    getPlanColor,
+    getUpgradeUrl,
+    getUserPlan,
+    hasCapability,
+    PLANS,
+    type PlanCapabilities,
+    type PlanTier,
 } from '@/lib/plans';
+import { ArrowUpRight, Check, Crown, Lock, Sparkles, Zap } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 
 interface CapabilityGateProps {
   need: keyof PlanCapabilities | (keyof PlanCapabilities)[];
@@ -190,7 +190,7 @@ export function UpgradeModal({ open, onClose }: { open: boolean; onClose: () => 
         <div className="relative transform overflow-hidden rounded-xl bg-white dark:bg-gray-800 px-6 py-8 shadow-2xl transition-all sm:w-full sm:max-w-lg">
           <div className="text-center">
             {/* Icon */}
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-orange-600 mb-4">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-orange-600 mb-4">
               <Sparkles className="h-8 w-8 text-white" />
             </div>
 
@@ -226,7 +226,7 @@ export function UpgradeModal({ open, onClose }: { open: boolean; onClose: () => 
               </button>
               <a
                 href={getUpgradeUrl(currentPlan, targetPlan)}
-                className="flex-1 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg hover:shadow-lg transition-all transform hover:scale-105 text-center"
+                className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:shadow-lg transition-all transform hover:scale-105 text-center"
               >
                 Upgrade ${plan.price}/{plan.period}
               </a>

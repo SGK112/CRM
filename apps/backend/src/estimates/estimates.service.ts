@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
+import { randomBytes } from 'crypto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Client, ClientDocument } from '../clients/schemas/client.schema';
 import { PriceItem, PriceItemDocument } from '../pricing/schemas/price-item.schema';
 import { EmailService } from '../services/email.service';
 import { PdfTemplatesService, TemplateType } from '../services/pdf-templates.service';
-import { Estimate, EstimateDocument } from './schemas/estimate.schema';
 import { User, UserDocument } from '../users/schemas/user.schema';
+import { Estimate, EstimateDocument } from './schemas/estimate.schema';
 
 export interface CreateEstimateDto {
   number?: string;
@@ -27,6 +28,7 @@ export interface CreateEstimateDto {
   taxRate?: number;
   notes?: string;
 }
+
 export interface UpdateEstimateDto {
   items?: {
     priceItemId?: string;
@@ -42,6 +44,17 @@ export interface UpdateEstimateDto {
   discountValue?: number;
   taxRate?: number;
   notes?: string;
+}
+
+export interface EstimateWithClient extends Estimate {
+  client?: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    company?: string;
+    email?: string;
+    phone?: string;
+  };
 }
 
 @Injectable()
@@ -163,10 +176,29 @@ export class EstimatesService {
       discountValue: dto.discountValue || 0,
       taxRate: dto.taxRate || 0,
       notes: dto.notes,
+      shareToken: randomBytes(16).toString('hex'),
     });
     this.computeTotals(doc);
     await doc.save();
     return doc;
+  }
+
+  async findByShareToken(token: string) {
+    const estimate = await this.estimateModel.findOne({ shareToken: token });
+    if (!estimate) return null;
+    const client = await this.clientModel.findOne({ _id: estimate.clientId, workspaceId: estimate.workspaceId });
+    const estimateObj = estimate.toObject() as EstimateWithClient;
+    if (client) {
+      estimateObj.client = {
+        _id: client._id.toString(),
+        firstName: client.firstName,
+        lastName: client.lastName,
+        company: client.company,
+        email: client.email,
+        phone: client.phone,
+      };
+    }
+    return estimateObj;
   }
 
   async recalc(id: string, workspaceId: string) {
@@ -178,11 +210,53 @@ export class EstimatesService {
   }
 
   async list(workspaceId: string) {
-    return this.estimateModel.find({ workspaceId }).sort({ createdAt: -1 });
+    const estimates = await this.estimateModel.find({ workspaceId }).sort({ createdAt: -1 });
+
+    // Populate client data for each estimate
+    const populatedEstimates = await Promise.all(
+      estimates.map(async (estimate) => {
+        const client = await this.clientModel.findOne({ _id: estimate.clientId, workspaceId });
+        const estimateObj = estimate.toObject() as EstimateWithClient;
+
+        if (client) {
+          // Add client data to the response
+          estimateObj.client = {
+            _id: client._id.toString(),
+            firstName: client.firstName,
+            lastName: client.lastName,
+            company: client.company,
+            email: client.email,
+            phone: client.phone,
+          };
+        }
+
+        return estimateObj;
+      })
+    );
+
+    return { estimates: populatedEstimates };
   }
 
   async findOne(id: string, workspaceId: string) {
-    return this.estimateModel.findOne({ _id: id, workspaceId });
+    const estimate = await this.estimateModel.findOne({ _id: id, workspaceId });
+    if (!estimate) return null;
+
+    // Populate client data
+    const client = await this.clientModel.findOne({ _id: estimate.clientId, workspaceId });
+    const estimateObj = estimate.toObject() as EstimateWithClient;
+
+    if (client) {
+      estimateObj.client = {
+        _id: client._id.toString(),
+        firstName: client.firstName,
+        lastName: client.lastName,
+        company: client.company,
+        email: client.email,
+        phone: client.phone,
+      };
+    }
+
+    return estimateObj;
   }
 
   async send(id: string, workspaceId: string) {
@@ -223,6 +297,51 @@ export class EstimatesService {
     if (!doc) return null;
     doc.status = status;
     await doc.save();
+    return doc;
+  }
+
+  async approve(id: string, workspaceId: string) {
+    const doc = await this.estimateModel.findOne({ _id: id, workspaceId });
+    if (!doc) return null;
+    if (doc.status !== 'accepted') {
+      doc.status = 'accepted';
+      await doc.save();
+      // Notify client if possible
+      const client = await this.clientModel.findOne({ _id: doc.clientId, workspaceId });
+      if (client?.email) {
+        try {
+          await this.emailService.sendEmail({
+            to: client.email,
+            subject: `Estimate ${doc.number} Approved`,
+            html: `<p>Hi ${client.firstName},</p><p>Your estimate <strong>${doc.number}</strong> has been approved. We'll be in touch shortly regarding next steps.</p>`,
+          });
+        } catch (_) {
+          /* silent */
+        }
+      }
+    }
+    return doc;
+  }
+
+  async reject(id: string, workspaceId: string) {
+    const doc = await this.estimateModel.findOne({ _id: id, workspaceId });
+    if (!doc) return null;
+    if (doc.status !== 'rejected') {
+      doc.status = 'rejected';
+      await doc.save();
+      const client = await this.clientModel.findOne({ _id: doc.clientId, workspaceId });
+      if (client?.email) {
+        try {
+          await this.emailService.sendEmail({
+            to: client.email,
+            subject: `Estimate ${doc.number} Updated`,
+            html: `<p>Hi ${client.firstName},</p><p>Your estimate <strong>${doc.number}</strong> has been updated with status: Rejected. Feel free to reply if you have questions or would like revisions.</p>`,
+          });
+        } catch (_) {
+          /* silent */
+        }
+      }
+    }
     return doc;
   }
 

@@ -1,16 +1,16 @@
 'use client';
 
+import {
+    ArrowLeftIcon,
+    CalculatorIcon,
+    CalendarIcon,
+    CurrencyDollarIcon,
+    DocumentTextIcon,
+    PlusIcon,
+} from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useState, useMemo } from 'react';
-import {
-  CalendarIcon,
-  DocumentTextIcon,
-  CurrencyDollarIcon,
-  ArrowLeftIcon,
-  PlusIcon,
-  CalculatorIcon,
-} from '@heroicons/react/24/outline';
+import { useEffect, useMemo, useState } from 'react';
 
 interface Project {
   _id: string;
@@ -138,7 +138,7 @@ export default function ProjectDetailPage() {
             <ArrowLeftIcon className="h-4 w-4" />
             Back to Projects
           </Link>
-          
+
           <div className="flex items-center gap-2 ml-auto">
             <Link
               href={`/dashboard/invoices/new?projectId=${id}&projectName=${encodeURIComponent(project?.title || '')}`}

@@ -56,13 +56,13 @@ async function testCompleteOnboardingFlow() {
     // This is what the onboarding form does:
     const newContactId = created?._id || created?.id;
     const redirectUrl = `/dashboard/clients/${newContactId}?created=true&type=${onboardingFormData.entityType}`;
-    
+
     console.log('\n🔄 Simulating redirect to:', redirectUrl);
     console.log('🔍 Fetching contact with ID:', newContactId);
 
     // Step 2: Immediately try to fetch the contact (simulating the redirect)
     const fetchResponse = await fetch(`${baseUrl}/api/clients/${newContactId}`);
-    
+
     console.log('📊 Fetch response status:', fetchResponse.status);
 
     if (fetchResponse.ok) {
@@ -80,7 +80,7 @@ async function testCompleteOnboardingFlow() {
         status: fetchResponse.status,
         error: errorText
       });
-      
+
       // Check what's actually in the store
       console.log('\n🔍 Checking what contacts exist in store...');
       const allContactsResponse = await fetch(`${baseUrl}/api/clients`);
@@ -88,19 +88,19 @@ async function testCompleteOnboardingFlow() {
         const allData = await allContactsResponse.json();
         const contacts = allData.clients || allData;
         console.log('📋 Total contacts in store:', contacts.length);
-        
+
         if (contacts.length > 0) {
           console.log('📝 Recent contacts:');
           contacts.slice(0, 3).forEach((contact, i) => {
             console.log(`  ${i + 1}. ID: ${contact.id}, _ID: ${contact._id}, Name: ${contact.name}`);
           });
-          
+
           // Check if our contact exists with a different ID format
-          const ourContact = contacts.find(c => 
-            c.email === onboardingFormData.email || 
+          const ourContact = contacts.find(c =>
+            c.email === onboardingFormData.email ||
             c.name === onboardingFormData.name
           );
-          
+
           if (ourContact) {
             console.log('🔍 Found our contact with different lookup:', {
               id: ourContact.id,
@@ -110,7 +110,7 @@ async function testCompleteOnboardingFlow() {
           }
         }
       }
-      
+
       console.log('\n💥 FAILURE: This reproduces the user\'s issue!');
     }
 

@@ -14,14 +14,14 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/remode
 
 async function demonstrateWorkflow() {
   const client = new MongoClient(MONGODB_URI);
-  
+
   try {
     await client.connect();
     console.log('✅ Connected to MongoDB');
-    
+
     const db = client.db();
     const timestamp = Date.now();
-    
+
     // Step 1: Create a new client
     console.log('\n📋 Step 1: Creating a new client...');
     const newClient = {
@@ -36,10 +36,10 @@ async function demonstrateWorkflow() {
       updatedAt: new Date(),
       userId: 'demo-user'
     };
-    
+
     await db.collection('clients').insertOne(newClient);
     console.log(`✅ Created client: ${newClient.name} (ID: ${newClient._id})`);
-    
+
     // Step 2: Create a project for this client
     console.log('\n🏗️ Step 2: Creating a new project...');
     const newProject = {
@@ -54,10 +54,10 @@ async function demonstrateWorkflow() {
       updatedAt: new Date(),
       userId: 'demo-user'
     };
-    
+
     await db.collection('projects').insertOne(newProject);
     console.log(`✅ Created project: ${newProject.name} (ID: ${newProject._id})`);
-    
+
     // Step 3: Create an estimate for this project
     console.log('\n💰 Step 3: Creating an estimate...');
     const newEstimate = {
@@ -78,7 +78,7 @@ async function demonstrateWorkflow() {
           total: 17000
         },
         {
-          id: '2', 
+          id: '2',
           description: 'LED Lighting System',
           quantity: 25,
           unit: 'fixtures',
@@ -110,10 +110,10 @@ async function demonstrateWorkflow() {
       updatedAt: new Date(),
       userId: 'demo-user'
     };
-    
+
     await db.collection('estimates').insertOne(newEstimate);
     console.log(`✅ Created estimate: ${newEstimate.title} (${newEstimate.estimateNumber}) - $${newEstimate.total.toLocaleString()}`);
-    
+
     // Step 4: Convert estimate to invoice
     console.log('\n🧾 Step 4: Converting estimate to invoice...');
     const newInvoice = {
@@ -135,15 +135,15 @@ async function demonstrateWorkflow() {
       updatedAt: new Date(),
       userId: 'demo-user'
     };
-    
+
     await db.collection('invoices').insertOne(newInvoice);
     console.log(`✅ Created invoice: ${newInvoice.title} (${newInvoice.invoiceNumber}) - $${newInvoice.total.toLocaleString()}`);
-    
+
     // Step 5: Update estimate status to converted
     await db.collection('estimates').updateOne(
       { _id: newEstimate._id },
-      { 
-        $set: { 
+      {
+        $set: {
           status: 'converted',
           convertedToInvoice: newInvoice._id,
           updatedAt: new Date()
@@ -151,29 +151,29 @@ async function demonstrateWorkflow() {
       }
     );
     console.log('✅ Updated estimate status to "converted"');
-    
+
     // Step 6: Show updated stats
     console.log('\n📊 Step 6: Updated Dashboard Stats:');
-    
+
     const clientCount = await db.collection('clients').countDocuments();
     const projectCount = await db.collection('projects').countDocuments();
     const estimateCount = await db.collection('estimates').countDocuments();
     const invoiceCount = await db.collection('invoices').countDocuments();
-    
+
     // Calculate financial stats
     const totalEstimateValue = await db.collection('estimates').aggregate([
       { $group: { _id: null, total: { $sum: '$total' } } }
     ]).toArray();
-    
+
     const totalInvoiceValue = await db.collection('invoices').aggregate([
       { $group: { _id: null, total: { $sum: '$total' } } }
     ]).toArray();
-    
+
     console.log(`📈 Clients: ${clientCount}`);
     console.log(`🏗️ Projects: ${projectCount}`);
     console.log(`💰 Estimates: ${estimateCount} (Total: $${(totalEstimateValue[0]?.total || 0).toLocaleString()})`);
     console.log(`🧾 Invoices: ${invoiceCount} (Total: $${(totalInvoiceValue[0]?.total || 0).toLocaleString()})`);
-    
+
     console.log('\n🎉 Workflow demonstration completed successfully!');
     console.log('\n📱 You can now view the updated dashboard at: http://localhost:3005/dashboard');
     console.log(`👤 View the new client at: http://localhost:3005/dashboard/clients/${newClient._id}`);
@@ -182,7 +182,7 @@ async function demonstrateWorkflow() {
     console.log(`🧾 View the invoice at: http://localhost:3005/dashboard/invoices/${newInvoice._id}`);
     console.log('\n✨ Note: Estimates and invoices display demo data when not authenticated');
     console.log('🔐 For full functionality, create an account at: http://localhost:3005/auth/register');
-    
+
   } catch (error) {
     console.error('❌ Error during workflow:', error);
   } finally {

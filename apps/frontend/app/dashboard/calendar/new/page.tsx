@@ -1,18 +1,18 @@
 'use client';
+import {
+    CalendarDaysIcon,
+    CheckIcon,
+    ChevronDownIcon,
+    ClockIcon,
+    DocumentTextIcon,
+    MagnifyingGlassIcon,
+    MapPinIcon,
+    PlusIcon,
+    UserIcon,
+    XMarkIcon,
+} from '@heroicons/react/24/outline';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import {
-  CalendarDaysIcon,
-  ClockIcon,
-  MapPinIcon,
-  UserIcon,
-  DocumentTextIcon,
-  XMarkIcon,
-  CheckIcon,
-  MagnifyingGlassIcon,
-  PlusIcon,
-  ChevronDownIcon,
-} from '@heroicons/react/24/outline';
 
 interface Contact {
   id: string;
@@ -61,7 +61,7 @@ export default function NewAppointment() {
     const nextHour = new Date(now.getTime() + 60 * 60 * 1000);
     nextHour.setMinutes(0);
     const endTime = new Date(nextHour.getTime() + 60 * 60 * 1000);
-    
+
     setStart(nextHour.toTimeString().slice(0, 5));
     setEnd(endTime.toTimeString().slice(0, 5));
   }, [params]);
@@ -74,7 +74,7 @@ export default function NewAppointment() {
         const headers: Record<string, string> = {
           'Content-Type': 'application/json',
         };
-        
+
         if (authToken && authToken !== 'null' && authToken !== 'undefined' && authToken.length > 10) {
           headers.Authorization = `Bearer ${authToken}`;
         }
@@ -88,7 +88,7 @@ export default function NewAppointment() {
           const data = await response.json();
           const contactList = data.clients || data || [];
           setContacts(contactList);
-          
+
           // If we have a preselected contact, find and set it
           if (selectedContactId) {
             const contact = contactList.find((c: Contact) => c.id === selectedContactId || c._id === selectedContactId);
@@ -110,7 +110,7 @@ export default function NewAppointment() {
   const filteredContacts = contacts.filter(contact => {
     const displayName = contact.name || `${contact.firstName || ''} ${contact.lastName || ''}`.trim() || contact.email;
     const searchText = contactSearchTerm.toLowerCase();
-    return displayName.toLowerCase().includes(searchText) || 
+    return displayName.toLowerCase().includes(searchText) ||
            contact.email.toLowerCase().includes(searchText) ||
            (contact.company && contact.company.toLowerCase().includes(searchText));
   });
@@ -120,12 +120,12 @@ export default function NewAppointment() {
     setSelectedContactId(contact.id || contact._id || '');
     setShowContactDropdown(false);
     setContactSearchTerm('');
-    
+
     // Auto-populate title
     const displayName = contact.name || `${contact.firstName || ''} ${contact.lastName || ''}`.trim() || contact.email;
     if (!title || title.includes('Meeting with')) {
-      setTitle(`${appointmentType === 'consultation' ? 'Consultation' : 
-                appointmentType === 'site_visit' ? 'Site visit' : 
+      setTitle(`${appointmentType === 'consultation' ? 'Consultation' :
+                appointmentType === 'site_visit' ? 'Site visit' :
                 appointmentType === 'inspection' ? 'Inspection' : 'Meeting'} with ${displayName}`);
     }
   };
@@ -135,13 +135,13 @@ export default function NewAppointment() {
     const now = new Date();
     const todayStart = new Date(now);
     todayStart.setHours(9, 0, 0, 0); // Start at 9 AM
-    
+
     // Today's remaining slots
     if (now.getHours() < 17) {
       const nextSlot = new Date(now);
       nextSlot.setMinutes(0, 0, 0);
       nextSlot.setHours(nextSlot.getHours() + 1);
-      
+
       while (nextSlot.getHours() < 17) {
         slots.push({
           label: `Today ${nextSlot.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
@@ -152,12 +152,12 @@ export default function NewAppointment() {
         if (slots.length >= 3) break;
       }
     }
-    
+
     // Tomorrow slots
     const tomorrow = new Date(now);
     tomorrow.setDate(tomorrow.getDate() + 1);
     tomorrow.setHours(9, 0, 0, 0);
-    
+
     for (let i = 0; i < 3; i++) {
       slots.push({
         label: `Tomorrow ${tomorrow.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
@@ -166,7 +166,7 @@ export default function NewAppointment() {
       });
       tomorrow.setHours(tomorrow.getHours() + 2);
     }
-    
+
     return slots;
   };
 
@@ -215,7 +215,7 @@ export default function NewAppointment() {
       const existingAppointments = JSON.parse(
         localStorage.getItem('appointments') || '[]'
       );
-      
+
       const newAppointment = {
         ...appointmentData,
         id: Date.now().toString(),
@@ -327,14 +327,14 @@ export default function NewAppointment() {
                       className="w-full px-4 py-3 border border-slate-700 rounded-lg bg-slate-800 text-white text-left focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 flex items-center justify-between"
                     >
                       <span className={selectedContact ? 'text-white' : 'text-slate-400'}>
-                        {selectedContact 
+                        {selectedContact
                           ? (selectedContact.name || `${selectedContact.firstName || ''} ${selectedContact.lastName || ''}`.trim() || selectedContact.email)
                           : 'Choose existing contact or leave blank'
                         }
                       </span>
                       <ChevronDownIcon className="h-4 w-4 text-slate-400" />
                     </button>
-                    
+
                     {showContactDropdown && (
                       <div className="absolute z-10 w-full mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                         <div className="p-2">

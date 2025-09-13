@@ -1,8 +1,8 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import ClientSelector from '@/components/ClientSelector';
 import { Client, Project } from '@/types/shared';
+import { useRouter } from 'next/navigation';
 
 interface ClientProjectSelectorProps {
   selectedClientId: string;
@@ -30,7 +30,7 @@ export default function ClientProjectSelector({
   const router = useRouter();
 
   // Filter projects by selected client
-  const filteredProjects = selectedClientId 
+  const filteredProjects = selectedClientId
     ? projects.filter(p => p.clientId === selectedClientId)
     : projects;
 
@@ -82,10 +82,10 @@ export default function ClientProjectSelector({
           disabled={!selectedClientId || filteredProjects.length === 0}
         >
           <option value="">
-            {!selectedClientId 
-              ? 'Select a client first' 
-              : filteredProjects.length === 0 
-                ? 'No projects available' 
+            {!selectedClientId
+              ? 'Select a client first'
+              : filteredProjects.length === 0
+                ? 'No projects available'
                 : 'Select a project (optional)'
             }
           </option>
@@ -96,7 +96,7 @@ export default function ClientProjectSelector({
             </option>
           ))}
         </select>
-        
+
         {selectedClientId && (
           <div className="mt-2 space-y-1">
             <button

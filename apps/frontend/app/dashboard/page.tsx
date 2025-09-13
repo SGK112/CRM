@@ -1,22 +1,22 @@
 'use client';
 
 import {
-  ChartBarIcon,
-  CheckCircleIcon,
-  ClipboardDocumentListIcon,
-  ClockIcon,
-  CurrencyDollarIcon,
-  ExclamationTriangleIcon,
-  UserGroupIcon,
-  BellIcon,
-  UserIcon,
-  CalendarIcon,
-  ArrowRightIcon,
-  StarIcon,
-  UserPlusIcon,
+    ArrowRightIcon,
+    BellIcon,
+    CalendarIcon,
+    ChartBarIcon,
+    CheckCircleIcon,
+    ClipboardDocumentListIcon,
+    ClockIcon,
+    CurrencyDollarIcon,
+    ExclamationTriangleIcon,
+    StarIcon,
+    UserGroupIcon,
+    UserIcon,
+    UserPlusIcon,
 } from '@heroicons/react/24/outline';
 import {
-  StarIcon as StarIconSolid
+    StarIcon as StarIconSolid
 } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -112,7 +112,7 @@ export default function DashboardPage() {
         const headers: Record<string, string> = {
           'Content-Type': 'application/json',
         };
-        
+
         if (authToken && authToken !== 'null' && authToken !== 'undefined' && authToken.length > 10) {
           headers.Authorization = `Bearer ${authToken}`;
         }
@@ -125,7 +125,7 @@ export default function DashboardPage() {
         if (response.ok) {
           const data = await response.json();
           const contacts = data.clients || data || [];
-          
+
           // Sort by creation date and take the 5 most recent
           const sortedContacts = contacts
             .sort((a: ApiContact, b: ApiContact) => new Date(b.createdAt || b.updatedAt || '').getTime() - new Date(a.createdAt || a.updatedAt || '').getTime())
@@ -140,7 +140,7 @@ export default function DashboardPage() {
               company: contact.company,
               createdAt: contact.createdAt || contact.updatedAt || ''
             }));
-          
+
           setRecentContacts(sortedContacts);
         }
       } catch (error) {
@@ -369,14 +369,14 @@ export default function DashboardPage() {
               <ArrowRightIcon className="h-4 w-4" />
             </Link>
           </div>
-          
+
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
             <Link
               href="/dashboard/onboarding"
               className="group p-4 bg-black rounded-2xl border border-slate-700 hover:border-amber-600 transition-all duration-200 hover:scale-[1.02]"
             >
               <div className="flex flex-col items-center text-center">
-                <div className="p-3 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl mb-3 group-hover:from-amber-600 group-hover:to-orange-700 transition-all">
+                <div className="p-3 bg-orange-600 rounded-xl mb-3 group-hover:bg-orange-700 transition-all">
                   <UserPlusIcon className="h-5 w-5 text-white" />
                 </div>
                 <span className="text-sm font-medium text-white group-hover:text-amber-400 transition-colors">Add Contact</span>
@@ -509,7 +509,7 @@ export default function DashboardPage() {
                   <ArrowRightIcon className="h-4 w-4" />
                 </Link>
               </div>
-              
+
               <div className="space-y-3">
                 {recentContacts.length === 0 ? (
                   <div className="text-center py-8">
@@ -531,7 +531,7 @@ export default function DashboardPage() {
                       className="flex items-center gap-3 p-3 bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors"
                     >
                       <div className="flex-shrink-0">
-                        <div className="h-10 w-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg flex items-center justify-center">
+                        <div className="h-10 w-10 bg-orange-600 rounded-lg flex items-center justify-center">
                           <span className="text-white font-semibold text-sm">
                             {(contact.name || contact.company || 'U').charAt(0).toUpperCase()}
                           </span>

@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
-  walletService,
-  type Wallet,
-  type Transaction,
-  type WalletStats,
+    walletService,
+    type Transaction,
+    type Wallet,
+    type WalletStats,
 } from '../lib/services/walletService';
 
 export interface UseWalletReturn {
@@ -80,7 +80,7 @@ export function useWallet(): UseWalletReturn {
       if (!walletService) {
         throw new Error('Wallet service not initialized');
       }
-      
+
       try {
         setError(null);
         const connectedWallet = await walletService.connectWallet(address);
@@ -100,7 +100,7 @@ export function useWallet(): UseWalletReturn {
     if (!walletService) {
       throw new Error('Wallet service not initialized');
     }
-    
+
     try {
       setError(null);
       await walletService.disconnectWallet();
@@ -116,7 +116,7 @@ export function useWallet(): UseWalletReturn {
       if (!walletService) {
         throw new Error('Wallet service not initialized');
       }
-      
+
       try {
         setError(null);
         await walletService.createPayment({

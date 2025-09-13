@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
 interface ColorTheme {
   name: string;
@@ -96,7 +96,7 @@ export function ColorProvider({ children }: { children: React.ReactNode }) {
 
   const applyTheme = (theme: ColorTheme) => {
     const root = document.documentElement;
-    
+
     // Map theme colors to CSS variables
     const cssVariables = {
       '--brand': theme.colors.primary,
@@ -161,7 +161,7 @@ export function ColorProvider({ children }: { children: React.ReactNode }) {
 
       // Always save to localStorage as backup
       localStorage.setItem('customColorTheme', JSON.stringify(theme));
-      
+
       // Apply the theme
       setCurrentTheme(theme);
       applyTheme(theme);

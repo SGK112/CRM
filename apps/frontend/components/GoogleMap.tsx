@@ -1,8 +1,8 @@
 'use client';
 
-import { Wrapper, Status } from '@googlemaps/react-wrapper';
-import { useEffect, useRef, useState } from 'react';
+import { Status, Wrapper } from '@googlemaps/react-wrapper';
 import { MapPinIcon } from '@heroicons/react/24/outline';
+import { useEffect, useRef, useState } from 'react';
 
 interface GoogleMapProps {
   address?: string;
@@ -112,7 +112,7 @@ const MapComponent: React.FC<{ address: string }> = ({ address }) => {
         if (status === 'OK' && results && results[0]) {
           const location = results[0].geometry.location;
           map.setCenter(location);
-          
+
           // Add a marker
           new google.maps.Marker({
             position: location,
@@ -167,9 +167,9 @@ const render = (status: Status): React.ReactElement => {
   }
 };
 
-export const GoogleMap: React.FC<GoogleMapProps> = ({ 
-  address = "New York, NY", 
-  className = "w-full h-64" 
+export const GoogleMap: React.FC<GoogleMapProps> = ({
+  address = "New York, NY",
+  className = "w-full h-64"
 }) => {
   // You'll need to add your Google Maps API key here
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';

@@ -1,13 +1,13 @@
 'use client';
 
 import {
-  ArrowLeftIcon,
-  CheckIcon,
-  XMarkIcon,
-  UserIcon,
-  BuildingOfficeIcon,
-  MapPinIcon,
-  DocumentTextIcon
+    ArrowLeftIcon,
+    BuildingOfficeIcon,
+    CheckIcon,
+    DocumentTextIcon,
+    MapPinIcon,
+    UserIcon,
+    XMarkIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';

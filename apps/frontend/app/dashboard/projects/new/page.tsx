@@ -228,11 +228,11 @@ function ClientSelector({
           className="w-full px-3 py-2 border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-amber-500/60 focus:border-amber-500/60 bg-[var(--surface-1)] text-left flex items-center justify-between hover:bg-[var(--surface-2)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <span className={selectedClient ? 'text-[var(--text)]' : 'text-[var(--text-dim)]'}>
-            {loading 
+            {loading
               ? 'Loading clients...'
               : selectedClient
                 ? `${selectedClient.firstName} ${selectedClient.lastName}${selectedClient.company ? ` (${selectedClient.company})` : ''}`
-                : error 
+                : error
                   ? 'No clients available (you can still create a project)'
                   : 'Select a client (optional)'
             }
@@ -395,7 +395,7 @@ export default function NewDashboardProjectPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const preselectedClientId = searchParams?.get('clientId') || '';
-  
+
   // Smart returnTo logic: if clientId is provided but no returnTo, assume coming from estimate form
   const getReturnTo = () => {
     const explicitReturnTo = searchParams?.get('returnTo');
@@ -408,7 +408,7 @@ export default function NewDashboardProjectPage() {
     }
     return '/dashboard/projects';
   };
-  
+
   const returnTo = getReturnTo();
 
   const [clients, setClients] = useState<Client[]>([]);
@@ -459,7 +459,7 @@ export default function NewDashboardProjectPage() {
     try {
       setClientsLoading(true);
       setClientsError(null);
-      
+
       const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
       if (!token) {
         // If no token, still allow the form to work with limited functionality
@@ -479,7 +479,7 @@ export default function NewDashboardProjectPage() {
         const data = await response.json();
         const clientsArray = Array.isArray(data) ? data : [];
         setClients(clientsArray);
-        
+
         // Auto-select client if preselected from URL
         if (preselectedClientId) {
           const foundClient = clientsArray.find(client => client._id === preselectedClientId);

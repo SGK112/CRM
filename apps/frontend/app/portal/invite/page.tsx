@@ -1,16 +1,16 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
 import {
-  UserPlusIcon,
-  ClipboardDocumentIcon,
-  CheckIcon,
-  ExclamationTriangleIcon,
-  InformationCircleIcon,
-  ArrowLeftIcon,
-  GlobeAltIcon
+    ArrowLeftIcon,
+    CheckIcon,
+    ClipboardDocumentIcon,
+    ExclamationTriangleIcon,
+    GlobeAltIcon,
+    InformationCircleIcon,
+    UserPlusIcon
 } from '@heroicons/react/24/outline';
+import Link from 'next/link';
+import { useState } from 'react';
 
 interface InvitationData {
   clientName: string;
@@ -25,7 +25,7 @@ export default function ClientPortalInvitePage() {
   const [inviteStep, setInviteStep] = useState<'setup' | 'sending' | 'success' | 'error'>('setup');
   const [inviteLink, setInviteLink] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  
+
   const [clientName, setClientName] = useState('');
   const [clientEmail, setClientEmail] = useState('');
   const [permissionLevel, setPermissionLevel] = useState<'full' | 'custom'>('full');
@@ -56,7 +56,7 @@ export default function ClientPortalInvitePage() {
         clientName: clientName.trim(),
         clientEmail: clientEmail.trim(),
         permissionLevel,
-        permissions: permissionLevel === 'full' 
+        permissions: permissionLevel === 'full'
           ? ['viewProjects', 'viewEstimates', 'viewInvoices', 'viewMessages', 'viewCalendar', 'editProfile', 'payInvoices', 'communicateWithTeam']
           : Object.entries(customPermissions)
               .filter(([, enabled]) => enabled)
@@ -291,7 +291,7 @@ export default function ClientPortalInvitePage() {
                 <option value="full">Full Access - View and manage all client data</option>
                 <option value="custom">Custom Permissions - Select specific features</option>
               </select>
-              
+
               {permissionLevel === 'custom' && (
                 <div className="bg-slate-800 rounded-xl p-6 mt-4">
                   <h5 className="text-sm font-medium text-white mb-4">Select Permissions:</h5>
@@ -350,7 +350,7 @@ export default function ClientPortalInvitePage() {
               <div className="text-sm text-blue-200">
                 <p className="font-medium mb-2">About Client Portal Access</p>
                 <p>
-                  Clients will receive a secure link to access their personalized portal. They can view their 
+                  Clients will receive a secure link to access their personalized portal. They can view their
                   project information, communicate with your team, and manage their account based on the permissions you set.
                 </p>
               </div>

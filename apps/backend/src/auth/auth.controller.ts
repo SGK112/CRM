@@ -236,4 +236,20 @@ export class AuthController {
   async getVerificationStatus(@Request() req) {
     return this.emailVerificationService.checkVerificationStatus(req.user.id);
   }
+
+  @Post('forgot-password-email')
+  @ApiOperation({ summary: 'Send password reset email' })
+  @ApiResponse({ status: 200, description: 'Password reset email sent successfully' })
+  @ApiResponse({ status: 400, description: 'No account found with this email address' })
+  async forgotPasswordEmail(@Body() body: { email: string }) {
+    return this.authService.sendPasswordResetEmail(body.email);
+  }
+
+  @Post('reset-password-with-token')
+  @ApiOperation({ summary: 'Reset password using email token' })
+  @ApiResponse({ status: 200, description: 'Password reset successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid or expired reset token' })
+  async resetPasswordWithToken(@Body() body: { token: string; newPassword: string }) {
+    return this.authService.resetPasswordWithToken(body.token, body.newPassword);
+  }
 }

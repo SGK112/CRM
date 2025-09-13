@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { Model, Types } from 'mongoose';
+import { EmailService } from '../services/email.service';
 import { TwilioService } from '../services/twilio.service';
 import { User, UserDocument } from '../users/schemas/user.schema';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
@@ -41,7 +42,8 @@ export class AuthService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     public jwtService: JwtService,
-    private twilioService: TwilioService
+    private twilioService: TwilioService,
+    private emailService: EmailService
   ) {
     // Initialize demo users only when explicitly enabled
     if (this.useDemoUsers) {
@@ -552,6 +554,112 @@ export class AuthService {
     } catch (error) {
       console.error('Password reset error:', error);
       return { success: false, message: 'Invalid or expired reset token' };
+    }
+  }
+
+  // Email-based Password Reset Methods
+  async sendPasswordResetEmail(email: string): Promise<{ success: boolean; message: string }> {
+    try {
+      console.log(`🔄 Password reset request for email: ${email}`);
+
+      // Find user by email in demo users when enabled
+      let user = null;
+      if (this.useDemoUsers) {
+        if (demoUsers.has(email)) {
+          user = demoUsers.get(email);
+        }
+      }
+
+      // Fall back to database
+      if (!user) {
+        try {
+          user = await this.userModel.findOne({ email });
+        } catch (error) {
+          console.log('Database email lookup failed, only demo users available');
+        }
+      }
+
+      if (!user) {
+        console.log(`❌ No user found with email: ${email}`);
+        return { success: false, message: 'No account found with this email address' };
+      }
+
+      console.log(`✅ User found: ${user.email || user.firstName}`);
+
+      // Generate reset token
+      const resetToken = this.jwtService.sign(
+        {
+          userId: user.id || user._id?.toString(),
+          email: user.email,
+          type: 'password_reset'
+        },
+        { expiresIn: '10m' }
+      );
+
+      console.log(`🔑 Generated reset token for user: ${user.email}`);
+
+      // Create reset link
+      const resetLink = `${process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3005'}/auth/reset-password?token=${resetToken}`;
+
+      // Send email
+      const emailSent = await this.emailService.sendEmail({
+        to: email,
+        subject: 'Password Reset Request - Remodely CRM',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #2563eb;">Password Reset Request</h2>
+            <p>Hi ${user.firstName || 'there'},</p>
+            <p>We received a request to reset your password for your Remodely CRM account.</p>
+
+            <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+              <p><strong>Click the button below to reset your password:</strong></p>
+              <a href="${resetLink}"
+                 style="display: inline-block; background: #2563eb; color: white; padding: 12px 24px;
+                        text-decoration: none; border-radius: 6px; font-weight: bold;">
+                Reset My Password
+              </a>
+            </div>
+
+            <p>Or copy and paste this link into your browser:</p>
+            <p style="word-break: break-all; color: #6b7280; font-size: 14px;">${resetLink}</p>
+
+            <p><strong>This link will expire in 10 minutes</strong> for security reasons.</p>
+
+            <p>If you didn't request this password reset, you can safely ignore this email. Your password will not be changed.</p>
+
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 14px;">
+              <p>This email was sent by Remodely CRM. If you have questions, please contact support.</p>
+            </div>
+          </div>
+        `,
+        text: `Password Reset Request
+
+Hi ${user.firstName || 'there'},
+
+We received a request to reset your password for your Remodely CRM account.
+
+To reset your password, click this link: ${resetLink}
+
+This link will expire in 10 minutes for security reasons.
+
+If you didn't request this password reset, you can safely ignore this email.
+
+- Remodely CRM Team`
+      });
+
+      if (emailSent) {
+        console.log(`✅ Reset email sent successfully to ${email}`);
+        return {
+          success: true,
+          message: 'Password reset link sent to your email. Check your inbox and spam folder.',
+        };
+      } else {
+        console.log(`❌ Failed to send email to ${email}`);
+        return { success: false, message: 'Failed to send reset email. Please try again.' };
+      }
+    } catch (error) {
+      console.error('Password reset email error:', error);
+      return { success: false, message: 'An error occurred while sending the reset email' };
     }
   }
 }

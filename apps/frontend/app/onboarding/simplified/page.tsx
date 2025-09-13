@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function SimplifiedOnboardingPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   useEffect(() => {
     const enhanced = searchParams?.get('enhanced');
     const redirectUrl = enhanced ? '/dashboard/onboarding?enhanced=true' : '/dashboard/onboarding';

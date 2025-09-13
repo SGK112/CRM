@@ -1,1 +1,30 @@
-[]
+[
+  {
+    "id": "1757739171887",
+    "_id": "1757739171887",
+    "name": "Sarah Sample",
+    "email": "sarah@example.com",
+    "phone": "(555) 123-4567",
+    "address": "1111 w Main st",
+    "city": "Anytown",
+    "state": "AA",
+    "zipCode": "12345",
+    "type": "client",
+    "entityType": "client",
+    "businessType": "Residential Property Owner",
+    "status": "lead",
+    "notes": "Testing the onboarding system.",
+    "createdAt": "2025-09-13T04:52:51.887Z",
+    "updatedAt": "2025-09-13T04:52:51.887Z",
+    "firstName": "Sarah",
+    "lastName": "Sample",
+    "company": "",
+    "contactType": "client",
+    "licenseNumber": "",
+    "insuranceNumber": "",
+    "hourlyRate": "",
+    "workAddress": "",
+    "accountNumber": "",
+    "taxId": ""
+  }
+]

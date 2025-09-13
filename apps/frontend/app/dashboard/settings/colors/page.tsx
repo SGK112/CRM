@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useColors, ColorTheme } from '../../../../src/components/ColorProvider';
-import { SwatchIcon, EyeIcon, ArrowPathIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { ArrowPathIcon, CheckIcon, EyeIcon, SwatchIcon } from '@heroicons/react/24/outline';
+import { useEffect, useState } from 'react';
+import { ColorTheme, useColors } from '../../../../src/components/ColorProvider';
 import './preview.css';
 
 const defaultThemes: ColorTheme[] = [
@@ -131,7 +131,7 @@ export default function ColorsPage() {
         name: selectedTheme.name === 'Custom' ? 'Custom' : `${selectedTheme.name} (Customized)`,
         colors: customColors,
       };
-      
+
       await saveTheme(newTheme);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);

@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
       if (process.env.NODE_ENV !== 'production') {
         return NextResponse.json({ success: true, message: 'All notifications marked as read (dev mode)' });
       }
-      
+
       const err = await response.json().catch(() => ({ error: 'Failed to mark all notifications as read' }));
       return NextResponse.json(err, { status: response.status });
     }
@@ -42,8 +42,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, message: 'All notifications marked as read (dev mode)' });
     }
 
-    return NextResponse.json({ 
-      error: error instanceof Error ? error.message : 'Unknown error' 
+    return NextResponse.json({
+      error: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }

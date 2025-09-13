@@ -124,7 +124,7 @@ export default function WalletPage() {
               </div>
             </div>
             <div className="flex gap-2">
-              <button 
+              <button
                 onClick={refreshWalletData}
                 disabled={loading}
                 className="p-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-lg transition-colors disabled:opacity-50"
@@ -230,7 +230,7 @@ export default function WalletPage() {
                   )}
                 </div>
               </div>
-              
+
               {/* Stats Grid */}
               {stats && (
                 <div className="grid grid-cols-2 gap-4 text-center">
@@ -281,7 +281,7 @@ export default function WalletPage() {
                 <span className="text-sm text-slate-400">{transactions.length} total</span>
               </div>
             </div>
-            
+
             {transactions.length > 0 ? (
               <div className="divide-y divide-slate-700">
                 {transactions.map((transaction) => (
@@ -290,7 +290,7 @@ export default function WalletPage() {
                       <div className="flex items-center gap-3">
                         <div className={`p-2 rounded-lg ${
                           transaction.type === 'payment'
-                            ? 'bg-green-500/20' 
+                            ? 'bg-green-500/20'
                             : 'bg-red-500/20'
                         }`}>
                           {getTypeIcon(transaction.type)}
@@ -319,11 +319,11 @@ export default function WalletPage() {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="text-xs text-slate-400 mb-2">
                       {transaction.description}
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         {getStatusIcon(transaction.status)}
@@ -368,7 +368,7 @@ export default function WalletPage() {
                 ✕
               </button>
             </div>
-            
+
             <div className="p-6">
               <div className="text-center mb-6">
                 <div className="h-12 w-12 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -378,7 +378,7 @@ export default function WalletPage() {
                   Enter your TON wallet address to connect
                 </p>
               </div>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
@@ -392,7 +392,7 @@ export default function WalletPage() {
                     className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                   />
                 </div>
-                
+
                 <div className="flex gap-3">
                   <button
                     onClick={() => {
@@ -434,7 +434,7 @@ export default function WalletPage() {
                 ✕
               </button>
             </div>
-            
+
             <div className="p-6">
               <div className="text-center mb-6">
                 <div className="h-12 w-12 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -444,7 +444,7 @@ export default function WalletPage() {
                   Create a new payment request
                 </p>
               </div>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
@@ -458,7 +458,7 @@ export default function WalletPage() {
                     className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
                     Description
@@ -471,7 +471,7 @@ export default function WalletPage() {
                     className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                   />
                 </div>
-                
+
                 <div className="flex gap-3">
                   <button
                     onClick={() => {

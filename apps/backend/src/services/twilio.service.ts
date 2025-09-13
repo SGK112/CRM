@@ -13,10 +13,18 @@ export class TwilioService {
     const authToken = this.configService.get('TWILIO_AUTH_TOKEN');
     this.fromNumber = this.configService.get('TWILIO_PHONE_NUMBER');
 
-    if (accountSid && authToken && /^AC[0-9a-fA-F]{32}$/.test(accountSid)) {
-      this.client = twilio(accountSid, authToken);
+    // Updated regex to handle both 30 and 32 character Account SIDs
+    if (accountSid && authToken && /^AC[0-9a-fA-F]{30,34}$/.test(accountSid)) {
+      try {
+        this.client = twilio(accountSid, authToken);
+        this.logger.log('✅ Twilio client initialized successfully');
+      } catch (error) {
+        this.logger.error('❌ Failed to initialize Twilio client:', error);
+      }
     } else if (accountSid || authToken) {
       this.logger.warn('Twilio credentials present but invalid format; running in simulation mode.');
+    } else {
+      this.logger.log('🔧 No Twilio credentials provided - running in simulation mode');
     }
   }
 

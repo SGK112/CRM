@@ -59,6 +59,18 @@ export class EstimatesController {
     return this.estimates.updateStatus(id, workspaceId, status);
   }
 
+  @Post(':id/approve')
+  approve(@Param('id') id: string, @Req() req) {
+    const workspaceId = req.user.workspaceId || req.user.sub;
+    return this.estimates.approve(id, workspaceId);
+  }
+
+  @Post(':id/reject')
+  reject(@Param('id') id: string, @Req() req) {
+    const workspaceId = req.user.workspaceId || req.user.sub;
+    return this.estimates.reject(id, workspaceId);
+  }
+
   @Post(':id/convert')
   convert(@Param('id') id: string, @Req() req) {
     const workspaceId = req.user.workspaceId || req.user.sub;

@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { UseFormRegister, FieldError, FieldValues, Path, RegisterOptions } from 'react-hook-form';
 import { CheckCircleIcon, ExclamationTriangleIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+import React, { useEffect, useState } from 'react';
+import { FieldError, FieldValues, Path, RegisterOptions, UseFormRegister } from 'react-hook-form';
 
 interface FormFieldProps<T extends FieldValues = FieldValues> {
   label: string;
@@ -241,7 +241,7 @@ export const FormProgress: React.FC<FormProgressProps> = ({
 
       <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 mb-3">
         <div
-          className="bg-gradient-to-r from-orange-500 to-orange-600 h-2 rounded-full transition-all duration-500"
+          className="bg-orange-600 h-2 rounded-full transition-all duration-500"
           style={{ width: `${percentage}%` }}
         />
       </div>
@@ -291,7 +291,7 @@ export const QuickStartForm: React.FC<QuickStartFormProps> = ({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 text-white font-semibold rounded-2xl transition-all duration-200 shadow-lg shadow-orange-500/25"
+              className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-orange-600 hover:bg-orange-700 disabled:opacity-50 text-white font-semibold rounded-2xl transition-all duration-200 shadow-lg shadow-orange-500/25"
             >
               {isSubmitting ? (
                 <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />

@@ -1,27 +1,27 @@
 'use client';
 
+import { showNotification } from '@/components/NotificationBanner';
 import {
-  ArchiveBoxIcon,
-  BellIcon,
-  ChatBubbleLeftRightIcon,
-  EnvelopeIcon,
-  ExclamationTriangleIcon,
-  FlagIcon,
-  InboxIcon,
-  MagnifyingGlassIcon,
-  StarIcon,
-  UserIcon,
-  TrashIcon,
-  FolderIcon,
-  CheckIcon,
+    ArchiveBoxIcon,
+    BellIcon,
+    ChatBubbleLeftRightIcon,
+    CheckIcon,
+    EnvelopeIcon,
+    ExclamationTriangleIcon,
+    FlagIcon,
+    FolderIcon,
+    InboxIcon,
+    MagnifyingGlassIcon,
+    StarIcon,
+    TrashIcon,
+    UserIcon,
 } from '@heroicons/react/24/outline';
 import {
-  StarIcon as StarIconSolid,
+    StarIcon as StarIconSolid,
 } from '@heroicons/react/24/solid';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { showNotification } from '@/components/NotificationBanner';
+import { useEffect, useState } from 'react';
 
 interface Sender {
   name: string;
@@ -250,7 +250,7 @@ export default function InboxPage() {
 
   const handleMessageClick = (message: InboxMessage) => {
     if (message.status === 'unread') {
-      const updatedMessages = messages.map(m => 
+      const updatedMessages = messages.map(m =>
         m.id === message.id ? { ...m, status: 'read' as const } : m
       );
       setMessages(updatedMessages);
@@ -267,7 +267,7 @@ export default function InboxPage() {
       return m;
     });
     setMessages(updatedMessages);
-    
+
     const message = messages.find(m => m.id === messageId);
     if (message) {
       setStats(prev => ({
@@ -299,8 +299,8 @@ export default function InboxPage() {
   };
 
   const handleSelectMessage = (messageId: string) => {
-    setSelectedMessages(prev => 
-      prev.includes(messageId) 
+    setSelectedMessages(prev =>
+      prev.includes(messageId)
         ? prev.filter(id => id !== messageId)
         : [...prev, messageId]
     );
@@ -322,7 +322,7 @@ export default function InboxPage() {
 
     try {
       let updatedMessages = [...messages];
-      let updateStats = { ...stats };
+      const updateStats = { ...stats };
 
       switch (action) {
         case 'delete':
@@ -334,8 +334,8 @@ export default function InboxPage() {
           break;
 
         case 'archive':
-          updatedMessages = messages.map(m => 
-            selectedMessages.includes(m.id) 
+          updatedMessages = messages.map(m =>
+            selectedMessages.includes(m.id)
               ? { ...m, folderId: 'archived' }
               : m
           );
@@ -343,9 +343,9 @@ export default function InboxPage() {
           showNotification.success({ title: 'Messages Archived', message: `Archived ${selectedMessages.length} messages` });
           break;
 
-        case 'mark-read':
+        case 'mark-read': {
           const unreadSelected = messages.filter(m => selectedMessages.includes(m.id) && m.status === 'unread');
-          updatedMessages = messages.map(m => 
+          updatedMessages = messages.map(m =>
             selectedMessages.includes(m.id) && m.status === 'unread'
               ? { ...m, status: 'read' as const }
               : m
@@ -353,17 +353,19 @@ export default function InboxPage() {
           updateStats.unread -= unreadSelected.length;
           showNotification.success({ title: 'Messages Marked as Read', message: `Marked ${unreadSelected.length} messages as read` });
           break;
+        }
 
-        case 'star':
+        case 'star': {
           const unstarredSelected = messages.filter(m => selectedMessages.includes(m.id) && m.status !== 'starred');
-          updatedMessages = messages.map(m => 
-            selectedMessages.includes(m.id) 
+          updatedMessages = messages.map(m =>
+            selectedMessages.includes(m.id)
               ? { ...m, status: 'starred' as const }
               : m
           );
           updateStats.starred += unstarredSelected.length;
-          showNotification.success({ title: 'Messages Starred', message: `Starred ${unstarredSelected.length} messages` });
+          showNotification.success({ title: 'Messages Starred', message: `Starred ${unstarredSelected.length} messages as read` });
           break;
+        }
       }
 
       setMessages(updatedMessages);
@@ -389,12 +391,12 @@ export default function InboxPage() {
     const matchesSearch = message.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          message.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          message.sender.name.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesFolder = selectedFolder === 'inbox' || 
+
+    const matchesFolder = selectedFolder === 'inbox' ||
                          (selectedFolder === 'starred' && message.status === 'starred') ||
                          (selectedFolder === 'unread' && message.status === 'unread') ||
                          (selectedFolder === 'archived' && message.folderId === 'archived');
-    
+
     return matchesSearch && matchesFolder;
   });
 
@@ -574,7 +576,7 @@ export default function InboxPage() {
                   {selectedMessages.length === filteredMessages.length ? 'Deselect All' : 'Select All'}
                 </button>
               </div>
-              
+
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => handleBulkAction('mark-read')}
@@ -584,7 +586,7 @@ export default function InboxPage() {
                   <CheckIcon className="h-4 w-4" />
                   Mark Read
                 </button>
-                
+
                 <button
                   onClick={() => handleBulkAction('star')}
                   disabled={selectedMessages.length === 0}
@@ -593,7 +595,7 @@ export default function InboxPage() {
                   <StarIcon className="h-4 w-4" />
                   Star
                 </button>
-                
+
                 <button
                   onClick={() => handleBulkAction('archive')}
                   disabled={selectedMessages.length === 0}
@@ -602,7 +604,7 @@ export default function InboxPage() {
                   <ArchiveBoxIcon className="h-4 w-4" />
                   Archive
                 </button>
-                
+
                 <button
                   onClick={() => handleBulkAction('delete')}
                   disabled={selectedMessages.length === 0}
@@ -611,7 +613,7 @@ export default function InboxPage() {
                   <TrashIcon className="h-4 w-4" />
                   Delete
                 </button>
-                
+
                 <button
                   onClick={toggleBulkActionMode}
                   className="px-3 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors text-sm"
@@ -638,7 +640,7 @@ export default function InboxPage() {
           <div className="p-6 border-b border-slate-700">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-white">
-                {selectedFolder === 'inbox' ? 'All Messages' : 
+                {selectedFolder === 'inbox' ? 'All Messages' :
                  selectedFolder === 'unread' ? 'Unread Messages' : 'Starred Messages'}
               </h2>
               <span className="text-sm text-slate-400">
@@ -646,7 +648,7 @@ export default function InboxPage() {
               </span>
             </div>
           </div>
-          
+
           <div className="divide-y divide-slate-700">
             {filteredMessages.length === 0 ? (
               <div className="p-8 text-center">
@@ -661,8 +663,8 @@ export default function InboxPage() {
                 <div
                   key={message.id}
                   className={`p-4 hover:bg-slate-800 cursor-pointer transition-colors ${
-                    bulkActionMode && selectedMessages.includes(message.id) 
-                      ? 'bg-amber-900/20 border-l-4 border-l-amber-500' 
+                    bulkActionMode && selectedMessages.includes(message.id)
+                      ? 'bg-amber-900/20 border-l-4 border-l-amber-500'
                       : ''
                   }`}
                   onClick={() => bulkActionMode ? handleSelectMessage(message.id) : handleMessageClick(message)}
@@ -681,11 +683,11 @@ export default function InboxPage() {
                         </div>
                       </div>
                     )}
-                    
-                    <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+
+                    <div className="w-12 h-12 bg-orange-600 rounded-2xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                       {message.sender.avatar}
                     </div>
-                    
+
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-sm font-medium text-white truncate">
@@ -723,7 +725,7 @@ export default function InboxPage() {
                             </span>
                           ))}
                         </div>
-                        
+
                         <div className="flex items-center gap-1">
                           <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${getPriorityColor(message.priority)}`}>
                             {message.priority}
@@ -774,7 +776,7 @@ export default function InboxPage() {
                 </button>
               </div>
             </div>
-            
+
             <form onSubmit={handleComposeSubmit} className="p-6 space-y-6">
               <div>
                 <label className="block text-sm font-medium text-white mb-2">To</label>
@@ -787,7 +789,7 @@ export default function InboxPage() {
                   required
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-white mb-2">Subject</label>
                 <input
@@ -799,7 +801,7 @@ export default function InboxPage() {
                   required
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-white mb-2">Message</label>
                 <textarea
@@ -811,7 +813,7 @@ export default function InboxPage() {
                   required
                 />
               </div>
-              
+
               <div className="flex gap-4 pt-4">
                 <button
                   type="submit"
@@ -843,12 +845,12 @@ export default function InboxPage() {
                   Confirm Deletion
                 </h3>
               </div>
-              
+
               <p className="text-sm text-slate-400 mb-6">
-                Are you sure you want to delete {selectedMessages.length} message{selectedMessages.length !== 1 ? 's' : ''}? 
+                Are you sure you want to delete {selectedMessages.length} message{selectedMessages.length !== 1 ? 's' : ''}?
                 This action cannot be undone.
               </p>
-              
+
               <div className="flex gap-3">
                 <button
                   onClick={() => setConfirmAction(null)}

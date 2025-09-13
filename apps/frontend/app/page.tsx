@@ -1,31 +1,31 @@
 'use client';
 
 import { RevealInit } from '@/components/RevealInit';
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import {
-  ShieldCheckIcon,
-  ChartBarIcon,
-  UserGroupIcon,
-  CalendarIcon,
-  WrenchScrewdriverIcon,
-  CogIcon,
-  ArrowRightIcon,
-  PlayIcon,
-  CheckIcon,
-  StarIcon,
-  ClockIcon,
-  DocumentTextIcon,
-  BoltIcon,
-  RocketLaunchIcon,
-  Bars3Icon,
-  XMarkIcon,
-  InboxIcon,
-  DevicePhoneMobileIcon,
-  CloudIcon,
-  LockClosedIcon,
-  SparklesIcon,
+    ArrowRightIcon,
+    Bars3Icon,
+    BoltIcon,
+    ChartBarIcon,
+    CheckIcon,
+    ClockIcon,
+    CloudIcon,
+    CogIcon,
+    DevicePhoneMobileIcon,
+    DocumentTextIcon,
+    InboxIcon,
+    LockClosedIcon,
+    PlayIcon,
+    RocketLaunchIcon,
+    ShieldCheckIcon,
+    SparklesIcon,
+    StarIcon,
+    UserGroupIcon,
+    WrenchScrewdriverIcon,
+    XMarkIcon
 } from '@heroicons/react/24/outline';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { FaRockrms } from "react-icons/fa6";
 
 // Typing animation component
 interface TypewriterTextProps {
@@ -257,10 +257,7 @@ export default function HomePage() {
                 <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-amber-500 via-amber-600 to-amber-700 flex items-center justify-center shadow-lg border border-amber-400/20 relative overflow-hidden">
                   {/* Professional Remodeling Logo */}
                   <div className="relative z-10">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="text-white">
-                      <path d="M11.47 3.84a.75.75 0 011.06 0l8.69 8.69a.75.75 0 101.06-1.06l-8.689-8.69a2.25 2.25 0 00-3.182 0l-8.69 8.69a.75.75 0 001.061 1.06l8.69-8.69z" />
-                      <path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 01-.75-.75v-4.5a.75.75 0 00-.75-.75h-3a.75.75 0 00-.75.75V21a.75.75 0 01-.75.75H5.625a1.875 1.875 0 01-1.875-1.875v-6.198a2.29 2.29 0 00.091-.086L12 5.43z" />
-                    </svg>
+                    <FaRockrms className="text-white h-6 w-6" />
                   </div>
                   {/* Subtle shine effect */}
                   <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent"></div>
@@ -382,7 +379,7 @@ export default function HomePage() {
             <div className="mb-8">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-600/10 border border-amber-500/20 text-amber-600 text-sm font-medium mb-6">
                 <SparklesIcon className="h-4 w-4" />
-                Production-Ready CRM • Zero Demo Data • Real Business Tools
+                Trusted by 500+ Contractors • Increase Revenue by 40% • AI-Powered Growth
               </div>
               <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
                 <TypewriterText text="AI-Powered CRM for " speed={50} delay={500} />
@@ -391,7 +388,7 @@ export default function HomePage() {
                 </span>
               </h1>
               <p className="text-xl sm:text-2xl text-[var(--text-dim)] mb-8 max-w-4xl mx-auto leading-relaxed">
-                Streamline your remodeling business with AI-driven insights, smart project management, 
+                Streamline your remodeling business with AI-driven insights, smart project management,
                 and automated client communications designed specifically for contractors and renovation professionals.
               </p>
               <div className="flex flex-col sm:flex-row gap-6 justify-center text-lg text-[var(--text-dim)] mb-8">
@@ -752,7 +749,7 @@ export default function HomePage() {
             <div className="bg-gradient-to-br from-amber-600/10 via-amber-500/5 to-amber-400/10 rounded-3xl p-12 border border-amber-500/20 relative overflow-hidden">
               {/* Background animation */}
               <div className="absolute inset-0 bg-gradient-to-r from-amber-600/5 to-transparent animate-pulse" />
-              
+
               <div className="relative z-10">
                 <h2 className="text-3xl md:text-4xl font-bold mb-6">
                   Ready to Transform Your{' '}

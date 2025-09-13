@@ -1,7 +1,7 @@
 'use client';
 
-import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { LineItem } from '@/types/shared';
+import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 interface LineItemsManagerProps {
   items: LineItem[];

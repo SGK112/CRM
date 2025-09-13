@@ -6,20 +6,20 @@ export interface DevClient {
   name: string;
   firstName?: string;
   lastName?: string;
-  
+
   // Contact Information
   email: string;
   phone?: string;
   alternatePhone?: string;
   workPhone?: string;
   mobilePhone?: string;
-  
+
   // Business Information
   company?: string;
   title?: string;
   department?: string;
   website?: string;
-  
+
   // Primary Address (Service Location)
   address?: string;
   address2?: string; // Unit, suite, etc.
@@ -27,7 +27,7 @@ export interface DevClient {
   state?: string;
   zipCode?: string;
   country?: string;
-  
+
   // Secondary Address (Billing/Mailing if different)
   billingAddress?: string;
   billingAddress2?: string;
@@ -35,7 +35,7 @@ export interface DevClient {
   billingState?: string;
   billingZipCode?: string;
   billingCountry?: string;
-  
+
   // Service Industry Specific
   serviceLocation?: 'primary_address' | 'billing_address' | 'custom' | 'multiple';
   customServiceAddress?: string;
@@ -43,7 +43,7 @@ export interface DevClient {
   emergencyPhone?: string;
   accessInstructions?: string; // Gate codes, building access, etc.
   preferredServiceTimes?: string;
-  
+
   // Business Details
   type?: string;
   entityType?: string;
@@ -51,25 +51,25 @@ export interface DevClient {
   licenseNumber?: string;
   insuranceExpiry?: string;
   taxId?: string;
-  
+
   // Project Information
   projectType?: string;
   budget?: string;
   timeline?: string;
   description?: string;
   specialRequirements?: string;
-  
+
   // System Fields
   status?: string;
   notes?: string;
   projects?: string[];
   createdAt: string;
   updatedAt: string;
-  
+
   // Service History
   lastServiceDate?: string;
   preferredContactMethod?: 'phone' | 'email' | 'text' | 'app';
-  
+
   // Emergency Information
   hasKeys?: boolean;
   alarmCode?: string;
@@ -117,7 +117,7 @@ function loadFromLocalStorage(): DevClient[] {
 function initializeDevStore() {
   // Try to load from localStorage first
   const storedContacts = loadFromLocalStorage();
-  
+
   if (storedContacts.length > 0) {
     // Use stored contacts if we have any
     devClientsStore.splice(0, devClientsStore.length, ...storedContacts);
@@ -126,7 +126,7 @@ function initializeDevStore() {
 
   // Start with completely empty store for production
   devClientsStore.splice(0, devClientsStore.length);
-  
+
   // Persist the empty state
   persistToLocalStorage(devClientsStore);
 }
@@ -138,7 +138,7 @@ export const getDevClientsStore = (): DevClient[] => devClientsStore;
 
 export const addToDevClientsStore = (client: DevClient): void => {
   devClientsStore.unshift(client); // Add to beginning for recent display
-  
+
   // Try to persist to localStorage if available (browser environment)
   if (typeof window !== 'undefined') {
     persistToLocalStorage(devClientsStore);
@@ -148,14 +148,14 @@ export const addToDevClientsStore = (client: DevClient): void => {
 export const updateInDevClientsStore = (id: string, updates: Partial<DevClient>): DevClient | null => {
   const index = devClientsStore.findIndex(c => c.id === id || c._id === id);
   if (index === -1) return null;
-  
+
   devClientsStore[index] = { ...devClientsStore[index], ...updates, updatedAt: new Date().toISOString() };
-  
+
   // Try to persist to localStorage if available (browser environment)
   if (typeof window !== 'undefined') {
     persistToLocalStorage(devClientsStore);
   }
-  
+
   return devClientsStore[index];
 };
 
@@ -166,13 +166,13 @@ export const findInDevClientsStore = (id: string): DevClient | undefined => {
 export const removeFromDevClientsStore = (id: string): boolean => {
   const index = devClientsStore.findIndex(c => c.id === id || c._id === id);
   if (index === -1) return false;
-  
+
   devClientsStore.splice(index, 1);
-  
+
   // Try to persist to localStorage if available (browser environment)
   if (typeof window !== 'undefined') {
     persistToLocalStorage(devClientsStore);
   }
-  
+
   return true;
 };

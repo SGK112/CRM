@@ -1,43 +1,43 @@
 "use client";
 
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import MapEmbed from '@/components/MapEmbed';
 import {
-  ArrowLeftIcon,
-  UserIcon,
-  EnvelopeIcon,
-  PhoneIcon,
-  BuildingOfficeIcon,
-  MapPinIcon,
-  ClockIcon,
-  DocumentTextIcon,
-  ChatBubbleLeftRightIcon,
-  PencilIcon,
-  PlusIcon,
-  XCircleIcon,
-  ExclamationTriangleIcon,
-  TagIcon,
-  DevicePhoneMobileIcon,
-  BellIcon,
-  CalendarIcon,
-  ChartBarIcon,
-  CogIcon,
-  MapIcon,
-  LinkIcon,
-  SpeakerWaveIcon,
-  InformationCircleIcon,
-  BanknotesIcon,
-  DocumentDuplicateIcon,
+    ArrowLeftIcon,
+    BanknotesIcon,
+    BellIcon,
+    BuildingOfficeIcon,
+    CalendarIcon,
+    ChartBarIcon,
+    ChatBubbleLeftRightIcon,
+    ClockIcon,
+    CogIcon,
+    DevicePhoneMobileIcon,
+    DocumentDuplicateIcon,
+    DocumentTextIcon,
+    EnvelopeIcon,
+    ExclamationTriangleIcon,
+    InformationCircleIcon,
+    LinkIcon,
+    MapIcon,
+    MapPinIcon,
+    PencilIcon,
+    PhoneIcon,
+    PlusIcon,
+    SpeakerWaveIcon,
+    TagIcon,
+    UserIcon,
+    XCircleIcon,
 } from '@heroicons/react/24/outline';
 import {
-  CheckCircleIcon as CheckCircleIconSolid,
-  CurrencyDollarIcon as CurrencyDollarIconSolid,
-  TagIcon as TagIconSolid,
-  StarIcon as StarIconSolid,
-  UserGroupIcon as UserGroupIconSolid,
+    CheckCircleIcon as CheckCircleIconSolid,
+    CurrencyDollarIcon as CurrencyDollarIconSolid,
+    StarIcon as StarIconSolid,
+    TagIcon as TagIconSolid,
+    UserGroupIcon as UserGroupIconSolid,
 } from '@heroicons/react/24/solid';
 import Link from 'next/link';
-import MapEmbed from '@/components/MapEmbed';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 // Minimal client-side types (kept local to avoid breaking imports)
 interface Entity {

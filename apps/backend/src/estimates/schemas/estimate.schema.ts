@@ -33,6 +33,8 @@ class EstimateLineItem {
 
 export const EstimateLineItemSchema = SchemaFactory.createForClass(EstimateLineItem);
 
+import { randomBytes } from 'crypto';
+
 @Schema({ timestamps: true })
 export class Estimate {
   @Prop({ required: true })
@@ -85,6 +87,9 @@ export class Estimate {
 
   @Prop()
   notes?: string;
+
+  @Prop({ unique: true, sparse: true })
+  shareToken?: string;
 }
 
 export type EstimateDocument = Estimate & Document;

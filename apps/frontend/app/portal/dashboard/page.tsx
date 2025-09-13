@@ -1,22 +1,22 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import {
-  UserIcon,
-  DocumentTextIcon,
-  CurrencyDollarIcon,
-  CalendarIcon,
-  ChatBubbleLeftRightIcon,
-  BellIcon,
-  CheckCircleIcon,
-  ExclamationTriangleIcon,
-  MapPinIcon,
-  PhoneIcon,
-  EnvelopeIcon,
-  ArrowTopRightOnSquareIcon
+    ArrowTopRightOnSquareIcon,
+    BellIcon,
+    CalendarIcon,
+    ChatBubbleLeftRightIcon,
+    CheckCircleIcon,
+    CurrencyDollarIcon,
+    DocumentTextIcon,
+    EnvelopeIcon,
+    ExclamationTriangleIcon,
+    MapPinIcon,
+    PhoneIcon,
+    UserIcon
 } from '@heroicons/react/24/outline';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface PortalData {
   client: {
@@ -129,7 +129,7 @@ export default function PortalDashboard() {
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
         <div className="text-center">
           <p className="text-white">Unable to load portal data</p>
-          <button 
+          <button
             onClick={() => router.push('/portal/login')}
             className="mt-4 px-4 py-2 bg-amber-600 text-white rounded-lg"
           >

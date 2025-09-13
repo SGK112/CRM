@@ -87,7 +87,7 @@ export async function GET(request: NextRequest) {
     if (!token || process.env.NODE_ENV !== 'production') {
       const localEstimates = estimateStorage.getAll();
       if (!token) {
-        return NextResponse.json(localEstimates);
+        return NextResponse.json({ estimates: localEstimates });
       }
 
       // If we have a token, try backend but fallback to local if it fails
@@ -102,12 +102,13 @@ export async function GET(request: NextRequest) {
 
         if (response.ok) {
           const data = await response.json();
+          // Backend now returns { estimates: [...] } format
           return NextResponse.json(data);
         } else {
-          return NextResponse.json(localEstimates);
+          return NextResponse.json({ estimates: localEstimates });
         }
       } catch (error) {
-        return NextResponse.json(localEstimates);
+        return NextResponse.json({ estimates: localEstimates });
       }
     }
 

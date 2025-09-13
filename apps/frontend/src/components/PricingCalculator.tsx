@@ -29,23 +29,23 @@ export default function PricingCalculator({
   };
 
   const subtotal = items.reduce((sum, item) => sum + calculateItemTotal(item), 0);
-  
-  const discountAmount = discountType === 'percent' 
-    ? (subtotal * discountValue) / 100 
+
+  const discountAmount = discountType === 'percent'
+    ? (subtotal * discountValue) / 100
     : discountValue;
-  
+
   const discountedSubtotal = subtotal - discountAmount;
   const taxableAmount = items
     .filter(item => item.taxable)
     .reduce((sum, item) => sum + calculateItemTotal(item), 0) - discountAmount;
-  
+
   const taxAmount = (taxableAmount * taxRate) / 100;
   const total = discountedSubtotal + taxAmount;
 
   return (
     <div className={`surface-solid p-6 ${className}`}>
       <h2 className="text-lg font-medium mb-4">Pricing Summary</h2>
-      
+
       <div className="space-y-4">
         {/* Discount Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -102,7 +102,7 @@ export default function PricingCalculator({
               <span className="text-[var(--text-dim)]">Subtotal:</span>
               <span>${subtotal.toFixed(2)}</span>
             </div>
-            
+
             {discountAmount > 0 && (
               <div className="flex justify-between text-sm">
                 <span className="text-[var(--text-dim)]">
@@ -111,17 +111,17 @@ export default function PricingCalculator({
                 <span className="text-red-600">-${discountAmount.toFixed(2)}</span>
               </div>
             )}
-            
+
             <div className="flex justify-between text-sm">
               <span className="text-[var(--text-dim)]">Taxable Amount:</span>
               <span>${Math.max(0, taxableAmount).toFixed(2)}</span>
             </div>
-            
+
             <div className="flex justify-between text-sm">
               <span className="text-[var(--text-dim)]">Tax ({taxRate}%):</span>
               <span>${Math.max(0, taxAmount).toFixed(2)}</span>
             </div>
-            
+
             <div className="border-t border-[var(--border)] pt-2 mt-2">
               <div className="flex justify-between text-lg font-semibold">
                 <span>Total:</span>

@@ -1,18 +1,18 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import {
-  UserIcon,
-  BuildingOfficeIcon,
-  EnvelopeIcon,
-  PhoneIcon,
-  CheckIcon,
-  CloudArrowUpIcon,
-  CurrencyDollarIcon,
-  SparklesIcon,
-  ArrowRightIcon
+    ArrowRightIcon,
+    BuildingOfficeIcon,
+    CheckIcon,
+    CloudArrowUpIcon,
+    CurrencyDollarIcon,
+    EnvelopeIcon,
+    PhoneIcon,
+    SparklesIcon,
+    UserIcon
 } from '@heroicons/react/24/outline';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface OnboardingFormData {
   // Essential Info
@@ -21,11 +21,11 @@ interface OnboardingFormData {
   email: string;
   phone?: string;
   company?: string;
-  
+
   // Type & Preferences
   entityType: 'client' | 'subcontractor' | 'vendor';
   businessType?: string;
-  
+
   // Sync Preferences
   autoSync: boolean;
   syncQuickBooks: boolean;
@@ -33,21 +33,21 @@ interface OnboardingFormData {
 }
 
 const entityTypeOptions = [
-  { 
-    value: 'client', 
-    label: 'Client', 
+  {
+    value: 'client',
+    label: 'Client',
     icon: '👥',
     description: 'People who hire your services'
   },
-  { 
-    value: 'subcontractor', 
-    label: 'Subcontractor', 
+  {
+    value: 'subcontractor',
+    label: 'Subcontractor',
     icon: '🔨',
     description: 'Professionals you work with'
   },
-  { 
-    value: 'vendor', 
-    label: 'Vendor', 
+  {
+    value: 'vendor',
+    label: 'Vendor',
     icon: '🚚',
     description: 'Suppliers and material providers'
   }
@@ -77,11 +77,11 @@ const businessTypeOptions = {
 
 export default function SimplifiedOnboardingForm() {
   const router = useRouter();
-  
+
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'success' | 'error'>('idle');
-  
+
   const [formData, setFormData] = useState<OnboardingFormData>({
     firstName: '',
     lastName: '',
@@ -185,7 +185,7 @@ export default function SimplifiedOnboardingForm() {
       }
 
       // Create the contact
-      const endpoint = formData.entityType === 'client' ? '/api/clients' : 
+      const endpoint = formData.entityType === 'client' ? '/api/clients' :
                      formData.entityType === 'vendor' ? '/api/vendors' : '/api/subcontractors';
 
       const createResponse = await fetch(endpoint, {
@@ -246,7 +246,7 @@ export default function SimplifiedOnboardingForm() {
       }
 
       setSyncStatus('success');
-      
+
       // Navigate to the contact profile
       setTimeout(() => {
         router.push(`/dashboard/clients/${contactId}/profile?created=true&onboarded=true`);
@@ -305,7 +305,7 @@ export default function SimplifiedOnboardingForm() {
   }
 
   return (
-    <div className="min-h-full bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 dark:from-slate-900 dark:via-slate-800 dark:to-amber-900/10 p-4">
+    <div className="min-h-full bg-orange-50 dark:bg-slate-900 p-4">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8 pt-6">
@@ -328,8 +328,8 @@ export default function SimplifiedOnboardingForm() {
             </span>
           </div>
           <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
-            <div 
-              className="bg-gradient-to-r from-orange-500 to-amber-500 h-2 rounded-full transition-all duration-300"
+            <div
+              className="bg-orange-600 h-2 rounded-full transition-all duration-300"
               style={{ width: `${(currentStep / 3) * 100}%` }}
             />
           </div>
@@ -360,8 +360,8 @@ export default function SimplifiedOnboardingForm() {
                     value={formData.firstName}
                     onChange={(e) => handleInputChange('firstName', e.target.value)}
                     className={`w-full px-4 py-3 rounded-xl border ${
-                      errors.firstName 
-                        ? 'border-red-300 dark:border-red-600' 
+                      errors.firstName
+                        ? 'border-red-300 dark:border-red-600'
                         : 'border-slate-300 dark:border-slate-600'
                     } bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all`}
                     placeholder="John"
@@ -380,8 +380,8 @@ export default function SimplifiedOnboardingForm() {
                     value={formData.lastName}
                     onChange={(e) => handleInputChange('lastName', e.target.value)}
                     className={`w-full px-4 py-3 rounded-xl border ${
-                      errors.lastName 
-                        ? 'border-red-300 dark:border-red-600' 
+                      errors.lastName
+                        ? 'border-red-300 dark:border-red-600'
                         : 'border-slate-300 dark:border-slate-600'
                     } bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all`}
                     placeholder="Doe"
@@ -403,8 +403,8 @@ export default function SimplifiedOnboardingForm() {
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
                     className={`w-full pl-10 pr-4 py-3 rounded-xl border ${
-                      errors.email 
-                        ? 'border-red-300 dark:border-red-600' 
+                      errors.email
+                        ? 'border-red-300 dark:border-red-600'
                         : 'border-slate-300 dark:border-slate-600'
                     } bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all`}
                     placeholder="john@example.com"
@@ -686,7 +686,7 @@ export default function SimplifiedOnboardingForm() {
             {currentStep < 3 ? (
               <button
                 onClick={handleNext}
-                className="px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold rounded-xl transition-all shadow-lg flex items-center gap-2"
+                className="px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-xl transition-all shadow-lg flex items-center gap-2"
               >
                 Next
                 <ArrowRightIcon className="h-4 w-4" />

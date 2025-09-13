@@ -87,7 +87,7 @@ export async function GET(
 ) {
   try {
     const { clientId } = params;
-    
+
     // Check authorization header
     const authorization = request.headers.get('authorization');
     if (!authorization || !authorization.startsWith('Bearer ')) {
@@ -98,7 +98,7 @@ export async function GET(
     }
 
     const token = authorization.replace('Bearer ', '');
-    
+
     // In a real implementation, validate the token and get client ID
     // For now, we'll just check if token exists
     if (!token) {

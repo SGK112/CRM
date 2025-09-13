@@ -1,17 +1,17 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
 import {
-  CloudArrowUpIcon,
-  DocumentTextIcon,
-  FolderIcon,
-  MagnifyingGlassIcon,
-  PlusIcon,
-  ArrowDownTrayIcon,
-  EyeIcon,
-  TrashIcon,
-  XMarkIcon,
+    ArrowDownTrayIcon,
+    CloudArrowUpIcon,
+    DocumentTextIcon,
+    EyeIcon,
+    FolderIcon,
+    MagnifyingGlassIcon,
+    PlusIcon,
+    TrashIcon,
+    XMarkIcon,
 } from '@heroicons/react/24/outline';
+import { useCallback, useRef, useState } from 'react';
 
 interface PriceSheet {
   id: string;
@@ -364,8 +364,8 @@ export default function CatalogPage() {
         {/* Upload Area */}
         <div
           className={`mb-4 border-2 border-dashed rounded-lg transition-all cursor-pointer ${
-            isDragOver 
-              ? 'border-amber-500 bg-amber-500/10' 
+            isDragOver
+              ? 'border-amber-500 bg-amber-500/10'
               : 'border-slate-700 hover:border-slate-600'
           }`}
           onDragOver={handleDragOver}
@@ -418,7 +418,7 @@ export default function CatalogPage() {
               className="w-full pl-10 pr-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
             />
           </div>
-          
+
           {viewMode === 'products' && (
             <div className="flex gap-2">
               <select

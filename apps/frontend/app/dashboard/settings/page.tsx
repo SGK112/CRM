@@ -3,6 +3,7 @@
 import CommunicationSettings from '@/components/CommunicationSettings';
 import DataManagement from '@/components/DataManagement';
 import {
+    ArchiveBoxIcon,
     BellIcon,
     BuildingStorefrontIcon,
     CalendarDaysIcon,
@@ -15,8 +16,7 @@ import {
     ShieldCheckIcon,
     UserIcon,
     UsersIcon,
-    WrenchScrewdriverIcon,
-    ArchiveBoxIcon
+    WrenchScrewdriverIcon
 } from '@heroicons/react/24/outline';
 import { useEffect, useState } from 'react';
 
@@ -1952,18 +1952,18 @@ export default function UnifiedSettingsPage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`group flex items-center p-4 text-sm font-medium rounded-xl transition-all duration-200 border-2 min-h-[90px] hover:scale-[1.02] hover:shadow-lg ${
                     activeTab === tab.id
-                      ? 'bg-gradient-to-br from-orange-600 to-orange-700 text-white border-orange-500 shadow-lg scale-[1.02]'
+                      ? 'bg-orange-600 text-white border-orange-500 shadow-lg scale-[1.02]'
                       : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300'
                   }`}
                 >
                   <div className="flex flex-col items-start text-left w-full">
                     <div className="flex items-center mb-2">
-                      <IconComponent 
+                      <IconComponent
                         className={`h-5 w-5 mr-2 flex-shrink-0 transition-colors ${
                           activeTab === tab.id
                             ? 'text-white'
                             : 'text-gray-500 group-hover:text-gray-700'
-                        }`} 
+                        }`}
                       />
                       <span className="font-semibold">{tab.name}</span>
                     </div>

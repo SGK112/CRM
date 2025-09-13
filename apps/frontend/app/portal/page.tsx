@@ -1,25 +1,25 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
-import Link from 'next/link';
 import {
-  UserIcon,
-  DocumentTextIcon,
-  CurrencyDollarIcon,
-  CalendarIcon,
-  ChatBubbleLeftRightIcon,
-  BellIcon,
-  CheckCircleIcon,
-  ExclamationTriangleIcon,
-  MapPinIcon,
-  PhoneIcon,
-  EnvelopeIcon,
-  ArrowTopRightOnSquareIcon,
-  LockClosedIcon,
-  EyeIcon,
-  EyeSlashIcon
+    ArrowTopRightOnSquareIcon,
+    BellIcon,
+    CalendarIcon,
+    ChatBubbleLeftRightIcon,
+    CheckCircleIcon,
+    CurrencyDollarIcon,
+    DocumentTextIcon,
+    EnvelopeIcon,
+    ExclamationTriangleIcon,
+    EyeIcon,
+    EyeSlashIcon,
+    LockClosedIcon,
+    MapPinIcon,
+    PhoneIcon,
+    UserIcon
 } from '@heroicons/react/24/outline';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface ClientPortalData {
   client: {
@@ -70,7 +70,7 @@ export default function UniversalClientPortal() {
   const searchParams = useSearchParams();
   const clientId = searchParams.get('client');
   const token = searchParams.get('token');
-  
+
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);

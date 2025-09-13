@@ -55,13 +55,13 @@ export default function InvoiceDetail() {
           setLoading(false);
           return;
         }
-        
+
         const headers: Record<string, string> = {
           Authorization: `Bearer ${token}`
         };
-        
+
         const res = await fetch(`${API_PREFIX}/invoices/${id}`, { headers });
-        
+
         if (res.ok) {
           setInv(await res.json());
         }
@@ -148,7 +148,7 @@ export default function InvoiceDetail() {
               </div>
             </div>
           )}
-          
+
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-3">
               <Link href="/dashboard/invoices" className="text-gray-600 hover:text-gray-900">

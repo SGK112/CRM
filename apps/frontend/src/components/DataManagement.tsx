@@ -1,22 +1,22 @@
 'use client';
 
-import { useState } from 'react';
-import {
-  ArchiveBoxIcon,
-  TrashIcon,
-  FolderIcon,
-  ExclamationTriangleIcon,
-  DocumentIcon,
-  UsersIcon,
-  CalendarIcon,
-  CurrencyDollarIcon,
-  BellIcon,
-  PhotoIcon,
-  ClockIcon,
-  CloudArrowDownIcon,
-  ShieldCheckIcon
-} from '@heroicons/react/24/outline';
 import { showNotification } from '@/components/NotificationBanner';
+import {
+    ArchiveBoxIcon,
+    BellIcon,
+    CalendarIcon,
+    ClockIcon,
+    CloudArrowDownIcon,
+    CurrencyDollarIcon,
+    DocumentIcon,
+    ExclamationTriangleIcon,
+    FolderIcon,
+    PhotoIcon,
+    ShieldCheckIcon,
+    TrashIcon,
+    UsersIcon
+} from '@heroicons/react/24/outline';
+import { useState } from 'react';
 
 interface DataStats {
   total: number;
@@ -167,24 +167,24 @@ export default function DataManagement() {
       });
 
       const data = await response.json();
-      
+
       if (data.success) {
         showNotification.success({
           title: 'Success',
           message: `Successfully ${selectedAction}d ${selectedCategories.length} data categories`
         });
-        
+
         // Update local state to reflect changes
         if (selectedAction === 'delete') {
-          setCategories(prev => 
-            prev.map(cat => 
-              selectedCategories.includes(cat.id) 
+          setCategories(prev =>
+            prev.map(cat =>
+              selectedCategories.includes(cat.id)
                 ? { ...cat, stats: { ...cat.stats, total: 0 } }
                 : cat
             )
           );
         }
-        
+
         setSelectedCategories([]);
         setSelectedAction('');
       } else {
@@ -216,14 +216,14 @@ export default function DataManagement() {
       });
 
       const data = await response.json();
-      
+
       if (data.success) {
         showNotification.success({
           title: 'Data Reset',
           message: 'All data has been reset successfully'
         });
         // Reset all categories
-        setCategories(prev => 
+        setCategories(prev =>
           prev.map(cat => ({ ...cat, stats: { ...cat.stats, total: 0 } }))
         );
         setSelectedCategories([]);
@@ -270,7 +270,7 @@ export default function DataManagement() {
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
-        
+
         showNotification.success({
           title: 'Export Complete',
           message: 'Data exported successfully'
@@ -327,7 +327,7 @@ export default function DataManagement() {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-4">
           <div className="flex items-center">
             <DocumentIcon className="h-8 w-8 text-green-600 mr-3" />
@@ -412,7 +412,7 @@ export default function DataManagement() {
         {categories.map((category) => {
           const IconComponent = category.icon;
           const isSelected = selectedCategories.includes(category.id);
-          
+
           return (
             <div
               key={category.id}
@@ -447,11 +447,11 @@ export default function DataManagement() {
                   )}
                 </div>
               </div>
-              
+
               <p className="text-sm text-gray-600 dark:text-[var(--text-dim)] mb-3">
                 {category.description}
               </p>
-              
+
               <div className="flex justify-between items-center text-sm">
                 <span className="text-gray-700 dark:text-[var(--text)]">
                   {category.stats.total} items
@@ -460,7 +460,7 @@ export default function DataManagement() {
                   {category.stats.size}
                 </span>
               </div>
-              
+
               {category.lastActivity && (
                 <div className="mt-2 text-xs text-gray-500 dark:text-[var(--text-dim)]">
                   Last activity: {category.lastActivity}
@@ -498,7 +498,7 @@ export default function DataManagement() {
             <p className="text-sm text-red-700 dark:text-red-400 mb-4">
               These actions are irreversible and will permanently delete all data.
             </p>
-            
+
             <div className="space-y-3">
               <button
                 onClick={() => setConfirmAction('reset-all')}
@@ -506,7 +506,7 @@ export default function DataManagement() {
               >
                 Reset All CRM Data
               </button>
-              
+
               <div className="text-xs text-red-600 dark:text-red-400">
                 This will delete ALL contacts, projects, invoices, estimates, appointments, and uploaded files.
                 Only your user account will remain.
@@ -526,14 +526,14 @@ export default function DataManagement() {
                 Confirm {confirmAction === 'reset-all' ? 'Reset All Data' : `${confirmAction} Action`}
               </h3>
             </div>
-            
+
             <p className="text-sm text-gray-600 dark:text-[var(--text-dim)] mb-6">
-              {confirmAction === 'reset-all' 
+              {confirmAction === 'reset-all'
                 ? 'This will permanently delete ALL your CRM data including contacts, projects, invoices, estimates, appointments, and files. This action cannot be undone.'
                 : `Are you sure you want to ${confirmAction} the selected data categories? This action ${confirmAction === 'delete' ? 'cannot be undone' : 'can be reversed later'}.`
               }
             </p>
-            
+
             {confirmAction !== 'reset-all' && selectedCategories.length > 0 && (
               <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded">
                 <p className="text-sm font-medium text-gray-700 dark:text-[var(--text)] mb-2">
@@ -549,7 +549,7 @@ export default function DataManagement() {
                 </ul>
               </div>
             )}
-            
+
             <div className="flex space-x-3">
               <button
                 onClick={() => setConfirmAction(null)}

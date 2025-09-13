@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
+import { NextRequest, NextResponse } from 'next/server';
 
 interface InvitationRequest {
   clientId: string;
@@ -14,7 +14,7 @@ interface InvitationRequest {
 export async function POST(request: NextRequest) {
   try {
     const body: InvitationRequest = await request.json();
-    
+
     const {
       clientId,
       clientName,
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
 
     // Store the client portal password (in production, hash this)
     const portalPassword = `portal${Math.random().toString(36).slice(2, 8)}`;
-    
+
     // In a real implementation:
     // 1. Save invitation to database
     // 2. Save client portal password securely

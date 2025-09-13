@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import {
-  ChartBarIcon,
-  CurrencyDollarIcon,
-  UserGroupIcon,
-  ClipboardDocumentListIcon,
-} from '@heroicons/react/24/outline';
 import { simple } from '@/lib/simple-ui';
+import {
+    ChartBarIcon,
+    ClipboardDocumentListIcon,
+    CurrencyDollarIcon,
+    UserGroupIcon,
+} from '@heroicons/react/24/outline';
+import { useEffect, useState } from 'react';
 
 interface AnalyticsStats {
   totalRevenue: number;

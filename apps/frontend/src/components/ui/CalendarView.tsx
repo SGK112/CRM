@@ -1,13 +1,13 @@
 
 'use client';
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { EventClickArg, EventInput } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
+import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
 
 type Contact = { id: string; name: string };
 

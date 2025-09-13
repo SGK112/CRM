@@ -1,15 +1,14 @@
-import Link from 'next/link';
 import {
-  ArrowLeftIcon,
-  UserIcon,
-  EnvelopeIcon,
-  PhoneIcon,
-  MapPinIcon,
-  ClockIcon,
-  ChatBubbleLeftRightIcon,
-  
+    ArrowLeftIcon,
+    ChatBubbleLeftRightIcon,
+    ClockIcon,
+    EnvelopeIcon,
+    MapPinIcon,
+    PhoneIcon,
+    UserIcon,
 } from '@heroicons/react/24/outline';
-import { CheckCircleIcon as CheckCircleIconSolid, StarIcon as StarIconSolid, CurrencyDollarIcon as CurrencyDollarIconSolid, ChartBarIcon } from '@heroicons/react/24/solid';
+import { ChartBarIcon, CheckCircleIcon as CheckCircleIconSolid, CurrencyDollarIcon as CurrencyDollarIconSolid, StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
+import Link from 'next/link';
 
 // Server-side fetch wrapper - Next.js server component
 async function fetchEntityServer(id: string) {

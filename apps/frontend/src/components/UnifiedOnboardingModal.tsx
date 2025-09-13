@@ -1,6 +1,6 @@
 "use client";
 
-import { XMarkIcon, CloudArrowUpIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { CheckIcon, CloudArrowUpIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import React, { useState } from 'react';
 
 type EntityType = 'client' | 'subcontractor' | 'vendor';
@@ -67,7 +67,7 @@ export default function UnifiedOnboardingModal({ open, onClose, onCreated }: Uni
       const endpoint = type === 'client' ? '/api/clients' : type === 'vendor' ? '/api/vendors' : '/api/subcontractors';
       const res = await fetch(endpoint, { method: 'POST', headers, body: JSON.stringify(payload) });
       if (!res.ok) throw new Error(`Failed to create ${type}`);
-      
+
       const data = await res.json();
       const contactId = data._id || data.id || data._doc?._id || 'new';
 
@@ -99,7 +99,7 @@ export default function UnifiedOnboardingModal({ open, onClose, onCreated }: Uni
       }
 
       setSyncStatus('success');
-      
+
       setTimeout(() => {
         onCreated?.({ _id: contactId, type });
         onClose();
@@ -161,10 +161,10 @@ export default function UnifiedOnboardingModal({ open, onClose, onCreated }: Uni
           {/* Contact Type */}
           <div>
             <label className="block text-sm font-medium text-[var(--text)] mb-2">Contact Type</label>
-            <select 
-              name="type" 
-              value={type} 
-              onChange={(e) => setType(e.target.value as EntityType)} 
+            <select
+              name="type"
+              value={type}
+              onChange={(e) => setType(e.target.value as EntityType)}
               className="w-full input"
               required
             >
@@ -178,23 +178,23 @@ export default function UnifiedOnboardingModal({ open, onClose, onCreated }: Uni
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-[var(--text)] mb-1">First Name *</label>
-              <input 
-                name="firstName" 
-                value={form.firstName} 
-                onChange={handleChange} 
-                className="w-full input" 
-                required 
+              <input
+                name="firstName"
+                value={form.firstName}
+                onChange={handleChange}
+                className="w-full input"
+                required
                 placeholder="John"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-[var(--text)] mb-1">Last Name *</label>
-              <input 
-                name="lastName" 
-                value={form.lastName} 
-                onChange={handleChange} 
-                className="w-full input" 
-                required 
+              <input
+                name="lastName"
+                value={form.lastName}
+                onChange={handleChange}
+                className="w-full input"
+                required
                 placeholder="Doe"
               />
             </div>
@@ -202,12 +202,12 @@ export default function UnifiedOnboardingModal({ open, onClose, onCreated }: Uni
 
           <div>
             <label className="block text-sm font-medium text-[var(--text)] mb-1">Email *</label>
-            <input 
-              type="email" 
-              name="email" 
-              value={form.email} 
-              onChange={handleChange} 
-              className="w-full input" 
+            <input
+              type="email"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              className="w-full input"
               required
               placeholder="john@example.com"
             />
@@ -216,20 +216,20 @@ export default function UnifiedOnboardingModal({ open, onClose, onCreated }: Uni
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-[var(--text)] mb-1">Phone</label>
-              <input 
-                name="phone" 
-                value={form.phone} 
-                onChange={handleChange} 
+              <input
+                name="phone"
+                value={form.phone}
+                onChange={handleChange}
                 className="w-full input"
                 placeholder="(555) 123-4567"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-[var(--text)] mb-1">Company</label>
-              <input 
-                name="company" 
-                value={form.company} 
-                onChange={handleChange} 
+              <input
+                name="company"
+                value={form.company}
+                onChange={handleChange}
                 className="w-full input"
                 placeholder="ABC Construction"
               />
@@ -239,7 +239,7 @@ export default function UnifiedOnboardingModal({ open, onClose, onCreated }: Uni
           {/* Sync Preferences */}
           <div className="bg-[var(--surface-1)] rounded-lg p-4 border border-[var(--border)]">
             <h4 className="font-medium text-[var(--text)] mb-3">Sync Preferences</h4>
-            
+
             <div className="space-y-3">
               <label className="flex items-center gap-3">
                 <input
@@ -293,9 +293,9 @@ export default function UnifiedOnboardingModal({ open, onClose, onCreated }: Uni
             <button type="button" onClick={onClose} className="btn btn-gray-outline">
               Cancel
             </button>
-            <button 
-              type="submit" 
-              disabled={loading} 
+            <button
+              type="submit"
+              disabled={loading}
               className="btn btn-amber flex items-center gap-2"
             >
               {loading ? (

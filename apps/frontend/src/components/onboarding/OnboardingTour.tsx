@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import {
-  XMarkIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  PlayIcon,
+    ChevronLeftIcon,
+    ChevronRightIcon,
+    PlayIcon,
+    XMarkIcon,
 } from '@heroicons/react/24/outline';
+import { useEffect, useState } from 'react';
 
 interface TourStep {
   target: string;

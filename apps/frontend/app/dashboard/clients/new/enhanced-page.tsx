@@ -1,22 +1,22 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { FormField, FormProgress, FormSection, QuickStartForm } from '@/components/ui/forms';
 import {
-  ArrowLeftIcon,
-  UserIcon,
-  BuildingOfficeIcon,
-  EnvelopeIcon,
-  PhoneIcon,
-  CheckIcon,
-  SparklesIcon,
-  CurrencyDollarIcon,
-  DocumentTextIcon,
-  ClockIcon
+    ArrowLeftIcon,
+    BuildingOfficeIcon,
+    CheckIcon,
+    ClockIcon,
+    CurrencyDollarIcon,
+    DocumentTextIcon,
+    EnvelopeIcon,
+    PhoneIcon,
+    SparklesIcon,
+    UserIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { FormField, FormSection, FormProgress, QuickStartForm } from '@/components/ui/forms';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 
 interface ContactFormData {
   // Basic Info
@@ -337,7 +337,7 @@ export default function EnhancedContactCreationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 dark:from-slate-900 dark:via-slate-800 dark:to-amber-900/10 p-3">
+    <div className="min-h-screen bg-orange-50 dark:bg-slate-900 p-3">
       <div className="max-w-md mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6 pt-4">

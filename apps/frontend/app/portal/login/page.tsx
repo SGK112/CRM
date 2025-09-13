@@ -1,16 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
 import {
-  EyeIcon,
-  EyeSlashIcon,
-  UserIcon,
-  EnvelopeIcon,
-  KeyIcon,
-  ArrowRightIcon
+    ArrowRightIcon,
+    EnvelopeIcon,
+    EyeIcon,
+    EyeSlashIcon,
+    KeyIcon,
+    UserIcon
 } from '@heroicons/react/24/outline';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface LoginForm {
   email: string;
@@ -68,7 +68,7 @@ export default function ClientPortalLogin() {
         // Store portal session
         localStorage.setItem('portal_token', data.token);
         localStorage.setItem('portal_client_id', data.clientId);
-        
+
         // Redirect to portal dashboard
         router.push('/portal/dashboard');
       } else {

@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     // Authentication with token
     if (token) {
       const tokenData = mockTokens[token];
-      
+
       if (!tokenData) {
         return NextResponse.json(
           { error: 'Invalid token' },
@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
     // Authentication with password
     if (password && clientId) {
       const validPassword = mockPasswords[clientId];
-      
+
       if (!validPassword || validPassword !== password) {
         return NextResponse.json(
           { error: 'Invalid credentials' },

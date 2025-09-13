@@ -240,7 +240,7 @@ export default function DocumentsPage() {
               className="w-full pl-10 pr-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
             />
           </div>
-          
+
           <div className="grid grid-cols-2 gap-2">
             <select
               value={categoryFilter}
@@ -305,7 +305,7 @@ export default function DocumentsPage() {
           <div className={viewMode === 'grid' ? 'grid grid-cols-2 gap-3' : 'space-y-3'}>
             {filteredDocuments.map(document => {
               const FileIcon = getFileIcon(document.mimeType);
-              
+
               return (
                 <div
                   key={document._id}
@@ -348,7 +348,7 @@ export default function DocumentsPage() {
                           {document.status}
                         </span>
                       </div>
-                      
+
                       <div className="flex gap-1">
                         <button className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded transition-colors">
                           <EyeIcon className="h-3.5 w-3.5" />
@@ -385,7 +385,7 @@ export default function DocumentsPage() {
                 ✕
               </button>
             </div>
-            
+
             <div className="p-6">
               <div className="border-2 border-dashed border-slate-700 rounded-lg p-8 text-center bg-slate-800/50">
                 <CloudArrowUpIcon className="h-12 w-12 text-slate-400 mx-auto mb-4" />
@@ -396,7 +396,7 @@ export default function DocumentsPage() {
                   Supports PDF, DOC, DOCX, JPG, PNG, DWG
                 </p>
               </div>
-              
+
               <div className="flex gap-3 mt-6">
                 <button
                   onClick={() => setUploadModalOpen(false)}

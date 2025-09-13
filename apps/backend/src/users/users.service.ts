@@ -23,8 +23,14 @@ export class UsersService {
       lastName?: string;
       phone?: string;
       avatar?: string;
+      company?: string;
+      jobTitle?: string;
+      bio?: string;
       emailSignatureHtml?: string;
       emailSignatureText?: string;
+      customTheme?: string;
+      timezone?: string;
+      language?: string;
     }
   ): Promise<User> {
     try {
@@ -74,10 +80,17 @@ export class UsersService {
   async updateNotificationPreferences(
     userId: string,
     preferences: {
-      email?: boolean;
-      sms?: boolean;
-      push?: boolean;
-      marketing?: boolean;
+      emailNotifications?: {
+        newLeads?: boolean;
+        appointmentUpdates?: boolean;
+        estimateUpdates?: boolean;
+        paymentNotifications?: boolean;
+      };
+      pushNotifications?: {
+        newLeads?: boolean;
+        messages?: boolean;
+        appointmentReminders?: boolean;
+      };
     }
   ): Promise<User> {
     try {
@@ -85,6 +98,106 @@ export class UsersService {
         .findByIdAndUpdate(
           userId,
           { $set: { notificationPreferences: preferences } },
+          { new: true }
+        )
+        .select('-password')
+        .exec();
+
+      if (!updatedUser) {
+        throw new NotFoundException('User not found');
+      }
+
+      return updatedUser;
+    } catch (error) {
+      throw new NotFoundException('User not found');
+    }
+  }
+
+  async verifyPassword(userId: string, password: string): Promise<boolean> {
+    try {
+      const user = await this.userModel.findById(userId);
+      if (!user) {
+        return false;
+      }
+      return await bcrypt.compare(password, user.password);
+    } catch (error) {
+      return false;
+    }
+  }
+
+  async updateTwoFactorSecret(userId: string, secret: string): Promise<void> {
+    try {
+      await this.userModel.findByIdAndUpdate(userId, {
+        $set: { twoFactorSecret: secret }
+      });
+    } catch (error) {
+      throw new NotFoundException('User not found');
+    }
+  }
+
+  async enable2FA(userId: string, backupCodes: string[]): Promise<User> {
+    try {
+      const updatedUser = await this.userModel
+        .findByIdAndUpdate(
+          userId,
+          {
+            $set: {
+              twoFactorEnabled: true,
+              twoFactorBackupCodes: backupCodes,
+              twoFactorEnabledAt: new Date(),
+            }
+          },
+          { new: true }
+        )
+        .select('-password')
+        .exec();
+
+      if (!updatedUser) {
+        throw new NotFoundException('User not found');
+      }
+
+      return updatedUser;
+    } catch (error) {
+      throw new NotFoundException('User not found');
+    }
+  }
+
+  async disable2FA(userId: string): Promise<User> {
+    try {
+      const updatedUser = await this.userModel
+        .findByIdAndUpdate(
+          userId,
+          {
+            $set: {
+              twoFactorEnabled: false,
+            },
+            $unset: {
+              twoFactorSecret: '',
+              twoFactorBackupCodes: '',
+              twoFactorEnabledAt: '',
+            }
+          },
+          { new: true }
+        )
+        .select('-password')
+        .exec();
+
+      if (!updatedUser) {
+        throw new NotFoundException('User not found');
+      }
+
+      return updatedUser;
+    } catch (error) {
+      throw new NotFoundException('User not found');
+    }
+  }
+
+  async updateBackupCodes(userId: string, backupCodes: string[]): Promise<User> {
+    try {
+      const updatedUser = await this.userModel
+        .findByIdAndUpdate(
+          userId,
+          { $set: { twoFactorBackupCodes: backupCodes } },
           { new: true }
         )
         .select('-password')

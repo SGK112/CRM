@@ -1,14 +1,14 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import {
-  DocumentArrowUpIcon,
-  ExclamationTriangleIcon,
-  InformationCircleIcon,
-  ArrowLeftIcon,
+    ArrowLeftIcon,
+    DocumentArrowUpIcon,
+    ExclamationTriangleIcon,
+    InformationCircleIcon,
 } from '@heroicons/react/24/outline';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useRef, useState } from 'react';
 
 export default function ClientsImportPage() {
   const [uploading, setUploading] = useState(false);
@@ -19,7 +19,7 @@ export default function ClientsImportPage() {
   const downloadTemplate = () => {
     const csvContent = `firstName,lastName,email,phone,company,contactType,address,city,state,zipCode,country,website,tags,notes
 ,,,(555) 000-0000,,client,,,,,USA,,,"Notes here"`;
-    
+
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -145,29 +145,29 @@ export default function ClientsImportPage() {
         // Name fields with multiple variations
         firstName: row.firstName || row.firstname || row.FirstName || row.first_name || row['First Name'] || '',
         lastName: row.lastName || row.lastname || row.LastName || row.last_name || row['Last Name'] || '',
-        
+
         // Contact information
         email: row.email || row.Email || row.emailAddress || row.EmailAddress || row['Email Address'] || '',
         phone: row.phone || row.Phone || row.phoneNumber || row.PhoneNumber || row['Phone Number'] || row.mobile || row.Mobile || '',
-        
+
         // Business information
         company: row.company || row.Company || row.organization || row.Organization || row.business || row.Business || '',
-        
+
         // Additional fields
         status: row.status || row.Status || 'active',
         notes: row.notes || row.Notes || row.description || row.Description || '',
         tags: row.tags || row.Tags ? (row.tags || row.Tags).split(',').map((t: string) => t.trim()) : undefined,
-        
+
         // Contact type mapping
         contactType: row.contactType || row.type || row.Type || row.category || row.Category || 'client',
-        
+
         // Address fields if present
         address: row.address || row.Address || row['Street Address'] || '',
         city: row.city || row.City || '',
         state: row.state || row.State || row.province || row.Province || '',
         zipCode: row.zipCode || row.zip || row.Zip || row.postal || row.Postal || row['Postal Code'] || '',
         country: row.country || row.Country || '',
-        
+
         // Additional contact fields
         website: row.website || row.Website || row.url || row.URL || '',
         linkedIn: row.linkedIn || row.LinkedIn || row.linkedin || ''

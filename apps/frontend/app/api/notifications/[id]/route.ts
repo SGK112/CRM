@@ -36,7 +36,7 @@ export async function PATCH(
         if (process.env.NODE_ENV !== 'production') {
           return NextResponse.json({ success: true, message: 'Notification marked as read (dev mode)' });
         }
-        
+
         const err = await response.json().catch(() => ({ error: 'Failed to mark notification as read' }));
         return NextResponse.json(err, { status: response.status });
       }
@@ -60,7 +60,7 @@ export async function PATCH(
       if (process.env.NODE_ENV !== 'production') {
         return NextResponse.json({ success: true, message: 'Notification updated (dev mode)' });
       }
-      
+
       const err = await response.json().catch(() => ({ error: 'Failed to update notification' }));
       return NextResponse.json(err, { status: response.status });
     }
@@ -73,8 +73,8 @@ export async function PATCH(
       return NextResponse.json({ success: true, message: 'Notification updated (dev mode)' });
     }
 
-    return NextResponse.json({ 
-      error: error instanceof Error ? error.message : 'Unknown error' 
+    return NextResponse.json({
+      error: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }
@@ -108,7 +108,7 @@ export async function DELETE(
       if (process.env.NODE_ENV !== 'production') {
         return NextResponse.json({ success: true, message: 'Notification deleted (dev mode)' });
       }
-      
+
       const err = await response.json().catch(() => ({ error: 'Failed to delete notification' }));
       return NextResponse.json(err, { status: response.status });
     }
@@ -121,8 +121,8 @@ export async function DELETE(
       return NextResponse.json({ success: true, message: 'Notification deleted (dev mode)' });
     }
 
-    return NextResponse.json({ 
-      error: error instanceof Error ? error.message : 'Unknown error' 
+    return NextResponse.json({
+      error: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }

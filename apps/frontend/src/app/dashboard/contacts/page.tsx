@@ -3,8 +3,8 @@
 // a shared component import once routing is stable.
 "use client";
 
-import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function ContactsAliasPage() {
   const router = useRouter();

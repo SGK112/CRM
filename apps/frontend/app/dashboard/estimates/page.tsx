@@ -1,8 +1,23 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Search, Eye, Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import {
+  DocumentTextIcon,
+  EyeIcon,
+  PlusIcon,
+  MagnifyingGlassIcon,
+  PencilIcon,
+  TrashIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  ClockIcon,
+  PaperAirplaneIcon,
+  Squares2X2Icon,
+  ListBulletIcon
+} from '@heroicons/react/24/outline';
+
 
 interface Estimate {
   _id: string;
@@ -24,424 +39,421 @@ interface Estimate {
 }
 
 export default function EstimatesPage() {
+  const router = useRouter();
   const [estimates, setEstimates] = useState<Estimate[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [user, setUser] = useState<{ id: number; name: string; firstName?: string; email: string } | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  const token =
-    typeof window !== 'undefined'
-      ? localStorage.getItem('accessToken') || localStorage.getItem('token')
-      : '';
+  useEffect(() => {
+    // Load user data
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      try {
+        setUser(JSON.parse(userData));
+        fetchEstimates();
+      } catch (e) {
+        // Handle auth error
+        router.push('/auth/login');
+      }
+    } else {
+      router.push('/auth/login');
+    }
+  }, [router]);
 
-  const fetchEstimates = useCallback(async () => {
-    if (!token) return;
-
+  const fetchEstimates = async () => {
     try {
-      setLoading(true);
-      setError(null);
-
-      const res = await fetch('/api/estimates', {
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await fetch('/api/estimates', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        setEstimates(data);
+      if (response.ok) {
+        const data = await response.json();
+        const list = (data.estimates || []).map((raw: unknown) => {
+          const e = raw as Partial<Estimate> & { id?: string };
+          return { ...e, _id: e._id || (e as { id?: string }).id } as Estimate;
+        });
+        setEstimates(list);
       } else {
-        setError('Failed to load estimates');
+        // Failed to fetch estimates
       }
-    } catch (err) {
-      setError('Error loading estimates');
+    } catch (error) {
+      // Error fetching estimates
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  };
 
-  useEffect(() => {
-    fetchEstimates();
-  }, [fetchEstimates]);
-
-  const filteredEstimates = estimates.filter(estimate => {
-    if (!searchTerm) return true;
-    const search = searchTerm.toLowerCase();
-    return (
-      estimate.number.toLowerCase().includes(search) ||
-      estimate.client?.firstName?.toLowerCase().includes(search) ||
-      estimate.client?.lastName?.toLowerCase().includes(search) ||
-      estimate.client?.company?.toLowerCase().includes(search)
-    );
-  });
-
-  const totalValue = filteredEstimates.reduce((sum, e) => sum + e.total, 0);
-
-  const handleDelete = async (id: string) => {
+  const deleteEstimate = async (estimateId: string) => {
+    const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
     if (!token) {
-      setError('Not authenticated');
+      alert('Not authenticated');
       return;
     }
     const ok = window.confirm('Delete this estimate? This cannot be undone.');
     if (!ok) return;
     try {
-      const res = await fetch(`/api/estimates/${id}`, {
+      const res = await fetch(`/api/estimates/${estimateId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (res.ok) {
-        setEstimates(prev => prev.filter(e => e._id !== id));
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.deleted) {
+        setEstimates(prev => prev.filter(e => e._id !== estimateId));
+      } else if (res.status === 401) {
+        alert('Unauthorized: please log in again.');
+      } else if (res.status === 404) {
+        alert('Estimate not found (may already be deleted).');
+        setEstimates(prev => prev.filter(e => e._id !== estimateId));
       } else {
-        setError('Failed to delete estimate');
+        alert(`Failed to delete estimate${data.error ? ': ' + data.error : ''}`);
       }
     } catch (e) {
-      setError('Error deleting estimate');
+      alert('Network error deleting estimate');
     }
   };
 
-  if (loading) {
-    return <div style={{ padding: '20px', textAlign: 'center' }}>Loading...</div>;
-  }
+  const filteredEstimates = estimates.filter(estimate => {
+    const clientName = estimate.client ?
+      `${estimate.client.firstName} ${estimate.client.lastName}` :
+      'Unknown Client';
 
-  return (
-    <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-      {/* Simple Header */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '30px',
-          borderBottom: '1px solid #e5e5e5',
-          paddingBottom: '20px',
-        }}
-      >
-        <div>
-          <h1 style={{ margin: '0 0 5px 0', fontSize: '24px', fontWeight: '600' }}>Estimates</h1>
-          <p style={{ margin: 0, color: '#666', fontSize: '14px' }}>
-            {filteredEstimates.length} estimates • ${totalValue.toLocaleString()} total
+    const matchesSearch =
+      clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (estimate.client?.company && estimate.client.company.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      estimate.number.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesStatus = statusFilter === 'all' || estimate.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
+
+  const getStatusBadge = (status: string) => {
+    const safeStatus = (typeof status === 'string' && status.length) ? status : 'unknown';
+    const statusConfig = {
+      'draft': { color: 'text-gray-700 bg-gray-100 border-gray-200', icon: DocumentTextIcon },
+      'sent': { color: 'text-blue-700 bg-blue-100 border-blue-200', icon: PaperAirplaneIcon },
+      'viewed': { color: 'text-brand-700 bg-brand-100 border-brand-200', icon: EyeIcon },
+      'accepted': { color: 'text-green-700 bg-green-100 border-green-200', icon: CheckCircleIcon },
+      'rejected': { color: 'text-red-700 bg-red-100 border-red-200', icon: XCircleIcon },
+      'unknown': { color: 'text-slate-700 bg-slate-100 border-slate-200', icon: ClockIcon }
+    } as const;
+
+    const config = statusConfig[safeStatus as keyof typeof statusConfig];
+    const Icon = config.icon;
+    const label = safeStatus === 'unknown'
+      ? 'Unknown'
+      : safeStatus.charAt(0).toUpperCase() + safeStatus.slice(1);
+
+    return (
+      <span className={`inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-md border ${config.color}`}>
+        <Icon className="w-3 h-3 mr-1" />
+        {label}
+      </span>
+    );
+  };
+
+  const stats = {
+    total: estimates.length,
+    draft: estimates.filter(e => e.status === 'draft').length,
+    sent: estimates.filter(e => e.status === 'sent').length,
+    viewed: estimates.filter(e => e.status === 'viewed').length,
+    accepted: estimates.filter(e => e.status === 'accepted').length,
+    rejected: estimates.filter(e => e.status === 'rejected').length,
+    totalValue: estimates.reduce((sum, e) => sum + (e.total || 0), 0),
+    acceptedValue: estimates.filter(e => e.status === 'accepted').reduce((sum, e) => sum + (e.total || 0), 0)
+  };
+
+  const EstimateCard = ({ estimate }: { estimate: Estimate }) => {
+    const clientName = estimate.client ?
+      `${estimate.client.firstName} ${estimate.client.lastName}` :
+      'Unknown Client';
+
+    const getInitials = (name: string) => {
+      return name
+        .split(' ')
+        .map(n => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
+    };
+
+    if (viewMode === 'list') {
+      return (
+        <div className="bg-slate-900 rounded-xl border border-slate-800 p-4 hover:bg-slate-800/50 transition-all">
+          <div className="flex items-center space-x-4">
+            {/* Avatar */}
+            <div className="w-12 h-12 bg-black rounded-xl flex items-center justify-center text-white font-semibold border border-slate-700">
+              {getInitials(clientName)}
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center space-x-2 mb-1">
+                <h3 className="font-semibold text-white truncate">#{estimate.number}</h3>
+                {getStatusBadge(estimate.status)}
+              </div>
+              <div className="flex items-center space-x-4 text-sm text-slate-400">
+                <span className="truncate">{clientName}</span>
+                {estimate.client?.company && (
+                  <span className="text-slate-500">• {estimate.client.company}</span>
+                )}
+                <span className="text-slate-500">
+                  {new Date(estimate.createdAt).toLocaleDateString()}
+                </span>
+              </div>
+            </div>
+
+            {/* Value & Actions */}
+            <div className="text-right">
+              <p className="text-sm font-semibold text-white">
+                ${(estimate.total || 0).toLocaleString()}
+              </p>
+              <div className="flex items-center space-x-2 mt-2">
+                <Link
+                  href={`/dashboard/estimates/${estimate._id}`}
+                  className="p-1 text-slate-400 hover:text-brand-500 transition-colors"
+                >
+                  <EyeIcon className="w-4 h-4" />
+                </Link>
+                <Link
+                  href={`/dashboard/estimates/${estimate._id}/edit`}
+                  className="p-1 text-slate-400 hover:text-blue-500 transition-colors"
+                >
+                  <PencilIcon className="w-4 h-4" />
+                </Link>
+                <button
+                  onClick={() => deleteEstimate(estimate._id)}
+                  className="p-1 text-slate-400 hover:text-red-500 transition-colors"
+                >
+                  <TrashIcon className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="bg-slate-900 rounded-xl border border-slate-800 p-4 hover:bg-slate-800/50 transition-all group">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="w-12 h-12 bg-black rounded-xl flex items-center justify-center text-white font-semibold border border-slate-700">
+            {getInitials(clientName)}
+          </div>
+          <div className="flex items-center space-x-2">
+            {getStatusBadge(estimate.status)}
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="mb-4">
+          <h3 className="font-semibold text-white group-hover:text-slate-300 transition-colors mb-1">
+            #{estimate.number}
+          </h3>
+          <p className="text-sm text-slate-400 truncate">{clientName}</p>
+          {estimate.client?.company && (
+            <p className="text-xs text-slate-500">{estimate.client.company}</p>
+          )}
+        </div>
+
+        {/* Value */}
+        <div className="mb-4">
+          <p className="text-lg font-bold text-white">
+            ${(estimate.total || 0).toLocaleString()}
+          </p>
+          <p className="text-xs text-slate-400">
+            Created {new Date(estimate.createdAt).toLocaleDateString()}
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-          <div style={{ position: 'relative' }}>
-            <Search
-              style={{
-                position: 'absolute',
-                left: '10px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: '#999',
-                width: '16px',
-                height: '16px',
-              }}
-            />
+        {/* Actions */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Link
+              href={`/dashboard/estimates/${estimate._id}`}
+              className="p-2 bg-slate-800 rounded-lg text-slate-400 hover:text-brand-500 hover:bg-slate-700 transition-colors border border-slate-700"
+            >
+              <EyeIcon className="w-4 h-4" />
+            </Link>
+            <Link
+              href={`/dashboard/estimates/${estimate._id}/edit`}
+              className="p-2 bg-slate-800 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-slate-700 transition-colors border border-slate-700"
+            >
+              <PencilIcon className="w-4 h-4" />
+            </Link>
+          </div>
+          <button
+            onClick={() => deleteEstimate(estimate._id)}
+            className="p-2 bg-slate-800 rounded-lg text-slate-400 hover:text-red-500 hover:bg-slate-700 transition-colors border border-slate-700"
+          >
+            <TrashIcon className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500"></div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-black">
+      {/* Mobile Header */}
+      <div className="sticky top-0 z-40 bg-black border-b border-slate-800">
+        <div className="px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-xl font-bold text-white">Estimates</h1>
+              <p className="text-sm text-slate-400">
+                Hey {user?.firstName || 'there'}, you have {stats.total} estimates worth ${stats.totalValue.toLocaleString()}
+              </p>
+            </div>
+            <div className="flex items-center space-x-2">
+              {/* View Mode Toggle */}
+              <div className="flex bg-slate-900 rounded-lg border border-slate-800 p-1">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-1.5 rounded ${viewMode === 'grid' ? 'bg-brand-500 text-white' : 'text-slate-400 hover:text-white'}`}
+                >
+                  <Squares2X2Icon className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-1.5 rounded ${viewMode === 'list' ? 'bg-brand-500 text-white' : 'text-slate-400 hover:text-white'}`}
+                >
+                  <ListBulletIcon className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Create New Estimate */}
+              <Link
+                href="/dashboard/estimates/new"
+                className="inline-flex items-center px-4 py-2 bg-brand-500 text-white text-sm font-medium rounded-lg hover:bg-brand-400 transition-colors"
+              >
+                <PlusIcon className="h-4 w-4 mr-2" />
+                New Estimate
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="px-4 py-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="bg-slate-900 rounded-xl border border-slate-800 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-slate-400 uppercase tracking-wide">Total</p>
+                <p className="text-xl font-bold text-white">{stats.total}</p>
+              </div>
+              <DocumentTextIcon className="w-8 h-8 text-slate-600" />
+            </div>
+          </div>
+
+          <div className="bg-slate-900 rounded-xl border border-slate-800 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-slate-400 uppercase tracking-wide">Sent</p>
+                <p className="text-xl font-bold text-white">{stats.sent}</p>
+              </div>
+              <PaperAirplaneIcon className="w-8 h-8 text-blue-500" />
+            </div>
+          </div>
+
+          <div className="bg-slate-900 rounded-xl border border-slate-800 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-slate-400 uppercase tracking-wide">Viewed</p>
+                <p className="text-xl font-bold text-white">{stats.viewed}</p>
+              </div>
+              <EyeIcon className="w-8 h-8 text-brand-500" />
+            </div>
+          </div>
+
+          <div className="bg-slate-900 rounded-xl border border-slate-800 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-slate-400 uppercase tracking-wide">Accepted</p>
+                <p className="text-xl font-bold text-white">{stats.accepted}</p>
+              </div>
+              <CheckCircleIcon className="w-8 h-8 text-green-500" />
+            </div>
+          </div>
+        </div>
+
+        {/* Search and Filters */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          {/* Search */}
+          <div className="relative flex-1">
+            <MagnifyingGlassIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              placeholder="Search..."
-              style={{
-                paddingLeft: '35px',
-                paddingRight: '15px',
-                paddingTop: '8px',
-                paddingBottom: '8px',
-                border: '1px solid #ddd',
-                borderRadius: '6px',
-                fontSize: '14px',
-                width: '200px',
-              }}
+              placeholder="Search estimates..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
             />
           </div>
 
-          <Link
-            href="/dashboard/estimates/new"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '8px 16px',
-              backgroundColor: '#007bff',
-              color: 'white',
-              textDecoration: 'none',
-              borderRadius: '6px',
-              fontSize: '14px',
-              fontWeight: '500',
-            }}
+          {/* Status Filter */}
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-4 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
           >
-            <Plus style={{ width: '16px', height: '16px' }} />
-            New
-          </Link>
+            <option value="all">All Status</option>
+            <option value="draft">Draft</option>
+            <option value="sent">Sent</option>
+            <option value="viewed">Viewed</option>
+            <option value="accepted">Accepted</option>
+            <option value="rejected">Rejected</option>
+          </select>
         </div>
-      </div>
 
-      {/* Simple Table */}
-      <div
-        style={{
-          backgroundColor: 'white',
-          border: '1px solid #e5e5e5',
-          borderRadius: '8px',
-          overflow: 'hidden',
-        }}
-      >
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead style={{ backgroundColor: '#f8f9fa' }}>
-            <tr>
-              <th
-                style={{
-                  padding: '12px 16px',
-                  textAlign: 'left',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  color: '#666',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                }}
-              >
-                Number
-              </th>
-              <th
-                style={{
-                  padding: '12px 16px',
-                  textAlign: 'left',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  color: '#666',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                }}
-              >
-                Client
-              </th>
-              <th
-                style={{
-                  padding: '12px 16px',
-                  textAlign: 'left',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  color: '#666',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                }}
-              >
-                Status
-              </th>
-              <th
-                style={{
-                  padding: '12px 16px',
-                  textAlign: 'right',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  color: '#666',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                }}
-              >
-                Amount
-              </th>
-              <th
-                style={{
-                  padding: '12px 16px',
-                  textAlign: 'left',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  color: '#666',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                }}
-              >
-                Date
-              </th>
-              <th
-                style={{
-                  padding: '12px 16px',
-                  textAlign: 'center',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  color: '#666',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                }}
-              >
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredEstimates.map((estimate, index) => (
-              <tr
-                key={estimate._id}
-                style={{ borderTop: index > 0 ? '1px solid #f0f0f0' : 'none' }}
-              >
-                <td
-                  style={{
-                    padding: '16px',
-                    fontSize: '14px',
-                    fontFamily: 'monospace',
-                    fontWeight: '500',
-                  }}
-                >
-                  {estimate.number}
-                </td>
-                <td style={{ padding: '16px', fontSize: '14px' }}>
-                  <div>
-                    <div style={{ fontWeight: '500' }}>
-                      {estimate.client
-                        ? `${estimate.client.firstName} ${estimate.client.lastName}`
-                        : 'No Client'}
-                    </div>
-                    {estimate.client?.company && (
-                      <div style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>
-                        {estimate.client.company}
-                      </div>
-                    )}
-                  </div>
-                </td>
-                <td style={{ padding: '16px', fontSize: '14px' }}>
-                  <span
-                    style={{
-                      display: 'inline-block',
-                      padding: '4px 8px',
-                      fontSize: '11px',
-                      fontWeight: '500',
-                      borderRadius: '12px',
-                      textTransform: 'capitalize',
-                      backgroundColor:
-                        estimate.status === 'draft'
-                          ? '#f3f4f6'
-                          : estimate.status === 'sent'
-                            ? '#dbeafe'
-                            : estimate.status === 'accepted'
-                              ? '#d1fae5'
-                              : estimate.status === 'rejected'
-                                ? '#fee2e2'
-                                : '#e0e7ff',
-                      color:
-                        estimate.status === 'draft'
-                          ? '#374151'
-                          : estimate.status === 'sent'
-                            ? '#1e40af'
-                            : estimate.status === 'accepted'
-                              ? '#059669'
-                              : estimate.status === 'rejected'
-                                ? '#dc2626'
-                                : '#5b21b6',
-                    }}
-                  >
-                    {estimate.status}
-                  </span>
-                </td>
-                <td
-                  style={{
-                    padding: '16px',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    textAlign: 'right',
-                  }}
-                >
-                  ${estimate.total.toLocaleString()}
-                </td>
-                <td style={{ padding: '16px', fontSize: '14px', color: '#666' }}>
-                  {new Date(estimate.createdAt).toLocaleDateString()}
-                </td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>
-                  <div style={{ display: 'inline-flex', gap: '8px' }}>
-                    <Link
-                      href={`/dashboard/estimates/${estimate._id}`}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: '32px',
-                        height: '32px',
-                        borderRadius: '6px',
-                        backgroundColor: '#f8f9fa',
-                        color: '#007bff',
-                        textDecoration: 'none',
-                        transition: 'background-color 0.15s',
-                      }}
-                      onMouseOver={e => (e.currentTarget.style.backgroundColor = '#e9ecef')}
-                      onMouseOut={e => (e.currentTarget.style.backgroundColor = '#f8f9fa')}
-                    >
-                      <Eye style={{ width: '16px', height: '16px' }} />
-                    </Link>
-                    <button
-                      onClick={() => handleDelete(estimate._id)}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: '32px',
-                        height: '32px',
-                        borderRadius: '6px',
-                        backgroundColor: '#fff5f5',
-                        color: '#dc2626',
-                        border: '1px solid #fecaca',
-                      }}
-                      title="Delete"
-                    >
-                      <Trash2 style={{ width: '16px', height: '16px' }} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {filteredEstimates.length === 0 && (
-              <tr>
-                <td colSpan={6} style={{ padding: '40px', textAlign: 'center', color: '#666' }}>
-                  <div>{searchTerm ? 'No estimates match your search' : 'No estimates found'}</div>
-                  {!searchTerm && (
-                    <Link
-                      href="/dashboard/estimates/new"
-                      style={{
-                        color: '#007bff',
-                        textDecoration: 'none',
-                        fontSize: '14px',
-                        marginTop: '8px',
-                        display: 'inline-block',
-                      }}
-                    >
-                      Create your first estimate
-                    </Link>
-                  )}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Simple Error */}
-      {error && (
-        <div
-          style={{
-            position: 'fixed',
-            bottom: '20px',
-            right: '20px',
-            backgroundColor: '#fee2e2',
-            color: '#dc2626',
-            padding: '12px 16px',
-            borderRadius: '6px',
-            border: '1px solid #fecaca',
-            fontSize: '14px',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span>{error}</span>
-            <button
-              onClick={() => setError(null)}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#dc2626',
-                cursor: 'pointer',
-                fontSize: '16px',
-                marginLeft: '8px',
-              }}
+        {/* Estimates Grid/List */}
+        {filteredEstimates.length === 0 ? (
+          <div className="text-center py-12">
+            <DocumentTextIcon className="w-16 h-16 text-slate-600 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-white mb-2">No estimates found</h3>
+            <p className="text-slate-400 mb-6">
+              {searchQuery || statusFilter !== 'all'
+                ? 'Try adjusting your search or filters'
+                : 'Get started by creating your first estimate'
+              }
+            </p>
+            <Link
+              href="/dashboard/estimates/new"
+              className="inline-flex items-center px-4 py-2 bg-brand-500 text-white text-sm font-medium rounded-lg hover:bg-brand-400 transition-colors"
             >
-              ✕
-            </button>
+              <PlusIcon className="h-4 w-4 mr-2" />
+              Create Estimate
+            </Link>
           </div>
-        </div>
-      )}
+        ) : (
+          <div className={viewMode === 'grid'
+            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+            : "space-y-4"
+          }>
+            {filteredEstimates.map((estimate) => (
+              <EstimateCard key={estimate._id} estimate={estimate} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

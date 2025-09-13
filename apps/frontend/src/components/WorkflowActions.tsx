@@ -1,11 +1,11 @@
 'use client';
 
 import {
-  DocumentTextIcon,
-  CurrencyDollarIcon,
-  WrenchScrewdriverIcon,
-  CalendarIcon,
-  UserIcon,
+    CalendarIcon,
+    CurrencyDollarIcon,
+    DocumentTextIcon,
+    UserIcon,
+    WrenchScrewdriverIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 
@@ -233,7 +233,7 @@ export default function WorkflowActions({
   const renderAction = (action: ActionType, index: number) => {
     const Icon = action.icon;
     const baseClasses = `inline-flex items-center gap-2 rounded-lg font-medium transition-colors ${getSizeClasses()}`;
-    
+
     let classes = baseClasses;
     if (variant === 'pills') {
       classes += ` ${getColorClasses(action.color)} rounded-full`;

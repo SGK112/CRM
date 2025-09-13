@@ -327,4 +327,4 @@ export const copilotAPI = typeof window !== 'undefined' ? new CopilotAPI() : und
 export function getCopilotAPI(): CopilotAPI | undefined {
   return copilotAPI;
 }
-export type { CalendarEvent, Client, Project, EmailDraft, AppointmentBooking };
+export type { AppointmentBooking, CalendarEvent, Client, EmailDraft, Project };

@@ -1,14 +1,14 @@
 /**
  * Browser Script - Authentication Token Setter
- * 
+ *
  * ⚠️  This script is meant to be run in the BROWSER CONSOLE, not in Node.js
- * 
+ *
  * Instructions:
  * 1. Open your browser and navigate to http://localhost:3005/dashboard
  * 2. Open Developer Tools (F12)
  * 3. Go to the Console tab
  * 4. Copy and paste this entire script and press Enter
- * 
+ *
  * This will set the authentication token in localStorage
  */
 

@@ -10,13 +10,13 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/remode
 
 async function createDemoUser() {
   const client = new MongoClient(MONGODB_URI);
-  
+
   try {
     await client.connect();
     console.log('✅ Connected to MongoDB');
-    
+
     const db = client.db();
-    
+
     // Check if demo user already exists
     const existingUser = await db.collection('users').findOne({ email: 'demo@demo.com' });
     if (existingUser) {
@@ -25,10 +25,10 @@ async function createDemoUser() {
       console.log('🌐 Login at: http://localhost:3005/auth/login');
       return;
     }
-    
+
     // Create demo user - Note: Password will need to be hashed by backend
     const workspaceId = `workspace-${Date.now()}`;
-    
+
     const demoUser = {
       _id: `demo-user-${Date.now()}`,
       email: 'demo@demo.com',
@@ -45,7 +45,7 @@ async function createDemoUser() {
       createdAt: new Date(),
       updatedAt: new Date()
     };
-    
+
     await db.collection('users').insertOne(demoUser);
     console.log('✅ Demo user created successfully!');
     console.log('📧 Email: demo@demo.com');

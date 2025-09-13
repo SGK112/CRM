@@ -253,4 +253,4 @@ export const walletService = typeof window !== 'undefined' ? new WalletService()
 export function getWalletService(): WalletService | undefined {
   return walletService;
 }
-export type { Wallet, Transaction, WalletStats, PaymentRequest, PaymentResponse };
+export type { PaymentRequest, PaymentResponse, Transaction, Wallet, WalletStats };

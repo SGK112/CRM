@@ -1,15 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import {
-  UserGroupIcon,
-  ClipboardDocumentListIcon,
-  CurrencyDollarIcon,
-  CheckCircleIcon,
-  ArrowRightIcon,
-  PlayIcon,
+    ArrowRightIcon,
+    CheckCircleIcon,
+    ClipboardDocumentListIcon,
+    CurrencyDollarIcon,
+    PlayIcon,
+    UserGroupIcon,
 } from '@heroicons/react/24/outline';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface OnboardingStep {
   id: string;

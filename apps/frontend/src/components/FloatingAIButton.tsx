@@ -1,8 +1,8 @@
 'use client';
 
+import { SparklesIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 import AIAssistant from './AIAssistant';
-import { SparklesIcon } from '@heroicons/react/24/outline';
 
 export default function FloatingAIButton() {
   const [isAIOpen, setIsAIOpen] = useState(false);
@@ -12,7 +12,7 @@ export default function FloatingAIButton() {
       {/* Floating AI Button */}
       <button
         onClick={() => setIsAIOpen(true)}
-        className="fixed bottom-6 right-6 z-40 p-4 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-full shadow-lg hover:from-amber-700 hover:to-orange-700 transition-all duration-200 hover:scale-110 focus:outline-none focus-visible:ring-4 focus-visible:ring-amber-400/40 group"
+        className="fixed bottom-6 right-6 z-40 p-4 bg-orange-600 text-white rounded-full shadow-lg hover:bg-orange-700 transition-all duration-200 hover:scale-110 focus:outline-none focus-visible:ring-4 focus-visible:ring-orange-400/40 group"
         title="Open AI Assistant"
         aria-label="Open AI Assistant"
       >
