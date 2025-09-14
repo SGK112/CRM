@@ -90,7 +90,16 @@ export default function ContactDetailPage() {
   useEffect(() => {
     const fetchContact = async () => {
       try {
-        const response = await fetch(`/api/clients/${contactId}`);
+        const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+        const headers: Record<string, string> = {};
+        
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`/api/clients/${contactId}`, {
+          headers
+        });
 
         if (response.ok) {
           const data = await response.json();
@@ -124,8 +133,16 @@ export default function ContactDetailPage() {
 
     setIsDeleting(true);
     try {
+      const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+      const headers: Record<string, string> = {};
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`/api/clients/${contactId}`, {
         method: 'DELETE',
+        headers
       });
 
       if (response.ok) {

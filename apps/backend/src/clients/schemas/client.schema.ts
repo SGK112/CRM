@@ -67,11 +67,37 @@ export class Client {
   @Prop([String])
   projects: string[];
 
-  @Prop({ default: 'lead' })
-  status: string;
+  @Prop({ 
+    type: String,
+    enum: ['lead', 'contact', 'client', 'dead_lead', 'vendor', 'subcontractor'],
+    default: 'lead' 
+  })
+  status: 'lead' | 'contact' | 'client' | 'dead_lead' | 'vendor' | 'subcontractor';
+
+  @Prop({ 
+    type: String,
+    enum: ['residential', 'commercial'],
+    default: 'residential'
+  })
+  type?: 'residential' | 'commercial';
+
+  @Prop()
+  businessType?: string;
+
+  @Prop()
+  licenseNumber?: string;
+
+  @Prop()
+  insuranceNumber?: string;
 
   @Prop()
   source?: string;
+
+  @Prop()
+  assignedTo?: string; // User ID who manages this client
+
+  @Prop()
+  lastContactDate?: Date;
 
   @Prop({ required: true })
   workspaceId: string;
@@ -92,23 +118,24 @@ export class Client {
 export const ClientSchema = SchemaFactory.createForClass(Client);
 
 // At least one contact method validation
-// Use explicit this typing instead of suppressing with ts-ignore.
-ClientSchema.pre('validate', function (this: any, next) {
+ClientSchema.pre('validate', function (this: ClientDocument, next) {
   if (!this.email && !this.phone) {
-    // Provide synthesized email if phone exists (import path) was already handled upstream; keep defensive check
     return next(new Error('Either email or phone is required'));
   }
   next();
 });
 
-ClientSchema.index({ workspaceId: 1, isActive: 1, lastName: 1, firstName: 1 });
+ClientSchema.index({ workspaceId: 1, isActive: 1, status: 1, lastName: 1, firstName: 1 });
 ClientSchema.index({ 'address.city': 1, workspaceId: 1 });
 ClientSchema.index({ email: 1, workspaceId: 1 }, { unique: false });
 ClientSchema.index({ phone: 1, workspaceId: 1 });
 ClientSchema.index({ company: 1, workspaceId: 1 });
 ClientSchema.index({ status: 1, workspaceId: 1 });
+ClientSchema.index({ type: 1, workspaceId: 1 });
 ClientSchema.index({ source: 1, workspaceId: 1 });
 ClientSchema.index({ tags: 1, workspaceId: 1 });
+ClientSchema.index({ assignedTo: 1, workspaceId: 1 });
+ClientSchema.index({ lastContactDate: -1, workspaceId: 1 });
 
 // Text index for full-text search
 ClientSchema.index(

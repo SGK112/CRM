@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useProjects, Project } from './hooks/useProjects';
 import {
   ProjectSearchBar,
@@ -14,9 +13,6 @@ import {
 import { ProjectForm } from './components/ProjectForm';
 
 export default function ProjectsPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  
   const {
     projects,
     stats,
@@ -35,51 +31,6 @@ export default function ProjectsPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [formLoading, setFormLoading] = useState(false);
-  const [prefilledClientData, setPrefilledClientData] = useState<{
-    clientId?: string;
-    clientName?: string;
-  }>({});
-
-  // Handle URL parameters for client pre-filling and auto-opening form
-  useEffect(() => {
-    const clientId = searchParams.get('clientId');
-    const clientName = searchParams.get('clientName');
-    const action = searchParams.get('action');
-    const projectId = searchParams.get('projectId');
-
-    // Set prefilled client data
-    if (clientId || clientName) {
-      setPrefilledClientData({
-        clientId: clientId || undefined,
-        clientName: clientName || undefined,
-      });
-    }
-
-    // Auto-open form for new project creation with client
-    if (action === 'create' && (clientId || clientName)) {
-      setEditingProject(null);
-      setIsFormOpen(true);
-      // Clean URL to avoid reopening on refresh
-      router.replace('/dashboard/projects', { scroll: false });
-    }
-
-    // Auto-open form for editing existing project
-    if (action === 'edit' && projectId) {
-      const project = projects.find(p => p._id === projectId);
-      if (project) {
-        setEditingProject(project);
-        setIsFormOpen(true);
-        router.replace('/dashboard/projects', { scroll: false });
-      }
-    }
-
-    // View/focus on specific project
-    if (action === 'view' && projectId) {
-      // Could scroll to project or highlight it
-      // For now, just clean the URL
-      router.replace('/dashboard/projects', { scroll: false });
-    }
-  }, [searchParams, projects, router]);
 
   // Memoized stats cards
   const statsCards = useMemo(() => [
@@ -118,22 +69,17 @@ export default function ProjectsPage() {
   const handleNewProject = useCallback(() => {
     setEditingProject(null);
     setIsFormOpen(true);
-    // Keep any prefilled client data when manually opening form
   }, []);
 
   const handleEditProject = useCallback((project: Project) => {
     setEditingProject(project);
     setIsFormOpen(true);
-    // Clear prefilled data when editing existing project
-    setPrefilledClientData({});
   }, []);
 
   const handleCloseForm = useCallback(() => {
     setIsFormOpen(false);
     setEditingProject(null);
     setFormLoading(false);
-    // Clear prefilled data when closing form
-    setPrefilledClientData({});
   }, []);
 
   const handleFormSubmit = useCallback(async (data: Partial<Project>) => {
@@ -254,7 +200,6 @@ export default function ProjectsPage() {
         onClose={handleCloseForm}
         onSubmit={handleFormSubmit}
         loading={formLoading}
-        prefilledClientData={prefilledClientData}
       />
     </div>
   );

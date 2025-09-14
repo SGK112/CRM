@@ -3,6 +3,7 @@
 import {
     BellIcon,
     BuildingOfficeIcon,
+    CalculatorIcon,
     ChatBubbleLeftRightIcon,
     ClockIcon,
     DocumentArrowUpIcon,
@@ -49,8 +50,7 @@ interface Client {
   name: string;
   email: string;
   phone: string;
-  status: 'active' | 'inactive' | 'lead';
-  contactType?: 'client' | 'subcontractor' | 'vendor' | 'contributor' | 'team';
+  status: 'lead' | 'contact' | 'client' | 'dead_lead' | 'vendor' | 'subcontractor';
   projectsCount: number;
   totalValue: number;
   lastContact?: string;
@@ -62,6 +62,10 @@ interface Client {
   firstName?: string;
   lastName?: string;
   company?: string;
+  type?: 'residential' | 'commercial';
+  source?: string;
+  assignedTo?: string;
+  lastContactDate?: string;
 }
 
 interface Notification {
@@ -74,6 +78,38 @@ interface Notification {
   clientId?: string;
   clientName?: string;
 }
+
+// Status progression helpers
+const getNextStatus = (currentStatus: Client['status']): Client['status'] | null => {
+  const progressionMap: Record<Client['status'], Client['status'] | null> = {
+    'lead': 'contact',
+    'contact': 'client',
+    'client': null, // Already at final stage
+    'dead_lead': 'lead', // Can revive
+    'vendor': 'contact', // Can become contact
+    'subcontractor': 'contact', // Can become contact
+  };
+  return progressionMap[currentStatus];
+};
+
+const getProgressionButtonStyle = (status: Client['status']): string => {
+  const nextStatus = getNextStatus(status);
+  if (!nextStatus) return 'bg-gray-600 border-gray-500 text-gray-300 cursor-not-allowed';
+  
+  switch (nextStatus) {
+    case 'contact': return 'bg-blue-600 hover:bg-blue-700 border-blue-500 text-white';
+    case 'client': return 'bg-green-600 hover:bg-green-700 border-green-500 text-white';
+    case 'lead': return 'bg-yellow-600 hover:bg-yellow-700 border-yellow-500 text-white';
+    default: return 'bg-gray-600 hover:bg-gray-700 border-gray-500 text-white';
+  }
+};
+
+const getProgressionButtonTitle = (status: Client['status']): string => {
+  const nextStatus = getNextStatus(status);
+  if (!nextStatus) return 'Already at final stage';
+  
+  return `Promote to ${nextStatus.replace('_', ' ')}`;
+};
 
 export default function ContactsPage() {
   const router = useRouter();
@@ -88,7 +124,7 @@ export default function ContactsPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [successMessageType, setSuccessMessageType] = useState<'created' | 'deleted'>('created');
-  const [activeTab, setActiveTab] = useState<'all' | 'client' | 'subcontractor' | 'vendor' | 'lead'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'lead' | 'contact' | 'client' | 'vendor' | 'subcontractor' | 'dead_lead'>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
@@ -106,21 +142,31 @@ export default function ContactsPage() {
       if (!refreshing) setLoading(true);
 
       try {
+        // Get authentication token
+        const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+        const headers: HeadersInit = {
+          'Content-Type': 'application/json',
+        };
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
         // Load clients from API
-        const clientsResponse = await fetch('/api/clients');
+        const clientsResponse = await fetch('/api/clients', { headers });
         const clientsData = await clientsResponse.json();
 
         // Load notifications
-        const notificationsResponse = await fetch('/api/notifications');
+        const notificationsResponse = await fetch('/api/notifications', { headers });
         const notificationsData = await notificationsResponse.json();
 
-        const processedClients = (clientsData.clients || []).map((client: ClientData) => ({
+        // Handle API response - it returns an array directly, not wrapped in {clients: []}
+        const clientsArray = Array.isArray(clientsData) ? clientsData : (clientsData.clients || []);
+        const processedClients = clientsArray.map((client: ClientData) => ({
           id: client._id || client.id || '',
           name: client.name || `${client.firstName || ''} ${client.lastName || ''}`.trim() || 'Unnamed Contact',
           email: client.email || '',
           phone: client.phone || '',
-          status: (client.status || 'active') as Client['status'],
-          contactType: client.contactType as Client['contactType'] || 'client',
+          status: (client.status || 'lead') as Client['status'],
           projectsCount: client.totalProjects || 0,
           totalValue: client.totalValue || 0,
           lastContact: client.lastContact || client.updatedAt,
@@ -135,9 +181,13 @@ export default function ContactsPage() {
 
         setClients(processedClients);
         setNotifications(notificationsData.notifications || []);
+
+        // Refresh sidebar counts after loading new data
+        if (typeof window !== 'undefined' && 'refreshSidebarCounts' in window) {
+          (window as { refreshSidebarCounts: () => void }).refreshSidebarCounts();
+        }
       } catch (error) {
-        // Enhanced fallback data
-        // Demo data cleared - using empty arrays for clean start
+        // Enhanced fallback data - using empty arrays for clean start
         setClients([]);
         setNotifications([]);
       }
@@ -195,8 +245,7 @@ export default function ContactsPage() {
           name: data.name || `${data.firstName || ''} ${data.lastName || ''}`.trim() || 'New Contact',
           email: data.email || '',
           phone: data.phone || '',
-          status: (data.status || 'active') as Client['status'],
-          contactType: data.contactType || 'client',
+          status: (data.status || 'lead') as Client['status'],
           projectsCount: data.totalProjects || 0,
           totalValue: data.totalValue || 0,
           lastContact: data.lastContact || data.updatedAt || new Date().toISOString(),
@@ -253,9 +302,7 @@ export default function ContactsPage() {
       client.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (client.company && client.company.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    const matchesFilter = activeTab === 'all' ||
-      (activeTab === 'lead' && client.status === 'lead') ||
-      (activeTab !== 'lead' && client.contactType === activeTab);
+    const matchesFilter = activeTab === 'all' || client.status === activeTab;
 
     return matchesSearch && matchesFilter;
   });
@@ -264,15 +311,53 @@ export default function ContactsPage() {
 
   const stats = {
     total: clients.length,
-    active: clients.filter(c => c.status === 'active').length,
     leads: clients.filter(c => c.status === 'lead').length,
+    contacts: clients.filter(c => c.status === 'contact').length,
+    clients: clients.filter(c => c.status === 'client').length,
+    vendors: clients.filter(c => c.status === 'vendor').length,
+    subcontractors: clients.filter(c => c.status === 'subcontractor').length,
+    deadLeads: clients.filter(c => c.status === 'dead_lead').length,
     totalValue: clients.reduce((sum, c) => sum + c.totalValue, 0),
     totalNotifications: unreadNotifications,
     estimatesViewed: clients.reduce((sum, c) => sum + (c.estimatesViewed || 0), 0),
-    clients: clients.filter(c => c.contactType === 'client').length,
-    subcontractors: clients.filter(c => c.contactType === 'subcontractor').length,
-    vendors: clients.filter(c => c.contactType === 'vendor').length,
   };
+
+  // Handle status progression
+  const handleStatusChange = async (clientId: string, newStatus: Client['status']) => {
+    try {
+      const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`/api/clients/${clientId}`, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update client status');
+      }
+
+      // Update local state
+      setClients(prev => prev.map(client => 
+        client.id === clientId ? { ...client, status: newStatus } : client
+      ));
+
+      // Refresh sidebar counts to reflect the change
+      if (typeof window !== 'undefined' && 'refreshSidebarCounts' in window) {
+        (window as { refreshSidebarCounts: () => void }).refreshSidebarCounts();
+      }
+    } catch (error) {
+      // Handle error silently or show user feedback
+    }
+  };
+
+
 
   if (loading) {
     return (
@@ -293,7 +378,7 @@ export default function ContactsPage() {
             <div>
               <h1 className="text-xl font-bold text-white">Contacts</h1>
               <p className="text-sm text-slate-400">
-                Hey {user?.firstName || 'there'}, you have {stats.active} active contacts
+                Hey {user?.firstName || 'there'}, you have {stats.contacts + stats.clients} active contacts
               </p>
             </div>
             <div className="flex items-center space-x-2">
@@ -445,7 +530,7 @@ export default function ContactsPage() {
               </div>
               <div className="ml-3">
                 <p className="text-sm text-slate-400">Active</p>
-                <p className="text-lg font-semibold text-white">{stats.active}</p>
+                <p className="text-lg font-semibold text-white">{stats.contacts + stats.clients}</p>
               </div>
             </div>
           </div>
@@ -490,22 +575,24 @@ export default function ContactsPage() {
             />
           </div>
 
-          {/* Filter Tabs */}
-          <div className="flex overflow-x-auto space-x-2 pb-2">
+          {/* Filter Tabs - Unified Client Status System */}
+          <div className="flex overflow-x-auto gap-3 py-2 px-1">
             {[
               { id: 'all', label: 'All', count: stats.total },
-              { id: 'client', label: 'Contacts', count: stats.clients },
-              { id: 'subcontractor', label: 'Subcontractors', count: stats.subcontractors },
-              { id: 'vendor', label: 'Vendors', count: stats.vendors },
               { id: 'lead', label: 'Leads', count: stats.leads },
+              { id: 'contact', label: 'Contacts', count: stats.contacts },
+              { id: 'client', label: 'Clients', count: stats.clients },
+              { id: 'vendor', label: 'Vendors', count: stats.vendors },
+              { id: 'subcontractor', label: 'Subcontractors', count: stats.subcontractors },
+              { id: 'dead_lead', label: 'Dead Leads', count: stats.deadLeads },
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as 'all' | 'client' | 'subcontractor' | 'vendor' | 'lead')}
-                className={`flex-shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                onClick={() => setActiveTab(tab.id as 'all' | 'lead' | 'contact' | 'client' | 'vendor' | 'subcontractor' | 'dead_lead')}
+                className={`flex-shrink-0 px-5 py-3 rounded-xl text-sm font-medium transition-all duration-200 border ${
                   activeTab === tab.id
-                    ? 'bg-amber-500 text-black'
-                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                    ? 'bg-amber-500 text-black border-amber-400 shadow-lg shadow-amber-500/25'
+                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border-slate-700 hover:border-slate-600'
                 }`}
               >
                 {tab.label} ({tab.count})
@@ -556,6 +643,7 @@ export default function ContactsPage() {
                 client={client}
                 viewMode={viewMode}
                 onViewDetails={() => router.push(`/dashboard/clients/${client.id}`)}
+                onStatusChange={handleStatusChange}
               />
             ))}
           </div>
@@ -593,11 +681,13 @@ export default function ContactsPage() {
 function ContactCard({
   client,
   viewMode,
-  onViewDetails
+  onViewDetails,
+  onStatusChange
 }: {
   client: Client;
   viewMode: 'grid' | 'list';
   onViewDetails: () => void;
+  onStatusChange: (clientId: string, status: Client['status']) => void;
 }) {
   const getInitials = (name: string) => {
     return name
@@ -617,11 +707,14 @@ function ContactCard({
     }
   };
 
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'client': return 'text-blue-500 bg-blue-50 border-blue-200';
-      case 'subcontractor': return 'text-green-500 bg-green-50 border-green-200';
+  const getTypeColor = (status: string) => {
+    switch (status) {
+      case 'lead': return 'text-yellow-500 bg-yellow-50 border-yellow-200';
+      case 'contact': return 'text-blue-500 bg-blue-50 border-blue-200';
+      case 'client': return 'text-green-500 bg-green-50 border-green-200';
       case 'vendor': return 'text-purple-500 bg-purple-50 border-purple-200';
+      case 'subcontractor': return 'text-indigo-500 bg-indigo-50 border-indigo-200';
+      case 'dead_lead': return 'text-red-500 bg-red-50 border-red-200';
       default: return 'text-gray-500 bg-gray-50 border-gray-200';
     }
   };
@@ -694,8 +787,8 @@ function ContactCard({
         <h3 className="font-semibold text-white group-hover:text-slate-300 transition-colors truncate">
           {client.name}
         </h3>
-        <span className={`inline-block px-2 py-1 text-xs font-medium rounded-md mt-1 border ${getTypeColor(client.contactType || 'client')}`}>
-          {client.contactType || 'client'}
+        <span className={`inline-block px-2 py-1 text-xs font-medium rounded-md mt-1 border ${getTypeColor(client.status)}`}>
+          {client.status}
         </span>
       </div>
 
@@ -750,6 +843,7 @@ function ContactCard({
                   window.open(`mailto:${client.email}`, '_blank');
                 }}
                 className="p-1.5 rounded-lg bg-black hover:bg-slate-700 transition-colors border border-slate-700"
+                title="Send Email"
               >
                 <EnvelopeIcon className="w-4 h-4 text-white" />
               </button>
@@ -761,10 +855,38 @@ function ContactCard({
                   window.open(`tel:${client.phone}`, '_blank');
                 }}
                 className="p-1.5 rounded-lg bg-black hover:bg-slate-700 transition-colors border border-slate-700"
+                title="Call Client"
               >
                 <PhoneIcon className="w-4 h-4 text-white" />
               </button>
             )}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(`/dashboard/estimates/new?clientId=${client.id}&clientName=${encodeURIComponent(client.name)}`, '_self');
+              }}
+              className="p-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors border border-blue-500"
+              title="Create Estimate"
+            >
+              <CalculatorIcon className="w-4 h-4 text-white" />
+            </button>
+            
+            {/* Status Progression Button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                const nextStatus = getNextStatus(client.status);
+                if (nextStatus) {
+                  onStatusChange(client.id, nextStatus);
+                }
+              }}
+              className={`p-1.5 rounded-lg transition-colors border ${getProgressionButtonStyle(client.status)}`}
+              title={getProgressionButtonTitle(client.status)}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
           </div>
 
           <button

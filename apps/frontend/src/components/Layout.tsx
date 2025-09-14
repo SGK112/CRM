@@ -275,7 +275,6 @@ export default function Layout({ children }: LayoutProps) {
       items: [
         { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
         { name: 'Inbox', href: '/dashboard/inbox', icon: InboxIcon, badge: inboxStats?.unread },
-        { name: 'Notifications', href: '/dashboard/notifications', icon: BellIcon, badge: counts?.notifications },
         {
           name: 'Projects',
           href: '/dashboard/projects',

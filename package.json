@@ -55,7 +55,7 @@
   "dependencies": {
     "@types/nodemailer": "^7.0.1",
     "mongodb": "^6.19.0",
-    "node-fetch": "^2.6.7",
+    "node-fetch": "^2.7.0",
     "nodemailer": "^7.0.5",
     "pdfkit": "^0.17.2",
     "twilio": "^5.9.0"

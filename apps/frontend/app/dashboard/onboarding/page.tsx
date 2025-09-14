@@ -10,6 +10,7 @@ import {
     StandardPageWrapper,
     StandardSection
 } from '@/components/ui/StandardPageWrapper';
+import { authService } from '@/lib/auth';
 import {
     ArrowRightIcon,
     BuildingOfficeIcon,
@@ -30,7 +31,7 @@ import {
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface OnboardingFormData {
   // Essential Info
@@ -146,6 +147,7 @@ export default function OnboardingPage() {
 
   const [currentStep, setCurrentStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
+  const [authenticated, setAuthenticated] = useState(false);
   const [formData, setFormData] = useState<OnboardingFormData>({
     // Essential Info
     firstName: '',
@@ -205,6 +207,29 @@ export default function OnboardingPage() {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // Initialize authentication
+  useEffect(() => {
+    const initAuth = async () => {
+      // Check if already authenticated
+      if (authService.isAuthenticated()) {
+        setAuthenticated(true);
+        return;
+      }
+
+      // Auto-authenticate with demo credentials for development
+      try {
+        await authService.demoLogin();
+        setAuthenticated(true);
+      } catch (error) {
+        // If auto-login fails, user will need to log in manually
+        // For now, we'll continue without authentication
+        setAuthenticated(false);
+      }
+    };
+
+    initAuth();
+  }, []);
+
   const validateStep = (step: number): boolean => {
     const newErrors: Record<string, string> = {};
 
@@ -248,27 +273,19 @@ export default function OnboardingPage() {
       setSubmitting(true);
 
       try {
-        const authToken = localStorage.getItem('accessToken');
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json',
-        };
+        // Get authentication headers
+        const headers = authService.getAuthHeaders();
 
-        if (authToken && authToken !== 'null' && authToken !== 'undefined' && authToken.length > 10) {
-          headers.Authorization = `Bearer ${authToken}`;
-        }
-
-        // Create the contact using the same structure as other forms
+        // Create the contact using the backend API
         const response = await fetch('/api/clients', {
           method: 'POST',
           headers,
           body: JSON.stringify({
-            name: `${formData.firstName} ${formData.lastName}`.trim() || formData.company,
             firstName: formData.firstName,
             lastName: formData.lastName,
             email: formData.email,
             phone: formData.phone,
             company: formData.company,
-            type: formData.entityType,
             contactType: formData.entityType,
             businessType: formData.businessType,
             entityType: formData.entityType,
@@ -283,7 +300,8 @@ export default function OnboardingPage() {
             accountNumber: formData.accountNumber,
             taxId: formData.taxId,
             notes: formData.notes,
-            status: 'lead'
+            status: 'lead',
+            tags: []
           }),
         });
 
@@ -308,7 +326,9 @@ export default function OnboardingPage() {
           }
 
           // Verify the contact exists before redirecting
-          const verifyResponse = await fetch(`/api/clients/${newContactId}`, { headers });
+          const verifyResponse = await fetch(`/api/clients/${newContactId}`, { 
+            headers: authService.getAuthHeaders() 
+          });
 
           if (verifyResponse.ok) {
             // Contact verified - refresh sidebar counts
@@ -320,7 +340,9 @@ export default function OnboardingPage() {
           } else {
             // Contact not found immediately - wait and retry
             await new Promise(resolve => setTimeout(resolve, 200));
-            const retryResponse = await fetch(`/api/clients/${newContactId}`, { headers });
+            const retryResponse = await fetch(`/api/clients/${newContactId}`, { 
+              headers: authService.getAuthHeaders() 
+            });
 
             if (retryResponse.ok) {
               // Contact verified after retry - refresh sidebar counts
