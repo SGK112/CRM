@@ -1,42 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+export const dynamic = 'force-dynamic';
 
-interface Client {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  status: string;
-  projectsCount: number;
-  totalValue: number;
-}
-
-const DEV_MOCK_CLIENTS: Client[] = [];
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL || 'http://localhost:3001';
 
 export async function GET(request: NextRequest) {
   try {
-    const token = request.headers.get('authorization')?.replace('Bearer ', '');
-
-    if (!token) {
-      // In local development, return mock clients so the UI can load without signing in.
-      if (process.env.NODE_ENV !== 'production') {
-        return NextResponse.json({ clients: DEV_MOCK_CLIENTS });
-      }
-
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const { searchParams } = new URL(request.url);
     const queryString = searchParams.toString();
-    const url = queryString ? `${BACKEND_URL}/api/clients?${queryString}` : `${BACKEND_URL}/api/clients`;
+    const url = `${BACKEND_URL}/api/clients${queryString ? `?${queryString}` : ''}`;
+
+    // Forward both cookies and authorization headers
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    // Forward cookie header if present
+    const cookieHeader = request.headers.get('cookie');
+    if (cookieHeader) {
+      headers['Cookie'] = cookieHeader;
+    }
+
+    // Forward authorization header if present
+    const authHeader = request.headers.get('authorization');
+    if (authHeader) {
+      headers['Authorization'] = authHeader;
+    }
 
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
+      headers,
     });
 
     if (!response.ok) {
@@ -58,32 +51,35 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const token = request.headers.get('authorization')?.replace('Bearer ', '');
-
     const body = await request.json();
 
-    if (!token) {
-      // Allow creating clients locally without auth by returning a fake created record.
-      if (process.env.NODE_ENV !== 'production') {
-        const created = { id: String(Date.now()), ...body };
-        return NextResponse.json(created, { status: 201 });
-      }
+    // Forward both cookies and authorization headers
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
 
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Forward cookie header if present
+    const cookieHeader = request.headers.get('cookie');
+    if (cookieHeader) {
+      headers['Cookie'] = cookieHeader;
+    }
+
+    // Forward authorization header if present
+    const authHeader = request.headers.get('authorization');
+    if (authHeader) {
+      headers['Authorization'] = authHeader;
     }
 
     const response = await fetch(`${BACKEND_URL}/api/clients`, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify(body),
     });
 
     if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Failed to create client' }));
       return NextResponse.json(
-        { error: 'Failed to create client' },
+        { error: errorData.message || 'Failed to create client' },
         { status: response.status }
       );
     }

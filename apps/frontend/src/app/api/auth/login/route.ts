@@ -2,17 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-function getApiBase() {
-  const raw = process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL || 'http://localhost:3001';
-  return raw.replace(/\/$/, '').replace(/(?:\/api)+$/, '');
-}
-const API_BASE = getApiBase();
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL || 'http://localhost:3001';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-  const response = await fetch(`${API_BASE}/api/auth/login`, {
+    const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -20,28 +16,33 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(body),
     });
 
-    let data;
-    try {
-      const text = await response.text();
-      data = text ? JSON.parse(text) : {};
-  } catch (parseError) {
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Login failed' }));
       return NextResponse.json(
-        { success: false, message: 'Invalid response from server' },
-        { status: 500 }
+        { error: errorData.message || 'Login failed' },
+        { status: response.status }
       );
     }
 
-    if (!response.ok) {
-      return NextResponse.json(data, { status: response.status });
+    const data = await response.json();
+    
+    // Create response with user data
+    const loginResponse = NextResponse.json(data);
+    
+    // Set access token cookie if provided
+    if (data.accessToken) {
+      loginResponse.cookies.set('accessToken', data.accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 30 * 24 * 60 * 60, // 30 days
+      });
     }
 
-    return NextResponse.json(data);
+    return loginResponse;
   } catch (error) {
     return NextResponse.json(
-      {
-        success: false,
-        message: error instanceof Error ? error.message : 'Login failed',
-      },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }

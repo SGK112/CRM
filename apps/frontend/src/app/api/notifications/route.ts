@@ -1,49 +1,62 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createBackendHeaders, getBackendUrl } from '../utils/backend';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+export const dynamic = 'force-dynamic';
 
-interface Notification {
-  id: string;
-  type: string;
-  title: string;
-  message: string;
-  timestamp: string;
-  read: boolean;
-  clientId: string;
-  clientName: string;
-}
-
-const DEV_MOCK_NOTIFICATIONS: Notification[] = [];
+const BACKEND_URL = getBackendUrl();
 
 export async function GET(request: NextRequest) {
   try {
-    const token = request.headers.get('authorization')?.replace('Bearer ', '');
+    const { searchParams } = new URL(request.url);
+    const queryString = searchParams.toString();
+    const url = `${BACKEND_URL}/api/notifications${queryString ? `?${queryString}` : ''}`;
 
-    if (!token) {
-      if (process.env.NODE_ENV !== 'production') {
-        return NextResponse.json({ notifications: DEV_MOCK_NOTIFICATIONS });
-      }
-
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const response = await fetch(`${BACKEND_URL}/api/notifications`, {
+    const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
+      headers: createBackendHeaders(request),
     });
 
     if (!response.ok) {
-      // Return mock data for development if backend is not available
-      return NextResponse.json({ notifications: DEV_MOCK_NOTIFICATIONS });
+      return NextResponse.json(
+        { error: 'Failed to fetch notifications' },
+        { status: response.status }
+      );
     }
 
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    // Return mock data for development
-    return NextResponse.json({ notifications: DEV_MOCK_NOTIFICATIONS });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+
+    const response = await fetch(`${BACKEND_URL}/api/notifications`, {
+      method: 'POST',
+      headers: createBackendHeaders(request),
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Failed to create notification' }));
+      return NextResponse.json(
+        { error: errorData.message || 'Failed to create notification' },
+        { status: response.status }
+      );
+    }
+
+    const data = await response.json();
+    return NextResponse.json(data);
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

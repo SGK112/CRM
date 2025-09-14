@@ -1,46 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-function getApiBase() {
-  const raw = process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL || 'http://localhost:3001';
-  return raw.replace(/\/$/, '').replace(/(?:\/api)+$/, '');
-}
-const API_BASE = getApiBase();
+export const dynamic = 'force-dynamic';
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL || 'http://localhost:3001';
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const authorization = request.headers.get('authorization');
-
-    if (!authorization) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Forward the query parameters to the backend
     const queryString = searchParams.toString();
-  const backendUrl = `${API_BASE}/api/inbox${queryString ? `?${queryString}` : ''}`;
+    const url = `${BACKEND_URL}/api/inbox${queryString ? `?${queryString}` : ''}`;
 
-    const response = await fetch(backendUrl, {
+    const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'Authorization': authorization,
         'Content-Type': 'application/json',
+        'Cookie': request.headers.get('cookie') || '',
       },
     });
 
     if (!response.ok) {
-      const errorData = await response.text();
       return NextResponse.json(
-        { error: 'Backend request failed', details: errorData },
+        { error: 'Failed to fetch inbox' },
         { status: response.status }
       );
     }
 
     const data = await response.json();
     return NextResponse.json(data);
-
   } catch (error) {
     return NextResponse.json(
-      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }
@@ -48,37 +37,30 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const authorization = request.headers.get('authorization');
-
-    if (!authorization) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const body = await request.json();
 
-  const response = await fetch(`${API_BASE}/api/inbox`, {
+    const response = await fetch(`${BACKEND_URL}/api/inbox`, {
       method: 'POST',
       headers: {
-        'Authorization': authorization,
         'Content-Type': 'application/json',
+        'Cookie': request.headers.get('cookie') || '',
       },
       body: JSON.stringify(body),
     });
 
     if (!response.ok) {
-      const errorData = await response.text();
+      const errorData = await response.json().catch(() => ({ message: 'Failed to create inbox item' }));
       return NextResponse.json(
-        { error: 'Backend request failed', details: errorData },
+        { error: errorData.message || 'Failed to create inbox item' },
         { status: response.status }
       );
     }
 
     const data = await response.json();
     return NextResponse.json(data);
-
   } catch (error) {
     return NextResponse.json(
-      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }
