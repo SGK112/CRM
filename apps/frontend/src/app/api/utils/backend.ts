@@ -27,5 +27,7 @@ export function createBackendHeaders(request: NextRequest): Record<string, strin
  * Get the backend URL with environment variable fallback
  */
 export function getBackendUrl(): string {
-  return process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL || 'http://localhost:3001';
+  return process.env.NEXT_PUBLIC_API_URL || 
+         process.env.BACKEND_URL || 
+         'https://remodely-crm-backend.onrender.com';
 }

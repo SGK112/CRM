@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL || 'http://localhost:3001';
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 
+                   process.env.BACKEND_URL || 
+                   'https://remodely-crm-backend.onrender.com';
 
 export async function POST(request: NextRequest) {
   try {
