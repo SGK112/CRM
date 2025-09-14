@@ -39,13 +39,14 @@ export default function EnhancedContactCreationPage() {
   const returnTo = searchParams.get('returnTo') || '/dashboard/clients';
   const contactType = (searchParams.get('type') as string) || 'client';
 
-  const [_contactId, setContactId] = useState<string | null>(null);
   const [, setQuickBooksEnabled] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting }
+    formState: { errors }
   } = useForm<ContactFormData>({
     defaultValues: {
       contactType: contactType as ContactFormData['contactType'],
@@ -71,8 +72,12 @@ export default function EnhancedContactCreationPage() {
   }, []);
 
   const onQuickSubmit = async (data: ContactFormData) => {
+    setIsLoading(true);
+    setSubmitError(null);
+    
     try {
       const authToken = localStorage.getItem('accessToken');
+      
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
@@ -81,30 +86,56 @@ export default function EnhancedContactCreationPage() {
         headers.Authorization = `Bearer ${authToken}`;
       }
 
+      const payload = {
+        ...data,
+        status: 'lead', // Default status
+        type: data.contactType,
+        contactRole: data.contactType,
+        name: `${data.firstName} ${data.lastName}`.trim()
+      };
+
       const response = await fetch('/api/clients', {
         method: 'POST',
         headers,
-        body: JSON.stringify({
-          ...data,
-          status: 'lead', // Default status
-          type: data.contactType,
-          contactRole: data.contactType
-        }),
+        body: JSON.stringify(payload),
       });
-
+      
       if (response.ok) {
         const created = await response.json();
+        
         const newContactId = created?._id || created?.id;
-        setContactId(newContactId);
 
         // Go to profile completion
         router.push(`/dashboard/clients/${newContactId}/profile?created=true&type=${data.contactType}&quick=true`);
       } else {
         const errorData = await response.text();
-        throw new Error(`Create failed (${response.status}): ${errorData}`);
+        
+        let errorMessage = `Failed to create contact (${response.status})`;
+        
+        if (response.status === 401) {
+          errorMessage = 'Authentication required. Please log in and try again.';
+        } else if (response.status === 400) {
+          errorMessage = 'Invalid data provided. Please check your inputs.';
+        } else if (response.status === 404) {
+          errorMessage = 'API endpoint not found. Please try again later.';
+        } else if (errorData) {
+          try {
+            const parsedError = JSON.parse(errorData);
+            errorMessage = parsedError.error || parsedError.message || errorMessage;
+          } catch {
+            errorMessage += `: ${errorData}`;
+          }
+        }
+        
+        setSubmitError(errorMessage);
+        throw new Error(errorMessage);
       }
     } catch (error) {
-      alert('Failed to create contact. Please try again.');
+      if (!submitError) {
+        setSubmitError(error instanceof Error ? error.message : 'Failed to create contact. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -264,13 +295,30 @@ export default function EnhancedContactCreationPage() {
                 />
               </div>
 
+              {/* Error Display */}
+              {submitError && (
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-red-800 dark:text-red-200">Error creating contact</h3>
+                      <p className="text-sm text-red-700 dark:text-red-300 mt-1">{submitError}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isLoading}
                 className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl text-lg"
               >
-                {isSubmitting ? (
+                {isLoading ? (
                   <div className="flex items-center justify-center gap-2">
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     Creating...
