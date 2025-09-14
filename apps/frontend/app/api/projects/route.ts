@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createBackendHeaders, getBackendUrl } from '../utils/backend';
 
 export const dynamic = 'force-dynamic';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL || 'http://localhost:3001';
+const BACKEND_URL = getBackendUrl();
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,10 +13,7 @@ export async function GET(request: NextRequest) {
 
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Cookie': request.headers.get('cookie') || '',
-      },
+      headers: createBackendHeaders(request),
     });
 
     if (!response.ok) {
@@ -41,10 +39,7 @@ export async function POST(request: NextRequest) {
 
     const response = await fetch(`${BACKEND_URL}/api/projects`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Cookie': request.headers.get('cookie') || '',
-      },
+      headers: createBackendHeaders(request),
       body: JSON.stringify(body),
     });
 
