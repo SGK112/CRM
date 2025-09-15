@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL || 'http://localhost:3001';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     // Check for development mode
     if (process.env.NODE_ENV === 'development') {
@@ -23,7 +23,13 @@ export async function GET() {
 
     // Production mode - proxy to backend
     const cookieStore = cookies();
-    const token = cookieStore.get('token')?.value;
+    let token = cookieStore.get('token')?.value;
+    if (!token) {
+      const authHeader = request.headers.get('authorization');
+      if (authHeader?.toLowerCase().startsWith('bearer ')) {
+        token = authHeader.substring(7);
+      }
+    }
     
     if (!token) {
       return NextResponse.json(

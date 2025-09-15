@@ -26,7 +26,13 @@ export async function POST(request: Request) {
 
     // Production mode - proxy to backend
     const cookieStore = cookies();
-    const token = cookieStore.get('token')?.value;
+    let token = cookieStore.get('token')?.value;
+    if (!token) {
+      const authHeader = request.headers.get('authorization');
+      if (authHeader?.toLowerCase().startsWith('bearer ')) {
+        token = authHeader.substring(7);
+      }
+    }
     
     if (!token) {
       return NextResponse.json(
