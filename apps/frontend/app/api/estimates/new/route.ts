@@ -5,18 +5,21 @@ export const dynamic = 'force-dynamic';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL || 'http://localhost:3001';
 
-export async function GET() {
+export async function POST(request: Request) {
   try {
     // Check for development mode
     if (process.env.NODE_ENV === 'development') {
-      // Return mock inbox stats for development
+      const body = await request.json();
+      // Return mock created estimate for development
       return NextResponse.json({
         success: true,
-        stats: {
-          unread: 3,
-          total: 12,
-          urgent: 1,
-          lastUpdated: new Date().toISOString()
+        estimate: {
+          id: `est-${Date.now()}`,
+          number: `EST-${Math.floor(Math.random() * 10000)}`,
+          ...body,
+          status: 'draft',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
         }
       });
     }
@@ -32,18 +35,20 @@ export async function GET() {
       );
     }
 
-    const response = await fetch(`${BACKEND_URL}/api/inbox/stats`, {
-      method: 'GET',
+    const body = await request.json();
+
+    const response = await fetch(`${BACKEND_URL}/api/estimates`, {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
       },
-      cache: 'no-store',
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) {
       return NextResponse.json(
-        { success: false, message: 'Failed to fetch inbox stats' },
+        { success: false, message: 'Failed to create estimate' },
         { status: response.status }
       );
     }
@@ -54,7 +59,7 @@ export async function GET() {
     return NextResponse.json(
       {
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to fetch inbox stats',
+        message: error instanceof Error ? error.message : 'Failed to create estimate',
       },
       { status: 500 }
     );
