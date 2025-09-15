@@ -27,6 +27,8 @@ export interface CreateEstimateDto {
   discountValue?: number;
   taxRate?: number;
   notes?: string;
+  depositType?: 'percent' | 'fixed';
+  depositValue?: number; // percent (0-100) or fixed amount depending on type
 }
 
 export interface UpdateEstimateDto {
@@ -44,6 +46,8 @@ export interface UpdateEstimateDto {
   discountValue?: number;
   taxRate?: number;
   notes?: string;
+  depositType?: 'percent' | 'fixed' | 'none';
+  depositValue?: number;
 }
 
 export interface EstimateWithClient extends Estimate {
@@ -132,11 +136,21 @@ export class EstimatesService {
   }
 
   async create(dto: CreateEstimateDto, workspaceId: string) {
-    // generate number if not provided
-    if (!dto.number) {
-      const count = await this.estimateModel.countDocuments({ workspaceId });
-      dto.number = `EST-${1000 + count + 1}`;
+    // Always generate a unique, sequential estimate number per workspace
+    // Find the highest existing number for this workspace
+    let nextNumber = 1001;
+    const lastEstimate = await this.estimateModel
+      .find({ workspaceId, number: /^EST-\d+$/ })
+      .sort({ number: -1 })
+      .limit(1)
+      .lean();
+    if (lastEstimate.length > 0) {
+      const match = lastEstimate[0].number.match(/EST-(\d+)/);
+      if (match) {
+        nextNumber = parseInt(match[1], 10) + 1;
+      }
     }
+    dto.number = `EST-${nextNumber}`;
     // Build line items, enriching from price items if provided
     const items: Array<{
       priceItemId?: string;
@@ -177,8 +191,17 @@ export class EstimatesService {
       taxRate: dto.taxRate || 0,
       notes: dto.notes,
       shareToken: randomBytes(16).toString('hex'),
+      depositType: dto.depositType || 'none',
+      depositValue: dto.depositValue || 0,
+      depositRequired: 0,
     });
     this.computeTotals(doc);
+    // After totals, compute depositRequired if needed
+    if (doc.depositType === 'percent' && doc.depositValue > 0) {
+      doc.depositRequired = +(doc.total * (doc.depositValue / 100)).toFixed(2);
+    } else if (doc.depositType === 'fixed' && doc.depositValue > 0) {
+      doc.depositRequired = Math.min(doc.total, doc.depositValue);
+    }
     await doc.save();
     return doc;
   }
@@ -366,7 +389,17 @@ export class EstimatesService {
     if (dto.discountValue !== undefined) doc.discountValue = dto.discountValue;
     if (dto.taxRate !== undefined) doc.taxRate = dto.taxRate;
     if (dto.notes !== undefined) doc.notes = dto.notes;
+    if (dto.depositType !== undefined) doc.depositType = dto.depositType;
+    if (dto.depositValue !== undefined) doc.depositValue = dto.depositValue;
     this.computeTotals(doc);
+    // Recompute depositRequired
+    if (doc.depositType === 'percent' && doc.depositValue > 0) {
+      doc.depositRequired = +(doc.total * (doc.depositValue / 100)).toFixed(2);
+    } else if (doc.depositType === 'fixed' && doc.depositValue > 0) {
+      doc.depositRequired = Math.min(doc.total, doc.depositValue);
+    } else {
+      doc.depositRequired = 0;
+    }
     await doc.save();
     return doc;
   }

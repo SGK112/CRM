@@ -20,160 +20,64 @@ import {
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon as CheckCircleSolidIcon } from '@heroicons/react/24/solid';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { STATUS_META, TYPE_ICON, getEventColor, AppointmentStatus, AppointmentType } from '@/config/appointments';
+import { useCalendarEvents } from '@/hooks/useCalendarEvents';
+import CalendarSkeleton from '@/components/ui/CalendarSkeleton';
+import AppointmentModal from '@/components/scheduling/AppointmentModal';
 
+// Appointment type now sourced from hook
 interface Appointment {
   _id: string;
   title: string;
   description?: string;
-  appointmentType:
-    | 'consultation'
-    | 'site_visit'
-    | 'meeting'
-    | 'inspection'
-    | 'other'
-    | 'google_calendar';
-  status: 'scheduled' | 'confirmed' | 'completed' | 'cancelled' | 'confirmed';
+  appointmentType: AppointmentType;
+  status: AppointmentStatus;
   startDateTime: string;
   endDateTime: string;
-  location?: {
-    street: string;
-    city: string;
-    state: string;
-  };
-  client?: {
-    name: string;
-    phone?: string;
-  };
+  location?: { street: string; city: string; state: string };
+  client?: { name: string; phone?: string };
   isGoogleEvent?: boolean;
   googleEventId?: string;
 }
 
 export default function CalendarPage() {
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { appointments, loading, stats, upcoming, refresh } = useCalendarEvents();
   const [view, setView] = useState<'dayGridMonth' | 'timeGridWeek' | 'listWeek'>(
     'dayGridMonth'
   );
   const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchCalendarEvents = async () => {
-      try {
-        const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
-        if (!token) {
-          router.push('/auth/login');
-          return;
-        }
+  // Modal state for appointment scheduling
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalProps, setModalProps] = useState<{
+    selectedDate?: string;
+    presetTitle?: string;
+    presetContactId?: string;
+  }>({});
 
-        const response = await fetch('/api/appointments/calendar', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (response.ok) {
-          const events = await response.json();
-          // Transform API events to frontend format
-          const transformedAppointments: Appointment[] = events.map(
-            (event: {
-              id: string;
-              title: string;
-              start: string;
-              end: string;
-              description?: string;
-              extendedProps: {
-                type: string;
-                status: string;
-                location?: string;
-                source?: string;
-                googleEventId?: string;
-              };
-            }) => ({
-              _id: event.id,
-              title: event.title,
-              description: event.description || '',
-              appointmentType:
-                event.extendedProps.type === 'google_calendar'
-                  ? 'meeting'
-                  : (event.extendedProps.type as Appointment['appointmentType']),
-              status: (event.extendedProps.status || 'scheduled') as Appointment['status'],
-              startDateTime: event.start,
-              endDateTime: event.end,
-              location: event.extendedProps.location
-                ? {
-                    street: event.extendedProps.location,
-                    city: '',
-                    state: '',
-                  }
-                : undefined,
-              client: undefined, // Google events don't have client info
-              isGoogleEvent: event.extendedProps.source === 'google',
-              googleEventId: event.extendedProps.googleEventId,
-            })
-          );
-          setAppointments(transformedAppointments);
-        } else {
-          // Handle error silently for better UX
-          setAppointments([]);
-        }
-      } catch (error) {
-        // Handle error silently for better UX
-        setAppointments([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCalendarEvents();
-  }, [router]);
-
-  const getEventColor = (appointment: Appointment) => {
-    // Google Calendar events use their own color
-    if (appointment.isGoogleEvent) {
-      return '#ea4335'; // Google Calendar red
-    }
-
-    const colors = {
-      confirmed: '#10b981', // Emerald-500
-      scheduled: '#3b82f6', // Blue-500
-      completed: '#6b7280', // Gray-500
-      cancelled: '#ef4444', // Red-500
-    };
-    return colors[appointment.status as keyof typeof colors] || colors.scheduled;
+  // Helper functions for opening the appointment modal
+  const openAppointmentModal = (props?: {
+    selectedDate?: string;
+    presetTitle?: string;
+    presetContactId?: string;
+  }) => {
+    setModalProps(props || {});
+    setIsModalOpen(true);
   };
 
-  const getStatusIcon = (status: Appointment['status']) => {
-    switch (status) {
-      case 'confirmed':
-        return CheckCircleSolidIcon;
-      case 'scheduled':
-        return ClockSolidIcon;
-      case 'completed':
-        return CheckCircleIcon;
-      case 'cancelled':
-        return ExclamationTriangleIcon;
-      default:
-        return ClockIcon;
-    }
+  const handleAppointmentCreated = () => {
+    refresh(); // Refresh calendar events
   };
 
-  const getAppointmentTypeIcon = (type: Appointment['appointmentType']) => {
-    switch (type) {
-      case 'consultation':
-        return UserIcon;
-      case 'site_visit':
-        return MapPinIcon;
-      case 'meeting':
-        return UserIcon;
-      case 'inspection':
-        return CheckCircleIcon;
-      case 'google_calendar':
-        return CalendarDaysIcon;
-      default:
-        return CalendarDaysIcon;
-    }
+  const getStatusIcon = (status: AppointmentStatus) => {
+    const meta = STATUS_META[status];
+    return meta.solidIcon || meta.icon;
+  };
+
+  const getAppointmentTypeIcon = (type: AppointmentType) => {
+    return TYPE_ICON[type] || TYPE_ICON.other;
   };
 
   const filteredAppointments = appointments.filter(apt => {
@@ -190,55 +94,29 @@ export default function CalendarPage() {
     title: appointment.isGoogleEvent ? `📅 ${appointment.title}` : appointment.title,
     start: appointment.startDateTime,
     end: appointment.endDateTime,
-    backgroundColor: getEventColor(appointment),
-    borderColor: getEventColor(appointment),
+    backgroundColor: getEventColor(appointment.status, appointment.isGoogleEvent),
+    borderColor: getEventColor(appointment.status, appointment.isGoogleEvent),
     textColor: '#ffffff',
     extendedProps: {
       appointment: appointment,
     },
   }));
 
-  const today = new Date();
-  const stats = {
-    today: appointments.filter(
-      a => new Date(a.startDateTime).toDateString() === today.toDateString()
-    ).length,
-    thisWeek: appointments.filter(a => {
-      const appointmentDate = new Date(a.startDateTime);
-      const weekStart = new Date(today);
-      weekStart.setDate(today.getDate() - today.getDay());
-      const weekEnd = new Date(weekStart);
-      weekEnd.setDate(weekStart.getDate() + 6);
-      return appointmentDate >= weekStart && appointmentDate <= weekEnd;
-    }).length,
-    confirmed: appointments.filter(a => a.status === 'confirmed').length,
-    pending: appointments.filter(a => a.status === 'scheduled').length,
-  };
+  const upcomingAppointments = upcoming.filter(apt =>
+    filteredAppointments.some(f => f._id === apt._id)
+  );
 
-  const upcomingAppointments = filteredAppointments
-    .filter(apt => new Date(apt.startDateTime) > new Date())
-    .sort((a, b) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime())
-    .slice(0, 5);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <CalendarSkeleton />;
 
   return (
     <div className="min-h-screen bg-black">
       {/* Mobile-First Header */}
       <div className="sticky top-0 z-50 bg-black border-b border-slate-800">
         <div className="px-4 py-4">
-          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-amber-500/20 rounded-lg">
-                <CalendarDaysIcon className="h-6 w-6 text-amber-400" />
+              <div className="p-2 bg-brand-500/20 rounded-lg">
+                <CalendarDaysIcon className="h-6 w-6 text-brand-400" />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-white">Calendar</h1>
@@ -246,13 +124,17 @@ export default function CalendarPage() {
               </div>
             </div>
             <button
-              onClick={() => router.push('/dashboard/calendar/new')}
-              className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors text-black font-medium text-sm"
+              onClick={() => openAppointmentModal()}
+              className="flex items-center gap-2 px-4 py-2 bg-brand-500 hover:bg-brand-600 active:bg-brand-600/90 rounded-lg transition-colors text-white font-medium text-sm shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+              aria-label="Create new appointment"
             >
               <PlusIcon className="h-4 w-4" />
               New Appointment
             </button>
           </div>
+            <div className="flex justify-end mb-2">
+              <button onClick={() => refresh()} className="text-xs text-slate-400 hover:text-white transition-colors">Refresh</button>
+            </div>
 
           {/* Stats Cards */}
           <div className="grid grid-cols-4 gap-2">
@@ -265,7 +147,7 @@ export default function CalendarPage() {
               <div className="text-xs text-slate-400">Week</div>
             </div>
             <div className="bg-slate-900 rounded-lg p-3 text-center">
-              <div className="text-lg font-bold text-amber-400">{stats.confirmed}</div>
+              <div className="text-lg font-bold text-green-400">{stats.confirmed}</div>
               <div className="text-xs text-slate-400">Confirmed</div>
             </div>
             <div className="bg-slate-900 rounded-lg p-3 text-center">
@@ -287,7 +169,7 @@ export default function CalendarPage() {
               placeholder="Search appointments..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
             />
           </div>
 
@@ -307,9 +189,10 @@ export default function CalendarPage() {
                       viewOption.key as 'dayGridMonth' | 'timeGridWeek' | 'listWeek'
                     )
                   }
+                  aria-pressed={view === viewOption.key}
                   className={`flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium rounded transition-all ${
                     view === viewOption.key
-                      ? 'bg-amber-500 text-black'
+                      ? 'bg-brand-500 text-white shadow-inner'
                       : 'text-slate-400 hover:text-white'
                   }`}
                 >
@@ -332,7 +215,7 @@ export default function CalendarPage() {
               router.push(`/dashboard/calendar/${appointment._id}`);
             }}
             onDateClick={(info: DateClickArg) => {
-              router.push(`/dashboard/calendar/new?date=${info.dateStr}`);
+              openAppointmentModal({ selectedDate: info.dateStr });
             }}
           />
         </div>
@@ -365,7 +248,7 @@ export default function CalendarPage() {
                               appointment.status === 'confirmed'
                                 ? 'bg-green-500/20'
                                 : appointment.status === 'scheduled'
-                                  ? 'bg-blue-500/20'
+                                  ? 'bg-brand-500/20'
                                   : appointment.status === 'completed'
                                     ? 'bg-slate-500/20'
                                     : 'bg-red-500/20'
@@ -376,7 +259,7 @@ export default function CalendarPage() {
                                 appointment.status === 'confirmed'
                                   ? 'text-green-400'
                                   : appointment.status === 'scheduled'
-                                    ? 'text-blue-400'
+                                    ? 'text-brand-400'
                                     : appointment.status === 'completed'
                                       ? 'text-slate-400'
                                       : 'text-red-400'
@@ -432,18 +315,9 @@ export default function CalendarPage() {
 
                       <div className="mt-3 flex justify-between items-center">
                         <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            appointment.status === 'confirmed'
-                              ? 'bg-green-500/20 text-green-400'
-                              : appointment.status === 'scheduled'
-                                ? 'bg-blue-500/20 text-blue-400'
-                                : appointment.status === 'completed'
-                                  ? 'bg-slate-500/20 text-slate-400'
-                                  : 'bg-red-500/20 text-red-400'
-                          }`}
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${STATUS_META[appointment.status].badge}`}
                         >
-                          {appointment.status.charAt(0).toUpperCase() +
-                            appointment.status.slice(1)}
+                          {STATUS_META[appointment.status].label}
                         </span>
 
                         <ChevronRightIcon className="h-4 w-4 text-slate-400" />
@@ -464,8 +338,9 @@ export default function CalendarPage() {
                   Schedule your next appointment to get started
                 </p>
                 <button
-                  onClick={() => router.push('/dashboard/calendar/new')}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-lg text-sm font-medium transition-colors"
+                  onClick={() => openAppointmentModal()}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-brand-500 hover:bg-brand-600 active:bg-brand-600/90 text-white rounded-lg text-sm font-medium transition-colors shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                  aria-label="Schedule a new appointment"
                 >
                   <PlusIcon className="h-4 w-4" />
                   Schedule Appointment
@@ -475,6 +350,16 @@ export default function CalendarPage() {
           </div>
         </div>
       </div>
+
+      {/* Appointment Modal */}
+      <AppointmentModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onAppointmentCreated={handleAppointmentCreated}
+        selectedDate={modalProps.selectedDate}
+        presetTitle={modalProps.presetTitle}
+        presetContactId={modalProps.presetContactId}
+      />
     </div>
   );
 }

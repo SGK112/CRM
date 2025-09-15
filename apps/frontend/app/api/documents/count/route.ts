@@ -6,6 +6,12 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL |
 
 export async function GET(request: NextRequest) {
   try {
+    // Check for development mode
+    if (process.env.NODE_ENV === 'development') {
+      // Return mock count for development
+      return NextResponse.json({ count: 24, recent: 6 });
+    }
+
     const { searchParams } = new URL(request.url);
     const queryString = searchParams.toString();
     const url = `${BACKEND_URL}/api/documents/count${queryString ? `?${queryString}` : ''}`;

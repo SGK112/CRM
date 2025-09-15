@@ -7,6 +7,34 @@ const BACKEND_URL = getBackendUrl();
 
 export async function GET(request: NextRequest) {
   try {
+    // Check for development mode
+    if (process.env.NODE_ENV === 'development') {
+      // Return mock notifications data for development
+      return NextResponse.json({
+        success: true,
+        data: [
+          {
+            id: '1',
+            title: 'Welcome to Remodely',
+            message: 'Your CRM is ready to use!',
+            type: 'info',
+            read: false,
+            createdAt: new Date().toISOString()
+          },
+          {
+            id: '2',
+            title: 'New Project Update',
+            message: 'Kitchen renovation project has been updated',
+            type: 'project',
+            read: true,
+            createdAt: new Date(Date.now() - 86400000).toISOString()
+          }
+        ],
+        count: 2,
+        unread: 1
+      });
+    }
+
     const { searchParams } = new URL(request.url);
     const queryString = searchParams.toString();
     const url = `${BACKEND_URL}/api/notifications${queryString ? `?${queryString}` : ''}`;

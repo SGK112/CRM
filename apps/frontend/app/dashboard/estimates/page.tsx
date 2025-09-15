@@ -198,7 +198,16 @@ export default function EstimatesPage() {
                 {getStatusBadge(estimate.status)}
               </div>
               <div className="flex items-center space-x-4 text-sm text-slate-400">
-                <span className="truncate">{clientName}</span>
+                {estimate.clientId ? (
+                  <Link 
+                    href={`/dashboard/clients/${estimate.clientId}?source=estimate&estimate=${estimate._id}`}
+                    className="truncate hover:text-amber-400 transition-colors"
+                  >
+                    {clientName}
+                  </Link>
+                ) : (
+                  <span className="truncate">{clientName}</span>
+                )}
                 {estimate.client?.company && (
                   <span className="text-slate-500">• {estimate.client.company}</span>
                 )}
@@ -256,7 +265,16 @@ export default function EstimatesPage() {
           <h3 className="font-semibold text-white group-hover:text-slate-300 transition-colors mb-1">
             #{estimate.number}
           </h3>
-          <p className="text-sm text-slate-400 truncate">{clientName}</p>
+          {estimate.clientId ? (
+            <Link 
+              href={`/dashboard/clients/${estimate.clientId}?source=estimate&estimate=${estimate._id}`}
+              className="text-sm text-slate-400 truncate hover:text-amber-400 transition-colors block"
+            >
+              {clientName}
+            </Link>
+          ) : (
+            <p className="text-sm text-slate-400 truncate">{clientName}</p>
+          )}
           {estimate.client?.company && (
             <p className="text-xs text-slate-500">{estimate.client.company}</p>
           )}

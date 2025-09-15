@@ -164,7 +164,7 @@ export default function ProfileSettingsPage() {
     try {
       const token = localStorage.getItem('accessToken') ||
                    localStorage.getItem('token') ||
-                   document.cookie.replace(/(?:(?:^|.*;\s*)accessToken\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+                  document.cookie.replace(/(?:(?:^|.*;\s*)accessToken\s*=\s*([^;]*).*$)|^.*$/, "$1");
 
       if (!token) {
         setMessage('Authentication required. Please log in again.');
@@ -248,7 +248,7 @@ export default function ProfileSettingsPage() {
         // Update the avatar in the backend
         const token = localStorage.getItem('accessToken') ||
                      localStorage.getItem('token') ||
-                     document.cookie.replace(/(?:(?:^|.*;\s*)accessToken\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+                     document.cookie.replace(/(?:(?:^|.*;\s*)accessToken\s*=\s*([^;]*).*$)|^.*$/, "$1");
 
         if (!token) {
           setMessage('Authentication required. Please log in again.');
@@ -314,7 +314,7 @@ export default function ProfileSettingsPage() {
       // Try multiple token sources for better compatibility
       const token = localStorage.getItem('accessToken') ||
                    localStorage.getItem('token') ||
-                   document.cookie.replace(/(?:(?:^|.*;\s*)accessToken\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+                  document.cookie.replace(/(?:(?:^|.*;\s*)accessToken\s*=\s*([^;]*).*$)|^.*$/, "$1");
 
       if (!token) {
         setMessage('Authentication required. Please log in again.');
@@ -393,7 +393,7 @@ export default function ProfileSettingsPage() {
     try {
       const token = localStorage.getItem('accessToken') ||
                    localStorage.getItem('token') ||
-                   document.cookie.replace(/(?:(?:^|.*;\s*)accessToken\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+                  document.cookie.replace(/(?:(?:^|.*;\s*)accessToken\s*=\s*([^;]*).*$)|^.*$/, "$1");
 
       if (!token) {
         setMessage('Authentication required. Please log in again.');
@@ -452,7 +452,7 @@ export default function ProfileSettingsPage() {
     try {
       const token = localStorage.getItem('accessToken') ||
                    localStorage.getItem('token') ||
-                   document.cookie.replace(/(?:(?:^|.*;\s*)accessToken\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+                  document.cookie.replace(/(?:(?:^|.*;\s*)accessToken\s*=\s*([^;]*).*$)|^.*$/, "$1");
 
       if (!token) {
         setMessage('Authentication required. Please log in again.');
@@ -511,7 +511,7 @@ export default function ProfileSettingsPage() {
     try {
       const token = localStorage.getItem('accessToken') ||
                    localStorage.getItem('token') ||
-                   document.cookie.replace(/(?:(?:^|.*;\s*)accessToken\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+                  document.cookie.replace(/(?:(?:^|.*;\s*)accessToken\s*=\s*([^;]*).*$)|^.*$/, "$1");
 
       if (!token) {
         setMessage('Authentication required. Please log in again.');
@@ -560,7 +560,7 @@ export default function ProfileSettingsPage() {
     try {
       const token = localStorage.getItem('accessToken') ||
                    localStorage.getItem('token') ||
-                   document.cookie.replace(/(?:(?:^|.*;\s*)accessToken\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+                  document.cookie.replace(/(?:(?:^|.*;\s*)accessToken\s*=\s*([^;]*).*$)|^.*$/, "$1");
 
       const response = await fetch('/api/users/2fa/verify-setup', {
         method: 'POST',
@@ -606,7 +606,7 @@ export default function ProfileSettingsPage() {
     try {
       const token = localStorage.getItem('accessToken') ||
                    localStorage.getItem('token') ||
-                   document.cookie.replace(/(?:(?:^|.*;\s*)accessToken\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+                  document.cookie.replace(/(?:(?:^|.*;\s*)accessToken\s*=\s*([^;]*).*$)|^.*$/, "$1");
 
       const response = await fetch('/api/users/2fa/disable', {
         method: 'POST',

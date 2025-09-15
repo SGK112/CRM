@@ -159,8 +159,8 @@ export default function ContactsPage() {
         const notificationsResponse = await fetch('/api/notifications', { headers });
         const notificationsData = await notificationsResponse.json();
 
-        // Handle API response - it returns an array directly, not wrapped in {clients: []}
-        const clientsArray = Array.isArray(clientsData) ? clientsData : (clientsData.clients || []);
+        // Handle API response - it returns {success: true, data: [...]}
+        const clientsArray = Array.isArray(clientsData) ? clientsData : (clientsData.data || clientsData.clients || []);
         const processedClients = clientsArray.map((client: ClientData) => ({
           id: client._id || client.id || '',
           name: client.name || `${client.firstName || ''} ${client.lastName || ''}`.trim() || 'Unnamed Contact',
@@ -642,7 +642,7 @@ export default function ContactsPage() {
                 key={client.id}
                 client={client}
                 viewMode={viewMode}
-                onViewDetails={() => router.push(`/dashboard/clients/${client.id}`)}
+                onViewDetails={() => router.push(`/dashboard/clients/${client.id}?type=${client.status}`)}
                 onStatusChange={handleStatusChange}
               />
             ))}
@@ -869,6 +869,28 @@ function ContactCard({
               title="Create Estimate"
             >
               <CalculatorIcon className="w-4 h-4 text-white" />
+            </button>
+            
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(`/dashboard/projects?action=create&clientId=${client.id}&clientName=${encodeURIComponent(client.name)}`, '_self');
+              }}
+              className="p-1.5 rounded-lg bg-green-600 hover:bg-green-700 transition-colors border border-green-500"
+              title="Create Project"
+            >
+              <ListBulletIcon className="w-4 h-4 text-white" />
+            </button>
+            
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(`/dashboard/invoices/new?clientId=${client.id}&clientName=${encodeURIComponent(client.name)}`, '_self');
+              }}
+              className="p-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 transition-colors border border-purple-500"
+              title="Create Invoice"
+            >
+              <DocumentTextIcon className="w-4 h-4 text-white" />
             </button>
             
             {/* Status Progression Button */}

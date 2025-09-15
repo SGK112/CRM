@@ -193,7 +193,7 @@ export default function EditContactPage() {
       });
 
       if (response.ok) {
-        router.push(`/dashboard/clients/${contactId}?updated=true`);
+        router.push(`/dashboard/clients/${contactId}?updated=true&source=edit`);
       } else {
         const msg = await response.text();
         setError(`Update failed (${response.status}): ${msg}`);

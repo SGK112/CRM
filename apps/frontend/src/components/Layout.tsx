@@ -147,39 +147,75 @@ export default function Layout({ children }: LayoutProps) {
     // Only check authentication on client side after component mounts
     if (typeof window === 'undefined') return;
 
-    // Check if user is authenticated
-    const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
-    const userData = localStorage.getItem('user');
+    const initAuth = async () => {
+      // Check if user is authenticated
+      const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+      const userData = localStorage.getItem('user');
 
-    if (!token || !userData) {
-      // Check if we're already on an auth page to prevent redirect loops
-      if (!window.location.pathname.startsWith('/auth/')) {
-        router.push('/auth/login');
-      }
-      setLoading(false);
-      return;
-    }
+      if (!token || !userData) {
+        // In development mode, try to auto-authenticate with demo credentials
+        if (process.env.NODE_ENV === 'development') {
+          try {
+            console.log('🔑 No authentication found, setting up development auth...');
+            
+            // Try to login with demo credentials
+            const response = await fetch('http://localhost:3001/api/auth/login', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                email: 'test@example.com',
+                password: 'password123'
+              }),
+            });
 
-    try {
-      const parsedUser = JSON.parse(userData);
-      setUser(parsedUser);
-      setUserPlan(getUserPlan());
-      setLoading(false);
+            if (response.ok) {
+              const authData = await response.json();
+              localStorage.setItem('accessToken', authData.accessToken);
+              localStorage.setItem('user', JSON.stringify(authData.user));
+              setUser(authData.user);
+              setUserPlan(getUserPlan());
+              setLoading(false);
+              console.log('✅ Development authentication successful!');
+              return;
+            }
+          } catch (error) {
+            console.log('🔄 Demo auth failed, continuing without auth for development');
+          }
+        }
+        
+        // Check if we're already on an auth page to prevent redirect loops
+        if (!window.location.pathname.startsWith('/auth/')) {
+          router.push('/auth/login');
+        }
+        setLoading(false);
+        return;
+      }
 
-      // If user is authenticated and on auth page, redirect to dashboard
-      if (window.location.pathname.startsWith('/auth/')) {
-        router.push('/dashboard');
+      try {
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
+        setUserPlan(getUserPlan());
+        setLoading(false);
+
+        // If user is authenticated and on auth page, redirect to dashboard
+        if (window.location.pathname.startsWith('/auth/')) {
+          router.push('/dashboard');
+        }
+      } catch (error) {
+        // Failed to parse user data - clear and redirect
+        localStorage.removeItem('token');
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('user');
+        setLoading(false);
+        if (!window.location.pathname.startsWith('/auth/')) {
+          router.push('/auth/login');
+        }
       }
-    } catch (error) {
-      // Failed to parse user data - clear and redirect
-      localStorage.removeItem('token');
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('user');
-      setLoading(false);
-      if (!window.location.pathname.startsWith('/auth/')) {
-        router.push('/auth/login');
-      }
-    }
+    };
+
+    initAuth();
 
     // Load sidebar collapsed state from localStorage
     const collapsedState = localStorage.getItem('sidebarCollapsed');

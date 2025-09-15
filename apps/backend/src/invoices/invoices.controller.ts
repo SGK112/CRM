@@ -80,6 +80,20 @@ export class InvoicesController {
     if (!result) {
       return res.status(404).json({ message: 'Invoice not found' });
     }
+    // Profit metrics are suppressed in service layer for this client-facing path.
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${result.filename}"`);
+    return res.send(result.buffer);
+  }
+
+  // Internal PDF (includes profit metrics if enabled) - requires an internal flag / role
+  @Get(':id/pdf-internal')
+  async downloadPdfInternal(@Param('id') id: string, @Req() req, @Res() res: Response) {
+    const workspaceId = req.user.workspaceId || req.user.sub;
+    const result = await this.invoices.getPdf(id, workspaceId, { internal: true });
+    if (!result) {
+      return res.status(404).json({ message: 'Invoice not found' });
+    }
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${result.filename}"`);
     return res.send(result.buffer);

@@ -151,7 +151,7 @@ export default function WorkflowActions({
           actions.push({
             label: 'View Client',
             icon: UserIcon,
-            href: `/dashboard/clients/${clientId}`,
+            href: `/dashboard/clients/${clientId}?source=workflow`,
             color: 'blue',
           });
         }
@@ -169,7 +169,7 @@ export default function WorkflowActions({
             {
               label: 'View Client',
               icon: UserIcon,
-              href: `/dashboard/clients/${clientId}`,
+              href: `/dashboard/clients/${clientId}?source=invoice`,
               color: 'blue',
             }
           );
@@ -202,7 +202,7 @@ export default function WorkflowActions({
             {
               label: 'View Client',
               icon: UserIcon,
-              href: `/dashboard/clients/${clientId}`,
+              href: `/dashboard/clients/${clientId}?source=project`,
               color: 'blue',
             }
           );

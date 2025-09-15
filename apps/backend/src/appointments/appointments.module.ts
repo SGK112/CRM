@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { GoogleCalendarService } from '../integrations/google-calendar.service';
+import { IntegrationsModule } from '../integrations/integrations.module';
 import { EmailService } from '../services/email.service';
 import { TwilioService } from '../services/twilio.service';
 import { UsersModule } from '../users/users.module';
@@ -13,6 +13,7 @@ import { UnifiedCalendarService } from './unified-calendar.service';
   imports: [
     MongooseModule.forFeature([{ name: Appointment.name, schema: AppointmentSchema }]),
     UsersModule,
+    IntegrationsModule,
   ],
   controllers: [AppointmentsController],
   providers: [
@@ -20,7 +21,6 @@ import { UnifiedCalendarService } from './unified-calendar.service';
     UnifiedCalendarService,
     EmailService,
     TwilioService,
-    GoogleCalendarService,
   ],
   exports: [AppointmentsService, UnifiedCalendarService],
 })

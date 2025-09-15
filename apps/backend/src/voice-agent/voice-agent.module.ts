@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 import { VoiceAgentController } from './voice-agent.controller';
@@ -24,7 +24,7 @@ import { ElevenLabsIntegrationService } from './elevenlabs-integration.service';
       { name: Estimate.name, schema: EstimateSchema },
       { name: Note.name, schema: NoteSchema },
     ]),
-    AppointmentsModule,
+    forwardRef(() => AppointmentsModule),
   ],
   controllers: [VoiceAgentController],
   providers: [

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { devStore } from '../../dev-store';
 
 export const dynamic = 'force-dynamic';
 
@@ -6,6 +7,13 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL |
 
 export async function GET(request: NextRequest) {
   try {
+    // Check for development mode
+    if (process.env.NODE_ENV === 'development') {
+      // Return actual count from development store
+      const count = devStore.getCount();
+      return NextResponse.json({ count, total: count });
+    }
+
     const { searchParams } = new URL(request.url);
     const queryString = searchParams.toString();
     const url = `${BACKEND_URL}/api/clients/count${queryString ? `?${queryString}` : ''}`;

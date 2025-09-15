@@ -558,6 +558,36 @@ export class AppointmentsService {
     return results;
   }
 
+  // Scan for appointments starting within next X minutes and send reminders
+  async scanUpcomingForReminders(workspaceId: string, windowMinutes = 60) {
+    const now = new Date();
+    const windowEnd = new Date(now.getTime() + windowMinutes * 60000);
+    const candidates = (await this.appointmentModel.find({
+      workspaceId,
+      scheduledDate: { $gte: now, $lte: windowEnd },
+      status: { $nin: ['cancelled', 'completed'] },
+      reminderSent: { $ne: true },
+    }).exec()) as Appointment[];
+
+    const results: { id: string; sent: boolean; reason?: string }[] = [];
+    for (const appt of candidates) {
+      try {
+        // Basic opt-in: notifications.email or sms true OR notifications undefined (default send)
+        const prefs = appt.notifications || {};
+        if (prefs.email === false && prefs.sms === false) {
+          results.push({ id: appt._id.toString(), sent: false, reason: 'notifications disabled' });
+          continue;
+        }
+        await this.sendReminderNotification();
+        await this.appointmentModel.updateOne({ _id: appt._id }, { reminderSent: true });
+        results.push({ id: appt._id.toString(), sent: true });
+      } catch (e) {
+        results.push({ id: appt._id.toString(), sent: false, reason: (e as Error).message });
+      }
+    }
+    return { total: candidates.length, results };
+  }
+
   // Private helper methods
 
   private async checkTimeSlotAvailability(
@@ -570,29 +600,24 @@ export class AppointmentsService {
     const query: {
       workspaceId: string;
       status: { $nin: string[] };
-      $or: Array<Record<string, unknown>>;
       assignedTo?: string;
       _id?: { $ne: string };
+      $expr: {
+        $and: [
+          { $lt: ['$scheduledDate', { $date: string }] },
+          { $gt: [{ $add: ['$scheduledDate', { $multiply: ['$duration', 60000] }] }, { $date: string }] }
+        ]
+      };
     } = {
       workspaceId,
       status: { $nin: ['cancelled', 'completed'] },
-      $or: [
-        // Appointment starts during this time slot
-        {
-          scheduledDate: { $gte: startTime, $lt: endTime },
-        },
-        // Appointment ends during this time slot
-        {
-          $expr: {
-            $and: [
-              { $lt: ['$scheduledDate', endTime] },
-              {
-                $gt: [{ $add: ['$scheduledDate', { $multiply: ['$duration', 60000] }] }, startTime],
-              },
-            ],
-          },
-        },
-      ],
+      // Canonical overlap condition: existing.start < newEnd AND existing.end > newStart
+      $expr: {
+        $and: [
+          { $lt: ['$scheduledDate', { $date: endTime.toISOString() }] },
+          { $gt: [{ $add: ['$scheduledDate', { $multiply: ['$duration', 60000] }] }, { $date: startTime.toISOString() }] }
+        ]
+      }
     };
 
     if (assignedTo) {

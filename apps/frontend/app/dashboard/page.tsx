@@ -527,7 +527,7 @@ export default function DashboardPage() {
                   recentContacts.map((contact) => (
                     <Link
                       key={contact.id}
-                      href={`/dashboard/clients/${contact.id}`}
+                      href={`/dashboard/clients/${contact.id}?type=${contact.type || 'client'}`}
                       className="flex items-center gap-3 p-3 bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors"
                     >
                       <div className="flex-shrink-0">

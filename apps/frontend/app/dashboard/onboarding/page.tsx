@@ -1,395 +1,142 @@
 'use client';
 
 import {
-    FormattedInput
-} from '@/components/forms/FormattedInputs';
-import {
     StandardButton,
     StandardCard,
-    StandardGrid,
     StandardPageWrapper,
     StandardSection
 } from '@/components/ui/StandardPageWrapper';
-import { authService } from '@/lib/auth';
 import {
     ArrowRightIcon,
-    BuildingOfficeIcon,
-    BuildingStorefrontIcon,
     CheckIcon,
-    CreditCardIcon,
-    DocumentArrowUpIcon,
-    DocumentCheckIcon,
-    DocumentTextIcon,
-    EnvelopeIcon,
-    MapPinIcon,
-    PhoneIcon,
-    ShieldCheckIcon,
-    UserGroupIcon,
-    UserIcon,
     UserPlusIcon,
-    WrenchScrewdriverIcon
+    DocumentArrowUpIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
-
-interface OnboardingFormData {
-  // Essential Info
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone?: string;
-  alternatePhone?: string;
-  workPhone?: string;
-  company?: string;
-  title?: string;
-  website?: string;
-
-  // Address Information
-  address: string;
-  address2?: string;
-  city: string;
-  state: string;
-  zipCode: string;
-
-  // Billing Address (if different)
-  billingDifferent: boolean;
-  billingAddress?: string;
-  billingAddress2?: string;
-  billingCity?: string;
-  billingState?: string;
-  billingZipCode?: string;
-
-  // Service Information
-  serviceLocation: 'primary_address' | 'billing_address' | 'custom' | 'multiple';
-  customServiceAddress?: string;
-  accessInstructions?: string;
-  preferredServiceTimes?: string;
-  emergencyContact?: string;
-  emergencyPhone?: string;
-
-  // Type & Project Info
-  entityType: 'client' | 'subcontractor' | 'vendor';
-  businessType?: string;
-  projectType?: string;
-  budget?: string;
-  timeline?: string;
-  description?: string;
-
-  // Additional Service Industry Fields
-  licenseNumber?: string;
-  insuranceNumber?: string;
-  hourlyRate?: string;
-  workAddress?: string;
-  accountNumber?: string;
-  taxId?: string;
-  notes?: string;
-  preferredContactMethod?: 'phone' | 'email' | 'text' | 'app';
-  specialRequirements?: string;
-  petInformation?: string;
-  hasKeys?: boolean;
-}
-
-const entityTypeOptions = [
-  {
-    value: 'client',
-    label: 'Client',
-    icon: '👥',
-    description: 'People who hire your services'
-  },
-  {
-    value: 'subcontractor',
-    label: 'Subcontractor',
-    icon: '🔨',
-    description: 'Professionals you work with'
-  },
-  {
-    value: 'vendor',
-    label: 'Vendor',
-    icon: '🚚',
-    description: 'Suppliers and service providers'
-  }
-];
-
-const businessTypeOptions = {
-  client: [
-    'Residential Property Owner',
-    'Commercial Property Owner',
-    'Real Estate Developer',
-    'Property Manager',
-    'General Contractor',
-    'Other'
-  ],
-  subcontractor: [
-    'Electrician',
-    'Plumber',
-    'HVAC Technician',
-    'Flooring Specialist',
-    'Painter',
-    'Roofer',
-    'Landscaper',
-    'Other'
-  ],
-  vendor: [
-    'Building Materials Supplier',
-    'Equipment Rental',
-    'Tool Supplier',
-    'Specialty Materials',
-    'Professional Services',
-    'Other'
-  ]
-};
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const isEnhanced = searchParams?.get('enhanced') === 'true';
-
-  const [currentStep, setCurrentStep] = useState(1);
+  const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
-  const [authenticated, setAuthenticated] = useState(false);
-  const [formData, setFormData] = useState<OnboardingFormData>({
-    // Essential Info
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
+  
+  const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
-    alternatePhone: '',
-    workPhone: '',
-    company: '',
-    title: '',
-    website: '',
-
-    // Address Information
+    contactType: 'client',
     address: '',
-    address2: '',
     city: '',
     state: '',
     zipCode: '',
-
-    // Billing Address
-    billingDifferent: false,
-    billingAddress: '',
-    billingAddress2: '',
-    billingCity: '',
-    billingState: '',
-    billingZipCode: '',
-
-    // Service Information
-    serviceLocation: 'primary_address',
-    customServiceAddress: '',
-    accessInstructions: '',
-    preferredServiceTimes: '',
-    emergencyContact: '',
-    emergencyPhone: '',
-
-    // Type & Project Info
-    entityType: 'client',
-    businessType: '',
-    projectType: '',
-    budget: '',
-    timeline: '',
-    description: '',
-
-    // Additional Fields
-    licenseNumber: '',
-    insuranceNumber: '',
-    hourlyRate: '',
-    workAddress: '',
-    accountNumber: '',
-    taxId: '',
-    notes: '',
-    preferredContactMethod: 'phone',
-    specialRequirements: '',
-    petInformation: '',
-    hasKeys: false,
+    notes: ''
   });
 
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  // Initialize authentication
-  useEffect(() => {
-    const initAuth = async () => {
-      // Check if already authenticated
-      if (authService.isAuthenticated()) {
-        setAuthenticated(true);
-        return;
-      }
-
-      // Auto-authenticate with demo credentials for development
-      try {
-        await authService.demoLogin();
-        setAuthenticated(true);
-      } catch (error) {
-        // If auto-login fails, user will need to log in manually
-        // For now, we'll continue without authentication
-        setAuthenticated(false);
-      }
-    };
-
-    initAuth();
-  }, []);
-
-  const validateStep = (step: number): boolean => {
-    const newErrors: Record<string, string> = {};
-
+  const handleNext = async () => {
+    // Validation
     if (step === 1) {
-      // Basic contact information validation
-      if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
-      if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
-      if (!formData.email.trim()) {
-        newErrors.email = 'Email is required';
-      } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-        newErrors.email = 'Please enter a valid email address';
-      }
-    } else if (step === 2) {
-      // Contact type validation
-      if (!formData.entityType) newErrors.entityType = 'Please select a contact type';
-    } else if (step === 3) {
-      // Type-specific validation
-      if (formData.entityType === 'client') {
-        if (!formData.address.trim()) newErrors.address = 'Address is required for clients';
-        if (!formData.city.trim()) newErrors.city = 'City is required';
-        if (!formData.state.trim()) newErrors.state = 'State is required';
-        if (!formData.zipCode.trim()) newErrors.zipCode = 'ZIP code is required';
-      } else if (formData.entityType === 'subcontractor') {
-        if (!formData.businessType) newErrors.businessType = 'Please specify your trade/specialty';
-        if (!formData.phone?.trim()) newErrors.phone = 'Phone number is required for subcontractors';
-      } else if (formData.entityType === 'vendor') {
-        if (!formData.company?.trim()) newErrors.company = 'Company name is required for vendors';
-        if (!formData.businessType) newErrors.businessType = 'Please specify vendor type';
+      if (!formData.firstName || !formData.lastName || !formData.email) {
+        setError('Please fill in all required fields');
+        return;
       }
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleNext = async () => {
-    if (!validateStep(currentStep)) return;
-
-    if (currentStep === 3) {
-      // Submit the form on step 3
+    if (step === 3) {
+      // Submit form
       setSubmitting(true);
+      setError('');
 
       try {
-        // Get authentication headers
-        const headers = authService.getAuthHeaders();
-
-        // Create the contact using the backend API
         const response = await fetch('/api/clients', {
           method: 'POST',
-          headers,
+          headers: {
+            'Content-Type': 'application/json',
+          },
           body: JSON.stringify({
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            email: formData.email,
-            phone: formData.phone,
-            company: formData.company,
-            contactType: formData.entityType,
-            businessType: formData.businessType,
-            entityType: formData.entityType,
-            address: formData.address,
-            city: formData.city,
-            state: formData.state,
-            zipCode: formData.zipCode,
-            licenseNumber: formData.licenseNumber,
-            insuranceNumber: formData.insuranceNumber,
-            hourlyRate: formData.hourlyRate,
-            workAddress: formData.workAddress,
-            accountNumber: formData.accountNumber,
-            taxId: formData.taxId,
-            notes: formData.notes,
-            status: 'lead',
-            tags: []
+            ...formData,
+            entityType: formData.contactType,
+            status: 'lead'
           }),
         });
 
-        if (response.ok) {
-          const created = await response.json();
-          const newContactId = created?._id || created?.id;
-
-          if (!newContactId) {
-            throw new Error('Contact created but no ID returned');
-          }
-
-          // Store contact in localStorage as backup (for server restart recovery)
-          try {
-            const existingContacts = JSON.parse(localStorage.getItem('crm-dev-contacts') || '[]');
-            const contactExists = existingContacts.find((c: { id?: string; _id?: string }) => c.id === newContactId || c._id === newContactId);
-            if (!contactExists) {
-              existingContacts.unshift(created);
-              localStorage.setItem('crm-dev-contacts', JSON.stringify(existingContacts));
-            }
-          } catch (e) {
-            // Silent fail
-          }
-
-          // Verify the contact exists before redirecting
-          const verifyResponse = await fetch(`/api/clients/${newContactId}`, { 
-            headers: authService.getAuthHeaders() 
-          });
-
-          if (verifyResponse.ok) {
-            // Contact verified - refresh sidebar counts
-            if (typeof window !== 'undefined' && (window as any).refreshSidebarCounts) {
-              (window as any).refreshSidebarCounts();
-            }
-            // Contact verified - safe to redirect
-            router.push(`/dashboard/clients/${newContactId}?created=true&type=${formData.entityType}`);
-          } else {
-            // Contact not found immediately - wait and retry
-            await new Promise(resolve => setTimeout(resolve, 200));
-            const retryResponse = await fetch(`/api/clients/${newContactId}`, { 
-              headers: authService.getAuthHeaders() 
-            });
-
-            if (retryResponse.ok) {
-              // Contact verified after retry - refresh sidebar counts
-              if (typeof window !== 'undefined' && (window as any).refreshSidebarCounts) {
-                (window as any).refreshSidebarCounts();
-              }
-              router.push(`/dashboard/clients/${newContactId}?created=true&type=${formData.entityType}`);
-            } else {
-              // Fallback: redirect to contacts list with success message
-              // Still refresh counts as contact was likely created
-              if (typeof window !== 'undefined' && (window as any).refreshSidebarCounts) {
-                (window as any).refreshSidebarCounts();
-              }
-              router.push(`/dashboard/clients?created=${newContactId}&name=${encodeURIComponent(created.name || 'Contact')}`);
-            }
-          }
-        } else {
+        if (!response.ok) {
           const errorData = await response.text();
           throw new Error(`Create failed: ${errorData}`);
         }
-      } catch (error: unknown) {
-        setErrors({ submit: error instanceof Error ? error.message : 'Failed to create contact. Please try again.' });
+
+        const result = await response.json();
+        const newContactId = result.data?.id || result.data?._id;
+
+        if (newContactId) {
+          // Refresh sidebar counts
+          if (typeof window !== 'undefined' && (window as any).refreshSidebarCounts) {
+            (window as any).refreshSidebarCounts();
+          }
+          
+          // Redirect to the contact page
+          router.push(`/dashboard/clients/${newContactId}?created=true&type=${formData.contactType}`);
+        } else {
+          setSuccess(true);
+          // Reset form after delay
+          setTimeout(() => {
+            setStep(1);
+            setSuccess(false);
+            setFormData({
+              firstName: '',
+              lastName: '',
+              email: '',
+              phone: '',
+              contactType: 'client',
+              address: '',
+              city: '',
+              state: '',
+              zipCode: '',
+              notes: ''
+            });
+          }, 2000);
+        }
+        
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to create contact');
       } finally {
         setSubmitting(false);
       }
     } else {
-      // Move to next step
-      setCurrentStep(prev => Math.min(prev + 1, 3));
+      setStep(step + 1);
+      setError('');
     }
   };
 
   const handleBack = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 1));
+    setStep(step - 1);
+    setError('');
   };
 
-  if (submitting) {
+  if (success) {
     return (
-      <StandardPageWrapper>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <StandardCard className="max-w-md mx-auto text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <h2 className="text-xl font-semibold text-white mb-2">Creating Contact...</h2>
-            <p className="text-slate-400">
-              Setting up your new contact...
-            </p>
-          </StandardCard>
-        </div>
+      <StandardPageWrapper
+        title="Contact Created!"
+        subtitle="Successfully added new contact to your CRM"
+        icon={<CheckIcon className="h-6 w-6" />}
+      >
+        <StandardSection>
+          <div className="max-w-2xl mx-auto text-center">
+            <StandardCard>
+              <div className="p-8">
+                <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CheckIcon className="h-8 w-8 text-white" />
+                </div>
+                <h2 className="text-2xl font-bold text-white mb-4">Success!</h2>
+                <p className="text-slate-400 mb-6">Contact created successfully!</p>
+                <p className="text-sm text-slate-500">Redirecting...</p>
+              </div>
+            </StandardCard>
+          </div>
+        </StandardSection>
       </StandardPageWrapper>
     );
   }
@@ -397,7 +144,7 @@ export default function OnboardingPage() {
   return (
     <StandardPageWrapper
       title="Add New Contact"
-      subtitle={isEnhanced ? "Enhanced contact creation with advanced options" : "Quick contact setup"}
+      subtitle="Quick and easy contact onboarding process"
       icon={<UserPlusIcon className="h-6 w-6" />}
       headerActions={
         <div className="flex items-center gap-4">
@@ -410,14 +157,14 @@ export default function OnboardingPage() {
           </Link>
           <div className="flex items-center gap-2">
             <span className="text-sm text-slate-400">
-              Step {currentStep} of 3
+              Step {step} of 3
             </span>
             <div className="flex gap-1">
-              {[1, 2, 3].map((step) => (
+              {[1, 2, 3].map((s) => (
                 <div
-                  key={step}
+                  key={s}
                   className={`w-2 h-2 rounded-full transition-colors ${
-                    step <= currentStep ? 'bg-amber-500' : 'bg-slate-600'
+                    s <= step ? 'bg-amber-500' : 'bg-slate-600'
                   }`}
                 />
               ))}
@@ -433,468 +180,232 @@ export default function OnboardingPage() {
             <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
               <div
                 className="bg-amber-500 h-2 rounded-full transition-all duration-500 ease-out"
-                style={{ width: `${(currentStep / 3) * 100}%` }}
+                style={{ width: `${(step / 3) * 100}%` }}
               ></div>
             </div>
           </div>
 
-          {/* Step 1: Basic Contact Information */}
-          {currentStep === 1 && (
-            <StandardCard>
-              <div className="space-y-6">
-                <div className="text-center mb-6">
-                  <div className="w-16 h-16 bg-amber-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <UserIcon className="h-8 w-8 text-white" />
-                  </div>
-                  <h2 className="text-2xl font-bold text-white mb-2">Basic Contact Information</h2>
-                  <p className="text-slate-400">
-                    Let's start with the essential contact details
-                  </p>
-                </div>
-
-                {/* Essential Contact Info */}
-                <StandardGrid cols={2} gap="md">
-                  <FormattedInput
-                    label="First Name *"
-                    type="text"
-                    value={formData.firstName}
-                    onChange={(value) => setFormData(prev => ({ ...prev, firstName: value }))}
-                    placeholder="Enter first name"
-                    icon={UserIcon}
-                    error={errors.firstName}
-                    required
-                  />
-
-                  <FormattedInput
-                    label="Last Name *"
-                    type="text"
-                    value={formData.lastName}
-                    onChange={(value) => setFormData(prev => ({ ...prev, lastName: value }))}
-                    placeholder="Enter last name"
-                    icon={UserIcon}
-                    error={errors.lastName}
-                    required
-                  />
-                </StandardGrid>
-
-                <FormattedInput
-                  label="Email Address *"
-                  type="email"
-                  value={formData.email}
-                  onChange={(value) => setFormData(prev => ({ ...prev, email: value }))}
-                  placeholder="contact@example.com"
-                  icon={EnvelopeIcon}
-                  error={errors.email}
-                  required
-                />
-
-                <FormattedInput
-                  label="Primary Phone"
-                  type="phone"
-                  value={formData.phone || ''}
-                  onChange={(value) => setFormData(prev => ({ ...prev, phone: value }))}
-                  placeholder="(555) 123-4567"
-                  icon={PhoneIcon}
-                />
-
-                <div className="flex justify-end pt-6">
-                  <StandardButton onClick={handleNext} size="lg">
-                    Continue to Contact Type
-                    <ArrowRightIcon className="h-4 w-4 ml-2" />
-                  </StandardButton>
-                </div>
-              </div>
-            </StandardCard>
+          {error && (
+            <div className="bg-red-500/10 border border-red-500 text-red-400 p-4 rounded-lg mb-6">
+              {error}
+            </div>
           )}
 
-          {/* Step 2: Contact Type Selection */}
-          {currentStep === 2 && (
-            <StandardCard>
-              <div className="space-y-6">
-                <div className="text-center mb-6">
-                  <div className="w-16 h-16 bg-amber-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <BuildingOfficeIcon className="h-8 w-8 text-white" />
-                  </div>
-                  <h2 className="text-2xl font-bold text-white mb-2">Contact Type</h2>
-                  <p className="text-slate-400">
-                    What type of contact is this? This will determine what additional information we collect.
-                  </p>
-                </div>
-
-                <StandardGrid cols={1} gap="md">
-                  {entityTypeOptions.map((option) => (
-                    <div
-                      key={option.value}
-                      onClick={() => setFormData(prev => ({ ...prev, entityType: option.value as OnboardingFormData['entityType'] }))}
-                      className={`cursor-pointer rounded-xl border-2 p-6 transition-all duration-200 hover:scale-105 ${
-                        formData.entityType === option.value
-                          ? 'border-amber-500 bg-amber-500/10'
-                          : 'border-slate-300 dark:border-slate-600 hover:border-amber-400'
-                      }`}
-                    >
-                      <div className="flex items-center space-x-4">
-                        <div className="text-3xl">{option.icon}</div>
-                        <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-white">{option.label}</h3>
-                          <p className="text-slate-400">{option.description}</p>
-                        </div>
-                        {formData.entityType === option.value && (
-                          <CheckIcon className="h-6 w-6 text-amber-500" />
-                        )}
-                      </div>
+          <StandardCard>
+            <div className="space-y-6">
+              {/* Step 1: Basic Information */}
+              {step === 1 && (
+                <div>
+                  <div className="text-center mb-6">
+                    <div className="w-16 h-16 bg-amber-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <UserPlusIcon className="h-8 w-8 text-white" />
                     </div>
-                  ))}
-                </StandardGrid>
-
-                {formData.entityType && (
-                  <div className="space-y-4 animate-in slide-in-from-bottom">
-                    <label className="block text-sm font-medium text-slate-300">
-                      Specialization/Type
-                    </label>
-                    <select
-                      value={formData.businessType}
-                      onChange={(e) => setFormData(prev => ({ ...prev, businessType: e.target.value }))}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
-                    >
-                      <option value="">Select specialization...</option>
-                      {businessTypeOptions[formData.entityType].map((type) => (
-                        <option key={type} value={type}>{type}</option>
-                      ))}
-                    </select>
-                    {errors.businessType && (
-                      <p className="text-red-500 text-sm">{errors.businessType}</p>
-                    )}
+                    <h2 className="text-2xl font-bold text-white mb-2">Basic Information</h2>
+                    <p className="text-slate-400">
+                      Let's start with essential contact details
+                    </p>
                   </div>
-                )}
 
-                <div className="flex justify-between pt-6">
-                  <StandardButton variant="secondary" onClick={handleBack}>
-                    Back
-                  </StandardButton>
-                  <StandardButton onClick={handleNext} size="lg">
-                    Continue to Details
-                    <ArrowRightIcon className="h-4 w-4 ml-2" />
-                  </StandardButton>
-                </div>
-              </div>
-            </StandardCard>
-          )}
-
-          {/* Step 3: Contact-Specific Information */}
-          {currentStep === 3 && (
-            <StandardCard>
-              <div className="space-y-6">
-                <div className="text-center mb-6">
-                  <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                    {formData.entityType === 'client' && <UserGroupIcon className="h-8 w-8 text-white" />}
-                    {formData.entityType === 'subcontractor' && <WrenchScrewdriverIcon className="h-8 w-8 text-white" />}
-                    {formData.entityType === 'vendor' && <BuildingStorefrontIcon className="h-8 w-8 text-white" />}
-                  </div>
-                  <h2 className="text-2xl font-bold text-white mb-2">
-                    {formData.entityType === 'client' && 'Client Information'}
-                    {formData.entityType === 'subcontractor' && 'Contractor Details'}
-                    {formData.entityType === 'vendor' && 'Vendor Information'}
-                  </h2>
-                  <p className="text-slate-400">
-                    {formData.entityType === 'client' && 'Location and project details for your client'}
-                    {formData.entityType === 'subcontractor' && 'Trade skills and licensing information'}
-                    {formData.entityType === 'vendor' && 'Company and service information'}
-                  </p>
-                </div>
-
-                {/* Client-specific fields */}
-                {formData.entityType === 'client' && (
-                  <div className="space-y-6">
-                    {/* Primary Address */}
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold text-white mb-4">Project Address</h3>
-
-                      <FormattedInput
-                        label="Street Address *"
-                        type="address"
-                        value={formData.address}
-                        onChange={(value) => setFormData(prev => ({ ...prev, address: value }))}
-                        placeholder="123 Main Street"
-                        icon={MapPinIcon}
-                        required
-                      />
-
-                      <FormattedInput
-                        label="Address Line 2"
-                        type="address"
-                        value={formData.address2 || ''}
-                        onChange={(value) => setFormData(prev => ({ ...prev, address2: value }))}
-                        placeholder="Apt, Suite, Unit, Building, Floor, etc."
-                        icon={MapPinIcon}
-                      />
-
-                      <StandardGrid cols={3} gap="md">
-                        <FormattedInput
-                          label="City *"
-                          type="text"
-                          value={formData.city}
-                          onChange={(value) => setFormData(prev => ({ ...prev, city: value }))}
-                          placeholder="City"
-                          icon={MapPinIcon}
-                          required
-                        />
-
-                        <FormattedInput
-                          label="State *"
-                          type="text"
-                          value={formData.state}
-                          onChange={(value) => setFormData(prev => ({ ...prev, state: value }))}
-                          placeholder="State"
-                          icon={MapPinIcon}
-                          required
-                        />
-
-                        <FormattedInput
-                          label="ZIP Code *"
-                          type="zip"
-                          value={formData.zipCode}
-                          onChange={(value) => setFormData(prev => ({ ...prev, zipCode: value }))}
-                          placeholder="12345"
-                          icon={MapPinIcon}
-                          required
-                        />
-                      </StandardGrid>
-                    </div>
-
-                    {/* Billing Address Option */}
-                    <div className="border-t border-slate-600 pt-6">
-                      <label className="flex items-center space-x-3 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={formData.billingDifferent}
-                          onChange={(e) => setFormData(prev => ({ ...prev, billingDifferent: e.target.checked }))}
-                          className="w-5 h-5 text-amber-500 bg-slate-700 border-slate-600 rounded focus:ring-amber-500 focus:ring-2"
-                        />
-                        <span className="text-slate-300">Billing address is different from project address</span>
-                      </label>
-
-                      {formData.billingDifferent && (
-                        <div className="mt-6 space-y-4 animate-in slide-in-from-bottom">
-                          <h3 className="text-lg font-semibold text-white">Billing Address</h3>
-
-                          <FormattedInput
-                            label="Billing Street Address"
-                            type="address"
-                            value={formData.billingAddress || ''}
-                            onChange={(value) => setFormData(prev => ({ ...prev, billingAddress: value }))}
-                            placeholder="123 Business Street"
-                            icon={MapPinIcon}
-                          />
-
-                          <StandardGrid cols={3} gap="md">
-                            <FormattedInput
-                              label="Billing City"
-                              type="text"
-                              value={formData.billingCity || ''}
-                              onChange={(value) => setFormData(prev => ({ ...prev, billingCity: value }))}
-                              placeholder="City"
-                              icon={MapPinIcon}
-                            />
-
-                            <FormattedInput
-                              label="Billing State"
-                              type="text"
-                              value={formData.billingState || ''}
-                              onChange={(value) => setFormData(prev => ({ ...prev, billingState: value }))}
-                              placeholder="State"
-                              icon={MapPinIcon}
-                            />
-
-                            <FormattedInput
-                              label="Billing ZIP"
-                              type="zip"
-                              value={formData.billingZipCode || ''}
-                              onChange={(value) => setFormData(prev => ({ ...prev, billingZipCode: value }))}
-                              placeholder="12345"
-                              icon={MapPinIcon}
-                            />
-                          </StandardGrid>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Subcontractor-specific fields */}
-                {formData.entityType === 'subcontractor' && (
-                  <div className="space-y-6">
-                    <StandardGrid cols={2} gap="md">
-                      <FormattedInput
-                        label="License Number"
-                        type="text"
-                        value={formData.licenseNumber || ''}
-                        onChange={(value) => setFormData(prev => ({ ...prev, licenseNumber: value }))}
-                        placeholder="LIC123456"
-                        icon={DocumentCheckIcon}
-                      />
-
-                      <FormattedInput
-                        label="Insurance Policy Number"
-                        type="text"
-                        value={formData.insuranceNumber || ''}
-                        onChange={(value) => setFormData(prev => ({ ...prev, insuranceNumber: value }))}
-                        placeholder="INS789012"
-                        icon={ShieldCheckIcon}
-                      />
-                    </StandardGrid>
-
-                    <div className="space-y-4">
-                      <label className="block text-sm font-medium text-slate-300">
-                        Hourly Rate
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <span className="text-slate-400 sm:text-sm">$</span>
-                        </div>
-                        <input
-                          type="number"
-                          value={formData.hourlyRate || ''}
-                          onChange={(e) => setFormData(prev => ({ ...prev, hourlyRate: e.target.value }))}
-                          className="pl-7 w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
-                          placeholder="75.00"
-                        />
-                      </div>
-                    </div>
-
-                    <FormattedInput
-                      label="Work Address (if different from home)"
-                      type="address"
-                      value={formData.workAddress || ''}
-                      onChange={(value) => setFormData(prev => ({ ...prev, workAddress: value }))}
-                      placeholder="123 Workshop Street"
-                      icon={MapPinIcon}
-                    />
-                  </div>
-                )}
-
-                {/* Vendor-specific fields */}
-                {formData.entityType === 'vendor' && (
-                  <div className="space-y-6">
-                    <FormattedInput
-                      label="Company Name *"
-                      type="text"
-                      value={formData.company || ''}
-                      onChange={(value) => setFormData(prev => ({ ...prev, company: value }))}
-                      placeholder="ABC Supply Company"
-                      icon={BuildingOfficeIcon}
-                      required
-                    />
-
-                    <StandardGrid cols={2} gap="md">
-                      <FormattedInput
-                        label="Account Number"
-                        type="text"
-                        value={formData.accountNumber || ''}
-                        onChange={(value) => setFormData(prev => ({ ...prev, accountNumber: value }))}
-                        placeholder="ACC123456"
-                        icon={CreditCardIcon}
-                      />
-
-                      <FormattedInput
-                        label="Tax ID / EIN"
-                        type="text"
-                        value={formData.taxId || ''}
-                        onChange={(value) => setFormData(prev => ({ ...prev, taxId: value }))}
-                        placeholder="12-3456789"
-                        icon={DocumentTextIcon}
-                      />
-                    </StandardGrid>
-
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold text-white">Company Address</h3>
-
-                      <FormattedInput
-                        label="Street Address *"
-                        type="address"
-                        value={formData.address}
-                        onChange={(value) => setFormData(prev => ({ ...prev, address: value }))}
-                        placeholder="123 Business Drive"
-                        icon={MapPinIcon}
-                        required
-                      />
-
-                      <StandardGrid cols={3} gap="md">
-                        <FormattedInput
-                          label="City *"
-                          type="text"
-                          value={formData.city}
-                          onChange={(value) => setFormData(prev => ({ ...prev, city: value }))}
-                          placeholder="City"
-                          icon={MapPinIcon}
-                          required
-                        />
-
-                        <FormattedInput
-                          label="State *"
-                          type="text"
-                          value={formData.state}
-                          onChange={(value) => setFormData(prev => ({ ...prev, state: value }))}
-                          placeholder="State"
-                          icon={MapPinIcon}
-                          required
-                        />
-
-                        <FormattedInput
-                          label="ZIP Code *"
-                          type="zip"
-                          value={formData.zipCode}
-                          onChange={(value) => setFormData(prev => ({ ...prev, zipCode: value }))}
-                          placeholder="12345"
-                          icon={MapPinIcon}
-                          required
-                        />
-                      </StandardGrid>
-                    </div>
-                  </div>
-                )}
-
-                {/* Notes section for all types */}
-                <div className="border-t border-slate-600 pt-6">
                   <div className="space-y-4">
-                    <label className="block text-sm font-medium text-slate-300">
-                      Notes
-                    </label>
-                    <textarea
-                      value={formData.notes}
-                      onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                      rows={3}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all resize-none"
-                      placeholder="Any additional notes or special requirements..."
-                    />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-300 mb-2">First Name *</label>
+                        <input
+                          type="text"
+                          value={formData.firstName}
+                          onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                          className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                          placeholder="Enter first name"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-300 mb-2">Last Name *</label>
+                        <input
+                          type="text"
+                          value={formData.lastName}
+                          onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                          className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                          placeholder="Enter last name"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Email Address *</label>
+                      <input
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({...formData, email: e.target.value})}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                        placeholder="contact@example.com"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Phone</label>
+                      <input
+                        type="tel"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                        placeholder="(555) 123-4567"
+                      />
+                    </div>
                   </div>
                 </div>
+              )}
 
-                <div className="flex justify-between pt-6">
+              {/* Step 2: Contact Type */}
+              {step === 2 && (
+                <div>
+                  <div className="text-center mb-6">
+                    <div className="w-16 h-16 bg-amber-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <UserPlusIcon className="h-8 w-8 text-white" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-white mb-2">Contact Type</h2>
+                    <p className="text-slate-400">
+                      What type of contact is this?
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    {[
+                      { value: 'client', label: 'Client', description: 'People who hire your services' },
+                      { value: 'subcontractor', label: 'Subcontractor', description: 'Professionals you work with' },
+                      { value: 'vendor', label: 'Vendor', description: 'Suppliers and service providers' }
+                    ].map((option) => (
+                      <label
+                        key={option.value}
+                        className={`block p-4 border-2 rounded-xl cursor-pointer transition-all hover:scale-105 ${
+                          formData.contactType === option.value
+                            ? 'border-amber-500 bg-amber-500/10'
+                            : 'border-slate-300 dark:border-slate-600 hover:border-amber-400'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="contactType"
+                          value={option.value}
+                          checked={formData.contactType === option.value}
+                          onChange={(e) => setFormData({...formData, contactType: e.target.value})}
+                          className="sr-only"
+                        />
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="font-medium text-white">{option.label}</div>
+                            <div className="text-sm text-slate-400">{option.description}</div>
+                          </div>
+                          {formData.contactType === option.value && (
+                            <CheckIcon className="h-6 w-6 text-amber-500" />
+                          )}
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Step 3: Additional Details */}
+              {step === 3 && (
+                <div>
+                  <div className="text-center mb-6">
+                    <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <CheckIcon className="h-8 w-8 text-white" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-white mb-2">Additional Details</h2>
+                    <p className="text-slate-400">
+                      Add location and other information
+                    </p>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Address</label>
+                      <input
+                        type="text"
+                        value={formData.address}
+                        onChange={(e) => setFormData({...formData, address: e.target.value})}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                        placeholder="123 Main Street"
+                      />
+                    </div>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-300 mb-2">City</label>
+                        <input
+                          type="text"
+                          value={formData.city}
+                          onChange={(e) => setFormData({...formData, city: e.target.value})}
+                          className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                          placeholder="City"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-300 mb-2">State</label>
+                        <input
+                          type="text"
+                          value={formData.state}
+                          onChange={(e) => setFormData({...formData, state: e.target.value})}
+                          className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                          placeholder="State"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-300 mb-2">ZIP Code</label>
+                        <input
+                          type="text"
+                          value={formData.zipCode}
+                          onChange={(e) => setFormData({...formData, zipCode: e.target.value})}
+                          className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                          placeholder="12345"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Notes</label>
+                      <textarea
+                        value={formData.notes}
+                        onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all resize-none"
+                        rows={3}
+                        placeholder="Any additional notes or special requirements..."
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Navigation */}
+              <div className="flex justify-between pt-6">
+                {step > 1 && (
                   <StandardButton variant="secondary" onClick={handleBack}>
                     Back
                   </StandardButton>
-                  <StandardButton
-                    onClick={handleNext}
-                    size="lg"
-                    disabled={submitting}
-                  >
-                    {submitting ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Creating Contact...
-                      </>
-                    ) : (
-                      <>
-                        Create Contact
-                        <CheckIcon className="h-4 w-4 ml-2" />
-                      </>
-                    )}
-                  </StandardButton>
-                </div>
+                )}
+                <StandardButton
+                  onClick={handleNext}
+                  size="lg"
+                  disabled={submitting}
+                  className="ml-auto"
+                >
+                  {submitting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Creating...
+                    </>
+                  ) : step === 3 ? (
+                    <>
+                      Create Contact
+                      <CheckIcon className="h-4 w-4 ml-2" />
+                    </>
+                  ) : (
+                    <>
+                      Continue
+                      <ArrowRightIcon className="h-4 w-4 ml-2" />
+                    </>
+                  )}
+                </StandardButton>
               </div>
-            </StandardCard>
-          )}
-
+            </div>
+          </StandardCard>
         </div>
       </StandardSection>
     </StandardPageWrapper>

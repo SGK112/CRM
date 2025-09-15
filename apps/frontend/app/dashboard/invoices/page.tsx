@@ -3,6 +3,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { API_BASE } from '@/lib/api';
 import { downloadDataAsCSV, generateBulkPDF, generateInvoicePDF } from '@/lib/pdf-generator';
 import { Download } from 'lucide-react';
+import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 interface Invoice {
@@ -14,13 +15,39 @@ interface Invoice {
   total: number;
   createdAt: string;
   amountPaid: number;
+  clientId?: string;
+}
+
+interface Client {
+  _id: string;
+  id?: string;
+  name: string;
+  email?: string;
+  company?: string;
 }
 
 export default function InvoicesPage() {
   const [list, setList] = useState<Invoice[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : '';
+
+  const fetchClients = useCallback(async () => {
+    try {
+      const res = await fetch('/api/clients');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data)) {
+          setClients(data.data);
+        } else if (Array.isArray(data)) {
+          setClients(data);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch clients:', error);
+    }
+  }, []);
 
   const fetchList = useCallback(async () => {
     setLoading(true);
@@ -32,8 +59,17 @@ export default function InvoicesPage() {
   }, [token]);
 
   useEffect(() => {
+    fetchClients();
     fetchList();
-  }, [fetchList]);
+  }, [fetchClients, fetchList]);
+
+  // Helper function to get client name and info
+  const getClientInfo = useCallback((clientId?: string) => {
+    if (!clientId) return null;
+    return clients.find(client => 
+      client._id === clientId || client.id === clientId
+    );
+  }, [clients]);
 
   // PDF download handlers
   const handleDownloadPDF = async (invoice: Invoice) => {
@@ -176,6 +212,7 @@ export default function InvoicesPage() {
           <thead className="text-left text-[11px] uppercase tracking-wide text-gray-700 dark:text-gray-300 bg-[var(--surface-1)]">
             <tr className="border-b border-token">
               <th className="py-2 px-3">Number</th>
+              <th className="py-2 px-3">Client</th>
               <th className="py-2 px-3">Status</th>
               <th className="py-2 px-3">Subtotal</th>
               <th className="py-2 px-3">Tax</th>
@@ -188,7 +225,7 @@ export default function InvoicesPage() {
           <tbody className="divide-y divide-[var(--border)]/60">
             {loading && (
               <tr>
-                <td colSpan={8} className="py-6 text-center text-xs">
+                <td colSpan={9} className="py-6 text-center text-xs">
                   Loading...
                 </td>
               </tr>
@@ -197,6 +234,22 @@ export default function InvoicesPage() {
               list.map(inv => (
                 <tr key={inv._id} className="hover:bg-[var(--surface-2)]/60">
                   <td className="py-2 px-3 font-medium">{inv.number}</td>
+                  <td className="py-2 px-3 text-sm">
+                    {(() => {
+                      const client = getClientInfo(inv.clientId);
+                      if (client) {
+                        return (
+                          <Link 
+                            href={`/dashboard/clients?clientId=${client._id || client.id}&source=invoices`}
+                            className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline transition-colors"
+                          >
+                            {client.name}
+                          </Link>
+                        );
+                      }
+                      return <span className="text-gray-500 dark:text-gray-400">No client</span>;
+                    })()}
+                  </td>
                   <td className="py-2 px-3 text-[11px]">{inv.status}</td>
                   <td className="py-2 px-3">{inv.subtotal.toFixed(2)}</td>
                   <td className="py-2 px-3">{inv.taxAmount.toFixed(2)}</td>
@@ -238,7 +291,7 @@ export default function InvoicesPage() {
               ))}
             {!loading && list.length === 0 && (
               <tr>
-                <td colSpan={8} className="py-6 text-center text-xs text-gray-700">
+                <td colSpan={9} className="py-6 text-center text-xs text-gray-700">
                   No invoices yet.
                 </td>
               </tr>

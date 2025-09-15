@@ -90,6 +90,16 @@ export class Estimate {
 
   @Prop({ unique: true, sparse: true })
   shareToken?: string;
+
+  // Optional deposit requirements (either percentage or fixed amount).
+  @Prop({ default: 0 })
+  depositRequired: number; // normalized monetary amount (if percent used, converted at create/update time)
+
+  @Prop({ default: 'none' })
+  depositType: string; // none | percent | fixed
+
+  @Prop({ default: 0 })
+  depositValue: number; // original percent (0-100) or fixed amount entered by user
 }
 
 export type EstimateDocument = Estimate & Document;

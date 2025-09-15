@@ -1,3 +1,23 @@
+// TEST ROUTINES FOR TWILIO AND SENDGRID
+import { TwilioService } from '../services/twilio.service';
+import { EmailService } from '../services/email.service';
+
+// Add a test function to send SMS and email
+export async function testNotificationIntegrations(
+  twilioService: TwilioService,
+  emailService: EmailService,
+  testPhone: string,
+  testEmail: string
+) {
+  const smsResult = await twilioService.sendSMS(testPhone, 'CRM Twilio test: Your system is ready!');
+  const emailResult = await emailService.sendEmail({
+    to: testEmail,
+    subject: 'CRM SendGrid Test',
+    html: '<b>Your CRM SendGrid integration is working!</b>',
+    text: 'Your CRM SendGrid integration is working!'
+  });
+  return { smsResult, emailResult };
+}
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';

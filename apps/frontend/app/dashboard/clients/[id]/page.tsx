@@ -102,7 +102,9 @@ export default function ContactDetailPage() {
         });
 
         if (response.ok) {
-          const data = await response.json();
+          const responseData = await response.json();
+          // Handle API response format {success: true, data: {...}}
+          const data = responseData.success ? responseData.data : responseData;
           setContact(data);
 
           // Update document title with contact name
@@ -215,7 +217,7 @@ export default function ContactDetailPage() {
             label: 'Schedule Appointment',
             icon: CalendarIcon,
             action: () => {
-              window.open(`/dashboard/calendar/new?clientId=${contactId}`, '_blank');
+              window.open(`/dashboard/calendar?clientId=${contactId}`, '_blank');
             },
             color: 'amber'
           },
@@ -351,7 +353,7 @@ export default function ContactDetailPage() {
             label: 'Schedule 1:1',
             icon: CalendarIcon,
             action: () => {
-              window.open(`/dashboard/calendar/new?contact=${contactId}&type=meeting`, '_blank');
+              window.open(`/dashboard/calendar?contact=${contactId}&type=meeting`, '_blank');
             },
             color: 'green'
           },
