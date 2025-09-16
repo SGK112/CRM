@@ -150,7 +150,6 @@ export default function Inbox() {
         </p>
       </div>
 
-      {/* Search and Stats */}
       <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Search */}
         <div className="relative">
