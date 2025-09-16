@@ -6,33 +6,39 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL |
 
 export async function GET(request: NextRequest) {
   try {
-    // Check for development mode
-    if (process.env.NODE_ENV === 'development') {
-      // Return mock count for development
-      return NextResponse.json({ count: 8, active: 5, completed: 3 });
+    // Forward both cookies and authorization headers
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    // Forward cookie header if present
+    const cookieHeader = request.headers.get('cookie');
+    if (cookieHeader) {
+      headers['Cookie'] = cookieHeader;
     }
 
-    const { searchParams } = new URL(request.url);
-    const queryString = searchParams.toString();
-    const url = `${BACKEND_URL}/api/projects/count${queryString ? `?${queryString}` : ''}`;
+    // Forward authorization header if present
+    const authHeader = request.headers.get('authorization');
+    if (authHeader) {
+      headers['Authorization'] = authHeader;
+    }
 
-    const response = await fetch(url, {
+    const response = await fetch(`${BACKEND_URL}/api/projects`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Cookie': request.headers.get('cookie') || '',
-      },
+      headers,
     });
 
     if (!response.ok) {
-      // Return default count on error
-      return NextResponse.json({ count: 0 });
+      return NextResponse.json({ count: 0, active: 0, completed: 0 });
     }
 
-    const data = await response.json();
-    return NextResponse.json(data);
+    const projects = await response.json();
+    const count = Array.isArray(projects) ? projects.length : 0;
+    const active = Array.isArray(projects) ? projects.filter(p => p.status === 'active' || p.status === 'in_progress').length : 0;
+    const completed = Array.isArray(projects) ? projects.filter(p => p.status === 'completed').length : 0;
+    
+    return NextResponse.json({ count, active, completed });
   } catch (error) {
-    // Return default count on error
-    return NextResponse.json({ count: 0 });
+    return NextResponse.json({ count: 0, active: 0, completed: 0 });
   }
 }

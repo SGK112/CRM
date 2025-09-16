@@ -48,9 +48,9 @@ export default function CreateContactSlideOver({ open, onClose, defaultType = 'c
         email: form.email,
         phone: form.phone,
         company: form.company,
-        status: form.status,
+        status: form.type === 'client' ? 'client' : form.status, // Map frontend type to backend status
         notes: form.notes,
-        type: form.type,
+        type: 'residential', // Default type for client schema
       };
 
       const resp = await fetch('/api/clients', {

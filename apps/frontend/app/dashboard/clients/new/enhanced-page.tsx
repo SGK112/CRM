@@ -197,7 +197,8 @@ export default function EnhancedContactCreationPage() {
         headers,
         body: JSON.stringify({
           ...data,
-          type: data.contactType,
+          status: data.contactType === 'client' ? 'client' : data.status || 'lead', // Map contactType to status
+          type: 'residential', // Default type for schema compliance
           contactRole: data.contactType
         }),
       });
