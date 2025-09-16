@@ -44,7 +44,7 @@ export class EmailService {
     
     if (host && port && user && pass) {
       try {
-        this.transporter = nodemailer.createTransporter({
+        this.transporter = nodemailer.createTransport({
           host,
           port: parseInt(port, 10),
           secure: port === '465',

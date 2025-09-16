@@ -6,7 +6,7 @@ import { Model } from 'mongoose';
 import * as stream from 'stream';
 import { Client, ClientDocument } from './schemas/client.schema';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2022-11-15' });
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2023-08-16' });
 
 @Injectable()
 export class ClientsService {
