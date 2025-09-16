@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { randomBytes } from 'crypto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -59,6 +59,8 @@ export interface EstimateWithClient extends Estimate {
 
 @Injectable()
 export class EstimatesService {
+  private readonly logger = new Logger(EstimatesService.name);
+
   constructor(
     @InjectModel(Estimate.name) private estimateModel: Model<EstimateDocument>,
     @InjectModel(PriceItem.name) private priceModel: Model<PriceItemDocument>,
@@ -132,10 +134,42 @@ export class EstimatesService {
   }
 
   async create(dto: CreateEstimateDto, workspaceId: string) {
-    // generate number if not provided
+    // Generate unique number if not provided
     if (!dto.number) {
-      const count = await this.estimateModel.countDocuments({ workspaceId });
-      dto.number = `EST-${1000 + count + 1}`;
+      // Find the highest existing estimate number for this workspace
+      const lastEstimate = await this.estimateModel
+        .findOne({ workspaceId }, { number: 1 })
+        .sort({ number: -1 })
+        .exec();
+      
+      let nextNumber = 1001;
+      if (lastEstimate?.number) {
+        // Extract number from format EST-XXXX
+        const match = lastEstimate.number.match(/EST-(\d+)/);
+        if (match) {
+          nextNumber = Math.max(parseInt(match[1]) + 1, 1001);
+        }
+      }
+      
+      // Ensure uniqueness by checking if number already exists
+      let attempts = 0;
+      while (attempts < 10) {
+        const candidateNumber = `EST-${nextNumber + attempts}`;
+        const existing = await this.estimateModel.findOne({ 
+          workspaceId, 
+          number: candidateNumber 
+        });
+        if (!existing) {
+          dto.number = candidateNumber;
+          break;
+        }
+        attempts++;
+      }
+      
+      // Fallback if all attempts failed
+      if (!dto.number) {
+        dto.number = `EST-${Date.now()}`;
+      }
     }
     // Build line items, enriching from price items if provided
     const items: Array<{
@@ -165,22 +199,52 @@ export class EstimatesService {
       if (!li.name) li.name = li.sku || 'Item';
       items.push(li);
     }
-    const doc = new this.estimateModel({
-      workspaceId,
-      number: dto.number,
-      clientId: dto.clientId,
-      projectId: dto.projectId,
-      status: 'draft',
-      items,
-      discountType: dto.discountType || 'percent',
-      discountValue: dto.discountValue || 0,
-      taxRate: dto.taxRate || 0,
-      notes: dto.notes,
-      shareToken: randomBytes(16).toString('hex'),
-    });
-    this.computeTotals(doc);
-    await doc.save();
-    return doc;
+    // Retry logic for duplicate key errors
+    let attempts = 0;
+    const maxAttempts = 5;
+    
+    while (attempts < maxAttempts) {
+      try {
+        const doc = new this.estimateModel({
+          workspaceId,
+          number: dto.number,
+          clientId: dto.clientId,
+          projectId: dto.projectId,
+          status: 'draft',
+          items,
+          discountType: dto.discountType || 'percent',
+          discountValue: dto.discountValue || 0,
+          taxRate: dto.taxRate || 0,
+          notes: dto.notes,
+          shareToken: randomBytes(16).toString('hex'),
+        });
+        this.computeTotals(doc);
+        await doc.save();
+        return doc;
+      } catch (error) {
+        if (error.code === 11000 && attempts < maxAttempts - 1) {
+          // Duplicate key error - regenerate number
+          attempts++;
+          this.logger.warn(`Duplicate key error for estimate number ${dto.number}, attempt ${attempts}/${maxAttempts}`);
+          
+          // Find the highest number again and increment
+          const latestEstimate = await this.estimateModel
+            .findOne({ workspaceId })
+            .sort({ number: -1 })
+            .exec();
+          
+          const latestNumber = latestEstimate ? 
+            parseInt(latestEstimate.number.replace('EST-', ''), 10) : 
+            1000;
+          
+          dto.number = `EST-${latestNumber + attempts + 1}`;
+          continue;
+        }
+        throw error;
+      }
+    }
+    
+    throw new Error(`Failed to create estimate after ${maxAttempts} attempts due to duplicate key conflicts`);
   }
 
   async findByShareToken(token: string) {
