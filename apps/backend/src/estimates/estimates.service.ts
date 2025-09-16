@@ -324,36 +324,154 @@ export class EstimatesService {
   }
 
   async send(id: string, workspaceId: string) {
-    const doc = await this.estimateModel.findOne({ _id: id, workspaceId });
-    if (!doc) return null;
-    if (doc.status === 'draft') {
-      doc.status = 'sent';
-      await doc.save();
+    try {
+      const doc = await this.estimateModel.findOne({ _id: id, workspaceId });
+      if (!doc) {
+        this.logger.warn(`Estimate not found: ${id} for workspace: ${workspaceId}`);
+        return null;
+      }
+      
+      // Update status to sent if still draft
+      if (doc.status === 'draft') {
+        doc.status = 'sent';
+        await doc.save();
+        this.logger.log(`Estimate ${doc.number} status updated to 'sent'`);
+      }
+      
+      // Fetch client info
+      const client = await this.clientModel.findOne({ _id: doc.clientId, workspaceId });
+      if (!client || !client.email) {
+        this.logger.warn(`Cannot send estimate ${doc.number}: Client email not found`);
+        return doc; // Return doc but indicate email not sent
+      }
+
+      // Get user's template preference
+      const user = await this.userModel.findOne({ workspaceId });
+      const template = (user?.pdfTemplates?.estimateTemplate as TemplateType) || 'professional';
+
+      // Generate PDF with selected template
+      const pdfBuffer = await this.generateEstimatePDF(doc, client, template);
+
+      // Create professional email template
+      const emailSubject = `Your Project Estimate - ${doc.number}`;
+      const emailHtml = this.createEstimateEmailTemplate(doc, client);
+
+      // Send email with PDF attachment via SendGrid
+      const emailSent = await this.emailService.sendEmail({
+        to: client.email,
+        subject: emailSubject,
+        html: emailHtml,
+        attachments: [
+          {
+            filename: `Estimate-${doc.number}.pdf`,
+            content: pdfBuffer,
+          },
+        ],
+      });
+
+      if (emailSent) {
+        this.logger.log(`✅ Estimate ${doc.number} sent successfully to ${client.email}`);
+        
+        // Mark estimate as sent with timestamp
+        doc.sentAt = new Date();
+        await doc.save();
+      } else {
+        this.logger.error(`❌ Failed to send estimate ${doc.number} to ${client.email}`);
+      }
+
+      return doc;
+    } catch (error) {
+      this.logger.error(`Error sending estimate ${id}:`, error);
+      throw new Error(`Failed to send estimate: ${error.message}`);
     }
-    // Fetch client info
-    const client = await this.clientModel.findOne({ _id: doc.clientId, workspaceId });
-    if (!client || !client.email) return doc; // Can't send without client email
+  }
 
-    // Get user's template preference
-    const user = await this.userModel.findOne({ workspaceId });
-    const template = (user?.pdfTemplates?.estimateTemplate as TemplateType) || 'professional';
-
-    // Generate PDF with selected template
-    const pdfBuffer = await this.generateEstimatePDF(doc, client, template);
-
-    // Send email with PDF attachment
-    await this.emailService.sendEmail({
-      to: client.email,
-      subject: `Your Estimate from Remodely CRM (#${doc.number})`,
-      html: `<p>Dear ${client.firstName},</p><p>Please find your estimate attached.</p>`,
-      attachments: [
-        {
-          filename: `Estimate-${doc.number}.pdf`,
-          content: pdfBuffer,
-        },
-      ],
-    });
-    return doc;
+  private createEstimateEmailTemplate(estimate: EstimateDocument, client: ClientDocument): string {
+    const clientName = client.firstName || 'Valued Client';
+    const companyName = client.company || '';
+    const estimateTotal = estimate.total ? `$${estimate.total.toLocaleString()}` : 'TBD';
+    
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Your Project Estimate</title>
+        <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+            .header h1 { margin: 0; font-size: 28px; font-weight: 600; }
+            .header p { margin: 5px 0 0; opacity: 0.9; }
+            .content { background: white; padding: 30px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+            .greeting { font-size: 18px; margin-bottom: 20px; }
+            .highlight-box { background: #f8f9fa; border-left: 4px solid #d97706; padding: 20px; margin: 20px 0; border-radius: 4px; }
+            .estimate-details { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
+            .estimate-number { font-size: 24px; font-weight: bold; color: #d97706; }
+            .estimate-total { font-size: 20px; font-weight: bold; color: #059669; }
+            .cta-button { display: inline-block; background: #d97706; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 20px 0; }
+            .cta-button:hover { background: #b45309; }
+            .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 14px; }
+            .attachment-note { background: #eff6ff; border: 1px solid #bfdbfe; padding: 15px; border-radius: 6px; margin: 20px 0; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>🏗️ Your Project Estimate</h1>
+                <p>Professional Remodeling Services</p>
+            </div>
+            
+            <div class="content">
+                <div class="greeting">
+                    Dear ${clientName}${companyName ? ` from ${companyName}` : ''},
+                </div>
+                
+                <p>Thank you for considering our services for your remodeling project. We're excited to work with you and bring your vision to life.</p>
+                
+                <div class="estimate-details">
+                    <div class="estimate-number">Estimate #${estimate.number}</div>
+                    <div class="estimate-total">Total: ${estimateTotal}</div>
+                </div>
+                
+                <div class="highlight-box">
+                    <strong>📎 Your detailed estimate is attached as a PDF</strong><br>
+                    This document includes:
+                    <ul>
+                        <li>Complete project breakdown</li>
+                        <li>Materials and labor costs</li>
+                        <li>Timeline and milestones</li>
+                        <li>Terms and conditions</li>
+                    </ul>
+                </div>
+                
+                <div class="attachment-note">
+                    <strong>📋 Next Steps:</strong><br>
+                    Please review the attached estimate carefully. If you have any questions or would like to discuss modifications, we're here to help. Once you're ready to proceed, simply reply to this email or give us a call.
+                </div>
+                
+                <p>We pride ourselves on delivering quality workmanship and exceptional customer service. This estimate is valid for 30 days from the date issued.</p>
+                
+                <p>Questions? Feel free to reach out anytime. We're looking forward to hearing from you!</p>
+                
+                <div style="margin-top: 30px;">
+                    <strong>Best regards,</strong><br>
+                    The Remodely Team<br>
+                    <em>Making your remodeling dreams reality</em>
+                </div>
+            </div>
+            
+            <div class="footer">
+                <p>This estimate was generated using Remodely CRM - AI-Powered Construction Management</p>
+                <p style="font-size: 12px; color: #9ca3af;">
+                    Please add our email to your contacts to ensure you receive all project communications.
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
   }
 
   async updateStatus(id: string, workspaceId: string, status: string) {
