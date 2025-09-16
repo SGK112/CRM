@@ -1,18 +1,37 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import Stripe from 'stripe';
 import { InjectModel } from '@nestjs/mongoose';
 import { parse } from 'fast-csv';
 import { Model } from 'mongoose';
 import * as stream from 'stream';
 import { Client, ClientDocument } from './schemas/client.schema';
 
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2022-11-15' });
+
 @Injectable()
 export class ClientsService {
   constructor(@InjectModel(Client.name) private clientModel: Model<ClientDocument>) {}
 
   async create(createClientDto: Record<string, unknown>, workspaceId: string): Promise<Client> {
+    // 1. Create Stripe customer
+    let stripeCustomerId: string | undefined = undefined;
+    try {
+      const stripeCustomer = await stripe.customers.create({
+        name: `${createClientDto.firstName} ${createClientDto.lastName}`,
+        email: createClientDto.email as string,
+        phone: createClientDto.phone as string,
+        metadata: { workspaceId },
+      });
+      stripeCustomerId = stripeCustomer.id;
+    } catch (err) {
+      // Optionally log error, but allow client creation to proceed
+      console.error('Stripe customer creation failed:', err);
+    }
+
     const client = new this.clientModel({
       ...createClientDto,
       workspaceId,
+      stripeCustomerId,
     });
     return client.save();
   }

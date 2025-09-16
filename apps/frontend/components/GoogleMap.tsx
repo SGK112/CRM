@@ -174,19 +174,13 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
   // You'll need to add your Google Maps API key here
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
 
-  // Don't attempt to load Google Maps if no API key is provided
-  if (!apiKey || apiKey === 'your_google_maps_api_key_here') {
+  if (!apiKey) {
     return (
       <div className={`${className} bg-slate-800 rounded-xl flex items-center justify-center`}>
         <div className="text-center">
           <MapPinIcon className="h-8 w-8 text-slate-400 mx-auto mb-2" />
-          <p className="text-sm text-slate-400">Maps not configured</p>
-          <p className="text-xs text-slate-500">
-            {process.env.NODE_ENV === 'development' 
-              ? 'Add Google Maps API key to enable' 
-              : 'Contact support for map functionality'
-            }
-          </p>
+          <p className="text-sm text-slate-400">Google Maps API key required</p>
+          <p className="text-xs text-slate-500">Add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to .env</p>
         </div>
       </div>
     );

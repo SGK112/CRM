@@ -92,7 +92,7 @@ export default function ContactDetailPage() {
       try {
         const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
         const headers: Record<string, string> = {};
-        
+
         if (token) {
           headers['Authorization'] = `Bearer ${token}`;
         }
@@ -137,7 +137,7 @@ export default function ContactDetailPage() {
     try {
       const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
       const headers: Record<string, string> = {};
-      
+
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
@@ -217,7 +217,7 @@ export default function ContactDetailPage() {
             label: 'Schedule Appointment',
             icon: CalendarIcon,
             action: () => {
-              window.open(`/dashboard/calendar?clientId=${contactId}`, '_blank');
+              window.open(`/dashboard/calendar/new?clientId=${contactId}`, '_blank');
             },
             color: 'amber'
           },
@@ -353,7 +353,7 @@ export default function ContactDetailPage() {
             label: 'Schedule 1:1',
             icon: CalendarIcon,
             action: () => {
-              window.open(`/dashboard/calendar?contact=${contactId}&type=meeting`, '_blank');
+              window.open(`/dashboard/calendar/new?contact=${contactId}&type=meeting`, '_blank');
             },
             color: 'green'
           },

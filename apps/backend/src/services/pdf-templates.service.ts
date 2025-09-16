@@ -22,13 +22,6 @@ export interface TemplateData {
     phone?: string;
     email?: string;
   };
-  // Optional invoice enhancements
-  depositRequired?: number;
-  depositPaid?: number;
-  balanceRemaining?: number;
-  showDepositDetails?: boolean;
-  showProfitMetrics?: boolean;
-  profitMetrics?: { costSubtotal: number; profit: number; marginPercent: number | null };
 }
 
 @Injectable()
@@ -231,7 +224,6 @@ export class PdfTemplatesService {
     }
     doc.moveDown(0.5);
     doc.fontSize(12).fillColor('#1a365d').text(`Total: $${data.total.toFixed(2)}`, totalsX);
-    this.drawOptionalSections(doc, data);
   }
 
   private drawModernTotals(doc: typeof PDFDocument.prototype, data: TemplateData): void {
@@ -247,7 +239,6 @@ export class PdfTemplatesService {
     doc.moveDown();
     doc.rect(totalsX - 10, doc.y - 5, 150, 25).fillAndStroke('#667eea', '#667eea');
     doc.fillColor('white').fontSize(12).text(`TOTAL: $${data.total.toFixed(2)}`, totalsX, doc.y);
-    this.drawOptionalSections(doc, data);
   }
 
   private drawClassicTotals(doc: typeof PDFDocument.prototype, data: TemplateData): void {
@@ -262,34 +253,6 @@ export class PdfTemplatesService {
     }
     doc.moveDown();
     doc.fontSize(12).text(`Total: $${data.total.toFixed(2)}`, totalsX);
-    this.drawOptionalSections(doc, data);
-  }
-
-  private drawOptionalSections(doc: typeof PDFDocument.prototype, data: TemplateData): void {
-    if (data.type === 'invoice') {
-      if (data.showDepositDetails && (data.depositRequired || 0) > 0) {
-        doc.moveDown(1);
-        doc.fontSize(11).fillColor('#1a365d').text('Deposit Details', 50);
-        doc.fontSize(9).fillColor('#2d3748');
-        doc.text(`Deposit Required: $${(data.depositRequired || 0).toFixed(2)}`, 50);
-        doc.text(`Deposit Paid: $${(data.depositPaid || 0).toFixed(2)}`, 50);
-        const remainingDeposit = (data.depositRequired || 0) - (data.depositPaid || 0);
-        if (remainingDeposit > 0) {
-          doc.text(`Deposit Remaining: $${remainingDeposit.toFixed(2)}`, 50);
-        }
-        doc.moveDown(0.5);
-      }
-      if (data.showProfitMetrics && data.profitMetrics) {
-        doc.moveDown(0.5);
-        doc.fontSize(11).fillColor('#1a365d').text('Profit Summary (Internal)', 50);
-        doc.fontSize(9).fillColor('#2d3748');
-        doc.text(`Cost Subtotal: $${data.profitMetrics.costSubtotal.toFixed(2)}`, 50);
-        doc.text(`Profit: $${data.profitMetrics.profit.toFixed(2)}`, 50);
-        if (data.profitMetrics.marginPercent !== null) {
-          doc.text(`Margin: ${data.profitMetrics.marginPercent.toFixed(1)}%`, 50);
-        }
-      }
-    }
   }
 
   generatePDF(template: TemplateType, data: TemplateData): Promise<Buffer> {

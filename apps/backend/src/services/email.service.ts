@@ -25,36 +25,48 @@ export class EmailService {
 
   private setupTransporter() {
     const sendGridApiKey = this.configService.get<string>('SENDGRID_API_KEY');
-    if (sendGridApiKey) {
-      sgMail.setApiKey(sendGridApiKey);
-      this.useSendGridAPI = true;
-      this.isConfigured = true;
-      return;
+    if (sendGridApiKey && sendGridApiKey !== 'your-sendgrid-api-key-here') {
+      try {
+        sgMail.setApiKey(sendGridApiKey);
+        this.useSendGridAPI = true;
+        this.isConfigured = true;
+        this.logger.log('✅ SendGrid API configured successfully');
+        return;
+      } catch (error) {
+        this.logger.error('❌ Failed to configure SendGrid:', error);
+      }
     }
+
     const host = this.configService.get<string>('SMTP_HOST');
     const port = this.configService.get<string>('SMTP_PORT');
     const user = this.configService.get<string>('SMTP_USER');
     const pass = this.configService.get<string>('SMTP_PASS');
+    
     if (host && port && user && pass) {
-      this.transporter = nodemailer.createTransport({
-        host,
-        port: parseInt(port, 10),
-        secure: port === '465',
-        auth: { user, pass },
-      });
-      this.isConfigured = true;
+      try {
+        this.transporter = nodemailer.createTransporter({
+          host,
+          port: parseInt(port, 10),
+          secure: port === '465',
+          auth: { user, pass },
+        });
+        this.isConfigured = true;
+        this.logger.log('✅ SMTP transporter configured successfully');
+      } catch (error) {
+        this.logger.error('❌ Failed to configure SMTP:', error);
+      }
+    }
+
+    if (!this.isConfigured) {
+      this.logger.warn('⚠️  No email provider configured. Set SENDGRID_API_KEY or SMTP_* variables.');
     }
   }
 
   async sendEmail(options: SendEmailOptions): Promise<boolean> {
     try {
       if (!this.isConfigured) {
-        // Surface a clear warning to avoid masking delivery problems
-        // Configure SENDGRID_API_KEY (preferred) or SMTP_HOST/SMTP_PORT/SMTP_USER/SMTP_PASS in env.
-        // Optionally set SENDGRID_FROM_EMAIL or SMTP_FROM for the sender address.
-        // Returning false ensures callers can surface a helpful error to the UI/logs.
-        this.logger.warn(
-          '[EmailService] Email provider is not configured. Set SENDGRID_API_KEY or SMTP_* env vars to enable email delivery.'
+        this.logger.error(
+          '[EmailService] Email provider not configured. Set SENDGRID_API_KEY or SMTP_* env vars.'
         );
         return false;
       }
@@ -65,7 +77,8 @@ export class EmailService {
           this.configService.get<string>('SENDGRID_FROM_EMAIL') ||
           this.configService.get<string>('SMTP_FROM') ||
           'noreply@crmapp.com';
-        const fromName = this.configService.get<string>('SENDGRID_FROM_NAME') || 'Remodely CRM';
+        const fromName = this.configService.get<string>('SENDGRID_FROM_NAME') || 'CRM System';
+        
         const msg: sgMail.MailDataRequired = {
           to: options.to,
           from: { email: fromEmail, name: fromName },
@@ -73,6 +86,7 @@ export class EmailService {
           html: options.html,
           text: options.text,
         };
+        
         if (options.attachments?.length) {
           msg.attachments = options.attachments.map(att => ({
             content: att.content.toString('base64'),
@@ -81,7 +95,9 @@ export class EmailService {
             disposition: 'attachment',
           }));
         }
+        
         await sgMail.send(msg);
+        this.logger.log(`✅ Email sent via SendGrid to ${options.to}: ${options.subject}`);
         return true;
       }
 
@@ -96,11 +112,14 @@ export class EmailService {
           text: options.text,
           attachments: options.attachments,
         } as nodemailer.SendMailOptions);
+        this.logger.log(`✅ Email sent via SMTP to ${options.to}: ${options.subject}`);
         return true;
       }
 
+      this.logger.error('[EmailService] No configured email provider available');
       return false;
-    } catch {
+    } catch (error) {
+      this.logger.error(`❌ Failed to send email to ${options.to}:`, error);
       return false;
     }
   }

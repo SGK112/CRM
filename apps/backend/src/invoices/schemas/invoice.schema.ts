@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 @Schema({ _id: false })
 class InvoiceLineItem {
@@ -24,11 +24,6 @@ export class Invoice {
   @Prop({ default: 0 }) taxRate: number;
   @Prop({ default: 0 }) taxAmount: number;
   @Prop({ default: 0 }) total: number;
-  @Prop({ default: 0 }) depositRequired: number; // Absolute deposit amount required (optional)
-  @Prop({ default: 0 }) depositPaid: number; // Amount paid toward deposit
-  @Prop({ default: 0 }) balanceRemaining: number; // Computed = total - amountPaid
-  @Prop({ default: false }) showDepositDetails: boolean; // Toggle to show deposit section on client-facing docs
-  @Prop({ default: false }) showProfitMetrics: boolean; // Internal only; never exposed to client PDFs if false
   @Prop() estimateId?: string; // link back to source estimate
   @Prop() notes?: string;
   @Prop() dueDate?: Date;

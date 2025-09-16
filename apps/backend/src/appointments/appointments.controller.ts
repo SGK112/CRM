@@ -8,9 +8,11 @@ import {
     Put,
     Query,
     Request,
+    UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request as ExpressRequest } from 'express';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AppointmentsService } from './appointments.service';
 import {
     AppointmentFilters,
@@ -55,18 +57,14 @@ interface GoogleCalendarSyncBody {
 }
 
 @ApiTags('appointments')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('appointments')
 export class AppointmentsController {
   constructor(
     private readonly appointmentsService: AppointmentsService,
     private readonly unifiedCalendarService: UnifiedCalendarService
   ) {}
-
-  @Get('test')
-  @ApiOperation({ summary: 'Test endpoint to verify module registration' })
-  async test() {
-    return { message: 'Appointments module is working', timestamp: new Date().toISOString() };
-  }
 
   @Post()
   @ApiOperation({ summary: 'Create new appointment' })
@@ -208,14 +206,6 @@ export class AppointmentsController {
     return await this.appointmentsService.sendReminder(id, req.user.workspaceId);
   }
 
-  @Post('scan/upcoming-reminders')
-  @ApiOperation({ summary: 'Scan for upcoming appointments and send reminders' })
-  @ApiResponse({ status: 200, description: 'Scan completed' })
-  async scanUpcoming(@Request() req: AuthenticatedRequest, @Query('window') window?: string) {
-    const minutes = window ? parseInt(window, 10) : 60;
-    return await this.appointmentsService.scanUpcomingForReminders(req.user.workspaceId, minutes);
-  }
-
   @Post('google-calendar/sync')
   @ApiOperation({ summary: 'Sync CRM appointment to Google Calendar' })
   @ApiResponse({ status: 201, description: 'Event synced to Google Calendar' })
@@ -229,39 +219,21 @@ export class AppointmentsController {
       throw new Error('Appointment not found');
     }
 
-    const endIso = new Date(
-      appointment.scheduledDate.getTime() + appointment.duration * 60000
-    ).toISOString();
-
-    const result = await this.unifiedCalendarService.createGoogleCalendarEvent(
+    // Create event in Google Calendar
+    const googleEvent = await this.unifiedCalendarService.createGoogleCalendarEvent(
       req.user._id || req.user.id || req.user.sub,
       {
         summary: appointment.title,
         description: appointment.description,
         start: appointment.scheduledDate.toISOString(),
-        end: endIso,
+        end: new Date(
+          appointment.scheduledDate.getTime() + appointment.duration * 60000
+        ).toISOString(),
         location: appointment.location,
       }
     );
-    const pending = typeof result === 'object' && result !== null && 'pending' in result;
-    if (pending) {
-      try {
-        await this.appointmentsService.update(
-          appointment._id.toString(),
-          {
-            metadata: {
-              ...(appointment.metadata || {}),
-              pendingGoogleSync: true,
-            },
-          } as UpdateAppointmentDto,
-          req.user.workspaceId
-        );
-      } catch (_) {
-        // Non-critical metadata update failure ignored
-      }
-      return { success: true, googleEvent: null, pending: true };
-    }
-    return { success: true, googleEvent: result };
+
+    return { success: true, googleEvent };
   }
 
   @Get('google-calendar/status')

@@ -17,14 +17,10 @@ export interface CreateInvoiceDto {
     quantity?: number;
     unitPrice?: number;
     taxable?: boolean;
-    costPrice?: number; // optional cost for profit metrics
   }[];
   taxRate?: number;
   notes?: string;
   dueDate?: string;
-  depositRequired?: number; // absolute amount required as upfront deposit
-  showDepositDetails?: boolean;
-  showProfitMetrics?: boolean; // internal flag
 }
 export interface UpdateInvoiceDto {
   items?: {
@@ -33,14 +29,10 @@ export interface UpdateInvoiceDto {
     quantity?: number;
     unitPrice?: number;
     taxable?: boolean;
-    costPrice?: number;
   }[];
   taxRate?: number;
   notes?: string;
   dueDate?: string;
-  depositRequired?: number;
-  showDepositDetails?: boolean;
-  showProfitMetrics?: boolean;
 }
 export interface RecordPaymentDto {
   amount: number;
@@ -61,40 +53,16 @@ export class InvoicesService {
 
   private compute(doc: InvoiceDocument) {
     let subtotal = 0;
-    let costSubtotal = 0;
-    interface LineItemWithCost {
-      name: string;
-      description?: string;
-      quantity?: number;
-      unitPrice?: number;
-      total?: number;
-      taxable?: boolean;
-      costPrice?: number;
-    }
-    (doc.items as unknown as LineItemWithCost[]).forEach(li => {
-      li.quantity = li.quantity ?? 1;
-      li.unitPrice = li.unitPrice ?? 0;
+    doc.items.forEach(li => {
+      li.quantity = li.quantity || 1;
+      li.unitPrice = li.unitPrice || 0;
       li.total = (li.quantity || 1) * (li.unitPrice || 0);
       subtotal += li.total;
-      if (typeof li.costPrice === 'number') {
-        costSubtotal += (li.quantity || 1) * (li.costPrice || 0);
-      }
     });
     doc.subtotal = subtotal;
     const taxAmount = (doc.taxRate || 0) > 0 ? (subtotal * (doc.taxRate || 0)) / 100 : 0;
     doc.taxAmount = taxAmount;
     doc.total = subtotal + taxAmount;
-    // Ensure depositRequired never exceeds total
-    if (doc.depositRequired && doc.depositRequired > doc.total) {
-      doc.depositRequired = doc.total;
-    }
-    doc.balanceRemaining = doc.total - (doc.amountPaid || 0);
-    // Attach profit metrics transiently on document (not persisted schema field) for PDF generation
-    (doc as unknown as { _profitMetrics?: { costSubtotal: number; profit: number; marginPercent: number | null } })._profitMetrics = {
-      costSubtotal,
-      profit: subtotal - costSubtotal,
-      marginPercent: costSubtotal > 0 ? ((subtotal - costSubtotal) / subtotal) * 100 : null,
-    };
   }
 
   private async generateInvoicePDF(
@@ -102,15 +70,6 @@ export class InvoicesService {
     client?: { firstName?: string; lastName?: string; email?: string; company?: string },
     template: TemplateType = 'professional'
   ): Promise<Buffer> {
-    interface ExtendedInvoice extends InvoiceDocument {
-      depositRequired: number;
-      depositPaid: number;
-      balanceRemaining: number;
-      showDepositDetails: boolean;
-      showProfitMetrics: boolean;
-      _profitMetrics?: { costSubtotal: number; profit: number; marginPercent: number | null };
-    }
-    const ext = invoice as ExtendedInvoice;
     const templateData = {
       type: 'invoice' as const,
       number: invoice.number,
@@ -133,12 +92,6 @@ export class InvoicesService {
       notes: invoice.notes,
       dueDate: invoice.dueDate?.toISOString(),
       createdAt: (invoice as InvoiceDocument & { createdAt: Date }).createdAt?.toISOString() || new Date().toISOString(),
-      depositRequired: ext.depositRequired || 0,
-      depositPaid: ext.depositPaid || 0,
-      balanceRemaining: ext.balanceRemaining,
-      showDepositDetails: ext.showDepositDetails,
-      showProfitMetrics: ext.showProfitMetrics,
-      profitMetrics: ext._profitMetrics,
     };
 
     return this.pdfTemplatesService.generatePDF(template, templateData);
@@ -160,9 +113,6 @@ export class InvoicesService {
       taxRate: dto.taxRate || 0,
       notes: dto.notes,
       dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
-      depositRequired: dto.depositRequired || 0,
-      showDepositDetails: !!dto.showDepositDetails,
-      showProfitMetrics: !!dto.showProfitMetrics,
     });
     this.compute(doc as unknown as InvoiceDocument);
     await doc.save();
@@ -185,7 +135,6 @@ export class InvoicesService {
       unitPrice: li.sellPrice,
       taxable: li.taxable,
     }));
-    const estWithDeposit = est as EstimateDocument & { depositRequired?: number };
     const doc = new this.invoiceModel({
       workspaceId,
       number,
@@ -195,10 +144,6 @@ export class InvoicesService {
       taxRate: est.taxRate,
       notes: est.notes,
       estimateId: est._id.toString(),
-      // Propagate deposit if estimate specifies one
-      depositRequired: estWithDeposit.depositRequired || 0,
-      showDepositDetails: (estWithDeposit.depositRequired || 0) > 0,
-      showProfitMetrics: false,
     });
     this.compute(doc as unknown as InvoiceDocument);
     await doc.save();
@@ -230,7 +175,6 @@ export class InvoicesService {
     if (dto.taxRate !== undefined) doc.taxRate = dto.taxRate;
     if (dto.notes !== undefined) doc.notes = dto.notes;
     if (dto.dueDate !== undefined) doc.dueDate = dto.dueDate ? new Date(dto.dueDate) : undefined;
-     if (dto.depositRequired !== undefined) doc.depositRequired = dto.depositRequired;
     this.compute(doc as unknown as InvoiceDocument);
     await doc.save();
     return doc;
@@ -271,15 +215,8 @@ export class InvoicesService {
     if (!doc) return null;
     const amount = dto.amount || 0;
     doc.amountPaid = (doc.amountPaid || 0) + amount;
-    // Track deposit progress if applicable
-    if (doc.depositRequired > 0 && doc.depositPaid < doc.depositRequired) {
-      const remainingDeposit = doc.depositRequired - doc.depositPaid;
-      const appliedToDeposit = Math.min(amount, remainingDeposit);
-      doc.depositPaid += appliedToDeposit;
-    }
     if (doc.amountPaid >= doc.total) doc.status = 'paid';
     else if (doc.amountPaid > 0) doc.status = 'partial';
-    doc.balanceRemaining = doc.total - doc.amountPaid;
     await doc.save();
     // TODO: store payment record document (future)
     return doc;
@@ -293,8 +230,7 @@ export class InvoicesService {
   // Generate a PDF buffer for a given invoice id in the workspace
   async getPdf(
     id: string,
-    workspaceId: string,
-    options?: { internal?: boolean }
+    workspaceId: string
   ): Promise<{ buffer: Buffer; filename: string } | null> {
     const inv = await this.invoiceModel.findOne({ _id: id, workspaceId });
     if (!inv) return null;
@@ -314,15 +250,7 @@ export class InvoicesService {
     const user = await this.userModel.findOne({ workspaceId });
     const template = (user?.pdfTemplates?.invoiceTemplate as TemplateType) || 'professional';
 
-    // Temporarily store original flag then ensure profit metrics suppressed unless internal request
-    const invoiceDoc = inv as unknown as InvoiceDocument;
-    const originalShowProfit = invoiceDoc.showProfitMetrics;
-    if (!options?.internal) {
-      invoiceDoc.showProfitMetrics = false;
-    }
-    const buffer = await this.generateInvoicePDF(invoiceDoc, clientInfo, template);
-    // Restore flag (no persistence change)
-    invoiceDoc.showProfitMetrics = originalShowProfit;
+    const buffer = await this.generateInvoicePDF(inv as unknown as InvoiceDocument, clientInfo, template);
     const filename = `Invoice-${inv.number || id}.pdf`;
     return { buffer, filename };
   }

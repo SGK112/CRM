@@ -28,18 +28,30 @@ export class CommunicationsService {
 
     const globalEmailConfigured = this.emailService.configured;
     const globalEmailProvider = this.emailService.provider;
+    const globalTwilioConfigured = this.twilioService.isConfigured;
+
+    const emailConfigured = globalEmailConfigured || 
+      !!(user?.emailConfig?.smtpHost && user?.emailConfig?.smtpUser);
+    
+    const smsConfigured = globalTwilioConfigured || 
+      !!(user?.twilioConfig?.accountSid && user?.twilioConfig?.authToken);
+
+    this.logger.log(`Service status check for workspace ${workspaceId}:`);
+    this.logger.log(`  Email: ${emailConfigured ? 'CONFIGURED' : 'NOT CONFIGURED'} (${globalEmailProvider})`);
+    this.logger.log(`  SMS: ${smsConfigured ? 'CONFIGURED' : 'NOT CONFIGURED'}`);
 
     return {
       email: {
-        configured:
-          globalEmailConfigured || !!(user?.emailConfig?.smtpHost && user?.emailConfig?.smtpUser),
-        provider:
-          user?.emailConfig?.provider ||
+        configured: emailConfigured,
+        provider: user?.emailConfig?.provider ||
           (globalEmailProvider !== 'none' ? globalEmailProvider : 'Not configured'),
+        global: globalEmailConfigured,
       },
       sms: {
-        configured: !!(user?.twilioConfig?.accountSid && user?.twilioConfig?.authToken),
-        phoneNumber: user?.twilioConfig?.phoneNumber || 'Not configured',
+        configured: smsConfigured,
+        phoneNumber: this.twilioService.from || 
+          user?.twilioConfig?.phoneNumber || 'Not configured',
+        global: globalTwilioConfigured,
       },
     };
   }
@@ -143,13 +155,7 @@ export class CommunicationsService {
         throw new BadRequestException('Recipient phone number is required');
       }
 
-      // Get user details for Twilio config
-      const user = await this.userModel.findById(userId).exec();
-      if (!user?.twilioConfig?.accountSid) {
-        throw new BadRequestException('Twilio not configured for this user');
-      }
-
-      // Send SMS
+      // Send SMS using global Twilio service
       const result = await this.twilioService.sendSMS(recipientPhone, sendSmsDto.message);
 
       // Log communication
@@ -164,9 +170,11 @@ export class CommunicationsService {
         status: result ? 'sent' : 'failed',
       });
 
+      this.logger.log(`SMS ${result ? 'sent successfully' : 'failed'} to ${recipientPhone}`);
+
       return {
         success: result,
-        message: result ? 'SMS sent successfully' : 'Failed to send SMS',
+        message: result ? 'SMS sent successfully' : 'Failed to send SMS (provider not configured or error)',
       };
     } catch (error) {
       this.logger.error('SMS sending error', error?.stack || String(error));
@@ -331,9 +339,15 @@ export class CommunicationsService {
 
   async sendTestSms(testPhone: string, userId: string) {
     try {
-      const user = await this.userModel.findById(userId).exec();
-      if (!user?.twilioConfig?.accountSid) {
-        throw new BadRequestException('Twilio not configured for this user');
+      // Use global Twilio service if available, otherwise check user config
+      if (!this.twilioService.isConfigured) {
+        const user = await this.userModel.findById(userId).exec();
+        if (!user?.twilioConfig?.accountSid) {
+          return {
+            success: false,
+            message: 'Twilio not configured globally or for this user',
+          };
+        }
       }
 
       const result = await this.twilioService.sendSMS(
@@ -341,9 +355,11 @@ export class CommunicationsService {
         'This is a test SMS from your CRM system to verify your Twilio configuration is working correctly.'
       );
 
+      this.logger.log(`Test SMS ${result ? 'sent successfully' : 'failed'} to ${testPhone}`);
+
       return {
         success: result,
-        message: result ? 'Test SMS sent successfully' : 'Failed to send test SMS',
+        message: result ? 'Test SMS sent successfully' : 'Failed to send test SMS (provider not configured or error)',
       };
     } catch (error) {
       this.logger.error('Test SMS error', error?.stack || String(error));

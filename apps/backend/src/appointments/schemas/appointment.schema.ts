@@ -44,7 +44,6 @@ export class Appointment extends Document {
       'site_visit',
       'meeting',
       'other',
-      'google_calendar',
     ],
   })
   type:
@@ -55,8 +54,7 @@ export class Appointment extends Document {
     | 'inspection'
     | 'site_visit'
     | 'meeting'
-    | 'other'
-    | 'google_calendar';
+    | 'other';
 
   @Prop()
   location?: string;

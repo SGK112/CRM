@@ -20,6 +20,9 @@ export class Client {
   @Prop()
   company?: string;
 
+  @Prop({ required: false })
+  stripeCustomerId?: string;
+
   @Prop({
     type: {
       street: String,

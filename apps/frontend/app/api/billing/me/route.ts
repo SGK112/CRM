@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_URL || 'http://localhost:3001';
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     // Check for development mode
     if (process.env.NODE_ENV === 'development') {
@@ -43,15 +43,8 @@ export async function GET(request: Request) {
 
     // Production mode - proxy to backend
     const cookieStore = cookies();
-    let token = cookieStore.get('token')?.value;
-    // Fallback: read Authorization header if cookie missing
-    if (!token) {
-      const authHeader = request.headers.get('authorization');
-      if (authHeader?.toLowerCase().startsWith('bearer ')) {
-        token = authHeader.substring(7);
-      }
-    }
-    
+    const token = cookieStore.get('token')?.value;
+
     if (!token) {
       return NextResponse.json(
         { success: false, message: 'Authentication required' },
@@ -78,6 +71,7 @@ export async function GET(request: Request) {
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
+    console.error('Billing API error:', error);
     return NextResponse.json(
       {
         success: false,

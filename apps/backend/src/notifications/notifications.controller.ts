@@ -1,6 +1,3 @@
-import { TwilioService } from '../services/twilio.service';
-import { EmailService } from '../services/email.service';
-import { testNotificationIntegrations } from './notifications.service';
 import { Body, Controller, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { NotificationsService } from './notifications.service';
@@ -8,22 +5,7 @@ import { NotificationsService } from './notifications.service';
 @Controller('notifications')
 @UseGuards(JwtAuthGuard)
 export class NotificationsController {
-  constructor(
-    private notificationsService: NotificationsService,
-    private twilioService: TwilioService,
-    private emailService: EmailService
-  ) {}
-
-  /**
-   * POST /notifications/test
-   * Body: { phone: string, email: string }
-   * Triggers test SMS and email using Twilio and SendGrid integrations.
-   */
-  @Post('test')
-  async testNotifications(@Body() body: { phone: string; email: string }) {
-    const { phone, email } = body;
-    return testNotificationIntegrations(this.twilioService, this.emailService, phone, email);
-  }
+  constructor(private notificationsService: NotificationsService) {}
 
   @Post()
   async createNotification(

@@ -13,18 +13,36 @@ export class TwilioService {
     const authToken = this.configService.get('TWILIO_AUTH_TOKEN');
     this.fromNumber = this.configService.get('TWILIO_PHONE_NUMBER');
 
+    // Skip configuration if using placeholder values
+    if (accountSid === 'ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' || 
+        authToken === 'your-twilio-auth-token-here' ||
+        !accountSid || !authToken) {
+      this.logger.log('🔧 Twilio credentials not provided - running in simulation mode');
+      return;
+    }
+
     // Updated regex to handle both 30 and 32 character Account SIDs
-    if (accountSid && authToken && /^AC[0-9a-fA-F]{30,34}$/.test(accountSid)) {
+    if (/^AC[0-9a-fA-F]{30,34}$/.test(accountSid)) {
       try {
         this.client = twilio(accountSid, authToken);
+        
+        // Verify the phone number format
+        if (this.fromNumber && !/^\+\d{10,15}$/.test(this.fromNumber)) {
+          this.logger.warn(`⚠️  Invalid Twilio phone number format: ${this.fromNumber}. Should be +1234567890`);
+          this.fromNumber = undefined;
+        }
+        
         this.logger.log('✅ Twilio client initialized successfully');
+        if (this.fromNumber) {
+          this.logger.log(`📱 Twilio phone number configured: ${this.fromNumber}`);
+        } else {
+          this.logger.warn('⚠️  Twilio phone number not configured');
+        }
       } catch (error) {
         this.logger.error('❌ Failed to initialize Twilio client:', error);
       }
-    } else if (accountSid || authToken) {
-      this.logger.warn('Twilio credentials present but invalid format; running in simulation mode.');
     } else {
-      this.logger.log('🔧 No Twilio credentials provided - running in simulation mode');
+      this.logger.warn('⚠️  Invalid Twilio Account SID format; running in simulation mode.');
     }
   }
 
@@ -54,7 +72,13 @@ export class TwilioService {
 
   async sendSMS(to: string, message: string): Promise<boolean> {
     try {
-      if (!this.client) {
+      // Validate phone number format
+      if (!to || !/^\+\d{10,15}$/.test(to)) {
+        this.logger.error(`❌ Invalid phone number format: ${to}. Should be +1234567890`);
+        return false;
+      }
+
+      if (!this.client || !this.fromNumber) {
         this.logger.log('🔧 Twilio not configured - SMS simulation mode');
         this.logger.log(`📱 Simulated SMS to ${to}: ${message}`);
         return true; // Simulate success for development
@@ -66,10 +90,10 @@ export class TwilioService {
         to: to,
       });
 
-      this.logger.log('✅ SMS sent successfully:', result.sid);
+      this.logger.log(`✅ SMS sent successfully to ${to} - SID: ${result.sid}`);
       return true;
     } catch (error) {
-      this.logger.error('❌ Failed to send SMS:', error);
+      this.logger.error(`❌ Failed to send SMS to ${to}:`, error);
       return false;
     }
   }
@@ -77,12 +101,11 @@ export class TwilioService {
   async sendPasswordResetCode(phoneNumber: string, code: string): Promise<boolean> {
     const message = `Your CRM password reset code is: ${code}. This code expires in 10 minutes.`;
 
-    if (!this.client) {
+    if (!this.client || !this.fromNumber) {
       this.logger.log('🔧 Twilio not configured - SMS simulation mode');
-      this.logger.log(`📱 Simulated SMS to ${phoneNumber}: ${message}`);
+      this.logger.log(`📱 Simulated password reset SMS to ${phoneNumber}: ${message}`);
       this.logger.log(`🔑 Reset Code: ${code}`);
-      // Return true for development to simulate successful SMS
-      return true;
+      return true; // Return true for development to simulate successful SMS
     }
 
     return this.sendSMS(phoneNumber, message);

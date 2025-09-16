@@ -52,7 +52,7 @@ export default function QuickActionsPage() {
       title: 'Schedule Meeting',
       description: 'Set up a client meeting or consultation',
       icon: CalendarIcon,
-      href: '/dashboard/calendar',
+      href: '/dashboard/calendar/new',
       color: 'purple',
       category: 'communication'
     },

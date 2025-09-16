@@ -247,26 +247,26 @@ export default function HomePage() {
   return (
     <div className="min-h-screen text-[var(--text)]">
       <RevealInit />
-      {/* Navigation Header with improved mobile design */}
+      {/* Navigation Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-[var(--bg-primary)]/95 backdrop-blur-lg border-b border-[var(--border)]">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-14 sm:h-16">
+          <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div className="flex-shrink-0">
-              <Link href="/" className="flex items-center space-x-2 sm:space-x-3">
-                <div className="h-10 sm:h-12 w-10 sm:w-12 rounded-xl bg-gradient-to-br from-amber-500 via-amber-600 to-amber-700 flex items-center justify-center shadow-lg border border-amber-400/20 relative overflow-hidden">
+              <Link href="/" className="flex items-center space-x-3">
+                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-amber-500 via-amber-600 to-amber-700 flex items-center justify-center shadow-lg border border-amber-400/20 relative overflow-hidden">
                   {/* Professional Remodeling Logo */}
                   <div className="relative z-10">
-                    <FaRockrms className="text-white h-5 sm:h-6 w-5 sm:w-6" />
+                    <FaRockrms className="text-white h-6 w-6" />
                   </div>
                   {/* Subtle shine effect */}
                   <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent"></div>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-amber-600 to-amber-700 bg-clip-text text-transparent leading-tight">
+                  <span className="text-xl font-bold bg-gradient-to-r from-amber-600 to-amber-700 bg-clip-text text-transparent leading-tight">
                     Remodely
                   </span>
-                  <span className="text-[9px] sm:text-xs font-medium text-[var(--text-dim)] -mt-1 tracking-wider">
+                  <span className="text-xs font-medium text-[var(--text-dim)] -mt-1 tracking-wider">
                     AI-DRIVEN CRM
                   </span>
                 </div>
@@ -275,29 +275,29 @@ export default function HomePage() {
 
             {/* Desktop Navigation */}
             <div className="hidden md:block">
-              <div className="ml-10 flex items-baseline space-x-6 lg:space-x-8">
+              <div className="ml-10 flex items-baseline space-x-8">
                 <a
                   href="#features"
-                  className="text-[var(--text-dim)] hover:text-amber-600 transition-colors font-medium text-sm lg:text-base"
+                  className="text-[var(--text-dim)] hover:text-amber-600 transition-colors font-medium"
                 >
                   Features
                 </a>
                 <a
                   href="#pricing"
-                  className="text-[var(--text-dim)] hover:text-amber-600 transition-colors font-medium text-sm lg:text-base"
+                  className="text-[var(--text-dim)] hover:text-amber-600 transition-colors font-medium"
                 >
                   Pricing
                 </a>
                 <a
                   href="#testimonials"
-                  className="text-[var(--text-dim)] hover:text-amber-600 transition-colors font-medium text-sm lg:text-base"
+                  className="text-[var(--text-dim)] hover:text-amber-600 transition-colors font-medium"
                 >
                   Reviews
                 </a>
-                <Link href="/auth/login" className="btn btn-outline text-sm px-4 py-2">
+                <Link href="/auth/login" className="btn btn-outline">
                   Sign In
                 </Link>
-                <Link href="/auth/register" className="btn btn-amber shadow-lg text-sm px-4 py-2">
+                <Link href="/auth/register" className="btn btn-amber shadow-lg">
                   Get Started
                 </Link>
               </div>
@@ -307,8 +307,7 @@ export default function HomePage() {
             <div className="md:hidden">
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="inline-flex items-center justify-center p-2 rounded-md text-[var(--text)] hover:bg-[var(--bg-secondary)] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 transition-colors"
-                aria-label="Toggle mobile menu"
+                className="inline-flex items-center justify-center p-2 rounded-md text-[var(--text)] hover:bg-[var(--bg-secondary)] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500"
               >
                 {mobileMenuOpen ? (
                   <XMarkIcon className="h-6 w-6" />
@@ -319,44 +318,44 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Mobile Navigation Menu with improved styling */}
+          {/* Mobile Navigation Menu */}
           {mobileMenuOpen && (
-            <div className="md:hidden border-t border-[var(--border)] bg-[var(--bg-primary)]">
-              <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            <div className="md:hidden">
+              <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-[var(--border)] bg-[var(--bg-primary)]">
                 <a
                   href="#features"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block px-3 py-3 text-base font-medium text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-[var(--bg-secondary)] rounded-md transition-colors"
+                  className="block px-3 py-2 text-base font-medium text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-[var(--bg-secondary)] rounded-md transition-colors"
                 >
                   Features
                 </a>
                 <a
                   href="#pricing"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block px-3 py-3 text-base font-medium text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-[var(--bg-secondary)] rounded-md transition-colors"
+                  className="block px-3 py-2 text-base font-medium text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-[var(--bg-secondary)] rounded-md transition-colors"
                 >
                   Pricing
                 </a>
                 <a
                   href="#testimonials"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block px-3 py-3 text-base font-medium text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-[var(--bg-secondary)] rounded-md transition-colors"
+                  className="block px-3 py-2 text-base font-medium text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-[var(--bg-secondary)] rounded-md transition-colors"
                 >
                   Reviews
                 </a>
                 <div className="pt-4 pb-3 border-t border-[var(--border)]">
-                  <div className="flex flex-col space-y-3 px-3">
+                  <div className="flex items-center space-x-3">
                     <Link
                       href="/auth/login"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="text-center btn btn-outline w-full"
+                      className="flex-1 text-center btn btn-outline"
                     >
                       Sign In
                     </Link>
                     <Link
                       href="/auth/register"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="text-center btn btn-amber w-full"
+                      className="flex-1 text-center btn btn-amber"
                     >
                       Get Started
                     </Link>
@@ -368,80 +367,79 @@ export default function HomePage() {
         </nav>
       </header>
 
-      {/* Add padding top to account for fixed header with mobile-safe spacing */}
-      <div className="pt-16 sm:pt-20 relative overflow-hidden">
-        {/* Background elements - positioned to not interfere with content */}
-        <div className="pointer-events-none select-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-amber-600/5 blur-3xl animate-pulse z-0" />
-        <div className="pointer-events-none select-none absolute top-1/2 -right-40 h-[28rem] w-[28rem] rounded-full bg-amber-500/3 blur-3xl animate-pulse delay-1000 z-0" />
+      {/* Add padding top to account for fixed header */}
+      <div className="pt-16">
+        {/* Background elements */}
+        <div className="pointer-events-none select-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-amber-600/10 blur-3xl animate-pulse" />
+        <div className="pointer-events-none select-none absolute top-1/3 -right-40 h-[28rem] w-[28rem] rounded-full bg-amber-500/5 blur-3xl animate-pulse delay-1000" />
 
-        {/* Hero Section with proper mobile spacing */}
-        <section className="relative z-10 px-4 sm:px-6 lg:px-8 py-12 sm:py-20 lg:py-32">
+        {/* Hero Section */}
+        <section className="relative z-10 px-4 py-20 sm:py-32">
           <div className="max-w-7xl mx-auto text-center">
-            <div className="mb-6 sm:mb-8">
-              <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-amber-600/10 border border-amber-500/20 text-amber-600 text-xs sm:text-sm font-medium mb-4 sm:mb-6">
+            <div className="mb-8">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-600/10 border border-amber-500/20 text-amber-600 text-sm font-medium mb-6">
                 <SparklesIcon className="h-4 w-4" />
-                <span className="hidden sm:inline">Trusted by 500+ Contractors • Increase Revenue by 40% • AI-Powered Growth</span>
-                <span className="sm:hidden">AI-Powered CRM for Contractors</span>
+                Trusted by 500+ Contractors • Increase Revenue by 40% • AI-Powered Growth
               </div>
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6 leading-tight">
+              <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
                 <TypewriterText text="AI-Powered CRM for " speed={50} delay={500} />
                 <span className="gradient-amber">
                   <TypewriterText text="Remodeling Pros" speed={80} delay={1800} />
                 </span>
               </h1>
-              <p className="text-lg sm:text-xl lg:text-2xl text-[var(--text-dim)] mb-6 sm:mb-8 max-w-4xl mx-auto leading-relaxed px-2">
+              <p className="text-xl sm:text-2xl text-[var(--text-dim)] mb-8 max-w-4xl mx-auto leading-relaxed">
                 Streamline your remodeling business with AI-driven insights, smart project management,
                 and automated client communications designed specifically for contractors and renovation professionals.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center text-sm sm:text-lg text-[var(--text-dim)] mb-6 sm:mb-8">
+              <div className="flex flex-col sm:flex-row gap-6 justify-center text-lg text-[var(--text-dim)] mb-8">
                 <div className="flex items-center justify-center gap-2">
-                  <CheckIcon className="h-4 sm:h-5 w-4 sm:w-5 text-emerald-500 flex-shrink-0" />
+                  <CheckIcon className="h-5 w-5 text-emerald-500" />
                   <span>AI-powered project insights</span>
                 </div>
                 <div className="flex items-center justify-center gap-2">
-                  <CheckIcon className="h-4 sm:h-5 w-4 sm:w-5 text-emerald-500 flex-shrink-0" />
+                  <CheckIcon className="h-5 w-5 text-emerald-500" />
                   <span>Smart renovation workflows</span>
                 </div>
                 <div className="flex items-center justify-center gap-2">
-                  <CheckIcon className="h-4 sm:h-5 w-4 sm:w-5 text-emerald-500 flex-shrink-0" />
+                  <CheckIcon className="h-5 w-5 text-emerald-500" />
                   <span>Automated client follow-ups</span>
                 </div>
               </div>
             </div>
 
-            {/* CTA Buttons with better mobile spacing */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-8 sm:mb-12 px-4">
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               <Link
                 href="/auth/register"
-                className="btn btn-amber shadow-lg text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 transform hover:scale-105 transition-all w-full sm:w-auto"
+                className="btn btn-amber shadow-lg text-lg px-8 py-4 transform hover:scale-105 transition-all"
               >
                 Start Free Trial
-                <ArrowRightIcon className="ml-2 h-4 sm:h-5 w-4 sm:w-5" />
+                <ArrowRightIcon className="ml-2 h-5 w-5" />
               </Link>
-              <Link href="/dashboard" className="btn btn-outline text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 hover:border-amber-500/60 w-full sm:w-auto">
-                <PlayIcon className="mr-2 h-4 sm:h-5 w-4 sm:w-5" />
+              <Link href="/dashboard" className="btn btn-outline text-lg px-8 py-4 hover:border-amber-500/60">
+                <PlayIcon className="mr-2 h-5 w-5" />
                 View Live Demo
               </Link>
             </div>
 
-            {/* Trust indicators with responsive layout */}
-            <div className="flex flex-col sm:flex-row flex-wrap gap-4 sm:gap-6 justify-center text-xs sm:text-sm text-[var(--text-dim)] mb-6 sm:mb-8 px-4">
-              <div className="flex items-center justify-center gap-2">
-                <LockClosedIcon className="h-4 sm:h-5 w-4 sm:w-5 text-amber-500 flex-shrink-0" />
+            {/* Trust indicators */}
+            <div className="flex flex-wrap gap-6 justify-center text-sm text-[var(--text-dim)] mb-8">
+              <div className="flex items-center gap-2">
+                <LockClosedIcon className="h-5 w-5 text-amber-500" />
                 <span>No Credit Card Required</span>
               </div>
-              <div className="flex items-center justify-center gap-2">
-                <ClockIcon className="h-4 sm:h-5 w-4 sm:w-5 text-amber-500 flex-shrink-0" />
+              <div className="flex items-center gap-2">
+                <ClockIcon className="h-5 w-5 text-amber-500" />
                 <span>14 Days Full Access</span>
               </div>
-              <div className="flex items-center justify-center gap-2">
-                <UserGroupIcon className="h-4 sm:h-5 w-4 sm:w-5 text-amber-500 flex-shrink-0" />
+              <div className="flex items-center gap-2">
+                <UserGroupIcon className="h-5 w-5 text-amber-500" />
                 <span>850+ Remodeling Pros Trust Us</span>
               </div>
             </div>
 
-            {/* Industry tags with better mobile wrapping */}
-            <div className="flex flex-wrap gap-2 sm:gap-3 justify-center px-4 max-w-4xl mx-auto">
+            {/* Industry tags */}
+            <div className="flex flex-wrap gap-3 justify-center">
               {[
                 'Kitchen Remodeling',
                 'Bathroom Renovation',
@@ -452,7 +450,7 @@ export default function HomePage() {
               ].map(tag => (
                 <span
                   key={tag}
-                  className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-[var(--border)] bg-[var(--surface-2)] text-xs sm:text-sm font-medium hover:border-amber-500/50 transition-colors whitespace-nowrap"
+                  className="px-4 py-2 rounded-full border border-[var(--border)] bg-[var(--surface-2)] text-sm font-medium hover:border-amber-500/50 transition-colors"
                 >
                   {tag}
                 </span>
@@ -461,35 +459,35 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Stats Section with mobile-first design */}
-        <section className="py-12 sm:py-16 border-y border-[var(--border)] bg-[var(--surface-1)]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 text-center">
+        {/* Stats Section */}
+        <section className="py-16 border-y border-[var(--border)] bg-[var(--surface-1)]">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
               {stats.map((stat, index) => (
-                <div key={index} className="space-y-1 sm:space-y-2 group">
-                  <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-amber-600 group-hover:scale-110 transition-transform">
+                <div key={index} className="space-y-2 group">
+                  <div className="text-3xl md:text-4xl font-bold text-amber-600 group-hover:scale-110 transition-transform">
                     {stat.value}
                   </div>
-                  <div className="text-xs sm:text-sm font-medium text-[var(--text-dim)] leading-tight">{stat.label}</div>
+                  <div className="text-sm font-medium text-[var(--text-dim)]">{stat.label}</div>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Business Pillars with responsive spacing */}
-        <section className="py-12 sm:py-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12 sm:mb-16">
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4">
+        {/* Business Pillars */}
+        <section className="py-20">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
                 <span className="gradient-amber">Analyze, Automate & Accelerate</span> Your Remodeling Business
               </h2>
-              <p className="text-lg sm:text-xl text-[var(--text-dim)] max-w-3xl mx-auto px-4">
+              <p className="text-xl text-[var(--text-dim)] max-w-3xl mx-auto">
                 Three AI-powered pillars that help remodeling contractors work smarter and scale faster.
               </p>
             </div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            <div className="grid md:grid-cols-3 gap-8">
               {businessPillars.map((pillar, index) => {
                 const getColorClasses = (color: string) => {
                   const colorMap = {
@@ -512,21 +510,21 @@ export default function HomePage() {
                 return (
                   <div
                     key={index}
-                    className="text-center p-6 sm:p-8 rounded-2xl bg-[var(--surface-1)] border border-[var(--border)] hover:shadow-lg hover:border-amber-500/30 transition-all group"
+                    className="text-center p-8 rounded-2xl bg-[var(--surface-1)] border border-[var(--border)] hover:shadow-lg hover:border-amber-500/30 transition-all group"
                   >
                     <div
-                      className={`inline-flex items-center justify-center w-12 sm:w-16 h-12 sm:h-16 rounded-2xl mb-4 sm:mb-6 ${colors.bg} ring-1 ${colors.ring} group-hover:scale-110 transition-transform`}
+                      className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6 ${colors.bg} ring-1 ${colors.ring} group-hover:scale-110 transition-transform`}
                     >
-                      <pillar.icon className={`h-6 sm:h-8 w-6 sm:w-8 ${colors.text}`} />
+                      <pillar.icon className={`h-8 w-8 ${colors.text}`} />
                     </div>
-                    <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">{pillar.label}</h3>
-                    <ul className="space-y-2 sm:space-y-3">
+                    <h3 className="text-2xl font-bold mb-4">{pillar.label}</h3>
+                    <ul className="space-y-3">
                       {pillar.points.map((point, pointIndex) => (
                         <li
                           key={pointIndex}
-                          className="flex items-start gap-2 sm:gap-3 text-sm sm:text-base text-[var(--text-dim)]"
+                          className="flex items-start gap-3 text-[var(--text-dim)]"
                         >
-                          <CheckIcon className="h-4 sm:h-5 w-4 sm:w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                          <CheckIcon className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
                           <span>{point}</span>
                         </li>
                       ))}
@@ -538,14 +536,14 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Core Features Grid with mobile optimization */}
-        <section id="features" className="py-12 sm:py-20 bg-[var(--surface-1)]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12 sm:mb-16">
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4">
+        {/* Core Features Grid */}
+        <section id="features" className="py-20 bg-[var(--surface-1)]">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
                 AI-Powered Features for <span className="gradient-amber">Modern Remodeling</span>
               </h2>
-              <div className="text-lg sm:text-xl text-[var(--text-dim)] max-w-3xl mx-auto px-4">
+              <div className="text-xl text-[var(--text-dim)] max-w-3xl mx-auto">
                 <p>
                   From intelligent project insights to automated workflows, we've built the complete AI solution
                   for today's remodeling professionals.
@@ -553,17 +551,17 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
               {coreFeatures.map((feature, index) => (
                 <div
                   key={index}
-                  className="p-4 sm:p-6 rounded-xl bg-[var(--bg)] border border-[var(--border)] hover:border-amber-500/50 transition-colors"
+                  className="p-6 rounded-xl bg-[var(--bg)] border border-[var(--border)] hover:border-amber-500/50 transition-colors"
                 >
-                  <div className="inline-flex items-center justify-center w-10 sm:w-12 h-10 sm:h-12 rounded-xl bg-amber-600/15 ring-1 ring-amber-500/30 mb-3 sm:mb-4">
-                    <feature.icon className="h-5 sm:h-6 w-5 sm:w-6 text-amber-600" />
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-600/15 ring-1 ring-amber-500/30 mb-4">
+                    <feature.icon className="h-6 w-6 text-amber-600" />
                   </div>
-                  <h3 className="font-bold text-base sm:text-lg mb-2">{feature.title}</h3>
-                  <div className="text-[var(--text-dim)] text-sm leading-relaxed mb-3 sm:mb-4">
+                  <h3 className="font-bold text-lg mb-2">{feature.title}</h3>
+                  <div className="text-[var(--text-dim)] text-sm mb-4 leading-relaxed">
                     <p>{feature.description}</p>
                   </div>
                   <ul className="space-y-1">
@@ -572,7 +570,7 @@ export default function HomePage() {
                         key={benefitIndex}
                         className="flex items-center gap-2 text-xs text-[var(--text-dim)]"
                       >
-                        <div className="w-1.5 h-1.5 rounded-full bg-amber-600 flex-shrink-0" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-amber-600" />
                         <span>{benefit}</span>
                       </li>
                     ))}
@@ -583,40 +581,40 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Testimonials with mobile improvements */}
-        <section id="testimonials" className="py-12 sm:py-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12 sm:mb-16">
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4">
+        {/* Testimonials */}
+        <section id="testimonials" className="py-20">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
                 Trusted by <span className="gradient-amber">Construction Leaders</span>
               </h2>
-              <p className="text-lg sm:text-xl text-[var(--text-dim)] px-4">
+              <p className="text-xl text-[var(--text-dim)]">
                 See what our customers say about transforming their businesses
               </p>
             </div>
 
             <div className="max-w-4xl mx-auto">
-              <div className="bg-[var(--surface-1)] rounded-2xl p-6 sm:p-8 lg:p-12 border border-[var(--border)] text-center">
-                <div className="flex justify-center mb-4 sm:mb-6">
+              <div className="bg-[var(--surface-1)] rounded-2xl p-8 md:p-12 border border-[var(--border)] text-center">
+                <div className="flex justify-center mb-6">
                   {[...Array(5)].map((_, i) => (
-                    <StarIcon key={i} className="h-5 sm:h-6 w-5 sm:w-6 text-amber-400 fill-current" />
+                    <StarIcon key={i} className="h-6 w-6 text-amber-400 fill-current" />
                   ))}
                 </div>
-                <blockquote className="text-lg sm:text-xl lg:text-2xl font-medium mb-6 sm:mb-8 leading-relaxed px-2">
+                <blockquote className="text-xl md:text-2xl font-medium mb-8 leading-relaxed">
                   "{testimonials[activeTestimonial].content}"
                 </blockquote>
                 <div className="text-center">
-                  <div className="font-semibold text-base sm:text-lg">
+                  <div className="font-semibold text-lg">
                     {testimonials[activeTestimonial].name}
                   </div>
-                  <div className="text-[var(--text-dim)] text-sm sm:text-base">
+                  <div className="text-[var(--text-dim)]">
                     {testimonials[activeTestimonial].role}
                   </div>
                 </div>
               </div>
 
               {/* Testimonial dots */}
-              <div className="flex justify-center mt-6 sm:mt-8 gap-2">
+              <div className="flex justify-center mt-8 gap-2">
                 {testimonials.map((_, index) => (
                   <button
                     key={index}
@@ -631,22 +629,22 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Pricing with mobile optimization */}
-        <section id="pricing" className="py-12 sm:py-20 bg-[var(--surface-1)]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12 sm:mb-16">
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4">
+        {/* Pricing */}
+        <section id="pricing" className="py-20 bg-[var(--surface-1)]">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
                 <span className="gradient-amber">Simple, Transparent</span> Pricing
               </h2>
-              <p className="text-lg sm:text-xl text-[var(--text-dim)] mb-6 sm:mb-8 px-4">
+              <p className="text-xl text-[var(--text-dim)] mb-8">
                 Start free and upgrade only when your operation demands more
               </p>
 
               {/* Billing toggle */}
-              <div className="inline-flex items-center gap-3 sm:gap-4 p-1 bg-[var(--surface-2)] rounded-lg border border-[var(--border)]">
+              <div className="inline-flex items-center gap-4 p-1 bg-[var(--surface-2)] rounded-lg border border-[var(--border)]">
                 <button
                   onClick={() => setIsYearly(false)}
-                  className={`px-3 sm:px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                     !isYearly
                       ? 'bg-[var(--bg)] text-[var(--text)] shadow-sm'
                       : 'text-[var(--text-dim)]'
@@ -656,7 +654,7 @@ export default function HomePage() {
                 </button>
                 <button
                   onClick={() => setIsYearly(true)}
-                  className={`px-3 sm:px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                     isYearly
                       ? 'bg-[var(--bg)] text-[var(--text)] shadow-sm'
                       : 'text-[var(--text-dim)]'
@@ -667,29 +665,29 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
+            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {pricingPlans.map((plan, index) => (
                 <div
                   key={index}
-                  className={`relative p-6 sm:p-8 rounded-2xl border transition-all hover:shadow-lg ${
+                  className={`relative p-8 rounded-2xl border transition-all hover:shadow-lg ${
                     plan.popular
                       ? 'bg-amber-600/5 border-amber-500/50 ring-2 ring-amber-500/20'
                       : 'bg-[var(--bg)] border-[var(--border)]'
                   }`}
                 >
                   {plan.popular && (
-                    <div className="absolute -top-3 sm:-top-4 left-1/2 transform -translate-x-1/2">
-                      <span className="bg-amber-600 text-white px-3 sm:px-4 py-1 rounded-full text-xs sm:text-sm font-medium">
+                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                      <span className="bg-amber-600 text-white px-4 py-1 rounded-full text-sm font-medium">
                         Most Popular
                       </span>
                     </div>
                   )}
 
-                  <div className="text-center mb-6 sm:mb-8">
-                    <h3 className="text-xl sm:text-2xl font-bold mb-2">{plan.name}</h3>
-                    <p className="text-[var(--text-dim)] mb-3 sm:mb-4 text-sm sm:text-base">{plan.description}</p>
+                  <div className="text-center mb-8">
+                    <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
+                    <p className="text-[var(--text-dim)] mb-4">{plan.description}</p>
                     <div className="mb-2">
-                      <span className="text-3xl sm:text-4xl font-bold">
+                      <span className="text-4xl font-bold">
                         ${isYearly ? plan.price.yearly : plan.price.monthly}
                       </span>
                       <span className="text-[var(--text-dim)]">/month</span>
@@ -701,18 +699,18 @@ export default function HomePage() {
                     )}
                   </div>
 
-                  <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
+                  <ul className="space-y-4 mb-8">
                     {plan.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-start gap-2 sm:gap-3">
-                        <CheckIcon className="h-4 sm:h-5 w-4 sm:w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                        <span className="text-[var(--text-dim)] text-sm sm:text-base">{feature}</span>
+                      <li key={featureIndex} className="flex items-start gap-3">
+                        <CheckIcon className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                        <span className="text-[var(--text-dim)]">{feature}</span>
                       </li>
                     ))}
                   </ul>
 
                   <Link
                     href="/auth/register"
-                    className={`block w-full text-center py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg font-medium transition-colors text-sm sm:text-base ${
+                    className={`block w-full text-center py-3 px-6 rounded-lg font-medium transition-colors ${
                       plan.popular
                         ? 'bg-amber-600 hover:bg-amber-700 text-white'
                         : 'border border-[var(--border)] hover:border-amber-500/50 hover:text-amber-600'
@@ -724,20 +722,20 @@ export default function HomePage() {
               ))}
             </div>
 
-            <div className="text-center mt-8 sm:mt-12">
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 text-xs sm:text-sm text-[var(--text-dim)]">
+            <div className="text-center mt-12">
+              <div className="inline-flex items-center gap-4 text-sm text-[var(--text-dim)]">
                 <div className="flex items-center gap-2">
-                  <LockClosedIcon className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                  <LockClosedIcon className="h-4 w-4 text-amber-500" />
                   <span>No setup fees</span>
                 </div>
-                <span className="hidden sm:block">•</span>
+                <span>•</span>
                 <div className="flex items-center gap-2">
-                  <ClockIcon className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                  <ClockIcon className="h-4 w-4 text-amber-500" />
                   <span>Cancel anytime</span>
                 </div>
-                <span className="hidden sm:block">•</span>
+                <span>•</span>
                 <div className="flex items-center gap-2">
-                  <ShieldCheckIcon className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                  <ShieldCheckIcon className="h-4 w-4 text-amber-500" />
                   <span>14-day free trial</span>
                 </div>
               </div>
@@ -745,53 +743,53 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Final CTA with mobile improvements */}
-        <section className="py-12 sm:py-20">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div className="bg-gradient-to-br from-amber-600/10 via-amber-500/5 to-amber-400/10 rounded-2xl sm:rounded-3xl p-8 sm:p-12 border border-amber-500/20 relative overflow-hidden">
+        {/* Final CTA */}
+        <section className="py-20">
+          <div className="max-w-4xl mx-auto px-4 text-center">
+            <div className="bg-gradient-to-br from-amber-600/10 via-amber-500/5 to-amber-400/10 rounded-3xl p-12 border border-amber-500/20 relative overflow-hidden">
               {/* Background animation */}
               <div className="absolute inset-0 bg-gradient-to-r from-amber-600/5 to-transparent animate-pulse" />
 
               <div className="relative z-10">
-                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6">
+                <h2 className="text-3xl md:text-4xl font-bold mb-6">
                   Ready to Transform Your{' '}
                   <span className="gradient-amber">Construction Business?</span>
                 </h2>
-                <div className="text-lg sm:text-xl text-[var(--text-dim)] mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
+                <div className="text-xl text-[var(--text-dim)] mb-8 max-w-2xl mx-auto">
                   <p>
                     Join over 850 remodeling contractors who have transformed their businesses with AI-powered insights
                     and increased profits with Remodely.
                   </p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-6 sm:mb-8 px-4">
+                <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
                   <Link
                     href="/auth/register"
-                    className="btn btn-amber text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 shadow-lg transform hover:scale-105 transition-all w-full sm:w-auto"
+                    className="btn btn-amber text-lg px-8 py-4 shadow-lg transform hover:scale-105 transition-all"
                   >
                     Start Your Free Trial
-                    <ArrowRightIcon className="ml-2 h-4 sm:h-5 w-4 sm:w-5" />
+                    <ArrowRightIcon className="ml-2 h-5 w-5" />
                   </Link>
                   <Link
                     href="/dashboard"
-                    className="btn btn-outline text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 hover:border-amber-500/60 hover:text-amber-600 transition-all w-full sm:w-auto"
+                    className="btn btn-outline text-lg px-8 py-4 hover:border-amber-500/60 hover:text-amber-600 transition-all"
                   >
-                    <PlayIcon className="mr-2 h-4 sm:h-5 w-4 sm:w-5" />
+                    <PlayIcon className="mr-2 h-5 w-5" />
                     View Live Demo
                   </Link>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-[var(--text-dim)]">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-sm text-[var(--text-dim)]">
                   <div className="flex items-center gap-2">
-                    <LockClosedIcon className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                    <LockClosedIcon className="h-4 w-4 text-amber-500" />
                     <span>No credit card required</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <ClockIcon className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                    <ClockIcon className="h-4 w-4 text-amber-500" />
                     <span>Setup in under 5 minutes</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <UserGroupIcon className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                    <UserGroupIcon className="h-4 w-4 text-amber-500" />
                     <span>Free onboarding support</span>
                   </div>
                 </div>

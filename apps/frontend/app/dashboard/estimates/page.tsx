@@ -199,7 +199,7 @@ export default function EstimatesPage() {
               </div>
               <div className="flex items-center space-x-4 text-sm text-slate-400">
                 {estimate.clientId ? (
-                  <Link 
+                  <Link
                     href={`/dashboard/clients/${estimate.clientId}?source=estimate&estimate=${estimate._id}`}
                     className="truncate hover:text-amber-400 transition-colors"
                   >
@@ -266,7 +266,7 @@ export default function EstimatesPage() {
             #{estimate.number}
           </h3>
           {estimate.clientId ? (
-            <Link 
+            <Link
               href={`/dashboard/clients/${estimate.clientId}?source=estimate&estimate=${estimate._id}`}
               className="text-sm text-slate-400 truncate hover:text-amber-400 transition-colors block"
             >
