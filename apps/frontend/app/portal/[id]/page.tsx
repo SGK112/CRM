@@ -123,7 +123,10 @@ export default function ClientPortalPage({ params }: { params: { id: string } })
             <h3 className="font-medium text-[var(--text)] mb-3">Project Location</h3>
             <MapEmbed
               address={fullAddress}
-              coordinates={client?.address?.coordinates}
+              coordinates={client?.address?.coordinates ? {
+                lat: Number(client.address.coordinates.lat),
+                lng: Number(client.address.coordinates.lng)
+              } : undefined}
               height={220}
             />
           </div>

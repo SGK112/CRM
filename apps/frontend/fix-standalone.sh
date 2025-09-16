@@ -16,9 +16,26 @@ if [ -d ".next/standalone" ] && [ -d ".next/static" ]; then
   
   # Also copy public files if they exist
   if [ -d "public" ]; then
-    cp -r public .next/standalone/apps/frontend/
+    mkdir -p .next/standalone/apps/frontend/public
+    cp -r public/* .next/standalone/apps/frontend/public/
     echo "✅ Public files copied successfully"
+    
+    # Specifically ensure manifest.json is copied
+    if [ -f "public/manifest.json" ]; then
+      cp public/manifest.json .next/standalone/apps/frontend/public/
+      echo "✅ manifest.json copied to standalone build"
+    fi
+    
+    # Ensure favicon.svg is copied
+    if [ -f "public/favicon.svg" ]; then
+      cp public/favicon.svg .next/standalone/apps/frontend/public/
+      echo "✅ favicon.svg copied to standalone build"
+    fi
   fi
+  
+  # List contents to verify
+  echo "📋 Verifying standalone build structure:"
+  ls -la .next/standalone/apps/frontend/public/ 2>/dev/null || echo "⚠️  Public directory not found in standalone build"
   
   echo "🎉 Standalone mode static assets are ready!"
 else

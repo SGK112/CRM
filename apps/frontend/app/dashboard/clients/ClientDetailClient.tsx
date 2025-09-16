@@ -422,7 +422,10 @@ export default function ClientDetailClient({ initialEntity, entityId }: { initia
                       {entity.source && (<div className="flex items-center gap-3"><TagIcon className="h-5 w-5 text-[var(--text-dim)]" /><span className="text-[var(--text)]">Source: {entity.source}</span></div>)}
                       {entity.preferredContactMethod && (<div className="flex items-center gap-3"><BellIcon className="h-5 w-5 text-[var(--text-dim)]" /><span className="text-[var(--text)]">Prefers: {entity.preferredContactMethod}</span></div>)}
                     </div>
-                    {entity.address && (<div className="mt-4"><h4 className="text-sm font-medium text-[var(--text)] mb-2">Location</h4><MapEmbed address={`${entity.address.street ?? ''}, ${entity.address.city ?? ''}, ${entity.address.state ?? ''} ${entity.address.zipCode ?? ''}`} coordinates={entity.address.coordinates} /></div>)}
+                    {entity.address && (<div className="mt-4"><h4 className="text-sm font-medium text-[var(--text)] mb-2">Location</h4><MapEmbed address={`${entity.address.street ?? ''}, ${entity.address.city ?? ''}, ${entity.address.state ?? ''} ${entity.address.zipCode ?? ''}`} coordinates={entity.address.coordinates ? {
+                      lat: Number(entity.address.coordinates.lat),
+                      lng: Number(entity.address.coordinates.lng)
+                    } : undefined} /></div>)}
                   </div>
                 </div>
                 {entity.tags && entity.tags.length > 0 && (<div><h3 className="text-lg font-semibold text-[var(--text)] mb-3">Tags</h3><div className="flex flex-wrap gap-2">{entity.tags.map((tag, index) => (<span key={index} className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-amber-100 text-amber-800 border border-amber-200"><TagIconSolid className="h-3 w-3 mr-1" />{tag}</span>))}</div></div>)}
