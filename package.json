@@ -53,6 +53,7 @@
   "license": "MIT",
   "packageManager": "npm@10.0.0",
   "dependencies": {
+    "@sendgrid/mail": "^8.1.5",
     "@types/nodemailer": "^7.0.1",
     "mongodb": "^6.19.0",
     "node-fetch": "^3.3.2",

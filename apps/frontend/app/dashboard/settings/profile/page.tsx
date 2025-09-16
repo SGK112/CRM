@@ -89,7 +89,7 @@ export default function ProfileSettingsPage() {
   useEffect(() => {
     if (!loading && !profile && !message.includes('Authentication') && !message.includes('Session')) {
       const retryTimer = setTimeout(() => {
-        console.log('Retrying profile load...');
+        // Retry profile load
         setLoading(true);
         loadUserProfile();
       }, 2000);
@@ -195,7 +195,7 @@ export default function ProfileSettingsPage() {
       }
 
       const data = await response.json();
-      console.log('Profile update response:', data); // Debug log
+      // Profile updated successfully
 
       if (data.success && data.user) {
         setProfile(data.user);
@@ -213,7 +213,7 @@ export default function ProfileSettingsPage() {
       setMessage(`${section === 'basic' ? 'Profile' : section === 'work' ? 'Work information' : section === 'preferences' ? 'Preferences' : 'Information'} updated successfully!`);
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
-      console.error('Error updating profile:', error);
+      // Profile update error handled silently
       setMessage(error instanceof Error ? error.message : 'Failed to update profile. Please try again.');
     } finally {
       setSaving(false);
@@ -279,7 +279,7 @@ export default function ProfileSettingsPage() {
           }
 
           const data = await response.json();
-          console.log('Avatar upload response:', data); // Debug log
+          // Avatar uploaded successfully
 
           if (data.success && data.user) {
             setProfile(data.user);
@@ -290,7 +290,7 @@ export default function ProfileSettingsPage() {
           setMessage('Avatar updated successfully!');
           setTimeout(() => setMessage(''), 3000);
         } catch (error) {
-          console.error('Error uploading avatar:', error);
+          // Avatar upload error handled silently
           setMessage('Failed to upload avatar. Please try again.');
         } finally {
           setUploadingAvatar(false);
@@ -344,7 +344,7 @@ export default function ProfileSettingsPage() {
       }
 
       const data = await response.json();
-      console.log('Profile data loaded:', data); // Debug log
+      // Profile data loaded
 
       if (data.success && data.user) {
         setProfile(data.user);
@@ -427,7 +427,7 @@ export default function ProfileSettingsPage() {
       }
 
       const data = await response.json();
-      console.log('Password update response:', data); // Debug log
+      // Password updated successfully
 
       setMessage('Password updated successfully!');
       setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
@@ -483,7 +483,7 @@ export default function ProfileSettingsPage() {
       }
 
       const data = await response.json();
-      console.log('Notifications update response:', data); // Debug log
+      // Notifications updated successfully
 
       if (data.success && data.user && data.user.notificationPreferences) {
         setNotifications(data.user.notificationPreferences);

@@ -45,7 +45,7 @@ export default function InvoicesPage() {
         }
       }
     } catch (error) {
-      console.error('Failed to fetch clients:', error);
+      // Handle fetch error gracefully
     }
   }, []);
 

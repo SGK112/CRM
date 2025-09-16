@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic';
 export default function FinancialNewPlaceholder() {
 	// lightweight server-side render only, no imports
 	// eslint-disable-next-line no-console
-	console.log('Rendering placeholder for /dashboard/financial/new (app tree)');
+	// Financial new page placeholder
 
 	return (
 		<div style={{ padding: 24 }}>

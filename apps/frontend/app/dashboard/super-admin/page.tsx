@@ -34,7 +34,7 @@ export default function SuperAdminSetup() {
 
       const data = await response.json();
       setStatus('Super admin setup completed successfully!');
-      console.log('Setup result:', data);
+      // Setup completed
     } catch (error) {
       console.error('Setup failed:', error);
       setStatus(`Setup failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -70,7 +70,7 @@ export default function SuperAdminSetup() {
       const data = await response.json();
       setVerificationData(data);
       setStatus('Access verification completed');
-      console.log('Verification result:', data);
+      // Verification completed
     } catch (error) {
       console.error('Verification failed:', error);
       setStatus(`Verification failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
