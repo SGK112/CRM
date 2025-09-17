@@ -1,0 +1,62 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createBackendHeaders, getBackendUrl } from '../utils/backend';
+
+export const dynamic = 'force-dynamic';
+
+const BACKEND_URL = getBackendUrl();
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const queryString = searchParams.toString();
+    const url = `${BACKEND_URL}/api/projects${queryString ? `?${queryString}` : ''}`;
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: createBackendHeaders(request),
+    });
+
+    if (!response.ok) {
+      return NextResponse.json(
+        { error: 'Failed to fetch projects' },
+        { status: response.status }
+      );
+    }
+
+    const data = await response.json();
+    return NextResponse.json(data);
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+
+    const response = await fetch(`${BACKEND_URL}/api/projects`, {
+      method: 'POST',
+      headers: createBackendHeaders(request),
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Failed to create project' }));
+      return NextResponse.json(
+        { error: errorData.message || 'Failed to create project' },
+        { status: response.status }
+      );
+    }
+
+    const data = await response.json();
+    return NextResponse.json(data);
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}

@@ -2,15 +2,10 @@ import { EmailService } from './src/services/email.service';
 import { ConfigService } from '@nestjs/config';
 
 async function testEmail() {
-  // Mock ConfigService with our SendGrid settings
+  // Use real environment variables
   const mockConfigService = {
     get: (key: string) => {
-      const config = {
-        SENDGRID_API_KEY: 'your-sendgrid-api-key-here',
-        SENDGRID_FROM_EMAIL: 'noreply@remodely.ai',
-        SENDGRID_FROM_NAME: 'Remodely CRM',
-      };
-      return config[key];
+      return process.env[key];
     },
   } as ConfigService;
 
@@ -20,7 +15,7 @@ async function testEmail() {
 
   try {
     const result = await emailService.sendEmail({
-      to: 'test@example.com', // Change this to your email
+      to: 'homero.valencia2018@gmail.com', // Test email
       subject: 'SendGrid Test from Remodely CRM',
       html: `
         <h1>🚀 SendGrid Integration Test</h1>
