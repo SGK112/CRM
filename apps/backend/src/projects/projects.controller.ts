@@ -36,6 +36,14 @@ export class ProjectsController {
     return this.projectsService.findAll(req.user.workspaceId);
   }
 
+  @Get('count')
+  @ApiOperation({ summary: 'Get project count' })
+  @ApiResponse({ status: 200, description: 'Project count retrieved successfully' })
+  async getCount(@Request() req) {
+    const projects = await this.projectsService.findAll(req.user.workspaceId);
+    return { count: projects.length };
+  }
+
   @Get('status/:status')
   @ApiOperation({ summary: 'Get projects by status' })
   @ApiResponse({ status: 200, description: 'Projects retrieved successfully' })
