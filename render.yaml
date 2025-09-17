@@ -53,19 +53,8 @@ services:
     plan: starter
     buildCommand: |
       echo "🔨 Building Remodely CRM Frontend..."
-      npm ci --production=false
-      npm run build
-      # Ensure standalone bundle serves static & public assets (fixes manifest/icons 404)
-      cd apps/frontend
-      pwd && ls -la
-      if [ -f "fix-standalone.sh" ]; then
-        chmod +x ./fix-standalone.sh
-        ./fix-standalone.sh
-        echo "✅ Standalone assets fixed"
-      else
-        echo "⚠️ fix-standalone.sh not found"
-      fi
-      cd -
+      npm ci --production=false --no-fund --no-audit
+      npm run build --workspace=@remodely-crm/frontend
       echo "✅ Frontend build complete!"
     startCommand: cd apps/frontend && node .next/standalone/apps/frontend/server.js
     autoDeploy: true # Auto-deploy enabled
