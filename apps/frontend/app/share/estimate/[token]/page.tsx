@@ -51,8 +51,9 @@ export default function PublicEstimatePage() {
   useEffect(() => {
     const fetchEstimate = async () => {
       try {
-        // Call through the frontend proxy to the backend
-        const response = await fetch(`/api/share/estimate/${token}`);
+        // Call the backend API directly since it's a public endpoint
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://remodely-backend-api.onrender.com';
+        const response = await fetch(`${backendUrl}/api/share/estimate/${token}`);
         if (!response.ok) {
           if (response.status === 404) {
             throw new Error('Estimate not found or link has expired');
@@ -74,7 +75,8 @@ export default function PublicEstimatePage() {
   }, [token]);
 
   const downloadPdf = () => {
-    window.open(`/api/share/estimate/${token}/pdf`, '_blank');
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://remodely-backend-api.onrender.com';
+    window.open(`${backendUrl}/api/share/estimate/${token}/pdf`, '_blank');
   };
 
   if (loading) {
