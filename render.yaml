@@ -7,12 +7,18 @@ services:
     plan: starter
     buildCommand: |
       echo "🔨 Building Remodely CRM Backend..."
-      npm ci --production=false
-      npm run build
+      echo "Node version: $(node --version)"
+      echo "NPM version: $(npm --version)"
+      # Fast install with optimizations
+      npm ci --production=false --no-fund --no-audit --prefer-offline
+      # Skip unnecessary steps for faster build
+      export NODE_OPTIONS="--max-old-space-size=460"
+      # Build only backend
+      npm run build --workspace=@remodely-crm/backend
       echo "✅ Backend build complete!"
     startCommand: cd apps/backend && npm run start:prod
     healthCheckPath: /api/health
-    autoDeploy: true # Auto-deploy enabled
+    autoDeploy: true
     envVars:
       - key: NODE_ENV
         value: production
@@ -39,6 +45,8 @@ services:
         value: 2
       - key: MAX_OLD_SPACE_SIZE
         value: 460
+      - key: NODE_OPTIONS
+        value: "--max-old-space-size=460"
       # Logging
       - key: LOG_LEVEL
         value: info
@@ -53,11 +61,19 @@ services:
     plan: starter
     buildCommand: |
       echo "🔨 Building Remodely CRM Frontend..."
-      npm ci --production=false --no-fund --no-audit
+      echo "Node version: $(node --version)"
+      echo "NPM version: $(npm --version)"
+      # Fast install with optimizations
+      npm ci --production=false --no-fund --no-audit --prefer-offline
+      # Set memory limit for Node.js
+      export NODE_OPTIONS="--max-old-space-size=460"
+      # Build frontend with optimizations
       npm run build --workspace=@remodely-crm/frontend
+      # Verify standalone build
+      ls -la apps/frontend/.next/standalone/
       echo "✅ Frontend build complete!"
     startCommand: cd apps/frontend && node .next/standalone/apps/frontend/server.js
-    autoDeploy: true # Auto-deploy enabled
+    autoDeploy: true
     envVars:
       - key: NODE_ENV
         value: production
@@ -79,6 +95,8 @@ services:
         value: 1
       - key: MAX_OLD_SPACE_SIZE
         value: 460
+      - key: NODE_OPTIONS
+        value: "--max-old-space-size=460"
 
 databases:
   - name: remodely-crm-db

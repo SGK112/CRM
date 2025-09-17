@@ -3,6 +3,14 @@
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
   "compilerOptions": {
-    "deleteOutDir": true
+    "deleteOutDir": true,
+    "webpack": true,
+    "webpackConfigPath": "webpack.config.js",
+    "assets": ["**/*.json", "**/*.hbs", "**/*.html"],
+    "watchAssets": true
+  },
+  "generateOptions": {
+    "spec": false,
+    "flat": true
   }
 }

@@ -12,6 +12,13 @@ const nextConfig = {
   // Enable compression
   compress: true,
 
+  // Build optimizations
+  poweredByHeader: false,
+  generateEtags: false,
+  
+  // Speed up builds
+  swcMinify: true,
+  
   // ESLint configuration for builds
   eslint: {
     // Allow production builds to complete even with ESLint warnings
@@ -22,6 +29,54 @@ const nextConfig = {
   typescript: {
     // Allow production builds to complete even with TypeScript errors
     ignoreBuildErrors: true,
+  },
+
+  // Experimental features for faster builds
+  experimental: {
+    // Enable SWC for faster compilation
+    forceSwcTransforms: true,
+    // Optimize server components
+    serverComponentsExternalPackages: ['mongoose', 'mongodb'],
+    // Faster builds with turbo
+    turbo: {
+      resolveAlias: {
+        underscore: 'lodash',
+        mocha: { browser: 'mocha/browser-entry.js' },
+      },
+    },
+  },
+
+  // Webpack optimizations
+  webpack: (config, { dev, isServer }) => {
+    // Add aliases for faster resolution
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': require('path').resolve(__dirname, './src'), // eslint-disable-line
+    };
+
+    // Optimize chunks
+    if (!dev && !isServer) {
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+            maxSize: 244000,
+          },
+        },
+      };
+    }
+
+    // Exclude large dependencies from bundle analysis
+    config.resolve.fallback = {
+      fs: false,
+      path: false,
+      os: false,
+    };
+
+    return config;
   },
 
   // Optimize images
