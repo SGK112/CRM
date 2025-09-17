@@ -4,8 +4,8 @@
   "description": "Next.js frontend for Remodely CRM",
   "scripts": {
     "dev": "PORT=3005 next dev",
-    "build": "NODE_OPTIONS='--max-old-space-size=460' next build && ./fix-standalone.sh",
-    "build:production": "NODE_OPTIONS='--max-old-space-size=460' NODE_ENV=production next build && ./fix-standalone.sh",
+    "build": "NODE_OPTIONS='--max-old-space-size=1024' next build && ./fix-standalone.sh",
+    "build:production": "NODE_OPTIONS='--max-old-space-size=1024' NODE_ENV=production next build && ./fix-standalone.sh",
     "start": "next start",
     "start:render": "node .next/standalone/apps/frontend/server.js",
     "lint": "next lint --cache",

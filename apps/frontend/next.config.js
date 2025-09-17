@@ -37,13 +37,6 @@ const nextConfig = {
     forceSwcTransforms: true,
     // Optimize server components
     serverComponentsExternalPackages: ['mongoose', 'mongodb'],
-    // Faster builds with turbo
-    turbo: {
-      resolveAlias: {
-        underscore: 'lodash',
-        mocha: { browser: 'mocha/browser-entry.js' },
-      },
-    },
   },
 
   // Webpack optimizations

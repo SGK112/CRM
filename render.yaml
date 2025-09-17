@@ -12,7 +12,7 @@ services:
       # Fast install with optimizations
       npm ci --production=false --no-fund --no-audit --prefer-offline
       # Skip unnecessary steps for faster build
-      export NODE_OPTIONS="--max-old-space-size=460"
+      export NODE_OPTIONS="--max-old-space-size=1024"
       # Build only backend
       npm run build --workspace=@remodely-crm/backend
       echo "✅ Backend build complete!"
@@ -44,9 +44,9 @@ services:
       - key: WEB_CONCURRENCY
         value: 2
       - key: MAX_OLD_SPACE_SIZE
-        value: 460
+        value: 1024
       - key: NODE_OPTIONS
-        value: "--max-old-space-size=460"
+        value: "--max-old-space-size=1024"
       # Logging
       - key: LOG_LEVEL
         value: info
@@ -66,7 +66,7 @@ services:
       # Fast install with optimizations
       npm ci --production=false --no-fund --no-audit --prefer-offline
       # Set memory limit for Node.js
-      export NODE_OPTIONS="--max-old-space-size=460"
+      export NODE_OPTIONS="--max-old-space-size=1024"
       # Build frontend with optimizations
       npm run build --workspace=@remodely-crm/frontend
       # Verify standalone build
@@ -94,9 +94,9 @@ services:
       - key: WEB_CONCURRENCY
         value: 1
       - key: MAX_OLD_SPACE_SIZE
-        value: 460
+        value: 1024
       - key: NODE_OPTIONS
-        value: "--max-old-space-size=460"
+        value: "--max-old-space-size=1024"
 
 databases:
   - name: remodely-crm-db

@@ -14,7 +14,7 @@
     "dev:stop": "pkill -f 'npm run dev' && lsof -ti:3000,3001 | xargs kill -9 2>/dev/null || true",
     "dev:status": "lsof -i:3000,3001 && echo '\\n=== Processes ===' && ps aux | grep -E '(nest|3000|3001)' | grep -v grep",
     "build": "turbo run build --cache-dir=.turbo",
-    "build:production": "NODE_OPTIONS='--max-old-space-size=512' turbo run build --cache-dir=.turbo",
+    "build:production": "NODE_OPTIONS='--max-old-space-size=1024' turbo run build --cache-dir=.turbo",
     "start": "turbo run start",
     "lint": "turbo run lint --cache-dir=.turbo",
     "test": "turbo run test --cache-dir=.turbo",
