@@ -89,7 +89,7 @@ export class AuthService {
 
       if (existingUser) {
         console.log('❌ User already exists:', createUserDto.email);
-        throw new BadRequestException('User with this email already exists');
+        throw new BadRequestException(`An account with the email "${createUserDto.email}" already exists. Please try logging in instead, or use a different email address to create a new account.`);
       }
 
       // Generate workspace ID
@@ -201,28 +201,28 @@ export class AuthService {
       };
     }
 
-    // Fall back to database
+    // First check database for real user
     try {
       const user = await this.userModel.findOne({ email });
       if (!user) {
-        throw new UnauthorizedException('Invalid credentials');
+        throw new UnauthorizedException('No account found with this email address. Please check your email or create a new account.');
       }
 
       // Verify password
       const isPasswordValid = await bcrypt.compare(password, user.password);
       if (!isPasswordValid) {
-        throw new UnauthorizedException('Invalid credentials');
+        throw new UnauthorizedException('Incorrect password. Please check your password and try again.');
       }
 
       // Check if user is active
       if (!user.isActive) {
-        throw new UnauthorizedException('Account is deactivated');
+        throw new UnauthorizedException('Your account has been deactivated. Please contact support for assistance.');
       }
 
       // Check if email is verified
       if (!user.isEmailVerified) {
         throw new UnauthorizedException(
-          'Please verify your email address before logging in. Check your inbox for a verification email.'
+          'Please verify your email address before logging in. Check your inbox for a verification email, or contact support if you need help.'
         );
       }
 
@@ -251,7 +251,10 @@ export class AuthService {
         message: 'Login successful',
       };
     } catch (error) {
-      throw new UnauthorizedException('Invalid credentials');
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new UnauthorizedException('Login failed. Please check your email and password and try again.');
     }
   }
 
