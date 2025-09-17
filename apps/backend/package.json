@@ -4,8 +4,8 @@
   "description": "NestJS backend for Remodely CRM",
   "main": "dist/main.js",
   "scripts": {
-    "build": "nest build --webpack",
-    "build:production": "NODE_OPTIONS='--max-old-space-size=1024' nest build --webpack --tsc",
+    "build": "nest build",
+    "build:production": "NODE_OPTIONS='--max-old-space-size=1024' nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "dev": "nest start --watch",

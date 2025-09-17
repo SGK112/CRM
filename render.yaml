@@ -13,8 +13,8 @@ services:
       npm ci --production=false --no-fund --no-audit --prefer-offline
       # Skip unnecessary steps for faster build
       export NODE_OPTIONS="--max-old-space-size=1024"
-      # Build only backend
-      npm run build --workspace=@remodely-crm/backend
+      # Build backend with simpler command
+      cd apps/backend && npm run build
       echo "✅ Backend build complete!"
     startCommand: cd apps/backend && npm run start:prod
     healthCheckPath: /api/health
@@ -67,8 +67,8 @@ services:
       npm ci --production=false --no-fund --no-audit --prefer-offline
       # Set memory limit for Node.js
       export NODE_OPTIONS="--max-old-space-size=1024"
-      # Build frontend with optimizations
-      npm run build --workspace=@remodely-crm/frontend
+      # Build frontend with simpler command
+      cd apps/frontend && npm run build
       # Verify standalone build
       ls -la apps/frontend/.next/standalone/
       echo "✅ Frontend build complete!"
