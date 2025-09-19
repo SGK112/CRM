@@ -120,8 +120,8 @@ interface ElevenLabsCallRequest {
 
 ### Required Environment Variables
 ```bash
-ELEVENLABS_API_KEY=sk_ea41f4ce7136e963cfa2bfc3dd6b0721f55b87c26d50920e
-ELEVENLABS_AGENT_ID=agent_5401k1we1dkbf1mvt22mme8wz82a
+ELEVENLABS_API_KEY=
+ELEVENLABS_AGENT_ID=
 ```
 
 ## Call Purpose Templates
